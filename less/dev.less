@@ -1,0 +1,586 @@
+/*
+    All code in this file is experimental and should only be used for research and development purposes.
+*/
+
+// LESS mixins
+.default-well {
+    background: #f5f5f5;
+    -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    text-shadow: 1px 1px 1px #fff;
+}
+.no-user-select {
+    // Disable user select
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    -o-user-select: none;
+    user-select: none;  
+}
+
+/* 
+    jQuery UI Tabs widget 
+    http://jqueryui.com/tabs/#vertical
+*/
+/*
+.ui-tabs-vertical {
+    .ui-tabs-nav {
+        float: left;
+        width: 12em;
+        li {
+            clear: left;
+            width: 100%;
+            border-bottom-width: 1px !important;
+            border-right-width: 0 !important;
+            //margin: 0 -1px 0 0;
+            background-color: #f6f6f6;
+            border-bottom: 1px solid #e6e6e6;
+            border-right: 1px solid #e6e6e6;
+            a {
+                display: block;
+                padding: 10px 15px;
+                text-decoration: none;
+                color: #000;
+                font-weight: 300;
+                // Remove blue outline
+                outline: 0;
+                .glyphicon {
+                    float: right;
+                }
+            }
+            &.ui-tabs-active {
+                //padding-bottom: 0;
+                //padding-right: .1em;
+                border-right: 1px solid #e6e6e6;
+                background-color: #fff;
+            }
+        }
+    }
+    .ui-tabs-panel {
+        padding: 1em; float: right; width: 40em;
+    }
+}
+*/
+
+h4 {
+    font-family: 'Roboto', sans-serif;
+}
+
+/*
+    Draggable panel
+*/
+.wgst-panel {
+    position: absolute;
+    width: auto;
+    height: auto;
+    left: 90px; 
+    top: 28px;
+    border: 0px solid #555;  
+    -webkit-box-shadow: 0px 0px 10px #999; 
+    -moz-box-shadow: 0px 0px 10px #999; 
+    box-shadow: 0px 0px 10px #999; 
+    border-radius: 8px;
+    background-color: #fff;
+    z-index: 10;
+    .no-user-select;
+    &.assembly-upload-panel {
+        display: none;
+    }
+    .wgst-panel-header {
+        width: 100%;
+        background-color: #fff;
+        border-radius: 8px 8px 0 0;
+        border-bottom: 1px solid #eee;
+        padding: 12px 15px;
+        line-height: 50px;
+        font-weight: 400;
+        cursor: move;
+        text-align: center;
+        /*
+        h3 {
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+            font-weight: 300;
+            text-shadow: 1px 1px 1px #fff;
+        }
+        */
+        .assembly-upload-summary {
+            font-weight: 300;
+            line-height: 20px;
+            strong, .assembly-sequences-average {
+                font-weight: 400;
+            }
+        }
+    }
+    .wgst-panel-footer {
+        width: 100%;
+        background-color: #fafafa;
+        border-radius: 0 0 8px 8px;
+        border-top: 1px solid #eee;
+        padding: 15px;
+        font-weight: 300;
+        background-color: #fff;
+        overflow: hidden;
+        .progress-container {
+            width: 83%;
+            float: left;
+            //.no-user-select;
+            .progress-label {
+                //line-height: 1.2em;
+                margin-bottom: 10px;
+                .progress-percentage-label {
+                    font-size: 12px;
+                    font-weight: 400;
+                    text-transform: uppercase;
+                }
+                .progress-percentage {
+                    font-weight: 400;
+                    font-size: 22px;
+                    margin-left: 2px;
+                    line-height: 1em;
+                }
+                .progress-hint {
+                    //font-weight: 100;
+                    font-size: 14px;
+                    margin-left: 4px;
+                    //font-style: italic;
+                }
+            }
+            .progress {
+                margin: 0;
+            }
+        }
+        .upload-controls-container {
+            float: right;
+            button {
+                margin-top: 20px;
+                margin-left: 8px;
+            }
+        }
+    }
+    .wgst-panel-body {
+        //border-top: 1px solid #fff;
+        //padding: 12px 15px;
+        //float: left;
+        overflow: hidden;
+        .assembly-navigator {
+            //border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            .assembly-navigator-controls {
+                display: inline-block;
+                height: 80px;
+                float: left;
+                padding: 10px;
+                border-left: 1px solid #eee;
+                border-right: 1px solid #eee;
+                .assembly-list-header {
+                    margin: 5px 0 15px 5px;
+                    text-align: center;
+                    font-weight: 300;
+                    overflow: hidden;
+                    .assembly-file-name {
+                        margin: 0;
+                        margin-left: 5px;
+                        float: left;
+                        padding: 5px 10px;
+                        font-size: 12px;
+                        font-weight: 400;
+                        border-radius: 26px;
+                        .default-well;
+                    }
+                    button {
+                        float: left;
+                        margin-top: 3px;
+                        margin-left: 10px;
+                        border-radius: 20px;
+                    }
+                    .assembly-list-counter {
+                        float: right;
+                        font-size: 12px;
+                        line-height: 27px;
+                        margin-right: 15px;
+                    }
+                    .selected-assembly-counter {
+                        padding: 5px 10px;
+                        margin: 0 3px;
+                        font-size: 12px;
+                        font-weight: 400;
+                        /*
+                        color: #fff;
+                        border-radius: 5px;
+                        background-color: #0e90d2;
+                        background-image: -moz-linear-gradient(top, #149bdf, #0480be);
+                        background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#149bdf), to(#0480be));
+                        background-image: -webkit-linear-gradient(top, #149bdf, #0480be);
+                        background-image: -o-linear-gradient(top, #149bdf, #0480be);
+                        background-image: linear-gradient(to bottom, #149bdf, #0480be);
+                        background-repeat: repeat-x;
+                        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff149bdf', endColorstr='#ff0480be', GradientType=0);
+                        -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                        -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                        box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                        border: 0px solid transparent;
+                        */
+
+                        border: none;
+                        background-image: linear-gradient(rgb(245, 245, 245), rgb(249, 249, 249));
+                        background-repeat: repeat-x;
+                        box-shadow: rgba(0, 0, 0, 0.0980392) 0px 1px 2px 0px inset;
+                        border-radius: 6px;
+
+                        .default-well;
+
+                            //background: #f5f5f5;
+                            border-radius: 4px;
+                            //-webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+                            //box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+
+                            //        text-shadow: 1px 1px 1px #fff;
+
+                    }
+                    .total-number-of-dropped-assemblies {
+                        font-size: 12px;
+                        font-weight: 400;
+                    }
+                }
+                .assembly-list-slider {
+                    width: 798px;//500px;
+                    margin: 10px;
+                    clear: both;
+                    // Overwrite default jQuery UI Slider widget styling
+                    // http://api.jqueryui.com/slider/
+                    //
+                    // Styling inspiration: http://www.eyecon.ro/bootstrap-slider/
+                    //
+                    // The track of the slider control. This element will additionally have a class name of
+                    // ui-slider-horizontal or ui-slider-vertical depending on the orientation of the slider.
+                    &.ui-slider {
+                        border: none;
+/*                        background-image: linear-gradient(rgb(245, 245, 245), rgb(249, 249, 249));
+                        background-repeat: repeat-x;
+                        box-shadow: rgba(0, 0, 0, 0.0980392) 0px 1px 2px 0px inset;*/
+
+                        .default-well;
+
+                            //background: #f5f5f5;
+                            border-radius: 6px;
+                            //-webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+                            //box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+
+
+                        border-radius: 6px;
+                        // The slider handles.
+                        .ui-slider-handle {
+                            outline: none;
+                            cursor: pointer;
+                            -webkit-border-radius: 20px;
+                            -moz-border-radius: 20px;
+                            border-radius: 20px;
+                            // http://www.eyecon.ro/bootstrap-slider/
+                            position: absolute;
+                            width: 20px;
+                            height: 20px;
+
+                            // Grey
+                            background-color: #0e90d2;
+                            background-image: -moz-linear-gradient(top, #149bdf, #0480be);
+                            background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#149bdf), to(#0480be));
+                            background-image: -webkit-linear-gradient(top, #149bdf, #0480be);
+                            background-image: -o-linear-gradient(top, #149bdf, #0480be);
+                            background-image: linear-gradient(to bottom, #444, #666);
+
+                            background-repeat: repeat-x;
+                            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff149bdf', endColorstr='#ff0480be', GradientType=0);
+                            -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                            -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                            box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                            border: 0px solid transparent;
+                            &:hover, &:active {
+                                // Blue
+                                background-color: #0e90d2;
+                                background-image: -moz-linear-gradient(top, #149bdf, #0480be);
+                                background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#149bdf), to(#0480be));
+                                background-image: -webkit-linear-gradient(top, #149bdf, #0480be);
+                                background-image: -o-linear-gradient(top, #149bdf, #0480be);
+                                background-image: linear-gradient(to bottom, #149bdf, #0480be);
+                            }
+                        }
+                        // The selected range used when the range option is set.
+                        // This element can additionally have a class of ui-slider-range-min or ui-slider-range-max if the range option is set to "min" or "max" respectively.
+                        .ui-slider-range {
+/*                            background-image: linear-gradient(rgb(245, 245, 245), rgb(249, 249, 249));
+                            background-repeat: repeat-x;
+                            box-shadow: rgba(0, 0, 0, 0.0980392) 0px 1px 2px 0px inset;*/
+                            border-radius: 6px;
+
+                            .default-well;
+
+                            //background: #f5f5f5;
+                            //border-radius: 4px;
+                            //-webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+                            //box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+                        }
+                    }
+                }
+            }
+            .nav-item-button {
+                display: inline-block;
+                height: 80px;
+                width: 80px;
+                padding: 10px;
+                border: 0;
+                text-decoration: none;
+                text-align: center;
+                text-transform: uppercase;
+                font-size: 11px;
+                outline: none;
+                // Notice :enabled (and :disabled?) has no IE<9 support
+                // http://www.quirksmode.org/css/contents.html#t33 
+                &:enabled {
+                    background-color: #fff;
+                    color: #000;
+                    &:hover {
+                        //background-color: #f3f3f3;
+                        //padding: 5px 10px;
+                        color: #fff;
+                        //font-size: 16px;
+                        //font-weight: 300;
+                        //border-radius: 5px;
+                        background-color: #0e90d2;
+                        background-image: -moz-linear-gradient(top, #149bdf, #0480be);
+                        background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#149bdf), to(#0480be));
+                        background-image: -webkit-linear-gradient(top, #149bdf, #0480be);
+                        background-image: -o-linear-gradient(top, #149bdf, #0480be);
+                        background-image: linear-gradient(to bottom, #149bdf, #0480be);
+                        background-repeat: repeat-x;
+                        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff149bdf', endColorstr='#ff0480be', GradientType=0);
+                        -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                        -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                        box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+                        border: 0px solid transparent;
+                    }
+                }
+                &:disabled {
+                    background-color: #fafafa;
+                    color: #ccc;
+                }
+                &.nav-prev-item {
+                    float: left;
+                    //border-right: 1px solid #fff;
+                }
+                &.nav-next-sequence {
+                    float: right;
+                    //border-left: 1px solid #fff;
+                }
+                .glyphicon {
+                    margin: 10px;
+                    font-size: 16px;
+                }
+                .nav-item-button-label {
+                    display: block;
+                    font-weight: 300;
+                }
+            }
+        }
+        .assembly-list-container {
+            float: left;
+            width: 1000px;
+            background-color: #fff;
+            //min-height: 395px;
+            //max-height: 395px;
+            //overflow: scroll;
+            //padding: 20px;
+            ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                .assembly-item {
+                    .assembly-overview {
+                        display: inline-block;
+                        width: 100%;
+                        float: left;
+                        margin: 0 auto;
+                        //padding: 25px 20px 0 20px;
+                        padding: 20px 0 18px 0;
+                        border-bottom: 1px solid #eee;
+                        text-align: center;
+                        .assembly-stats-container {
+/*                            float: left;
+                            margin-right: 20px;*/
+                            display: inline-block;
+                            margin: 0 25px;
+                            vertical-align: top;
+                            text-align: left;
+                            .assembly-stats-number {
+                                float: left;
+                                clear: both;
+                                //display: inline-block;
+                                font-weight: 400;
+                                font-size: 22px;
+                                //line-height: 30px;
+                                small {
+                                    font-size: 11px;
+                                    font-weight: 400;
+                                    text-transform: uppercase;
+                                    margin-left: 2px;
+                                }
+                            }
+                            .assembly-stats-label {
+                                width: 100%;
+                                float: left;
+                                clear: both;
+                                //display: inline-block;
+                                font-size: 11px;
+                                line-height: 14px;
+                                text-transform: uppercase;
+                                margin-top: 2px;
+                                margin-left: 1px;
+                                //margin-left: 6px;
+                            }
+                            /*
+                            .assembly-file-name {
+                                float: left;
+                                //display: inline;
+                                font-weight: 300;
+                                font-size: 18px;
+                                line-height: 30px;
+                            }
+                            */
+                        }
+                        button {
+                            float: right;
+                        }  
+                    }
+                    .assembly-content-data {
+                        //position: absolute;
+                        float: left;
+                        width: 500px;
+                        text-align: center;
+                        /*
+                        .assembly-stats-container {
+                            display: inline-block;
+                            margin: 0 auto;
+                            padding: 25px 20px 0 20px;
+                            div {
+                                float: left;
+                                &.assembly-stats-number {
+                                    font-weight: 400;
+                                    font-size: 32px;
+                                    line-height: 30px;
+                                }
+                                &.assembly-stats-label {
+                                    font-size: 11px;
+                                    line-height: 14px;
+                                    text-transform: uppercase;
+                                    text-align: left;
+                                    margin-top: 2px;
+                                    margin-left: 6px;
+                                }
+                            }
+                        }
+                        */
+                        svg {
+                            .axis {
+                                fill: none;
+                                stroke: #000;
+                            }
+                            text {
+                                font-size: 11px;
+                                font-weight: 100;
+                                &.axis-label {
+                                    stroke: #888;
+                                    stroke-width: 0.05em;
+                                    letter-spacing: 0.03em;
+                                    font-size: 12px;
+                                    text-transform: uppercase;
+                                }
+                            }
+                            circle {
+                                //stroke: #000;
+                                stroke-width: 0.5px;
+                                fill: #908CFF;
+                                opacity: 0.5;
+                            }
+                            path {
+                                stroke: #aaa;
+                                fill: none;
+                                &.n50-path {
+                                    fill: none;
+                                    //stroke: #5cb85c;
+                                }
+                            }
+                            .n50-group {
+                                circle {
+                                    fill: #000;
+                                    opacity: 1;
+                                }
+                                text {
+                                    fill: #000;
+                                    font-weight: 400;
+                                    font-size: 12px;
+                                }
+                                path {
+                                    stroke: #000;
+                                }
+                            }
+                        }
+                    }
+                    .assembly-metadata {
+                        width: 500px;
+                        float: right;
+                        padding: 20px;
+                        border-left: 1px solid #eee;
+                        min-height: 325px;
+                        max-height: 325px;
+                        overflow: scroll;
+                        h4 {
+                            margin: 0;
+                            margin-bottom: 20px;
+                            font-weight: 300;
+                            font-size: 14px;
+                        }
+                        .form-block {
+                            border-top: 1px solid #eee;
+                            padding-top: 10px;
+                            &:first-child {
+                                border-top: 0;
+                                padding-top: 0;
+                            }
+                            label {
+                                font-weight: 400;
+                                margin-bottom: 10px;
+                                //.no-user-select;
+                                .not-sure-hint {
+                                    font-weight: 300;
+                                    margin-left: 4px;
+                                    color: #FF9524;
+                                }
+                            }
+                            button {
+                                margin-top: 5px;
+                                margin-right: 10px;
+                            }
+                        }
+                    }
+                    .sequence-string {
+                        word-wrap: break-word;
+                    }
+                }
+            }
+        }
+/*        .sequence {
+            max-height: 500px;
+            overflow: scroll;
+        }*/
+
+    }
+}
+
+/*.sequence-list-container {
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+}*/
