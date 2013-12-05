@@ -6,6 +6,7 @@
 var express = require('express');
 var routes = require('./routes');
 var user = require('./routes/user');
+var assembly = require('./routes/assembly');
 var http = require('http');
 var path = require('path');
 
@@ -17,8 +18,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.favicon());
 app.use(express.logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded());
+// http://stackoverflow.com/a/19965089
+app.use(express.json({limit: '500mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
 app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
 app.use(express.session());
@@ -32,6 +34,8 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/users', user.list);
+app.post('/assembly/add', assembly.add);
+app.get('/assembly/:id', assembly.get);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

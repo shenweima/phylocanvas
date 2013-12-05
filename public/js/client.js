@@ -147,7 +147,7 @@ $(function(){
 	};*/
 
 
-
+	var FASTAFiles = [];
 
 
 
@@ -180,6 +180,9 @@ $(function(){
 
 		console.log(e.target.result);
 	};*/
+
+	var assemblies = {};
+
 	var handleDragOver = function(evt) {
 		evt.stopPropagation();
 		evt.preventDefault();
@@ -230,7 +233,7 @@ $(function(){
 			// FASTA file
 			FASTAFileRegex = /^.+(.fa)$/i,
 			// Assemblies
-			assemblies = {},
+			//assemblies = {},
 			// Array of sequence strings
 			sequences = [],
 			// Array of DNA sequence strings
@@ -239,10 +242,13 @@ $(function(){
 			sequenceParts = [],
 			assemblyListItem = $(); // Empty jQuery object
 
-		var dnaSequenceRegex = /^[CTAG]+$/i;
+		var dnaSequenceRegex = /^[CTAGNUX]+$/i;
 		var rawData = [];
 		var chartData = [];
 		var chartDataN50 = [];
+
+		// Final JSON
+		var finalAssembliesArray = [];
 
 		// Configure assembly navigator
 
@@ -264,7 +270,8 @@ $(function(){
 		}
 
 		var totalSequencesUpload = 0,
-			dnaSequence = '';
+			dnaSequence = '',
+			dnaSequenceId = '';
 
 		var parseFile = function(e, fileCounter, file) {
 
@@ -280,6 +287,7 @@ $(function(){
 			// Record number of sequences found
 			assemblies[fileCounter] = {
 				'name': file.name,
+				'id': '',
 				'sequences': {
 					'total': sequences.length,
 					'invalid': 0,
@@ -291,6 +299,7 @@ $(function(){
 			sequenceStringArray = [];
 			// Empty DNA sequence string
 			dnaSequence = '';
+			dnaSequenceId = '';
 
 			// Parse each sequence and break it into sequence parts
 			for (sequenceCounter = 0; sequenceCounter < sequences.length; sequenceCounter++) {
@@ -310,18 +319,26 @@ $(function(){
 				// Validate sequence parts
 				// If one part is invalid then the whole sequence is invalid
 				if (sequenceParts.length > 1) {	
-					// Init sequence object
-					assemblies[fileCounter]['sequences']['individual'][sequenceCounter] = {};
 					// Store DNA sequence string
 					// Need to remove white space at the end of DNA sequence string
 					dnaSequence = sequenceParts[sequenceParts.length - 1].trim();
+					dnaSequenceId = sequenceParts[0].trim().replace('>','');
+
 					// Validate DNA sequence string
 					if (dnaSequenceRegex.test(dnaSequence)) {
+						console.log('A');
 						// Store it in array
 						sequenceStringArray.push(dnaSequence);
+						// Init sequence object
+						assemblies[fileCounter]['sequences']['individual'][sequenceCounter] = {};
+						// Sequence id
+						assemblies[fileCounter]['sequences']['individual'][sequenceCounter]['id'] = dnaSequenceId;
 						// Store it in object
 						assemblies[fileCounter]['sequences']['individual'][sequenceCounter]['sequence'] = dnaSequence;
+					// Invalid DNA sequence string
 					} else {
+						$('#log').append('<div class="log-item">' + dnaSequence + '</div>');
+						console.log('B');
 						// Count as invalid sequence
 						assemblies[fileCounter]['sequences']['invalid'] = assemblies[fileCounter]['sequences']['invalid'] + 1;
 					}
@@ -339,6 +356,30 @@ $(function(){
 				*/
 
 			} // for
+
+			var fileNameParts = /*file.name*/'foo.bar.bar.test.fa'.split('.');
+
+			console.log([fileNameParts.length-1]);
+			console.log(e.target);
+
+			// FASTA file is valid
+			FASTAFiles.push({
+				name: file.name.substr(0, file.name.lastIndexOf('.')),
+				assembly: e.target.result,
+				metadata: {}
+			});
+
+/*			var fileNameParts = 'foo.bar.bar.test.fa'.split('.');
+
+			console.log([fileNameParts.length-1]);
+
+			// FASTA file is valid
+			FASTAFiles.push({
+				x: [fileNameParts.length-1],
+				name: 'foo.bar.bar.test.fa'.replace([fileNameParts.length - 1], ''),
+				assembly: e.target.result,
+				metadata: {}
+			});*/
 
 			/*
 			//rawData = getSequenceStringLengthFrequency(sequenceStringArray);
@@ -1146,6 +1187,39 @@ $(function(){
 		$(this).closest('.assembly-list-container').find('.assembly-item input:text[value=""]').focus();
 
 		e.preventDefault();
+	});
+
+
+	// On
+	$('.assembly-list-container').on('click', '.next-assembly-button', function(e){
+		// Do something
+	});
+
+
+	$('.upload-assemblies-button').on('click', function(){
+		
+		console.log('Upload assemblies.');
+		console.log(FASTAFiles);
+
+		console.log(new Date());
+
+		for (var i = 0; i < FASTAFiles.length; i++) {
+			// POST to Node.js end
+			$.ajax({
+				type: 'POST',
+				url: '/assembly/add/',
+				datatype: 'json',
+				data: FASTAFiles[i]
+			}).done(function(message){
+				console.log('POST request success: ');
+				console.log(JSON.parse(message));
+				console.log(new Date());
+			}).fail(function(jqXHR, textStatus, errorThrown){
+				console.error('POST request failed: ' + textStatus);
+				console.error('errorThrown: ' + errorThrown);
+				console.error('jqXHR: ' + jqXHR);
+			});
+		}
 	});
 
 
