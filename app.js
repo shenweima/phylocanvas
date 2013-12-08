@@ -34,6 +34,7 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/users', user.list);
+app.get('/users/name/:name', user.name);
 app.post('/assembly/add', assembly.add);
 app.get('/assembly/:id', assembly.get);
 

@@ -5,6 +5,25 @@
 
 exports.add = function(req, res) {
 
+	// For testing purposes only
+	var demoResponse =
+	{
+		taskId : "154273030677208533352573798127987081488",
+		assemblyId : "154273030677208533352573798127987081488",
+		status : "SUCCESS"
+	};
+
+	setTimeout(function(){
+		console.log('Sending response...');
+
+		// Return data
+		res.json(demoResponse);
+
+	}, 1000);
+	
+
+	/*
+
 	var uuid = require('node-uuid');
 
 	// TODO: Validate request
@@ -89,10 +108,17 @@ exports.add = function(req, res) {
 
 			});
 	});
+
+	*/
+
 };
 
 // TODO: Return fingerprint data
 exports.get = function(req, res) {
+
+	console.log('Get assembly with id: ' + req.params.id);
+
+	// TODO: Get requested assembly from db
 
 	var assembly = {
 		"type": "FINGERPRINT_COMPARISON",
@@ -208,8 +234,8 @@ exports.get = function(req, res) {
 			"blastLibrary": "/nfs/wgst/blast_libs/1280_fingerprints",
 			"referenceResourceId": "ref_fps_1280"
 		}
-	}
+	};
 
-	res.json(assembly);
+	res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
 
 };

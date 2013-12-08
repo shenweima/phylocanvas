@@ -299,6 +299,42 @@
         </div><!-- /.wgst-panel.assembly-upload-panel -->
 
 
+
+        <div class="wgst-panel assembly-panel wgst-draggable">
+          <header class="wgst-panel-header">
+
+            Assembly header
+
+          </header>
+          <div class="wgst-panel-body">
+
+            <table class="table assembly-data-table">
+              <colgroup>
+                <col class="col-target-fp">
+                <col class="col-score">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>targetFp</th>
+                  <th>score</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+
+          </div><!-- /.wgst-panel-body -->
+          <footer class="wgst-panel-footer">
+
+            Assembly footer
+
+          </footer><!-- /.wgst-panel-footer -->
+        </div><!-- /.wgst-panel.assembly-upload-panel -->
+
+
+
+
+
         <!-- <div id="log"></div> -->
 
         <script>
@@ -347,6 +383,31 @@
         <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js" charset="utf-8"></script>
         <!-- Modernizr -->
         <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+        <script>
+
+          /*
+            The name "undefined" is not guaranteed to have the type "undefined".
+            It can be assigned other values, like null or 1.
+            To make sure that undefined is undefined in that context, use anonymous self-invoking function.
+
+            However in modern browsers "undefined" is read-only.
+          */
+          (function(undefined){
+            'use strict';
+
+            // Flag requested assembly
+            window.requestedAssembly = undefined;
+
+            // If user requested individual assembly, e.g.: /assembly/FINGERPRINT_COMPARISON_154273030677208533352573798127987081488
+            <% if (typeof requestedAssemblyObject !== 'undefined') { %>
+              window.requestedAssembly = <%- requestedAssemblyObject %>;
+            <% } %>
+
+          })();
+
+        </script>
+
         <!-- Client -->
         <script src="/js/client.js"></script>
         <script>
@@ -661,10 +722,6 @@
             };
 
           });
-
-/*          var newickTree = '<%- tree %>';
-          console.log(JSON.parse(newickTree));*/
-
         </script>
     </body>
 </html>

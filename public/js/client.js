@@ -79,6 +79,37 @@ var getSequenceStringLengthFrequency = function(sequenceStringArray) {
     return frequency;
 };
 
+// Check if user provided assembly id
+if (typeof window.requestedAssembly !== 'undefined') {
+
+	console.log('[WGST] Assembly requested');
+	console.log(requestedAssembly);
+
+	// Create assembly data table
+	var counter = 0;
+	for (var score in requestedAssembly.scores) {
+		if (requestedAssembly.scores.hasOwnProperty(score)) {
+			counter++;
+			$('.assembly-data-table tbody').append(
+				((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
+				+ '<td>'
+					+ requestedAssembly.scores[score].targetFp
+				+ '</td>'
+				+ '<td>'
+					+ requestedAssembly.scores[score].score
+				+ '</td>'
+				+ '<tr/>'
+			);	
+		}
+	}
+
+	// TODO: Show assembly data
+	$('.assembly-panel').show();
+
+} else {
+	console.log('[WGST] No assembly requested');
+}
+
 $(function(){
 
 	// Init jQuery UI draggable interaction
@@ -133,6 +164,12 @@ $(function(){
 	} else {
 	  // Fallback to a library solution.
 	}
+
+
+
+
+
+
 
 
 
@@ -1208,12 +1245,20 @@ $(function(){
 			$.ajax({
 				type: 'POST',
 				url: '/assembly/add/',
-				datatype: 'json',
+				datatype: 'json', // http://stackoverflow.com/a/9155217
 				data: FASTAFiles[i]
 			}).done(function(message){
 				console.log('POST request success: ');
-				console.log(JSON.parse(message));
+				console.log(message);
 				console.log(new Date());
+
+				// Create assembly URL
+				var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FINGERPRINT_COMPARISON_' + message.assemblyId;
+
+				console.log(url);
+
+
+
 			}).fail(function(jqXHR, textStatus, errorThrown){
 				console.error('POST request failed: ' + textStatus);
 				console.error('errorThrown: ' + errorThrown);

@@ -69,12 +69,48 @@ h4 {
 /*
     Draggable panel
 */
+.wgst-panel.assembly-panel {
+    top: 86px;
+    .wgst-panel-header {
+        border-bottom: 1px solid #000;
+    }
+    .wgst-panel-body {
+        max-height: 500px;
+        overflow: scroll;
+        //padding: 10px;
+        table {
+            width: 500px;
+            margin-bottom: 0;
+            .row-stripe {
+                background-color: #F9F9F9;
+            }
+            .col-target-fp {
+                width: 80%;
+            }
+            .col-score {
+                width: 20%;
+            }
+            th {
+                border-bottom: 1px;
+            }
+            tbody {
+                tr:hover {
+                    background-color: #F0F7FF;
+                }
+            }
+        }
+    }
+    .wgst-panel-footer {
+        border-top: 1px solid #000;
+        text-align: center;
+    }
+}
+
 .wgst-panel {
     position: absolute;
     width: auto;
     height: auto;
     left: 90px; 
-    top: 28px;
     border: 0px solid #555;  
     -webkit-box-shadow: 0px 0px 10px #999; 
     -moz-box-shadow: 0px 0px 10px #999; 
@@ -83,8 +119,9 @@ h4 {
     background-color: #fff;
     z-index: 10;
     .no-user-select;
+    display: none;
     &.assembly-upload-panel {
-        display: none;
+        top: 28px;
     }
     .wgst-panel-header {
         width: 100%;
