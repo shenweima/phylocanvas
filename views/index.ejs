@@ -245,9 +245,10 @@
 
 
         <div class="wgst-panel assembly-upload-panel wgst-draggable">
+
           <header class="wgst-panel-header">
             <div class="assembly-upload-summary">
-            You have selected <strong><span class="assembly-upload-total-number"></span> <span class="assembly-upload-total-number-label"></span></strong> in total. On average <span class="assembly-sequences-average"></span> <strong>contigs</strong> per assembly.
+            You have selected <strong><span class="assembly-upload-total-number"></span> <span class="assembly-upload-total-number-label"></span></strong><span class="upload-multiple-assemblies-label"> in total</span>.<span class="upload-multiple-assemblies-label"> On average <span class="assembly-sequences-average"></span> <strong>contigs</strong> per assembly.</span>
             </div><!-- /.assembly-upload-summary -->
           </header>
           <div class="wgst-panel-body">
@@ -277,6 +278,8 @@
           </div><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer">
 
+          <div class="adding-metadata-progress-container">
+
             <div class="progress-container">
               <div class="progress-label">
                 <span class="progress-percentage-label">Your progress is </span>
@@ -285,7 +288,7 @@
               </div>
               <div class="progress progress-striped">
                 <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 10%">
-                  <span class="sr-only">40% Complete (success)</span>
+                  <span class="sr-only">10% Complete (success)</span>
                 </div>
               </div>
             </div><!-- /.progress-container -->
@@ -295,6 +298,32 @@
               <button type="button" class="btn btn-default">Cancel</button>
             </div><!-- /.upload-controls-container -->
 
+          </div><!-- /.adding-metadata-progress-container -->
+
+          <div class="uploading-assembly-progress-container">
+
+            <div class="uploading-progress-container">
+              <div class="progress-label">
+                <span class="progress-percentage-label">Uploading progress is </span>
+                <span class="progress-percentage">2%</span>
+                <span class="progress-hint"></span>
+              </div>
+              <div class="uploaded-assembly-url">
+                <div class="uploaded-assembly-url-label">
+                  <span class="uploaded-assembly-process-status">Processing</span> your assemblies.
+                  Visit this link<span class="uploaded-assembly-process-countdown-label"> in <span class="visit-url-seconds-number">2</span> seconds</span>:
+                </div>
+                <input type="text" class="form-control uploaded-assembly-url-input" val="">
+              </div><!-- /.uploaded-assembly-url -->
+              <div class="progress progress-striped active">
+                <div class="progress-bar" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 2%">
+                  <span class="sr-only">2% Complete (success)</span>
+                </div>
+              </div>
+            </div><!-- /.uploading-progress-container -->
+
+          </div><!-- /.uploading-assembly-progress-container -->
+
           </footer><!-- /.wgst-panel-footer -->
         </div><!-- /.wgst-panel.assembly-upload-panel -->
 
@@ -302,11 +331,75 @@
 
         <div class="wgst-panel assembly-panel wgst-draggable">
           <header class="wgst-panel-header">
-
-            Assembly header
-
+            Assembly id: <span class="assembly-id"></span>
           </header>
           <div class="wgst-panel-body">
+
+            <div class="mlst-number">MLST-22</div>
+
+            <h2>Resistance profile:</h2>
+
+            <table class="table assembly-resistance-profile">
+              <tbody>
+                <tr>
+                  <td class="resistance-fail">PCG</td>
+                  <td class="resistance-fail">FOX</td>
+                  <td class="resistance-fail">CIP</td>
+                  <td class="resistance-fail">MOX</td>
+                  <td class="resistance-success">AMI</td>
+                  <td class="resistance-success">GEN</td>
+                  <td class="resistance-success">TOB</td>
+                  <td class="resistance-fail">ERY</td>
+                  <td class="resistance-fail">CLI</td>
+                  <td class="resistance-success">TET</td>
+                  <td class="resistance-success">FUS</td>
+                  <td class="resistance-fail">MUP</td>
+                  <td class="resistance-success">RIF</td>
+                  <td class="resistance-success">TRI</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!--
+            <table class="table assembly-resistance-profile">
+              <thead>
+                <tr>
+                  <th>PCG</th>
+                  <th>FOX</th>
+                  <th>CIP</th>
+                  <th>MOX</th>
+                  <th>AMI</th>
+                  <th>GEN</th>
+                  <th>TOB</th>
+                  <th>ERY</th>
+                  <th>CLI</th>
+                  <th>TET</th>
+                  <th>FUS</th>
+                  <th>MUP</th>
+                  <th>RIF</th>
+                  <th>TRI</th>
+                </tr>
+              </thead>
+              <tbody>
+                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
+                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
+                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
+                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
+                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
+                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
+                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
+                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
+                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
+                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
+                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
+                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
+                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
+                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
+              </tbody>
+            </table>
+            -->
+
+            <h2>Scores:</h2>
 
             <table class="table assembly-data-table">
               <colgroup>
@@ -315,18 +408,19 @@
               </colgroup>
               <thead>
                 <tr>
-                  <th>targetFp</th>
-                  <th>score</th>
+                  <th>Reference Strain</th>
+                  <th>Score</th>
                 </tr>
               </thead>
               <tbody>
               </tbody>
-            </table>
+            </table>            
 
           </div><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer">
 
-            Assembly footer
+            Uploaded <span class="assembly-upload-datetime"></span>.
+            <!-- Assembly footer -->
 
           </footer><!-- /.wgst-panel-footer -->
         </div><!-- /.wgst-panel.assembly-upload-panel -->
@@ -383,7 +477,8 @@
         <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js" charset="utf-8"></script>
         <!-- Modernizr -->
         <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
-
+        <!-- Moment.js -->
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.4.0/moment.min.js"></script>
         <script>
 
           /*

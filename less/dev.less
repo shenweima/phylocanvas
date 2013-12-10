@@ -62,7 +62,7 @@
 }
 */
 
-h4 {
+h2, h4 {
     font-family: 'Roboto', sans-serif;
 }
 
@@ -72,15 +72,35 @@ h4 {
 .wgst-panel.assembly-panel {
     top: 86px;
     .wgst-panel-header {
-        border-bottom: 1px solid #000;
+        //border-bottom: 1px solid #000;
+        line-height: 1em;
+        font-weight: 300;
+        .assembly-id {
+            font-weight: 400;
+        }
     }
     .wgst-panel-body {
-        max-height: 500px;
+        max-height: 560px;
         overflow: scroll;
         //padding: 10px;
-        table {
-            width: 500px;
+        h2 {
+            font-size: 12px;
+            font-weight: 400;
+            margin: 20px 8px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .mlst-number {
+            font-weight: 300;
+            font-size: 22px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        table.assembly-data-table { // TODO: Rename to .assembly-score-table
+            width: 96%;
             margin-bottom: 0;
+            margin: 0 2%;
+            border-top: 1px solid #ddd;
             .row-stripe {
                 background-color: #F9F9F9;
             }
@@ -92,6 +112,9 @@ h4 {
             }
             th {
                 border-bottom: 1px;
+                font-weight: 500;
+                font-size: 12px;
+                text-transform: uppercase;
             }
             tbody {
                 tr:hover {
@@ -99,10 +122,50 @@ h4 {
                 }
             }
         }
+        table.assembly-resistance-profile {
+            width: 96%;
+            //border-bottom: 1px solid #ddd;
+            margin-bottom: 0;
+            margin: 0 2%;
+            .glyphicon {
+                color: #fff;
+            }
+            thead {
+                th {
+                    font-weight: 400;
+                }
+            }
+            tbody {
+                /*
+                tr {
+                    background-color: #f9f9f9;
+                }
+                */
+                td {
+                    width: 7%;
+                    color: #fff;
+                    font-weight: 300;
+                    text-align: center;
+                    border: 0;
+                    &.resistance-fail {
+                        background-color: #CF0000;
+                    }
+                    &.resistance-success {
+                        background-color: #038F05;
+                    }
+                }
+            }
+        }
     }
     .wgst-panel-footer {
-        border-top: 1px solid #000;
+        //border-top: 1px solid #000;
         text-align: center;
+        font-weight: 300;
+        padding: 10px;
+        font-size: 12px;
+        .assembly-upload-datetime {
+            font-weight: 400;
+        }
     }
 }
 
@@ -155,44 +218,112 @@ h4 {
         background-color: #fafafa;
         border-radius: 0 0 8px 8px;
         border-top: 1px solid #eee;
-        padding: 15px;
+        //padding: 15px;
         font-weight: 300;
         background-color: #fff;
         overflow: hidden;
-        .progress-container {
-            width: 83%;
-            float: left;
-            //.no-user-select;
-            .progress-label {
-                //line-height: 1.2em;
-                margin-bottom: 10px;
-                .progress-percentage-label {
-                    font-size: 12px;
-                    font-weight: 400;
-                    text-transform: uppercase;
+
+        .uploading-assembly-progress-container {
+            display: none;
+            margin: 15px;
+            overflow: hidden;
+            .uploading-progress-container {
+                width: 100%;
+                float: left;
+                //.no-user-select;
+                .uploaded-assembly-url {
+                    display: none;
+                    //margin-top: 10px;
+                    .uploaded-assembly-url-label {
+                        font-size: 12px;
+                        font-weight: 400;
+                        text-transform: uppercase;
+                        .visit-url-seconds-number {
+                            font-weight: 400;
+                            font-size: 22px;
+                            margin: 0 3px;
+                        }
+                        .uploaded-assembly-process-status {
+                            font-size: 22px;
+                            font-weight: 400;
+                            text-transform: uppercase;
+                            margin-right: 3px;
+                        }
+                    }
+                    .uploaded-assembly-url-input {
+                        margin-top: 5px;
+                    }
                 }
-                .progress-percentage {
-                    font-weight: 400;
-                    font-size: 22px;
-                    margin-left: 2px;
-                    line-height: 1em;
+                .progress-label {
+                    //line-height: 1.2em;
+                    margin-bottom: 10px;
+                    .progress-percentage-label {
+                        font-size: 12px;
+                        font-weight: 400;
+                        text-transform: uppercase;
+                    }
+                    .progress-percentage {
+                        font-weight: 400;
+                        font-size: 22px;
+                        margin-left: 2px;
+                        line-height: 1em;
+                        text-transform: uppercase;
+                    }
+                    .progress-hint {
+                        //font-weight: 100;
+                        font-size: 14px;
+                        margin-left: 4px;
+                        //font-style: italic;
+                    }
                 }
-                .progress-hint {
-                    //font-weight: 100;
-                    font-size: 14px;
-                    margin-left: 4px;
-                    //font-style: italic;
+                .progress {
+                    margin: 0;
+                    margin-top: 10px;
                 }
-            }
-            .progress {
-                margin: 0;
             }
         }
-        .upload-controls-container {
-            float: right;
-            button {
-                margin-top: 20px;
-                margin-left: 8px;
+
+        .adding-metadata-progress-container {
+            margin: 15px;
+            overflow: hidden;
+            .progress-container {
+                width: 83%;
+                float: left;
+                //.no-user-select;
+                .progress-label {
+                    //line-height: 1.2em;
+                    //margin-bottom: 10px;
+                    .progress-percentage-label {
+                        font-size: 12px;
+                        font-weight: 400;
+                        text-transform: uppercase;
+                    }
+                    .progress-percentage {
+                        font-weight: 400;
+                        font-size: 22px;
+                        margin-left: 2px;
+                        line-height: 1em;
+                        text-transform: uppercase;
+                    }
+                    .progress-hint {
+                        //font-weight: 100;
+                        font-size: 14px;
+                        margin-left: 4px;
+                        //font-style: italic;
+                    }
+                }
+                .progress {
+                    margin: 0;
+                    margin-top: 10px;
+                }
+            }
+            .upload-controls-container {
+                float: right;
+                button {
+                    margin-top: 20px;
+                    margin-left: 8px;
+                    outline: none;
+                }
             }
         }
     }
@@ -555,7 +686,7 @@ h4 {
                                 text {
                                     fill: #000;
                                     font-weight: 400;
-                                    font-size: 12px;
+                                    font-size: 11px;
                                 }
                                 path {
                                     stroke: #000;

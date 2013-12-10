@@ -85,7 +85,53 @@ if (typeof window.requestedAssembly !== 'undefined') {
 	console.log('[WGST] Assembly requested');
 	console.log(requestedAssembly);
 
+	// TODO: Sort data by score
+	// http://stackoverflow.com/a/15322129
+	var sortableScoresArray = [],
+		maxScore = 0;
+
+	for (var score in requestedAssembly.scores) {
+		if (requestedAssembly.scores.hasOwnProperty(score)) {
+			sortableScoresArray.push({ 
+				'referenceId': requestedAssembly.scores[score].referenceId,
+				'score': requestedAssembly.scores[score].score
+			});
+			// Check for max score
+			if (requestedAssembly.scores[score].score > maxScore) {
+				// Update max score
+				maxScore = requestedAssembly.scores[score].score;
+			}
+		}
+	}
+
+	sortableScoresArray = sortableScoresArray.sort(function(a,b){
+		return b.score - a.score;
+	});
+
+	console.log(sortableScoresArray);
+	console.log('Max score: ' + maxScore);
+
+	// TODO: Convert score values into percentages where the highest number is 100%
+
 	// Create assembly data table
+	var counter = 0;
+	for (var i = 0; i < sortableScoresArray.length; i++ ) {
+		console.log('B: ' + sortableScoresArray[i].score);
+		counter++;
+		$('.assembly-data-table tbody').append(
+			((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
+			+ '<td>'
+				+ sortableScoresArray[i].referenceId
+			+ '</td>'
+			+ '<td>'
+				+ Math.floor(+sortableScoresArray[i].score * 100 / maxScore) + '%'
+			+ '</td>'
+			+ '<tr/>'
+		);
+	}
+	
+	// Create assembly data table
+	/*
 	var counter = 0;
 	for (var score in requestedAssembly.scores) {
 		if (requestedAssembly.scores.hasOwnProperty(score)) {
@@ -93,7 +139,7 @@ if (typeof window.requestedAssembly !== 'undefined') {
 			$('.assembly-data-table tbody').append(
 				((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
 				+ '<td>'
-					+ requestedAssembly.scores[score].targetFp
+					+ requestedAssembly.scores[score].referenceId
 				+ '</td>'
 				+ '<td>'
 					+ requestedAssembly.scores[score].score
@@ -102,8 +148,35 @@ if (typeof window.requestedAssembly !== 'undefined') {
 			);	
 		}
 	}
+	*/
 
-	// TODO: Show assembly data
+	// Create assembly data table
+	/*
+	var counter = 0;
+	for (var score in requestedAssembly.scores) {
+		if (requestedAssembly.scores.hasOwnProperty(score)) {
+			counter++;
+			$('.assembly-data-table tbody').append(
+				((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
+				+ '<td>'
+					+ requestedAssembly.scores[score][0]
+				+ '</td>'
+				+ '<td>'
+					+ requestedAssembly.scores[score][1]
+				+ '</td>'
+				+ '<tr/>'
+			);	
+		}
+	}
+	*/
+
+	// Set assembly panel header text
+	$('.assembly-panel .wgst-panel-header .assembly-id').text(requestedAssembly.assemblyId);
+
+	// Set assembly upload datetime in footer
+	$('.assembly-upload-datetime').text(moment(requestedAssembly.timestamp, "YYYYMMDD_HHmmss").fromNow());
+
+	// Show assembly data
 	$('.assembly-panel').show();
 
 } else {
@@ -284,6 +357,14 @@ $(function(){
 		var chartData = [];
 		var chartDataN50 = [];
 
+		/*
+			If user dropped only 1 assembly then 
+			Hide average number of contigs per assembly
+		*/
+		if (files.length === 1) {
+			$('.upload-multiple-assemblies-label').hide();
+		}
+
 		// Final JSON
 		var finalAssembliesArray = [];
 
@@ -315,11 +396,14 @@ $(function(){
 			// Start counting from 1 not 0
 			fileCounter = fileCounter + 1;
 
-			// Split assembly string into individual sequences and return array of individual sequence strings
+			// Trim and then split assembly string into array of individual sequences
 			// Then filter that array by removing empty strings
-			sequences = e.target.result.split('>').filter(function(element){
-				return element.length;
+			sequences = e.target.result.trim().split('>').filter(function(element){
+				return (element.length > 0);
 			});
+
+			console.log('sequences.length: ' + sequences.length);
+			console.log('Last sequence: ' + sequences[sequences.length - 1]);
 
 			// Record number of sequences found
 			assemblies[fileCounter] = {
@@ -345,7 +429,7 @@ $(function(){
 				// Filter out empty parts
 				sequenceParts = sequences[sequenceCounter].split(/\n/)
 					.filter(function(element){
-						return element.length;
+						return (element.length > 0);
 					});
 					/*
 					.reduce(function(previousValue, currentValue, index, array){
@@ -353,19 +437,83 @@ $(function(){
 					});
 					*/
 
-				// Validate sequence parts
-				// If one part is invalid then the whole sequence is invalid
-				if (sequenceParts.length > 1) {	
-					// Store DNA sequence string
-					// Need to remove white space at the end of DNA sequence string
-					dnaSequence = sequenceParts[sequenceParts.length - 1].trim();
+				console.log('sequenceParts.length: ' + sequenceParts.length);
+
+				// Trim each element in sequence parts array
+				for (var i = 0; i < sequenceParts; i++) {
+					sequenceParts[i] = sequenceParts[i].trim();
+				}
+
+				/*
+
+				Validate sequence parts
+
+				*/
+
+				// If there is only one sequence part then this sequence is invalid
+				if (sequenceParts.length > 1) {
+
+					/*
+
+					DNA sequence can contain:
+					1) [CTAGNUX] characters.
+					2) White spaces (e.g.: new line characters).
+
+					The first line of FASTA file contains id and description.
+					The second line theoretically contains comments (starts with #).
+
+					To parse FASTA file you need to:
+					1. Separate assembly into individual sequences by splitting file's content by > character.
+					   Note: id and description can contain > character.
+					2. For each sequence: split it by a new line character, 
+					   then convert resulting array to string ignoring the first (and rarely the second) element of that array.
+
+					*/
+
+					//// Store DNA sequence string
+					//// Need to remove white space at the end of DNA sequence string
+					////dnaSequence = sequenceParts[sequenceParts.length - 1].trim();
+
+					// Parse sequence DNA string
+
+					// Create sub array of a sequence parts array - cut the first element (id and description).
+					var sequenceDNAStringArray = sequenceParts.splice(1, sequenceParts.length);
+
+					console.log('sequenceDNAStringArray.length: ' + sequenceDNAStringArray.length);
+					console.log('sequenceDNAStringArray[0]: ' + sequenceDNAStringArray[0].substr(0, 20));
+
+					// Very rarely the second line can be a comment
+					// If the first element won't match regex then assume it is a comment
+					if (! dnaSequenceRegex.test(sequenceDNAStringArray[0].trim())) {
+						console.log('DNA sequences comment!');
+						// Remove comment element from the array
+						sequenceDNAStringArray = sequenceDNAStringArray.splice(1, sequenceDNAStringArray.length);
+					}
+
+					console.log('sequenceDNAStringArray.length: ' + sequenceDNAStringArray.length);
+
+					// If DNA sequence string is broken amongst multiple lines then convert all parts into a single string
+/*					if (sequenceDNAStringArray.length > 1) {
+						dnaSequence = sequenceDNAStringArray.join('');
+					}*/
+
+					// Convert array of DNA sequence substrings into a single string
+					dnaSequence = sequenceDNAStringArray.join('').trim();
+
+					console.log('dnaSequence.length: ' + dnaSequence.length);
+					//console.log(sequenceDNAStringArray.length);
+					//console.log('Fist array item: ' + sequenceDNAStringArray[0]);
+
+					// Parse sequence id
 					dnaSequenceId = sequenceParts[0].trim().replace('>','');
 
 					// Validate DNA sequence string
 					if (dnaSequenceRegex.test(dnaSequence)) {
-						console.log('A');
 						// Store it in array
 						sequenceStringArray.push(dnaSequence);
+
+						console.log('AAA sequenceStringArray.length: ' + sequenceStringArray.length);
+
 						// Init sequence object
 						assemblies[fileCounter]['sequences']['individual'][sequenceCounter] = {};
 						// Sequence id
@@ -374,8 +522,7 @@ $(function(){
 						assemblies[fileCounter]['sequences']['individual'][sequenceCounter]['sequence'] = dnaSequence;
 					// Invalid DNA sequence string
 					} else {
-						$('#log').append('<div class="log-item">' + dnaSequence + '</div>');
-						console.log('B');
+						//$('#log').append('<div class="log-item">' + dnaSequence + '</div>');
 						// Count as invalid sequence
 						assemblies[fileCounter]['sequences']['invalid'] = assemblies[fileCounter]['sequences']['invalid'] + 1;
 					}
@@ -394,10 +541,10 @@ $(function(){
 
 			} // for
 
-			var fileNameParts = /*file.name*/'foo.bar.bar.test.fa'.split('.');
+/*			var fileNameParts = 'foo.bar.bar.test.fa'.split('.');
 
 			console.log([fileNameParts.length-1]);
-			console.log(e.target);
+			console.log(e.target);*/
 
 			// FASTA file is valid
 			FASTAFiles.push({
@@ -433,10 +580,14 @@ $(function(){
 			// Calculate N50
 			// http://www.nature.com/nrg/journal/v13/n5/box/nrg3174_BX1.html
 
+		    console.log('sequenceStringArray.length: ' + sequenceStringArray.length);
+
 			// Order array by sequence length DESC
 		    var sortedSequenceStringArray = sequenceStringArray.sort(function(a, b){
 		    	return b.length - a.length;
 		    });
+
+		    console.log('sortedSequenceStringArray.length: ' + sortedSequenceStringArray.length);
 
 		    // Calculate the total length of all contigs in the assembly
 		    var sequenceLengthArray = [];
@@ -451,6 +602,8 @@ $(function(){
 		    var halfSum = sequenceLengthArray[sequenceLengthArray.length - 1] / 2;
 
 		    console.log('Half sum: ' + halfSum);
+
+		    console.log('sequenceLengthArray.length: ' + sequenceLengthArray.length);
 
 		    // Sum the length of each contig starting from the longest contig
 		    // until this running sum equals one-half of the total length of all contigs in the assembly
@@ -805,6 +958,28 @@ $(function(){
 		    svg.append('path')
 		    	.attr('d', line(chartData));
 
+			// Draw line from (0,0) to d3.max(data)
+			var rootLineData = [{
+				'x': xScale(0) + 20,
+				'y': yScale(0)
+			},
+			{
+				'x': xScale(1) + 20,
+				'y': yScale(chartData[0])
+			}];
+
+			var rootLine = d3.svg.line()
+				.x(function(datum) {
+					return datum.x;
+				})
+				.y(function(datum) {
+					return datum.y;
+				})
+				.interpolate("linear");
+
+			var rootPath = svg.append('path')
+				.attr('d', rootLine(rootLineData));
+
 		    // Draw N50
 
 /*			svg.selectAll('.n50-circle')
@@ -841,7 +1016,7 @@ $(function(){
 			// Append text to group
 			var n50Text = n50Group.append('text')
       			.attr('dx', function(datum){
-      				return xScale(datum.sequenceNumber) + 20 + 10;
+      				return xScale(datum.sequenceNumber) + 20 + 9;
       			})
 				.attr('dy', function(datum){
 					return yScale(datum.sum) + 5;
@@ -876,28 +1051,6 @@ $(function(){
 			var n50Path = n50Group.append('path')
 				.attr('d', d50Line(d50LinesData));
 				//.attr('class', 'n50-path');
-
-			// Draw line from (0,0) to d3.max(data)
-			var rootLineData = [{
-				'x': xScale(0) + 20,
-				'y': yScale(0)
-			},
-			{
-				'x': xScale(1) + 20,
-				'y': yScale(chartData[0])
-			}];
-
-			var rootLine = d3.svg.line()
-				.x(function(datum) {
-					return datum.x;
-				})
-				.y(function(datum) {
-					return datum.y;
-				})
-				.interpolate("linear");
-
-			var rootPath = svg.append('path')
-				.attr('d', rootLine(rootLineData));
 
 			// Chart 1
 			/*			
@@ -1232,39 +1385,109 @@ $(function(){
 		// Do something
 	});
 
+	var incrementProgressBar = function(stepWidth) {
+		$('.uploading-progress-container .progress-bar').width((+$('.progress-bar').width() + stepWidth) + '%');
+		$('.uploading-progress-container .progress-percentage').text((+$('.progress-bar').width() + stepWidth) + '%');
+	};
 
-	$('.upload-assemblies-button').on('click', function(){
+	var endProgressBar = function(stepWidth) {
+		$('.progress-bar').width('100%');
+		$('.uploading-progress-container .progress-percentage').text('100%');
+		$('.uploading-progress-container .progress').removeClass('active');
+		setTimeout(function(){
+			$('.uploading-progress-container .progress-percentage').text('All done!');
+			$('.uploading-progress-container .progress').slideUp(function(){
+				setTimeout(function(){
+					$('.uploaded-assembly-url').slideDown(function(){
+						$('.uploading-progress-container .progress-label').slideUp();
+					});
+				}, 500);
+			});
+		}, 500);
+
+		// Show countdown timer
+
+		// It takes less than 10 seconds to process one assembly
+		var seconds = 10 * FASTAFiles.length;
+		console.log('Seconds to wait until processed: ' + seconds);
+		var timer = setInterval(
+			function() {
+				console.log(seconds);
+				$('.visit-url-seconds-number').text(seconds);
+				seconds--;
+				if (seconds === 0) {
+					// Hide processing assembly seconds countdown
+					$('.uploaded-assembly-process-countdown-label').fadeOut(function(){
+						// Update status
+						$('.uploaded-assembly-process-status').text('finished processing');
+					});
+					clearInterval(timer);
+				}
+			}, 1000
+		);
+	};	
+
+	$('.upload-assemblies-button').on('click', function() {
 		
 		console.log('Upload assemblies.');
 		console.log(FASTAFiles);
 
 		console.log(new Date());
 
-		for (var i = 0; i < FASTAFiles.length; i++) {
-			// POST to Node.js end
-			$.ajax({
-				type: 'POST',
-				url: '/assembly/add/',
-				datatype: 'json', // http://stackoverflow.com/a/9155217
-				data: FASTAFiles[i]
-			}).done(function(message){
-				console.log('POST request success: ');
-				console.log(message);
-				console.log(new Date());
+		$('.uploading-assembly-progress-container').fadeIn('slow', function(){
 
-				// Create assembly URL
-				var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FINGERPRINT_COMPARISON_' + message.assemblyId;
+			$('.adding-metadata-progress-container').slideUp('normal', function(){
+				for (var i = 0; i < FASTAFiles.length; i++) {
 
-				console.log(url);
+					incrementProgressBar(25);
 
+					// POST to Node.js end
+					$.ajax({
+						type: 'POST',
+						url: '/assembly/add/',
+						datatype: 'json', // http://stackoverflow.com/a/9155217
+						data: FASTAFiles[i]
+					}).done(function(message){
+						console.log('POST request success: ');
+						console.log(message);
+						console.log(new Date());
 
+						// Create assembly URL
+						var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FINGERPRINT_COMPARISON_' + JSON.parse(message).assemblyId;
 
-			}).fail(function(jqXHR, textStatus, errorThrown){
-				console.error('POST request failed: ' + textStatus);
-				console.error('errorThrown: ' + errorThrown);
-				console.error('jqXHR: ' + jqXHR);
+						console.log(url);
+
+						$('.uploaded-assembly-url-input').val(url);
+						endProgressBar();
+
+					}).fail(function(jqXHR, textStatus, errorThrown){
+						console.error('POST request failed: ' + textStatus);
+						console.error('errorThrown: ' + errorThrown);
+						console.error('jqXHR: ' + jqXHR);
+
+						endProgressBar();
+					});
+				}
 			});
-		}
+
+		});
+
+/*		$('.upload-controls-container').hide();
+		$('.progress-container').hide();
+		$('.uploading-progress-container').fadeIn();*/
+
+/*		// Update progress bar
+		$('.progress-container .progress').addClass('active');
+		$('.progress-container .progress-bar').removeClass('progress-bar-success');
+
+		// Update button
+		//$('.upload-controls-container .upload-assemblies-button').text('Uploading...').removeClass('btn-success').addClass('btn-primary').attr('disabled', 'disabled');
+		// Hide all buttons
+		$('.upload-controls-container').fadeOut('fast', function(){
+			// Change width of Progress Container to 100%
+			$('.progress-container').css('width', '100%');
+		});*/
+
 	});
 
 

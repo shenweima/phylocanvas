@@ -5,7 +5,10 @@
 
 exports.add = function(req, res) {
 
+	console.log('Here!');
+
 	// For testing purposes only
+	/*
 	var demoResponse =
 	{
 		taskId : "154273030677208533352573798127987081488",
@@ -20,9 +23,7 @@ exports.add = function(req, res) {
 		res.json(demoResponse);
 
 	}, 1000);
-	
-
-	/*
+	*/
 
 	var uuid = require('node-uuid');
 
@@ -32,7 +33,7 @@ exports.add = function(req, res) {
 
 	var amqp = require('amqp'),
 		connection = amqp.createConnection({
-			host: '129.31.26.152', //'fi--didewgstcn1',
+			host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
 			port: 5672
 		}, {
 			reconnect: false
@@ -98,7 +99,7 @@ exports.add = function(req, res) {
 
 				console.log(buffer.toString());
 
-				// TODO: Insert id into db
+				// TODO: Insert metadata into db
 
 				// Return result data
 				res.json(buffer.toString());
@@ -108,18 +109,36 @@ exports.add = function(req, res) {
 
 			});
 	});
-
-	*/
-
 };
 
 // TODO: Return fingerprint data
 exports.get = function(req, res) {
 
-	console.log('Get assembly with id: ' + req.params.id);
+	console.log('[MLST] Received assembly id: ' + req.params.id);
 
-	// TODO: Get requested assembly from db
+	var assembly = {};
 
+	// Get requested assembly from db
+	var couchbase = require('couchbase');
+	var db = new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: 'test_wgst',
+		password: '.oneir66'
+	}, function(err) {
+		if (err) throw err;
+		db.get(req.params.id, function(err, result) {
+			if (err) throw err;
+
+			assembly = result.value;
+
+			console.log(result.value);
+
+			res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
+
+		});
+	});
+
+	/*
 	var assembly = {
 		"type": "FINGERPRINT_COMPARISON",
 		"documentKey": "FINGERPRINT_COMPARISON_100547576489977442319713545768032221790",
@@ -235,7 +254,50 @@ exports.get = function(req, res) {
 			"referenceResourceId": "ref_fps_1280"
 		}
 	};
+	*/
 
-	res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
+	/*
+	var assembly = 
+	{
+		"type": "FINGERPRINT_COMPARISON",
+		"documentKey": "FINGERPRINT_COMPARISON_321180662083474624985282092499360010641",
+		"assemblyId": "321180662083474624985282092499360010641",
+		"speciesId": "1280",
+		"timestamp": "20131205_150511",
+		"scores": {
+			"gi|150373012|dbj|AP009351.1|": 231,
+			"gi|47118324|dbj|BA000018.3|": 197,
+			"gi|49240382|emb|BX571856.1|": 81,
+			"gi|156720466|dbj|AP009324.1|": 206,
+			"gi|302749911|gb|CP002120.1|": 197,
+			"gi|312436391|gb|CP002110.1|": 76,
+			"gi|47118312|dbj|BA000033.2|": 480,
+			"gi|312828563|emb|FR714927.1|": 196,
+			"gi|329312723|gb|CP002643.1|": 195,
+			"gi|262073980|gb|CP001781.1|": 195,
+			"gi|304365608|gb|CP002114.2|": 93,
+			"gi|344176319|emb|FR821779.1|": 78,
+			"gi|269939526|emb|FN433596.1|": 194,
+			"gi|149944932|gb|CP000736.1|": 201,
+			"gi|82655308|emb|AJ938182.1|": 68,
+			"gi|386829725|ref|NC_017763.1|": 128,
+			"gi|87125858|gb|CP000255.1|": 236,
+			"gi|283469229|emb|AM990992.1|": 82,
+			"gi|87201381|gb|CP000253.1|": 235,
+			"gi|49243355|emb|BX571857.1|": 529,
+			"gi|147739516|gb|CP000703.1|": 201,
+			"gi|311222926|gb|CP001844.2|": 197,
+			"gi|298693322|gb|CP001996.1|": 86,
+			"gi|47208328|dbj|BA000017.4|": 206,
+			"gi|160367075|gb|CP000730.1|": 234
+		},
+		"fingerprintSize": 1062,
+		"fingerprintId": "321180662083474624985282092499360010641",
+
+		"parameters": {
+			"blastLibrary": "/nfs/wgst/blast_libs/1280_fingerprints",
+			"referenceResourceId": "ref_fps_1280"
+		}
+	}*/
 
 };
