@@ -116,7 +116,6 @@ if (typeof window.requestedAssembly !== 'undefined') {
 	// Create assembly data table
 	var counter = 0;
 	for (var i = 0; i < sortableScoresArray.length; i++ ) {
-		console.log('B: ' + sortableScoresArray[i].score);
 		counter++;
 		$('.assembly-data-table tbody').append(
 			((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
@@ -511,9 +510,6 @@ $(function(){
 					if (dnaSequenceRegex.test(dnaSequence)) {
 						// Store it in array
 						sequenceStringArray.push(dnaSequence);
-
-						console.log('AAA sequenceStringArray.length: ' + sequenceStringArray.length);
-
 						// Init sequence object
 						assemblies[fileCounter]['sequences']['individual'][sequenceCounter] = {};
 						// Sequence id
