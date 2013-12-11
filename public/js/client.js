@@ -796,8 +796,22 @@ $(function(){
 			var assemblyMetadataFormContainer = $('<div class="assembly-metadata"></div>');
 			var assemblyMetadataFormHeader = $('<h4>Please provide mandatory assembly metadata:</h4>');
 			var assemblyMetadataForm = $('<form role="form"></form>');
+
+			var assemblySampleSpeciesFormBlock = $(
+				'<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block">'
+					+ '<div class="form-group">'
+						+ '<label for="assemblySampleSpeciesSelect' + fileCounter + '">What species have you sampled?</label>'
+						+ '<select class="form-control assembly-sample-species-select" id="assemblySampleSpeciesSelect' + fileCounter + '">'
+							+ '<option value="0" selected="selected">Choose species...</option>'
+							+ '<option value="1">Staphylococcus aureus</option>'
+							+ '<option value="2">Streptococcus pneumoniae</option>'
+						+ '</select>'
+					+ '</div>'
+				+ '</div>'
+			);
+
 			var assemblySampleDatetimeFormBlock = $(
-				'<div class="form-block assembly-metadata-' + fileCounter + '">'
+				'<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
 					+ '<div class="form-group">'
 						+ '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
 						+ '<div class="input-group">'
@@ -813,7 +827,7 @@ $(function(){
 				+ '</div>'
 			);
 			var assemblySampleLocationFormBlock = $(
-				'<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
+				'<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
 					+ '<div class="form-group">'
 						+ '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
 						+ '<div class="input-group">'
@@ -840,6 +854,7 @@ $(function(){
 			  		+ 'Ready? Click "Upload" button to upload your assemblies and metadata.'
 				+ '</div>'
 			);
+			assemblyMetadataForm.append(assemblySampleSpeciesFormBlock);
 			assemblyMetadataForm.append(assemblySampleDatetimeFormBlock);
 			assemblyMetadataForm.append(assemblySampleLocationFormBlock);
 			// Show form navigation buttons only when you're at the last assembly
@@ -1329,7 +1344,8 @@ $(function(){
 		$(this).closest('label').find('.not-sure-hint').toggleClass('hide-this');
 	});
 
-/*	var updateProgressBar = function(stepNumber) {
+	/*	
+	var updateProgressBar = function(stepNumber) {
 		var progressBar = $('.progress-bar'),
 			currentProgress = progressBar.css('width'),
 			// Multiply number of assemblies by number of metadata input fields
@@ -1337,7 +1353,31 @@ $(function(){
 		// Set new progress value
 		progressBar.css('width', currentProgress + (stepWidth * stepNumber));
 		console.log('Updating progress bar!');
-	};*/
+	};
+	*/
+
+	// TODO: This should work for general case where number of increment steps is unknown
+	var incrementMetadataProgressBar = function() {
+		var newProgressValue = +$('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow') + 30;
+		// Update bar's width
+		$('.adding-metadata-progress-container .progress-bar').width(newProgressValue + '%');
+		// Update aria-valuenow attribute
+		$('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow', newProgressValue);
+		// Update percentage value
+		$('.adding-metadata-progress-container .progress-percentage').text(newProgressValue + '%');
+	};
+
+	// Show next form block when user selects species
+	// TODO: Do now increment metadata progress bar more than once
+	$('.assembly-list-container').on('change', '.assembly-sample-species-select', function(){
+		// Show next form block
+		$(this).closest('.form-block').next('.form-block').fadeIn();
+	});
+	// Increment metadata progress bar only once
+	$('.assembly-list-container').one('change', '.assembly-sample-species-select', function(){
+		// Increment progress bar
+		incrementMetadataProgressBar();
+	});
 
 	// Show next form block when user fills in an input
 	// http://stackoverflow.com/a/6458946
@@ -1346,6 +1386,25 @@ $(function(){
 		// TODO: validate input value
 		// Show next form block
 		$(this).closest('.form-block').next('.form-block').fadeIn();
+		// Scroll to the next form block
+		//$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
+		//$(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
+		// Focus on the next input
+		$(this).closest('.form-block').next('.form-block').find('.assembly-sample-location-input').focus();
+		//$('.assembly-sample-location-input').focus();
+	});
+	// Increment metadata progress bar only once
+	$('.assembly-list-container').one('change change.dp', '.assembly-sample-datetime-input', function(){
+		// Increment progress bar
+		incrementMetadataProgressBar();
+	});
+	$('.assembly-list-container').one('hide.dp', '.assembly-sample-datetime-input', function(event){
+		var that = $(this);
+		setTimeout(function(){
+			// Scroll to the next form block
+			//$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
+			that.closest('.assembly-metadata').animate({scrollTop: that.closest('.assembly-metadata').height()}, 400);
+		}, 500);
 	});
 
 	// Show next form block when user fills in an input
@@ -1358,7 +1417,14 @@ $(function(){
 			// Scroll to the next form block
 			//$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
 			$(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
+			// Enable 'Upload' button
+			$('.upload-assemblies-button').removeAttr('disabled');
 		}
+	});
+	// Increment metadata progress bar only once
+	$('.assembly-list-container').one('change', '.assembly-sample-location-input', function(){
+		// Increment progress bar
+		incrementMetadataProgressBar();
 	});
 
 	// When 'Next assembly' button is pressed
@@ -1405,8 +1471,8 @@ $(function(){
 	});
 
 	var incrementProgressBar = function(stepWidth) {
-		$('.uploading-progress-container .progress-bar').width((+$('.progress-bar').width() + stepWidth) + '%');
-		$('.uploading-progress-container .progress-percentage').text((+$('.progress-bar').width() + stepWidth) + '%');
+		$('.uploading-progress-container .progress-bar').width((+$('.uploading-progress-container .progress-bar').width() + stepWidth) + '%');
+		$('.uploading-progress-container .progress-percentage').text((+$('.uploading-progress-container .progress-bar').width() + stepWidth) + '%');
 	};
 
 	var endProgressBar = function(stepWidth) {
