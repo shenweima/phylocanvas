@@ -1425,6 +1425,8 @@ $(function(){
 	$('.assembly-list-container').one('change', '.assembly-sample-location-input', function(){
 		// Increment progress bar
 		incrementMetadataProgressBar();
+		// Hide progress hint
+		$('.adding-metadata-progress-container .progress-hint').fadeOut();
 	});
 
 	// When 'Next assembly' button is pressed
