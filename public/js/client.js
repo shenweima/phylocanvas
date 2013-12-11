@@ -800,7 +800,10 @@ $(function(){
 				'<div class="form-block assembly-metadata-' + fileCounter + '">'
 					+ '<div class="form-group">'
 						+ '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
-						+ '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
+						+ '<div class="input-group">'
+							+ '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
+						 	+ '<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'
+						+ '</div>'
 					+ '</div>'
 					+ '<div class="checkbox">'
 						+ '<label>'
@@ -813,7 +816,10 @@ $(function(){
 				'<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
 					+ '<div class="form-group">'
 						+ '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
-						+ '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
+						+ '<div class="input-group">'
+							+ '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
+						 	+ '<span class="input-group-addon"><span class="glyphicon glyphicon-globe"></span></span>'
+						+ '</div>'
 					+ '</div>'
 
 					+ '<div class="checkbox">'
@@ -1195,6 +1201,21 @@ $(function(){
 
 			// Show first assembly
 			$('.assembly-item-1').removeClass('hide-this');
+
+			// Init bootstrap datetimepicker
+			//$('.assembly-upload-panel .assembly-sample-datetime-input').datetimepicker();
+			$('#assemblySampleDatetimeInput' + fileCounter).datetimepicker();
+
+			// Init Goolge Maps API Places Autocomplete
+			/*var autocomplete = */new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
+			//autocomplete.bindTo('bounds', WGST.map);
+
+			/*
+			google.maps.event.addListener(autocomplete, 'place_changed', function() {
+				var place = autocomplete.getPlace();
+				console.log('Place: ' + place);
+			});
+			*/
 		
 		}; // parseFile
 
@@ -1319,14 +1340,16 @@ $(function(){
 	};*/
 
 	// Show next form block when user fills in an input
-	$('.assembly-list-container').on('change', '.assembly-sample-datetime-input', function(){
+	// http://stackoverflow.com/a/6458946
+	// Relevant issue: https://github.com/Eonasdan/bootstrap-datetimepicker/issues/83
+	$('.assembly-list-container').on('change change.dp', '.assembly-sample-datetime-input', function(){
 		// TODO: validate input value
 		// Show next form block
 		$(this).closest('.form-block').next('.form-block').fadeIn();
 	});
 
 	// Show next form block when user fills in an input
-	$('.assembly-list-container').on('keyup', '.assembly-sample-location-input', function(){
+	$('.assembly-list-container').on('change', '.assembly-sample-location-input', function(){
 		// Show next form block if current input has some value
 		if ($(this).val().length) {
 			// TODO: validate input value
