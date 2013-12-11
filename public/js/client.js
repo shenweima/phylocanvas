@@ -1524,37 +1524,40 @@ $(function(){
 		$('.uploading-assembly-progress-container').fadeIn('slow', function(){
 
 			$('.adding-metadata-progress-container').slideUp('normal', function(){
-				for (var i = 0; i < FASTAFiles.length; i++) {
 
-					incrementProgressBar(25);
+				setTimeout(function(){
+					for (var i = 0; i < FASTAFiles.length; i++) {
 
-					// POST to Node.js end
-					$.ajax({
-						type: 'POST',
-						url: '/assembly/add/',
-						datatype: 'json', // http://stackoverflow.com/a/9155217
-						data: FASTAFiles[i]
-					}).done(function(message){
-						console.log('POST request success: ');
-						console.log(message);
-						console.log(new Date());
+						incrementProgressBar(25);
 
-						// Create assembly URL
-						var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FINGERPRINT_COMPARISON_' + JSON.parse(message).assemblyId;
+						// POST to Node.js end
+						$.ajax({
+							type: 'POST',
+							url: '/assembly/add/',
+							datatype: 'json', // http://stackoverflow.com/a/9155217
+							data: FASTAFiles[i]
+						}).done(function(message){
+							console.log('POST request success: ');
+							console.log(message);
+							console.log(new Date());
 
-						console.log(url);
+							// Create assembly URL
+							var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FINGERPRINT_COMPARISON_' + JSON.parse(message).assemblyId;
 
-						$('.uploaded-assembly-url-input').val(url);
-						endProgressBar();
+							console.log(url);
 
-					}).fail(function(jqXHR, textStatus, errorThrown){
-						console.error('POST request failed: ' + textStatus);
-						console.error('errorThrown: ' + errorThrown);
-						console.error('jqXHR: ' + jqXHR);
+							$('.uploaded-assembly-url-input').val(url);
+							endProgressBar();
 
-						endProgressBar();
-					});
-				}
+						}).fail(function(jqXHR, textStatus, errorThrown){
+							console.error('POST request failed: ' + textStatus);
+							console.error('errorThrown: ' + errorThrown);
+							console.error('jqXHR: ' + jqXHR);
+
+							endProgressBar();
+						});
+					}
+				}, 300);
 			});
 
 		});
