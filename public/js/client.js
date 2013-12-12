@@ -85,11 +85,12 @@ if (typeof window.requestedAssembly !== 'undefined') {
 	console.log('[WGST] Assembly requested');
 	console.log(requestedAssembly);
 
-	// TODO: Sort data by score
+	// Sort data by score
 	// http://stackoverflow.com/a/15322129
 	var sortableScoresArray = [],
 		maxScore = 0;
 
+	// First create the array of keys/values so that we can sort it
 	for (var score in requestedAssembly.scores) {
 		if (requestedAssembly.scores.hasOwnProperty(score)) {
 			sortableScoresArray.push({ 
@@ -108,11 +109,6 @@ if (typeof window.requestedAssembly !== 'undefined') {
 		return b.score - a.score;
 	});
 
-	console.log(sortableScoresArray);
-	console.log('Max score: ' + maxScore);
-
-	// TODO: Convert score values into percentages where the highest number is 100%
-
 	// Create assembly data table
 	var counter = 0;
 	for (var i = 0; i < sortableScoresArray.length; i++ ) {
@@ -123,6 +119,7 @@ if (typeof window.requestedAssembly !== 'undefined') {
 				+ sortableScoresArray[i].referenceId
 			+ '</td>'
 			+ '<td>'
+				// Convert score values into percentages where the highest number is 100%
 				+ Math.floor(+sortableScoresArray[i].score * 100 / maxScore) + '%'
 			+ '</td>'
 			+ '<tr/>'
@@ -199,19 +196,10 @@ $(function(){
 		}
 	});
 
-	// Init tabs
-	//$('.assembly-list-container').tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
-	//$('.assembly-list-container li').removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
-
-	// Init Twitter Bootstrap Slider
-/*	$('.assembly-list-slider').slider({
-		min: 1,
-		max: 10
-	});*/
-
 	// WGST namespace
 	var WGST = WGST || {};
-	// Map
+
+	// Google Maps
 	WGST.map = {};
 	WGST.mapOptions = {
         zoom: 8,
@@ -226,9 +214,7 @@ $(function(){
 
 	// File Upload
 	WGST.fileUpload = {
-		handleFileSelect: function() {
-
-		}
+		handleFileSelect: function() {}
 	};
 
 	if (Modernizr.draganddrop) {
@@ -237,30 +223,17 @@ $(function(){
 	  // Fallback to a library solution.
 	}
 
-
-
-
-
-
-
-
-
-
-
-/*	WGST.fileUpload = WGST.fileUpload || {};
+	/*	
+	WGST.fileUpload = WGST.fileUpload || {};
 	WGST.fileUpload = {
 		dragAndDrop: (function(){
 			var dropZone = document.getElementsByTagName('body')[0],
 
 		}())
-	};*/
-
+	};
+	*/
 
 	var FASTAFiles = [];
-
-
-
-
 
 	var parseFastaFile = function(fastaFile) {
 		// Validate FASTA format
@@ -273,22 +246,7 @@ $(function(){
 		// Post ajax request
 	};
 
-
 	var dropZone = document.getElementsByTagName('body')[0];
-/*	var parseTextFile = function(e) {
-
-		var sequenceListItem = $(
-			'<li>'
-			+ '<a href="#sequence-' + (i++) + '">Sequence ' + i + '</a>'
-			+ '</li>'
-		);
-
-		var sequenceContent = $(
-			'<div id="' + (i++) + '"></div>'
-		);
-
-		console.log(e.target.result);
-	};*/
 
 	var assemblies = {};
 
@@ -302,9 +260,6 @@ $(function(){
 		evt.preventDefault();
 
 		$('.assembly-upload-panel').fadeIn('fast');
-
-		
-
 
 		// files is a FileList of File objects. List some properties.
 /*		var output = [];
@@ -325,14 +280,6 @@ $(function(){
 		//	a, li, div, sequence;
 		//var reader = new FileReader();
 
-
-
-
-
-
-
-
-
 		// Define vars
 		var files = evt.dataTransfer.files, // FileList object
 			file = files[0],
@@ -349,12 +296,11 @@ $(function(){
 			sequenceStringArray = [],
 			// Array of sequence parts
 			sequenceParts = [],
-			assemblyListItem = $(); // Empty jQuery object
-
-		var dnaSequenceRegex = /^[CTAGNUX]+$/i;
-		var rawData = [];
-		var chartData = [];
-		var chartDataN50 = [];
+			assemblyListItem = $(), // Empty jQuery object
+			dnaSequenceRegex = /^[CTAGNUX]+$/i,
+			rawData = [],
+			chartData = [],
+			chartDataN50 = [];
 
 		/*
 			If user dropped only 1 assembly then 
@@ -401,9 +347,6 @@ $(function(){
 				return (element.length > 0);
 			});
 
-			console.log('sequences.length: ' + sequences.length);
-			console.log('Last sequence: ' + sequences[sequences.length - 1]);
-
 			// Record number of sequences found
 			assemblies[fileCounter] = {
 				'name': file.name,
@@ -435,8 +378,6 @@ $(function(){
 							return array[index].trim();
 					});
 					*/
-
-				console.log('sequenceParts.length: ' + sequenceParts.length);
 
 				// Trim each element in sequence parts array
 				for (var i = 0; i < sequenceParts; i++) {
@@ -478,30 +419,15 @@ $(function(){
 					// Create sub array of a sequence parts array - cut the first element (id and description).
 					var sequenceDNAStringArray = sequenceParts.splice(1, sequenceParts.length);
 
-					console.log('sequenceDNAStringArray.length: ' + sequenceDNAStringArray.length);
-					console.log('sequenceDNAStringArray[0]: ' + sequenceDNAStringArray[0].substr(0, 20));
-
 					// Very rarely the second line can be a comment
 					// If the first element won't match regex then assume it is a comment
 					if (! dnaSequenceRegex.test(sequenceDNAStringArray[0].trim())) {
-						console.log('DNA sequences comment!');
 						// Remove comment element from the array
 						sequenceDNAStringArray = sequenceDNAStringArray.splice(1, sequenceDNAStringArray.length);
 					}
 
-					console.log('sequenceDNAStringArray.length: ' + sequenceDNAStringArray.length);
-
-					// If DNA sequence string is broken amongst multiple lines then convert all parts into a single string
-/*					if (sequenceDNAStringArray.length > 1) {
-						dnaSequence = sequenceDNAStringArray.join('');
-					}*/
-
 					// Convert array of DNA sequence substrings into a single string
 					dnaSequence = sequenceDNAStringArray.join('').trim();
-
-					console.log('dnaSequence.length: ' + dnaSequence.length);
-					//console.log(sequenceDNAStringArray.length);
-					//console.log('Fist array item: ' + sequenceDNAStringArray[0]);
 
 					// Parse sequence id
 					dnaSequenceId = sequenceParts[0].trim().replace('>','');
@@ -518,7 +444,6 @@ $(function(){
 						assemblies[fileCounter]['sequences']['individual'][sequenceCounter]['sequence'] = dnaSequence;
 					// Invalid DNA sequence string
 					} else {
-						//$('#log').append('<div class="log-item">' + dnaSequence + '</div>');
 						// Count as invalid sequence
 						assemblies[fileCounter]['sequences']['invalid'] = assemblies[fileCounter]['sequences']['invalid'] + 1;
 					}
@@ -537,11 +462,6 @@ $(function(){
 
 			} // for
 
-/*			var fileNameParts = 'foo.bar.bar.test.fa'.split('.');
-
-			console.log([fileNameParts.length-1]);
-			console.log(e.target);*/
-
 			// FASTA file is valid
 			FASTAFiles.push({
 				name: file.name.substr(0, file.name.lastIndexOf('.')),
@@ -549,41 +469,17 @@ $(function(){
 				metadata: {}
 			});
 
-/*			var fileNameParts = 'foo.bar.bar.test.fa'.split('.');
-
-			console.log([fileNameParts.length-1]);
-
-			// FASTA file is valid
-			FASTAFiles.push({
-				x: [fileNameParts.length-1],
-				name: 'foo.bar.bar.test.fa'.replace([fileNameParts.length - 1], ''),
-				assembly: e.target.result,
-				metadata: {}
-			});*/
-
 			/*
-			//rawData = getSequenceStringLengthFrequency(sequenceStringArray);
-			//console.log(rawData);
-
-		    chartData = $.map(rawData, function(value, index) {
-				return {
-					sequenceLength: index,
-					lengthFrequency: value
-				};
-			});
-			*/
 
 			// Calculate N50
 			// http://www.nature.com/nrg/journal/v13/n5/box/nrg3174_BX1.html
 
-		    console.log('sequenceStringArray.length: ' + sequenceStringArray.length);
+			*/
 
 			// Order array by sequence length DESC
 		    var sortedSequenceStringArray = sequenceStringArray.sort(function(a, b){
 		    	return b.length - a.length;
 		    });
-
-		    console.log('sortedSequenceStringArray.length: ' + sortedSequenceStringArray.length);
 
 		    // Calculate the total length of all contigs in the assembly
 		    var sequenceLengthArray = [];
@@ -597,17 +493,12 @@ $(function(){
 		    // Calculate one-half of the total length of all contigs in the assembly
 		    var halfSum = sequenceLengthArray[sequenceLengthArray.length - 1] / 2;
 
-		    console.log('Half sum: ' + halfSum);
-
-		    console.log('sequenceLengthArray.length: ' + sequenceLengthArray.length);
-
 		    // Sum the length of each contig starting from the longest contig
 		    // until this running sum equals one-half of the total length of all contigs in the assembly
 		    var sum = 0;
 		    var n50 = {};
 		    for (var i = 0; i < sortedSequenceStringArray.length; i++) {
 		    	sum = sum + sortedSequenceStringArray[i].length;
-		    	console.log('Index: ' + i + '. Length: ' + sortedSequenceStringArray[i].length + '. Sum: ' + sum);
 		    	// The contig N50 of the assembly is the length of the shortest contig in this list
 		    	if (sum >= halfSum) {
 		    		n50['sequenceNumber'] = i + 1;
@@ -628,27 +519,6 @@ $(function(){
 		    	n50['quality'] = false;
 		    	//$('.assembly-stats-n50-number').addClass('n50-no-quality');
 		    }
-
-		    console.log('N50: ' + JSON.stringify(n50));
-
-		    // Find N50
-			/*for (var i = 0; i < sortedSequenceStringArray.length; i++) {
-		    	sum = sum + sortedSequenceStringArray[i].length;
-		    	if (sum >= half) {
-		    		console.log('Sum: ' + sum);
-		    		console.log('Index: ' + i);
-		    		n50['index'] = i + 1;
-		    		n50['sum'] = sum;
-		    		break;
-		    	}
-		    }*/
-
-/*		    for (var i = sortedSequenceStringArray.length - 1; i > 0; i--) {
-		    	console.log('looking for N50: ' + sortedSequenceStringArray[i].length);
-		    	if (sortedSequenceStringArray[i].length >= half) {
-		    		n50 = sortedSequenceStringArray[i].length;
-		    	}
-		    }*/
 
 			// Update total sequences to upload number
 			totalSequencesUpload = totalSequencesUpload + sequences.length;
@@ -1193,26 +1063,6 @@ $(function(){
 				})
 				.attr('r', 5);
 			*/
-
-
-
-
-
-
-
-
-
-
-
-			// Average sequence length / assembly
-			// Average number of sequences / assembly
-
-
-			// Draw graph
-			//$('.sequence-length-distribution-chart-' + fileCounter).;
-
-			//console.log('Assembly identifier: ' + assemblyCollection[sequenceCounter].identifier);
-			//console.log('Assembly sequence: ' + assemblyCollection[sequenceCounter].sequence);
 
 			// Show first assembly
 			$('.assembly-item-1').removeClass('hide-this');
