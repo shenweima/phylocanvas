@@ -1,4 +1,4 @@
-"use strict"; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
+'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
 if (!Array.prototype.filter) {
@@ -26,180 +26,194 @@ if (!Array.prototype.filter) {
   };
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce
-if ('function' !== typeof Array.prototype.reduce) {
-  Array.prototype.reduce = function(callback, opt_initialValue){
-    'use strict';
-    if (null === this || 'undefined' === typeof this) {
-      // At the moment all modern browsers, that support strict mode, have
-      // native implementation of Array.prototype.reduce. For instance, IE8
-      // does not support strict mode, so this check is actually useless.
-      throw new TypeError(
-          'Array.prototype.reduce called on null or undefined');
-    }
-    if ('function' !== typeof callback) {
-      throw new TypeError(callback + ' is not a function');
-    }
-    var index, value,
-        length = this.length >>> 0,
-        isValueSet = false;
-    if (1 < arguments.length) {
-      value = opt_initialValue;
-      isValueSet = true;
-    }
-    for (index = 0; length > index; ++index) {
-      if (this.hasOwnProperty(index)) {
-        if (isValueSet) {
-          value = callback(value, this[index], index, this);
-        }
-        else {
-          value = this[index];
-          isValueSet = true;
-        }
-      }
-    }
-    if (!isValueSet) {
-      throw new TypeError('Reduce of empty array with no initial value');
-    }
-    return value;
-  };
-}
-
-var getSequenceStringLengthFrequency = function(sequenceStringArray) {
-    var frequency = {},
-    	i = 0;
-    for (; i < sequenceStringArray.length; i++) {
-        var sequenceLength = sequenceStringArray[i].length;
-        if (frequency[sequenceLength]) {
-           frequency[sequenceLength]++;
-        } else {
-           frequency[sequenceLength] = 1;
-        }
-    }
-    return frequency;
-};
-
-// Check if user provided assembly id
-if (typeof window.requestedAssembly !== 'undefined') {
-
-	console.log('[WGST] Assembly requested');
-	console.log(requestedAssembly);
-
-	// Sort data by score
-	// http://stackoverflow.com/a/15322129
-	var sortableScoresArray = [],
-		maxScore = 0;
-
-	// First create the array of keys/values so that we can sort it
-	for (var score in requestedAssembly.scores) {
-		if (requestedAssembly.scores.hasOwnProperty(score)) {
-			sortableScoresArray.push({ 
-				'referenceId': requestedAssembly.scores[score].referenceId,
-				'score': requestedAssembly.scores[score].score
-			});
-			// Check for max score
-			if (requestedAssembly.scores[score].score > maxScore) {
-				// Update max score
-				maxScore = requestedAssembly.scores[score].score;
-			}
-		}
-	}
-
-	sortableScoresArray = sortableScoresArray.sort(function(a,b){
-		return b.score - a.score;
-	});
-
-	// Create assembly data table
-	var counter = 0;
-	for (var i = 0; i < sortableScoresArray.length; i++ ) {
-		counter++;
-		$('.assembly-data-table tbody').append(
-			((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
-			+ '<td>'
-				+ sortableScoresArray[i].referenceId
-			+ '</td>'
-			+ '<td>'
-				// Convert score values into percentages where the highest number is 100%
-				+ Math.floor(+sortableScoresArray[i].score * 100 / maxScore) + '%'
-			+ '</td>'
-			+ '<tr/>'
-		);
-	}
-	
-	// Create assembly data table
-	/*
-	var counter = 0;
-	for (var score in requestedAssembly.scores) {
-		if (requestedAssembly.scores.hasOwnProperty(score)) {
-			counter++;
-			$('.assembly-data-table tbody').append(
-				((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
-				+ '<td>'
-					+ requestedAssembly.scores[score].referenceId
-				+ '</td>'
-				+ '<td>'
-					+ requestedAssembly.scores[score].score
-				+ '</td>'
-				+ '<tr/>'
-			);	
-		}
-	}
-	*/
-
-	// Create assembly data table
-	/*
-	var counter = 0;
-	for (var score in requestedAssembly.scores) {
-		if (requestedAssembly.scores.hasOwnProperty(score)) {
-			counter++;
-			$('.assembly-data-table tbody').append(
-				((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
-				+ '<td>'
-					+ requestedAssembly.scores[score][0]
-				+ '</td>'
-				+ '<td>'
-					+ requestedAssembly.scores[score][1]
-				+ '</td>'
-				+ '<tr/>'
-			);	
-		}
-	}
-	*/
-
-	// Set assembly panel header text
-	$('.assembly-panel .wgst-panel-header .assembly-id').text(requestedAssembly.assemblyId);
-
-	// Set assembly upload datetime in footer
-	$('.assembly-upload-datetime').text(moment(requestedAssembly.timestamp, "YYYYMMDD_HHmmss").fromNow());
-
-	// Show assembly data
-	$('.assembly-panel').show();
-
-} else {
-	console.log('[WGST] No assembly requested');
-}
-
 $(function(){
 
-	// Init jQuery UI draggable interaction
-	$('.wgst-draggable').draggable({ handle: ".wgst-panel-header" });
+	// Init
+	(function(){
 
-	// Init jQuery IU slider widget
-	$('.assembly-list-slider').slider({
-		range: "max",
-		min: 1,
-		max: 10,
-		value: 1,
-		animate: 'fast',
-		slide: function(event, ui) {
-			$('.selected-assembly-counter').text(ui.value);
+		// Init jQuery UI draggable interaction
+		$('.wgst-draggable').draggable({ handle: ".wgst-panel-header" });
+
+		// Init jQuery IU slider widget
+		$('.assembly-list-slider').slider({
+			range: "max",
+			min: 1,
+			max: 10,
+			value: 1,
+			animate: 'fast',
+			slide: function(event, ui) {
+				$('.selected-assembly-counter').text(ui.value);
+			}
+		});
+
+		// Popover
+		$('.add-data button').popover({
+			html: true,
+			placement: 'bottom',
+			title: 'Add your data',
+			content: '<div class="upload-data"><span>You can drag and drop your CSV files anywhere on the map.</span><input type="file" id="exampleInputFile"></div>'
+		});
+
+		// Toggle timeline
+		$('.timeline-toggle-button').on('click', function(){
+			if ($(this).hasClass('active')) {
+				$('#timeline').hide();
+			} else {
+				$('#timeline').css('bottom', '0');
+				$('#timeline').show();
+			}
+		});
+
+		// Toggle graph
+		$('.graph-toggle-button').on('click', function(){
+			if ($(this).hasClass('active')) {
+				$('#graph').hide();
+			} else {
+				$('#graph').show();
+			}
+		});
+
+		// Toggle map
+		$('.map-toggle-button').on('click', function(){
+			if ($(this).hasClass('active')) {
+				$('#map').hide();
+			} else {
+				$('#map').show();
+			}
+		});
+
+	})();
+
+	var loadRequestedAssembly = function(requestedAssembly) {
+		console.log('[WGST] Loading requested assembly');
+
+		// Sort data by score
+		// http://stackoverflow.com/a/15322129
+		var sortableScoresArray = [],
+			maxScore = 0,
+			score;
+
+		// First create the array of keys/values so that we can sort it
+		for (score in requestedAssembly.scores) {
+			if (requestedAssembly.scores.hasOwnProperty(score)) {
+				sortableScoresArray.push({ 
+					'referenceId': requestedAssembly.scores[score].referenceId,
+					'score': requestedAssembly.scores[score].score
+				});
+				// Check for max score
+				if (requestedAssembly.scores[score].score > maxScore) {
+					// Update max score
+					maxScore = requestedAssembly.scores[score].score;
+				}
+			}
 		}
-	});
+
+		sortableScoresArray = sortableScoresArray.sort(function(a,b){
+			return b.score - a.score;
+		});
+
+		// Create assembly data table
+		var counter = 0;
+		for (var i = 0; i < sortableScoresArray.length; i++ ) {
+			counter++;
+			$('.assembly-data-table tbody').append(
+				((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
+				+ '<td>'
+					+ sortableScoresArray[i].referenceId
+				+ '</td>'
+				+ '<td>'
+					// Convert score values into percentages where the highest number is 100%
+					+ Math.floor(+sortableScoresArray[i].score * 100 / maxScore) + '%'
+				+ '</td>'
+				+ '<tr/>'
+			);
+		}
+		
+		// Create assembly data table
+		/*
+		var counter = 0;
+		for (var score in requestedAssembly.scores) {
+			if (requestedAssembly.scores.hasOwnProperty(score)) {
+				counter++;
+				$('.assembly-data-table tbody').append(
+					((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
+					+ '<td>'
+						+ requestedAssembly.scores[score].referenceId
+					+ '</td>'
+					+ '<td>'
+						+ requestedAssembly.scores[score].score
+					+ '</td>'
+					+ '<tr/>'
+				);	
+			}
+		}
+		*/
+
+		// Create assembly data table
+		/*
+		var counter = 0;
+		for (var score in requestedAssembly.scores) {
+			if (requestedAssembly.scores.hasOwnProperty(score)) {
+				counter++;
+				$('.assembly-data-table tbody').append(
+					((counter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
+					+ '<td>'
+						+ requestedAssembly.scores[score][0]
+					+ '</td>'
+					+ '<td>'
+						+ requestedAssembly.scores[score][1]
+					+ '</td>'
+					+ '<tr/>'
+				);	
+			}
+		}
+		*/
+
+		// Set assembly panel header text
+		$('.assembly-panel .wgst-panel-header .assembly-id').text(requestedAssembly.assemblyId);
+
+		// Set assembly upload datetime in footer
+		$('.assembly-upload-datetime').text(moment(requestedAssembly.timestamp, "YYYYMMDD_HHmmss").fromNow());
+
+		// Show assembly data
+		$('.assembly-panel').show();
+	};
+
+	// If user provided assembly id in url then load requested assembly
+	if (typeof window.WGST.requestedAssembly !== 'undefined') {
+		loadRequestedAssembly(window.WGST.requestedAssembly);
+	}
 
 	// WGST namespace
-	var WGST = WGST || {};
+	var WGST = window.WGST || {};
 
-	// Google Maps
+	// Map
+	WGST.map = {
+		map: {},
+		mapOptions: {
+			zoom: 8,
+        	center: new google.maps.LatLng(51.511214, -0.119824),
+        	mapTypeId: google.maps.MapTypeId.ROADMAP
+		},
+		init: function() {
+			this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions);
+		}
+	};
+
+	// Init map
+	WGST.map.init();
+
+	var FASTAFiles = [],
+		dropZone = document.getElementsByTagName('body')[0],
+		assemblies = {};
+
+	var handleDragOver = function(evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+		evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+	};
+
+	/*	
 	WGST.map = {};
 	WGST.mapOptions = {
         zoom: 8,
@@ -209,11 +223,10 @@ $(function(){
 	WGST.initMap = function() {
 		this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions);
 	};
-	// Init map
-	WGST.initMap();
+	*/
 
 	// File Upload
-	WGST.fileUpload = {
+/*	WGST.fileUpload = {
 		handleFileSelect: function() {}
 	};
 
@@ -221,7 +234,7 @@ $(function(){
 	  // Browser supports HTML5 DnD.
 	} else {
 	  // Fallback to a library solution.
-	}
+	}*/
 
 	/*	
 	WGST.fileUpload = WGST.fileUpload || {};
@@ -233,28 +246,35 @@ $(function(){
 	};
 	*/
 
-	var FASTAFiles = [];
+	/* Refactored */
 
-	var parseFastaFile = function(fastaFile) {
+	/*
+	var getSequenceStringLengthFrequency = function(sequenceStringArray) {
+	    var frequency = {},
+	    	i = 0;
+	    for (; i < sequenceStringArray.length; i++) {
+	        var sequenceLength = sequenceStringArray[i].length;
+	        if (frequency[sequenceLength]) {
+	           frequency[sequenceLength]++;
+	        } else {
+	           frequency[sequenceLength] = 1;
+	        }
+	    }
+	    return frequency;
+	};
+	*/
+
+/*	var parseFastaFile = function(fastaFile) {
 		// Validate FASTA format
 		// Slice sequence identifier
 		// Slice description
 		// Slice sequence data
 	};
-
-	var uploadFastaObject = function(fastaObject) {
+*/
+/*	var uploadFastaObject = function(fastaObject) {
 		// Post ajax request
-	};
+	};*/
 
-	var dropZone = document.getElementsByTagName('body')[0];
-
-	var assemblies = {};
-
-	var handleDragOver = function(evt) {
-		evt.stopPropagation();
-		evt.preventDefault();
-		evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
-	};
 	var handleFileSelect = function(evt) {
 		evt.stopPropagation();
 		evt.preventDefault();
@@ -1088,7 +1108,6 @@ $(function(){
 		for (fileCounter = 0; fileCounter < files.length; fileCounter++) {
 			file = files[fileCounter];			
 			if (file.name.match(FASTAFileRegex)) {
-				console.log('FASTA file.');
 				// Create new file reader
 				reader = new FileReader();
 				// Create new scope to save fileCounter variable with it's current value
@@ -1099,7 +1118,7 @@ $(function(){
 				// Read file as a text
 				reader.readAsText(file);
 			} else {
-				console.log("File not supported!");
+				console.log("[WGST] File not supported");
 			}
 		} // for
 
@@ -1109,13 +1128,13 @@ $(function(){
 		$('.assembly-upload-total-number-label').text((files.length === 1 ? 'assembly': 'assemblies'));
 
 	};
-	var init = function() {
+
+	var initDragAndDrop = function() {
 		dropZone.addEventListener('dragover', handleDragOver, false);
 		dropZone.addEventListener('drop', handleFileSelect, false);
 	};
 
-	// Init drag and drop
-	init();
+	initDragAndDrop();
 
 	/*
 		Sequence list navigation buttons
@@ -1282,7 +1301,7 @@ $(function(){
 	// When 'Next assembly' button is pressed
 	$('.assembly-list-container').on('click', '.next-assembly-button', function(e){
 		// Find assembly with empty or incomplete metadata
-		console.log($(this).closest('.assembly-list-container').find('.assembly-item input:text[value=""]'));
+		//console.log($(this).closest('.assembly-list-container').find('.assembly-item input:text[value=""]'));
 
 		// Get current assembly's id and split it
 		//var currentAssemblyIdPartArray = $(this).closest('.assembly-item').attr('id').split('-');
@@ -1291,8 +1310,6 @@ $(function(){
 		// Focus
 
 		//console.log($('#assembly-item-' + (+currentAssemblyIdCounter + 1)).find('input:first'));
-
-
 
 /*		// Focus on the next fist input of the next assembly metadata form
 		var currentAssemblyCounter = $(this).closest('.assembly-item').attr('id').split('-')[];
@@ -1316,11 +1333,10 @@ $(function(){
 		e.preventDefault();
 	});
 
-
 	// On
-	$('.assembly-list-container').on('click', '.next-assembly-button', function(e){
+/*	$('.assembly-list-container').on('click', '.next-assembly-button', function(e){
 		// Do something
-	});
+	});*/
 
 	var incrementProgressBar = function(stepWidth) {
 		$('.uploading-progress-container .progress-bar').width((+$('.uploading-progress-container .progress-bar').width() + stepWidth) + '%');
@@ -1346,10 +1362,8 @@ $(function(){
 
 		// It takes less than 10 seconds to process one assembly
 		var seconds = 10 * FASTAFiles.length;
-		console.log('Seconds to wait until processed: ' + seconds);
 		var timer = setInterval(
 			function() {
-				console.log(seconds);
 				$('.visit-url-seconds-number').text(seconds);
 				seconds--;
 				if (seconds === 0) {
@@ -1365,16 +1379,8 @@ $(function(){
 	};	
 
 	$('.upload-assemblies-button').on('click', function() {
-		
-		console.log('Upload assemblies.');
-		console.log(FASTAFiles);
-
-		console.log(new Date());
-
 		$('.uploading-assembly-progress-container').fadeIn('slow', function(){
-
 			$('.adding-metadata-progress-container').slideUp('normal', function(){
-
 				setTimeout(function(){
 					for (var i = 0; i < FASTAFiles.length; i++) {
 
@@ -1387,103 +1393,26 @@ $(function(){
 							datatype: 'json', // http://stackoverflow.com/a/9155217
 							data: FASTAFiles[i]
 						}).done(function(message){
-							console.log('POST request success: ');
-							console.log(message);
-							console.log(new Date());
-
+							console.log('[WGST] Successfully send FASTA file object to server and received response message');
+							//console.log('POST request success: ');
+							//console.log(message);
+							//console.log(new Date());
 							// Create assembly URL
 							var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FINGERPRINT_COMPARISON_' + JSON.parse(message).assemblyId;
-
-							console.log(url);
-
+							//console.log(url);
 							$('.uploaded-assembly-url-input').val(url);
 							endProgressBar();
 
 						}).fail(function(jqXHR, textStatus, errorThrown){
-							console.error('POST request failed: ' + textStatus);
-							console.error('errorThrown: ' + errorThrown);
-							console.error('jqXHR: ' + jqXHR);
-
+							console.log('[WGST] Failed to send FASTA file object to server or received error message');
+							//console.error('POST request failed: ' + textStatus);
+							//console.error('errorThrown: ' + errorThrown);
+							//console.error('jqXHR: ' + jqXHR);
 							endProgressBar();
 						});
 					}
 				}, 300);
 			});
-
 		});
-
-/*		$('.upload-controls-container').hide();
-		$('.progress-container').hide();
-		$('.uploading-progress-container').fadeIn();*/
-
-/*		// Update progress bar
-		$('.progress-container .progress').addClass('active');
-		$('.progress-container .progress-bar').removeClass('progress-bar-success');
-
-		// Update button
-		//$('.upload-controls-container .upload-assemblies-button').text('Uploading...').removeClass('btn-success').addClass('btn-primary').attr('disabled', 'disabled');
-		// Hide all buttons
-		$('.upload-controls-container').fadeOut('fast', function(){
-			// Change width of Progress Container to 100%
-			$('.progress-container').css('width', '100%');
-		});*/
-
 	});
-
-
-
-/*	$('form').on('submit', function(e){
-		console.log('Submit!');
-		e.preventDefault();
-	});*/
-
-/*	$('.assembly-list-container').on('blur', 'input', function(){
-		//console.log($(this).val());
-		if ($(this).val().length) {
-			// Increment progress bar
-			//updateProgressBar(1);
-		}
-	});*/
-
-
-	    			// Metadata form
-	    			/*
-	    			+ '<div class="assembly-metadata">'
-	    				+ '<h4>Please provide mandatory assembly metadata:</h4>'
-						+ '<form role="form">'
-
-							+ '<div class="form-block assembly-metadata-' + fileCounter + '">'
-								+ '<div class="form-group">'
-									+ '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
-									+ '<input type="datetime-local" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
-								+ '</div>'
-								+ '<div class="checkbox">'
-									+ '<label>'
-									  + '<input type="checkbox" id="assemblySampleDatetimeNotSure' + fileCounter + '"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
-									+ '</label>'
-								+ '</div>'
-							+ '</div>'
-
-							+ '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
-								+ '<div class="form-group">'
-									+ '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
-									+ '<input type="text" class="form-control" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
-								+ '</div>'
-
-								+ '<div class="checkbox">'
-									+ '<label>'
-									  + '<input type="checkbox" id="assemblySampleLocationNotSure' + fileCounter + '"> I am not sure!'
-									+ '</label>'
-								+ '</div>'	
-							+ '</div>'
-
-							+ '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
-						  		+ '<button type="submit" class="btn btn-default" class="show-next-assembly">Next assembly</button>'
-						  		+ ' <button type="submit" class="btn btn-default">Apply to all assemblies</button>'
-							+ '</div>'
-
-						+ '</form>'
-					+ '</div>'
-					*/
-
 });

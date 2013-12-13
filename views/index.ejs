@@ -8,7 +8,7 @@
         <meta name="keywords" content="">
         <meta name="author" content="">
         <base href="/"> 
-        <title>Project</title>
+        <title>WGST.net</title>
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -30,9 +30,7 @@
         <!-- Client -->
         <link href='/css/dev.css' rel='stylesheet' type='text/css'>
         <style>
-            * {
-                font-family: 'Roboto', sans-serif;
-            }
+        /*
             html, body {
               height: 100%;
               overflow: hidden;
@@ -41,6 +39,7 @@
                 width: 100%;
                 height: 100%;
             }
+            */
             .navigation {
                 position: absolute;
                 top: 28px;
@@ -429,42 +428,6 @@
           </footer><!-- /.wgst-panel-footer -->
         </div><!-- /.wgst-panel.assembly-upload-panel -->
 
-
-
-
-
-        <!-- <div id="log"></div> -->
-
-        <script>
-/*          function handleFileSelect(evt) {
-            evt.stopPropagation();
-            evt.preventDefault();
-
-            var files = evt.dataTransfer.files; // FileList object.
-
-            // files is a FileList of File objects. List some properties.
-            var output = [];
-            for (var i = 0, f; f = files[i]; i++) {
-              output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-                          f.size, ' bytes, last modified: ',
-                          f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-                          '</li>');
-            }
-            document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-          }
-
-          function handleDragOver(evt) {
-            evt.stopPropagation();
-            evt.preventDefault();
-            evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
-          }
-
-          // Setup the dnd listeners.
-          var dropZone = document.getElementsByTagName('body')[0];//document.getElementById('drop_zone');
-          dropZone.addEventListener('dragover', handleDragOver, false);
-          dropZone.addEventListener('drop', handleFileSelect, false);*/
-        </script>
-
         <!-- jQuery -->
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <!-- jQuery UI -->
@@ -484,345 +447,39 @@
         <!-- Moment.js -->
         <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.4.0/moment.min.js"></script>
         <!-- Bootstrap v3 datetimepicker widget -->
-        <script src="/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>        
+        <script src="/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
+        <!-- Init -->       
         <script>
-
-          /*
-            The name "undefined" is not guaranteed to have the type "undefined".
-            It can be assigned other values, like null or 1.
-            To make sure that undefined is undefined in that context, use anonymous self-invoking function.
-
-            However in modern browsers "undefined" is read-only.
-          */
-          (function(undefined){
-            'use strict';
-
-            // Flag requested assembly
-            window.requestedAssembly = undefined;
-
-            // If user requested individual assembly, e.g.: /assembly/FINGERPRINT_COMPARISON_154273030677208533352573798127987081488
-            <% if (typeof requestedAssemblyObject !== 'undefined') { %>
-              window.requestedAssembly = <%- requestedAssemblyObject %>;
-            <% } %>
-
-          })();
-
-        </script>
-
-        <!-- Client -->
-        <script src="/js/client.js"></script>
-        <script>
-
-          /* Sample D3 Tree code */
-          function tree() {
-              var _chart = {};
-
-              var _width = 1000, _height = 600,
-                      _margins = {top: 30, left: 120, right: 30, bottom: 30},
-                      _svg,
-                      _nodes,
-                      _i = 0,
-                      _tree,
-                      _diagonal,
-                      _bodyG;
-
-              _chart.render = function () {
-                  if (!_svg) {
-                      _svg = d3.select("#graph").append("svg")
-                              .attr("height", _height)
-                              .attr("width", _width);
-                  }
-
-                  renderBody(_svg);
-              };
-
-              function renderBody(svg) {
-                  if (!_bodyG) {
-                      _bodyG = svg.append("g")
-                  .attr("class", "body")
-                  .attr("transform", function (d) {
-                    return "translate(" + _margins.left 
-                      + "," + _margins.top + ")";
-                  });
-                  }
-
-                  _tree = d3.layout.tree()
-                          .size([
-                    (_height - _margins.top - _margins.bottom), 
-                    (_width - _margins.left - _margins.right)
-                  ]);
-
-                  _diagonal = d3.svg.diagonal()
-                          .projection(function (d) {
-                              return [d.y, d.x];
-                          });
-
-                  _nodes.x0 = (_height - _margins.top - _margins.bottom) / 2;
-                  _nodes.y0 = 0;
-
-                  render(_nodes);
-              }
-
-              function render(source) {
-                  var nodes = _tree.nodes(_nodes).reverse();
-
-                  renderNodes(nodes, source);
-
-                  renderLinks(nodes, source);
-              }
-
-              function renderNodes(nodes, source) {
-                  nodes.forEach(function (d) {
-                      d.y = d.depth * 180;
-                  });
-
-                  var node = _bodyG.selectAll("g.node")
-                          .data(nodes, function (d) {
-                              return d.id || (d.id = ++_i);
-                          });
-
-                  var nodeEnter = node.enter().append("svg:g")
-                          .attr("class", "node")
-                          .attr("transform", function (d) {
-                              return "translate(" + source.y0 
-                      + "," + source.x0 + ")";
-                          })
-                          .on("click", function (d) {
-                              toggle(d);
-                              render(d);
-                          });
-
-                  nodeEnter.append("svg:circle")
-                          .attr("r", 1e-6)
-                          .style("fill", function (d) {
-                              return d._children ? "lightsteelblue" : "#fff";
-                          });
-
-                  var nodeUpdate = node.transition()
-                          .attr("transform", function (d) {
-                              return "translate(" + d.y + "," + d.x + ")";
-                          });
-
-                  nodeUpdate.select("circle")
-                          .attr("r", 4.5)
-                          .style("fill", function (d) {
-                              return d._children ? "lightsteelblue" : "#fff";
-                          });
-
-                  var nodeExit = node.exit().transition()
-                          .attr("transform", function (d) {
-                              return "translate(" + source.y 
-                      + "," + source.x + ")";
-                          })
-                          .remove();
-
-                  nodeExit.select("circle")
-                          .attr("r", 1e-6);
-
-                  renderLabels(nodeEnter, nodeUpdate, nodeExit);
-
-                  nodes.forEach(function (d) {
-                      d.x0 = d.x;
-                      d.y0 = d.y;
-                  });
-              }
-
-              function renderLabels(nodeEnter, nodeUpdate, nodeExit) {
-                  nodeEnter.append("svg:text")
-                          .attr("x", function (d) {
-                              return d.children || d._children ? -10 : 10;
-                          })
-                          .attr("dy", ".35em")
-                          .attr("text-anchor", function (d) {
-                              return d.children || d._children ? "end" : "start";
-                          })
-                          .text(function (d) {
-                              return d.name;
-                          })
-                          .style("fill-opacity", 1e-6);
-
-                  nodeUpdate.select("text")
-                          .style("fill-opacity", 1);
-
-                  nodeExit.select("text")
-                          .style("fill-opacity", 1e-6);
-              }
-
-              function renderLinks(nodes, source) {
-                  var link = _bodyG.selectAll("path.link")
-                          .data(_tree.links(nodes), function (d) {
-                              return d.target.id;
-                          });
-
-                  link.enter().insert("svg:path", "g")
-                          .attr("class", "link")
-                          .attr("d", function (d) {
-                              var o = {x: source.x0, y: source.y0};
-                              return _diagonal({source: o, target: o});
-                          });
-
-                  link.transition()
-                          .attr("d", _diagonal);
-
-                  link.exit().transition()
-                          .attr("d", function (d) {
-                              var o = {x: source.x, y: source.y};
-                              return _diagonal({source: o, target: o});
-                          })
-                          .remove();
-              }
-
-              function toggle(d) {
-                  if (d.children) {
-                      d._children = d.children;
-                      d.children = null;
-                  } else {
-                      d.children = d._children;
-                      d._children = null;
-                  }
-              }
-
-              function toggleAll(d) {
-                  if (d.children) {
-                      d.children.forEach(toggleAll);
-                      toggle(d);
-                  }
-              }
-
-              _chart.width = function (w) {
-                  if (!arguments.length) return _width;
-                  _width = w;
-                  return _chart;
-              };
-
-              _chart.height = function (h) {
-                  if (!arguments.length) return _height;
-                  _height = h;
-                  return _chart;
-              };
-
-              _chart.margins = function (m) {
-                  if (!arguments.length) return _margins;
-                  _margins = m;
-                  return _chart;
-              };
-
-              _chart.nodes = function (n) {
-                  if (!arguments.length) return _nodes;
-                  _nodes = n;
-                  return _chart;
-              };
-
-              return _chart;
-          }
-
-          var chart = tree();
-
-          function simpleFlare() {
-            chart.nodes(JSON.parse('{"name":"flare","children":[{"name":"analytics","children":[{"name":"cluster","children":[{"name":"AgglomerativeCluster","size":3938},{"name":"CommunityStructure","size":3812},{"name":"MergeEdge","size":743}]},{"name":"graph","children":[{"name":"BetweennessCentrality","size":3534},{"name":"LinkDistance","size":5731}]},{"name":"optimization","children":[{"name":"AspectRatioBanker","size":7074}]}]},{"name":"animate","children":[{"name":"Easing","size":17010},{"name":"FunctionSequence","size":5842},{"name":"interpolate","children":[{"name":"ArrayInterpolator","size":1983},{"name":"ColorInterpolator","size":2047},{"name":"DateInterpolator","size":1375},{"name":"Interpolator","size":8746},{"name":"MatrixInterpolator","size":2202},{"name":"NumberInterpolator","size":1382},{"name":"ObjectInterpolator","size":1629},{"name":"PointInterpolator","size":1675},{"name":"RectangleInterpolator","size":2042}]},{"name":"ISchedulable","size":1041},{"name":"Parallel","size":5176},{"name":"Pause","size":449},{"name":"Scheduler","size":5593},{"name":"Sequence","size":5534},{"name":"Transition","size":9201},{"name":"Transitioner","size":19975},{"name":"TransitionEvent","size":1116},{"name":"Tween","size":6006}]}]}')).render();
-          }
-
-          /* Main code */
           $(function(){
-
-            simpleFlare();
-
+            'use strict';
             /*
-            var map;
-            function initialize() {
-              var mapOptions = {
-                zoom: 8,
-                center: new google.maps.LatLng(51.511214, -0.119824),
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-              };
-              map = new google.maps.Map(document.getElementById('map'),
-                  mapOptions);
-            }
+              The name "undefined" is not guaranteed to have the type "undefined".
+              It can be assigned other values, like null or 1.
+              To make sure that undefined is undefined in that context, use anonymous self-invoking function.
 
-            google.maps.event.addDomListener(window, 'load', initialize);
+              However in modern browsers "undefined" is read-only.
             */
+            (function(undefined){
 
-            // Popover
-            $('.add-data button').popover({
-              html: true,
-              placement: 'bottom',
-              title: 'Add your data',
-              content: '<div class="upload-data"><span>You can drag and drop your CSV files anywhere on the map.</span><input type="file" id="exampleInputFile"></div>'
-            });
+              // WGST namespace
+              window.WGST = window.WGST || {};
+              window.WGST.requestedAssembly = undefined;
 
-            // Toggle timeline
-            $('.timeline-toggle-button').on('click', function(){
-              if ($(this).hasClass('active')) {
-                $('#timeline').hide();
-              } else {
-                $('#timeline').css('bottom', '0');
-                $('#timeline').show();
-              }
-            });
+              // Store requested assembly
+              //window.requestedAssembly = undefined;
 
-            // Toggle graph
-            $('.graph-toggle-button').on('click', function(){
-              if ($(this).hasClass('active')) {
-                $('#graph').hide();
-              } else {
-                $('#graph').show();
-              }
-            });
+              // If user requested individual assembly, e.g.: /assembly/FINGERPRINT_COMPARISON_154273030677208533352573798127987081488
+              <% if (typeof requestedAssemblyObject !== 'undefined') { %>
+                //window.requestedAssembly = <%- requestedAssemblyObject %>;
+                window.WGST.requestedAssembly = <%- requestedAssemblyObject %>;
+              <% } %>
 
-            // Toggle map
-            $('.map-toggle-button').on('click', function(){
-              if ($(this).hasClass('active')) {
-                $('#map').hide();
-              } else {
-                $('#map').show();
-              }
-            });
+              //console.log(WGST.init['requestedAssembly']);
 
-            var doc = document;
-            var myCanvas = doc.getElementById('graph').getElementsByTagName('div')[0];
-
-            if (myCanvas.addEventListener) {
-                myCanvas.addEventListener("mousedown", function(){ return drag(event, doc.getElementById('graph')); }, false);
-            } else if (myCanvas.attachEvent) {
-                myCanvas.attachEvent("onmousedown", drag(doc.getElementById('graph')));
-            } else {
-                myCanvas.setAttribute("onmousedown", drag(doc.getElementById('graph')));
-            }
-
-            var drag = function(e, elementToDrag) {
-                var mousePosition = [0, 0];
-                if (!e) var e = window.event;
-                var dragObj = elementToDrag;//e.target ? e.target : e.srcElement;
-
-                if (e.button == 0 || e.button == 1) {
-                    if (window.attachEvent) {
-                        mousePosition[0] = e.offsetX;
-                        mousePosition[1] = e.offsetY;
-                        e.returnValue = false;
-                    } else {
-                        mousePosition[0] = e.offsetX || e.layerX;
-                        mousePosition[1] = e.offsetY || e.layerY;
-                        e.preventDefault();
-                    }
-
-                    document.body.onmousemove = function(e) {
-                        if (!e) var e = window.event;
-                        dragObj.style.left = e.clientX - mousePosition[0] + "px";
-                        dragObj.style.top = e.clientY - mousePosition[1] + "px";
-                    }
-
-                    document.onmouseup = function() {
-                        document.body.onmousemove = null;
-                        document.body.onselectstart = null;
-                    }
-                }
-
-                document.body.onselectstart = function() {
-                    return false;
-                };
-            };
-
+            })();
           });
         </script>
+        <!-- Client -->
+        <script src="/js/client.js"></script>
     </body>
 </html>
