@@ -164,8 +164,8 @@ $(function(){
 	// Init map
 	WGST.map.init();
 
-		// Store FASTA files
-	var fastaFiles = [],
+		// Array of objects that store content of FASTA file and user-provided metadata
+	var fastaFilesAndMetadata = [],
 		// Element on which user can drag and drop files
 		dropZone = document.getElementsByTagName('body')[0],
 		// Store individual assembly objects used for displaying data
@@ -184,7 +184,7 @@ $(function(){
 				// Array of DNA sequence strings
 				dnaSequenceStrings = [],
 				// Single DNA sequence string
-				dnaSequence = '',
+				dnaSequenceString = '',
 				// Single DNA sequence id
 				dnaSequenceId = '',
 				// DNA sequence regex
@@ -213,12 +213,12 @@ $(function(){
 			// Clear this array of DNA sequence strings
 			dnaSequenceStrings = [];
 			// Clear this DNA sequence string
-			dnaSequence = '';
+			dnaSequenceString = '';
 			// Clear this DNA sequence id string
 			dnaSequenceId = '';
 
 			// Parse each contig
-			for (contigCounter = 0; contigCounter < contigs.length; contigCounter++) {
+			for (; contigCounter < contigs.length; contigCounter++) {
 
 				// Split contig string into parts
 				contigParts = contigs[contigCounter].split(/\n/)
@@ -228,17 +228,18 @@ $(function(){
 					});
 
 				// Trim each contig part
-				for (var contigPartCounter = 0; contigPartCounter < contigParts; i++) {
+				var contigPartCounter = 0;
+				for (; contigPartCounter < contigParts; i++) {
 					contigParts[contigPartCounter] = contigParts[contigPartCounter].trim();
 				}
 
 				/*
 
-				Validate sequence parts
+				Validate contig parts
 
 				*/
 
-				// If there is only one sequence part then this sequence is invalid
+				// If there is only one contig part then this contig is invalid
 				if (contigParts.length > 1) {
 
 					/*
@@ -260,32 +261,39 @@ $(function(){
 
 					// Parse sequence DNA string
 
-					// Create sub array of a contig parts array - cut the first element (id and description).
-					var sequenceDNAStringArray = contigParts.splice(1, contigParts.length);
+					// Create sub array of the contig parts array - cut the first element (id and description).
+					//var sequenceDNAStringArray = contigParts.splice(1, contigParts.length);
+					var contigPartsNoIdDescription = contigParts.splice(1, contigParts.length);
 
 					// Very rarely the second line can be a comment
 					// If the first element won't match regex then assume it is a comment
-					if (! dnaSequenceRegex.test(sequenceDNAStringArray[0].trim())) {
+					if (! dnaSequenceRegex.test(contigPartsNoIdDescription[0].trim())) {
 						// Remove comment element from the array
-						sequenceDNAStringArray = sequenceDNAStringArray.splice(1, sequenceDNAStringArray.length);
+						contigPartsNoIdDescription = contigPartsNoIdDescription.splice(1, contigPartsNoIdDescription.length);
 					}
 
+					/*
+
+					Contig string without id, description, comment is only left with DNA sequence string(s)
+
+					*/
 					// Convert array of DNA sequence substrings into a single string
-					dnaSequence = sequenceDNAStringArray.join('').trim();
+					// Remove whitespace
+					dnaSequenceString = contigPartsNoIdDescription.join('').replace(/\s/g, '');
 
 					// Parse sequence id
 					dnaSequenceId = contigParts[0].trim().replace('>','');
 
 					// Validate DNA sequence string
-					if (dnaSequenceRegex.test(dnaSequence)) {
+					if (dnaSequenceRegex.test(dnaSequenceString)) {
 						// Store it in array
-						dnaSequenceStrings.push(dnaSequence);
+						dnaSequenceStrings.push(dnaSequenceString);
 						// Init sequence object
 						assemblies[fileCounter]['contigs']['individual'][contigCounter] = {};
-						// Sequence id
+						// Store sequence id
 						assemblies[fileCounter]['contigs']['individual'][contigCounter]['id'] = dnaSequenceId;
-						// Store it in object
-						assemblies[fileCounter]['contigs']['individual'][contigCounter]['sequence'] = dnaSequence;
+						// Store sequence string
+						assemblies[fileCounter]['contigs']['individual'][contigCounter]['sequence'] = dnaSequenceString;
 					// Invalid DNA sequence string
 					} else {
 						// Count as invalid sequence
@@ -298,8 +306,9 @@ $(function(){
 
 			} // for
 
-			// FASTA file is valid
-			fastaFiles.push({
+			// Store fasta file and metadata
+			fastaFilesAndMetadata.push({
+				// Cut FASTA file extension from the file name
 				name: file.name.substr(0, file.name.lastIndexOf('.')),
 				assembly: e.target.result,
 				metadata: {}
@@ -307,54 +316,74 @@ $(function(){
 
 			/*
 
-			// Calculate N50
-			// http://www.nature.com/nrg/journal/v13/n5/box/nrg3174_BX1.html
+			Calculate N50
+			http://www.nature.com/nrg/journal/v13/n5/box/nrg3174_BX1.html
 
 			*/
 
 			// Order array by sequence length DESC
-		    var sortedSequenceStringArray = dnaSequenceStrings.sort(function(a, b){
+		    var sortedDnaSequenceStrings = dnaSequenceStrings.sort(function(a, b){
 		    	return b.length - a.length;
 		    });
 
-		    // Calculate the total length of all contigs in the assembly
-		    var sequenceLengthArray = [];
-		    for (var i = 0; i < sortedSequenceStringArray.length; i++) {
-		    	if (sequenceLengthArray.length > 0) {
-		    		sequenceLengthArray.push(+sortedSequenceStringArray[i].length + +sequenceLengthArray[sequenceLengthArray.length - 1]);
+		    // Calculate sums of all nucleotides in this assembly by adding current contig's length to the sum of all previous contig lengths
+		    // Contig length === number of nucleotides in this contig
+		    var assemblyNucleotideSums = [],
+		    	// Count sorted dna sequence strings
+		    	sortedDnaSequenceStringCounter = 0;
+
+		    for (; sortedDnaSequenceStringCounter < sortedDnaSequenceStrings.length; sortedDnaSequenceStringCounter++) {
+		    	if (assemblyNucleotideSums.length > 0) {
+		    		// Add current contig's length to the sum of all previous contig lengths
+		    		assemblyNucleotideSums.push(sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length + assemblyNucleotideSums[assemblyNucleotideSums.length - 1]);
 		    	} else {
-		    		sequenceLengthArray.push(+sortedSequenceStringArray[i].length);
+		    		// This is a "sum" of a single contig's length
+		    		assemblyNucleotideSums.push(sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length);
 		    	}
 		    }
-		    // Calculate one-half of the total length of all contigs in the assembly
-		    var halfSum = sequenceLengthArray[sequenceLengthArray.length - 1] / 2;
 
-		    // Sum the length of each contig starting from the longest contig
-		    // until this running sum equals one-half of the total length of all contigs in the assembly
-		    var sum = 0;
-		    var n50 = {};
-		    for (var i = 0; i < sortedSequenceStringArray.length; i++) {
-		    	sum = sum + sortedSequenceStringArray[i].length;
-		    	// The contig N50 of the assembly is the length of the shortest contig in this list
-		    	if (sum >= halfSum) {
-		    		n50['sequenceNumber'] = i + 1;
-		    		n50['sum'] = sum;
-		    		n50['sequenceLength'] = sortedSequenceStringArray[i].length;
+		    // Calculate one-half of the total sum of all nucleotides in the assembly
+		    var assemblyNucleotidesHalfSum = assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / 2;
+
+		    /*
+
+		    Sum lengths of every contig starting from the longest contig
+		    until this running sum equals one-half of the total length of all contigs in the assembly.
+
+		    */
+
+		    	// Store nucleotides sum
+		    var assemblyNucleotidesSum = 0,
+		    	// N50 object
+		    	assemblyN50 = {},
+		    	// Count again sorted dna sequence strings
+		    	sortedDnaSequenceStringCounter = 0;
+
+		    for (; sortedDnaSequenceStringCounter < sortedDnaSequenceStrings.length; sortedDnaSequenceStringCounter++) {
+		    	// Update nucleotides sum
+		    	assemblyNucleotidesSum = assemblyNucleotidesSum + sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length;
+		    	// Contig N50 of an assembly is the length of the shortest contig in this list
+		    	// Check if current sum of nucleotides is greater or equals to half sum of nucleotides in this assembly
+		    	if (assemblyNucleotidesSum >= assemblyNucleotidesHalfSum) {
+		    		assemblyN50['sequenceNumber'] = sortedDnaSequenceStringCounter + 1;
+		    		assemblyN50['sum'] = assemblyNucleotidesSum;
+		    		assemblyN50['sequenceLength'] = sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length;
 		    		break;
 		    	}
 		    }
 
-		    var averageNucleotidesPerSequence = Math.floor(sequenceLengthArray[sequenceLengthArray.length - 1] / dnaSequenceStrings.length);
+		    // Calculate average nucleotides per sequence
+		    var averageNucleotidesPerSequence = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / dnaSequenceStrings.length);
 
 		    // Calculate N50 quality
 		    // If sequence length is greater than average sequence length then quality is good
-		    if (n50['sequenceLength'] > averageNucleotidesPerSequence) {
-		    	n50['quality'] = true;
-		    	//$('.assembly-stats-n50-number').addClass('n50-quality');
+		    /*
+		    if (assemblyN50['sequenceLength'] > averageNucleotidesPerSequence) {
+		    	assemblyN50['quality'] = true;
 		    } else { // Quality is bad
-		    	n50['quality'] = false;
-		    	//$('.assembly-stats-n50-number').addClass('n50-no-quality');
+		    	assemblyN50['quality'] = false;
 		    }
+		    */
 
 			// Update total number of contigs to upload
 			contigsSum = contigsSum + contigs.length;
@@ -362,6 +391,7 @@ $(function(){
 			// Show average number of contigs per assembly
 			$('.assembly-sequences-average').text(Math.floor(contigsSum / files.length));
 
+			// TODO: Convert multiple strings concatenation to array and use join('')
 			// Display current assembly
 			assemblyListItem = $(
 				'<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
@@ -379,7 +409,7 @@ $(function(){
 		       				// Print a number with commas as thousands separators
 		       				// http://stackoverflow.com/a/2901298
 		       				+ '<div class="assembly-stats-label">total nucleotides</div>'
-		    				+ '<div class="assembly-stats-number">' + sequenceLengthArray[sequenceLengthArray.length - 1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
+		    				+ '<div class="assembly-stats-number">' + assemblyNucleotideSums[assemblyNucleotideSums.length - 1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
 		    				//+ '<div class="assembly-stats-label">sequences</div>'
 		    			+ '</div>'
 
@@ -395,7 +425,7 @@ $(function(){
 		       				// Print a number with commas as thousands separators
 		       				// http://stackoverflow.com/a/2901298
 		    				+ '<div class="assembly-stats-label">min contig</div>'
-		    				+ '<div class="assembly-stats-number">' + sortedSequenceStringArray[sortedSequenceStringArray.length - 1].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+		    				+ '<div class="assembly-stats-number">' + sortedDnaSequenceStrings[sortedDnaSequenceStrings.length - 1].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
 		    				//+ '<div class="assembly-stats-label">sequences</div>'
 		    			+ '</div>'
 
@@ -411,7 +441,7 @@ $(function(){
 		       				// Print a number with commas as thousands separators
 		       				// http://stackoverflow.com/a/2901298
 		    				+ '<div class="assembly-stats-label">max contig</div>'
-		    				+ '<div class="assembly-stats-number">' + sortedSequenceStringArray[0].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+		    				+ '<div class="assembly-stats-number">' + sortedDnaSequenceStrings[0].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
 		    				//+ '<div class="assembly-stats-label">sequences</div>'
 		    			+ '</div>'
 
@@ -419,7 +449,7 @@ $(function(){
 		       				// Print a number with commas as thousands separators
 		       				// http://stackoverflow.com/a/2901298
 		    				+ '<div class="assembly-stats-label">contig N50</div>'
-		    				+ '<div class="assembly-stats-number assembly-stats-n50-number">' + n50['sequenceLength'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+		    				+ '<div class="assembly-stats-number assembly-stats-n50-number">' + assemblyN50['sequenceLength'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
 		    				//+ '<div class="assembly-stats-label">nucleotides in<br>N50 contig</div>'
 		    			+ '</div>'
 
@@ -574,7 +604,7 @@ $(function(){
 			$('.assembly-list-container ul').append(assemblyListItem);
 
 			// Draw chart
-			chartData = sequenceLengthArray;
+			chartData = assemblyNucleotideSums;
 
 			var chartWidth = 460,
 				chartHeight = 312;
@@ -716,7 +746,7 @@ $(function(){
 
 			// Group circle and text elements
 			var n50Group = svg.selectAll('.n50-circle')
-				.data([n50])
+				.data([assemblyN50])
 				.enter()
 				.append('g')
 				.attr('class', 'n50-group');
@@ -747,14 +777,14 @@ $(function(){
 			// Draw N50 lines
 			var d50LinesData = [{
 				'x': 54,
-				'y': yScale(n50.sum)
+				'y': yScale(assemblyN50.sum)
 			},
 			{
-				'x': xScale(n50.sequenceNumber) + 20,
-				'y': yScale(n50.sum)
+				'x': xScale(assemblyN50.sequenceNumber) + 20,
+				'y': yScale(assemblyN50.sum)
 			},
 			{
-				'x': xScale(n50.sequenceNumber) + 20,
+				'x': xScale(assemblyN50.sequenceNumber) + 20,
 				'y': chartHeight - 46
 			}];
 
@@ -1234,7 +1264,7 @@ $(function(){
 		// Show countdown timer
 
 		// It takes less than 10 seconds to process one assembly
-		var seconds = 10 * fastaFiles.length;
+		var seconds = 10 * fastaFilesAndMetadata.length;
 		var timer = setInterval(
 			function() {
 				$('.visit-url-seconds-number').text(seconds);
@@ -1255,7 +1285,7 @@ $(function(){
 		$('.uploading-assembly-progress-container').fadeIn('slow', function(){
 			$('.adding-metadata-progress-container').slideUp('normal', function(){
 				setTimeout(function(){
-					for (var i = 0; i < fastaFiles.length; i++) {
+					for (var i = 0; i < fastaFilesAndMetadata.length; i++) {
 
 						incrementProgressBar(25);
 
@@ -1264,7 +1294,7 @@ $(function(){
 							type: 'POST',
 							url: '/assembly/add/',
 							datatype: 'json', // http://stackoverflow.com/a/9155217
-							data: fastaFiles[i]
+							data: fastaFilesAndMetadata[i]
 						}).done(function(message){
 							console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
 							// Create assembly URL
