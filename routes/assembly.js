@@ -5,8 +5,6 @@
 
 exports.add = function(req, res) {
 
-	console.log('Here!');
-
 	// For testing purposes only
 	/*
 	var demoResponse =
@@ -59,7 +57,7 @@ exports.add = function(req, res) {
 		console.log('[MLST] User assembly id: ' + req.body.name);
 
 		// TODO: Prepare object to publish
-		var demo = {
+		var assembly = {
 			"speciesId" : "1280",
 			"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
 			"userAssemblyId" : req.body.name,
@@ -67,7 +65,7 @@ exports.add = function(req, res) {
 		};
 
 		// Publish message
-		exchange.publish('upload', demo, { 
+		exchange.publish('upload', assembly, { 
 			mandatory: true,
 			contentType: 'application/json',
 			deliveryMode: 1,
@@ -298,6 +296,7 @@ exports.get = function(req, res) {
 			"blastLibrary": "/nfs/wgst/blast_libs/1280_fingerprints",
 			"referenceResourceId": "ref_fps_1280"
 		}
-	}*/
+	}
+	*/
 
 };
