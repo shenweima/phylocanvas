@@ -124,7 +124,7 @@ $(function(){
 				+ '</td>'
 				+ '<td>'
 					// Convert score values into percentages where the highest number is 100%
-					+ Math.floor(+sortableScoresArray[i].score * 100 / maxScore) + '%'
+					+ Math.floor(sortableScoresArray[i].score * 100 / maxScore) + '%'
 				+ '</td>'
 				+ '<tr/>'
 			);
@@ -1133,7 +1133,7 @@ $(function(){
 
 	// TODO: This should work for general case where number of increment steps is unknown
 	var incrementMetadataProgressBar = function() {
-		var newProgressValue = +$('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow') + 30;
+		var newProgressValue = parseInt($('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow'), 10) + 30;
 		// Update bar's width
 		$('.adding-metadata-progress-container .progress-bar').width(newProgressValue + '%');
 		// Update aria-valuenow attribute
@@ -1245,15 +1245,15 @@ $(function(){
 	});*/
 
 	var incrementProgressBar = function(stepWidth) {
-		$('.uploading-progress-container .progress-bar').width((+$('.uploading-progress-container .progress-bar').width() + stepWidth) + '%');
-		$('.uploading-progress-container .progress-percentage').text((+$('.uploading-progress-container .progress-bar').width() + stepWidth) + '%');
+		$('.uploading-progress-container .progress-bar').width(parseInt($('.uploading-progress-container .progress-bar').width() + stepWidth, 10) + '%');
+		$('.uploading-progress-container .progress-percentage').text(parseInt($('.uploading-progress-container .progress-bar').width() + stepWidth, 10) + '%');
 	};
 
 	var endProgressBar = function(stepWidth) {
 		$('.progress-bar').width('100%');
 		$('.uploading-progress-container .progress-percentage').text('100%');
 		$('.uploading-progress-container .progress').removeClass('active');
-		
+
 		setTimeout(function(){
 			$('.uploading-progress-container .progress-percentage').text('All done!');
 			$('.uploading-progress-container .progress').slideUp(function(){
