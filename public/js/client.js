@@ -171,7 +171,7 @@ $(function(){
 		// Store individual assembly objects used for displaying data
 		assemblies = [];
 
-		var parseFastaFile = function(e, fileCounter, file, files) {
+		var parseFastaFile = function(e, fileCounter, file, droppedFiles) {
 
 				// Array of contigs
 			var contigs = [],
@@ -389,7 +389,7 @@ $(function(){
 			contigsSum = contigsSum + contigs.length;
 
 			// Show average number of contigs per assembly
-			$('.assembly-sequences-average').text(Math.floor(contigsSum / files.length));
+			$('.assembly-sequences-average').text(Math.floor(contigsSum / droppedFiles.length));
 
 			// TODO: Convert multiple strings concatenation to array and use join('')
 			// Display current assembly
@@ -525,11 +525,10 @@ $(function(){
 				+ '</li>'
 			);
 
-			var assemblyMetadataFormContainer = $('<div class="assembly-metadata"></div>');
-			var assemblyMetadataFormHeader = $('<h4>Please provide mandatory assembly metadata:</h4>');
-			var assemblyMetadataForm = $('<form role="form"></form>');
-
-			var assemblySampleSpeciesFormBlock = $(
+			var assemblyMetadataFormContainer = $('<div class="assembly-metadata"></div>'),
+				assemblyMetadataFormHeader = $('<h4>Please provide mandatory assembly metadata:</h4>'),
+				assemblyMetadataForm = $('<form role="form"></form>'),
+				assemblySampleSpeciesFormBlock = $(
 				'<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block">'
 					+ '<div class="form-group">'
 						+ '<label for="assemblySampleSpeciesSelect' + fileCounter + '">What species have you sampled?</label>'
@@ -540,9 +539,8 @@ $(function(){
 						+ '</select>'
 					+ '</div>'
 				+ '</div>'
-			);
-
-			var assemblySampleDatetimeFormBlock = $(
+				),
+				assemblySampleDatetimeFormBlock = $(
 				'<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
 					+ '<div class="form-group">'
 						+ '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
@@ -557,8 +555,8 @@ $(function(){
 						+ '</label>'
 					+ '</div>'
 				+ '</div>'
-			);
-			var assemblySampleLocationFormBlock = $(
+				),
+				assemblySampleLocationFormBlock = $(
 				'<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
 					+ '<div class="form-group">'
 						+ '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
@@ -574,23 +572,25 @@ $(function(){
 						+ '</label>'
 					+ '</div>'	
 				+ '</div>'
-			);
-			var assemblyControlsFormBlock = $(
+				),
+				assemblyControlsFormBlock = $(
 				'<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
 			  		+ '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next empty metadata</button>'
 			  		+ ' <button class="btn btn-default apply-to-all-assemblies-button">Copy to all assemblies</button>'
 				+ '</div>'
-			);
-			var assemblyMeatadataDoneBlock = $(
+				),
+				assemblyMeatadataDoneBlock = $(
 				'<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
 			  		+ 'Ready? Click "Upload" button to upload your assemblies and metadata.'
 				+ '</div>'
-			);
+				);
+
 			assemblyMetadataForm.append(assemblySampleSpeciesFormBlock);
 			assemblyMetadataForm.append(assemblySampleDatetimeFormBlock);
 			assemblyMetadataForm.append(assemblySampleLocationFormBlock);
+
 			// Show form navigation buttons only when you're at the last assembly
-			if (fileCounter < files.length) {
+			if (fileCounter < droppedFiles.length) {
 				assemblyMetadataForm.append(assemblyControlsFormBlock);
 			} else {
 				assemblyMetadataForm.append(assemblyMeatadataDoneBlock);
@@ -603,203 +603,8 @@ $(function(){
 			// Append assembly
 			$('.assembly-list-container ul').append(assemblyListItem);
 
-			// Draw chart
-			chartData = assemblyNucleotideSums;
-
-			var chartWidth = 460,
-				chartHeight = 312;
-
-			// Extent
-			var xExtent = d3.extent(chartData, function(datum){
-				return datum.sequenceLength;
-			});
-
-			// Scales
-
-			// X
-			var xScale = d3.scale.linear()
-				.domain([0, chartData.length])
-				.range([40, chartWidth - 50]); // the pixels to map, i.e. the width of the diagram
-
-			// Y
-			var yScale = d3.scale.linear()
-				.domain([chartData[chartData.length - 1], 0])
-				.range([30, chartHeight - 52]);
-
-			// Axes
-
-			// X
-			var xAxis = d3.svg.axis()
-			    .scale(xScale)
-			    .orient('bottom')
-			    .ticks(10);
-
-			// Y
-			var yAxis = d3.svg.axis()
-				.scale(yScale)
-				.orient('left')
-				// http://stackoverflow.com/a/18822793
-				.ticks(10);
-
-			// Append SVG to DOM
-			var svg = d3.select('.sequence-length-distribution-chart-' + fileCounter)
-				.append('svg')
-				.attr('width', chartWidth)
-				.attr('height', chartHeight);
-
-			// Append axis
-
-			// X
-			svg.append('g')
-				.attr('class', 'x axis')
-				.attr('transform', 'translate(20, 260)')
-				.call(xAxis);
-
-			// Y
-			svg.append('g')
-				.attr('class', 'y axis')
-				.attr('transform', 'translate(60, 0)')
-				.call(yAxis);
-
-			// Axis labels
-
-			// X
-			svg.select('.x.axis')
-				.append('text')
-				.text('Ordered contigs')
-				.attr('class', 'axis-label')
-				.attr('text-anchor', 'end')
-				.attr('x', (chartWidth / 2) + 49)
-				.attr('y', 45);
-
-			// Y
-			svg.select('.y.axis')
-				.append('text')
-				.text('Nucleotides sum')
-				.attr('class', 'axis-label')
-				.attr('transform', 'rotate(-90)')
-				.attr('x', -(chartHeight / 2) - 44)
-				.attr('y', 398);
-
-			// Circles
-			svg.selectAll('circle')
-				.data(chartData)
-				.enter()
-				.append('circle')
-				.attr('cx', function(datum, index){
-					return xScale(index + 1) + 20;
-				})
-				.attr('cy', function(datum){
-					return yScale(datum);
-				})
-				.attr('r', 5);
-
-			// Line
-		    var line = d3.svg.line()
-		       //.interpolate("basis")
-		       .x(function(datum, index) {
-		       		return xScale(index + 1) + 20; 
-		       	})
-		       .y(function(datum) { 
-		       		return yScale(datum); 
-		       	});
-
-		    svg.append('path')
-		    	.attr('d', line(chartData));
-
-			// Draw line from (0,0) to d3.max(data)
-			var rootLineData = [{
-				'x': xScale(0) + 20,
-				'y': yScale(0)
-			},
-			{
-				'x': xScale(1) + 20,
-				'y': yScale(chartData[0])
-			}];
-
-			var rootLine = d3.svg.line()
-				.x(function(datum) {
-					return datum.x;
-				})
-				.y(function(datum) {
-					return datum.y;
-				})
-				.interpolate("linear");
-
-			var rootPath = svg.append('path')
-				.attr('d', rootLine(rootLineData));
-
-		    // Draw N50
-
-/*			svg.selectAll('.n50-circle')
-				.data([n50])
-				.enter()
-				.append('circle')
-				.attr('cx', function(datum){
-					return xScale(datum.index) + 20;
-				})
-				.attr('cy', function(datum){
-					return yScale(datum.sum);
-				})
-				.attr('r', 6)
-				.attr('class', 'n50-circle')*/
-
-			// Group circle and text elements
-			var n50Group = svg.selectAll('.n50-circle')
-				.data([assemblyN50])
-				.enter()
-				.append('g')
-				.attr('class', 'n50-group');
-
-			// Append circle to group
-			var n50Circle = n50Group.append('circle')
-				.attr('cx', function(datum){
-					return xScale(datum.sequenceNumber) + 20;
-				})
-				.attr('cy', function(datum){
-					return yScale(datum.sum);
-				})
-				.attr('r', 6);
-				//.attr('class', 'n50-circle');
-			
-			// Append text to group
-			var n50Text = n50Group.append('text')
-      			.attr('dx', function(datum){
-      				return xScale(datum.sequenceNumber) + 20 + 9;
-      			})
-				.attr('dy', function(datum){
-					return yScale(datum.sum) + 5;
-				})
-				.attr("text-anchor", 'right')
-      			.text('N50');
-      			//.attr('class', 'n50-text');
-
-			// Draw N50 lines
-			var d50LinesData = [{
-				'x': 54,
-				'y': yScale(assemblyN50.sum)
-			},
-			{
-				'x': xScale(assemblyN50.sequenceNumber) + 20,
-				'y': yScale(assemblyN50.sum)
-			},
-			{
-				'x': xScale(assemblyN50.sequenceNumber) + 20,
-				'y': chartHeight - 46
-			}];
-
-			var d50Line = d3.svg.line()
-				.x(function(datum) {
-					return datum.x;
-				})
-				.y(function(datum) {
-					return datum.y;
-				})
-				.interpolate("linear");
-
-			var n50Path = n50Group.append('path')
-				.attr('d', d50Line(d50LinesData));
-				//.attr('class', 'n50-path');
+			// Draw N50 chart
+			drawN50Chart(assemblyNucleotideSums, assemblyN50, fileCounter);
 
 			// Chart 1
 			/*			
@@ -946,6 +751,204 @@ $(function(){
 		
 		}; // parseFastaFile()
 
+	var drawN50Chart = function(chartData, assemblyN50, fileCounter) {
+
+		var chartWidth = 460,
+			chartHeight = 312;
+
+		// Extent
+		var xExtent = d3.extent(chartData, function(datum){
+			return datum.sequenceLength;
+		});
+
+		// Scales
+
+		// X
+		var xScale = d3.scale.linear()
+			.domain([0, chartData.length])
+			.range([40, chartWidth - 50]); // the pixels to map, i.e. the width of the diagram
+
+		// Y
+		var yScale = d3.scale.linear()
+			.domain([chartData[chartData.length - 1], 0])
+			.range([30, chartHeight - 52]);
+
+		// Axes
+
+		// X
+		var xAxis = d3.svg.axis()
+		    .scale(xScale)
+		    .orient('bottom')
+		    .ticks(10);
+
+		// Y
+		var yAxis = d3.svg.axis()
+			.scale(yScale)
+			.orient('left')
+			// http://stackoverflow.com/a/18822793
+			.ticks(10);
+
+		// Append SVG to DOM
+		var svg = d3.select('.sequence-length-distribution-chart-' + fileCounter)
+			.append('svg')
+			.attr('width', chartWidth)
+			.attr('height', chartHeight);
+
+		// Append axis
+
+		// X
+		svg.append('g')
+			.attr('class', 'x axis')
+			.attr('transform', 'translate(20, 260)')
+			.call(xAxis);
+
+		// Y
+		svg.append('g')
+			.attr('class', 'y axis')
+			.attr('transform', 'translate(60, 0)')
+			.call(yAxis);
+
+		// Axis labels
+
+		// X
+		svg.select('.x.axis')
+			.append('text')
+			.text('Ordered contigs')
+			.attr('class', 'axis-label')
+			.attr('text-anchor', 'end')
+			.attr('x', (chartWidth / 2) + 49)
+			.attr('y', 45);
+
+		// Y
+		svg.select('.y.axis')
+			.append('text')
+			.text('Nucleotides sum')
+			.attr('class', 'axis-label')
+			.attr('transform', 'rotate(-90)')
+			.attr('x', -(chartHeight / 2) - 44)
+			.attr('y', 398);
+
+		// Circles
+		svg.selectAll('circle')
+			.data(chartData)
+			.enter()
+			.append('circle')
+			.attr('cx', function(datum, index){
+				return xScale(index + 1) + 20;
+			})
+			.attr('cy', function(datum){
+				return yScale(datum);
+			})
+			.attr('r', 5);
+
+		// Line
+	    var line = d3.svg.line()
+	       //.interpolate("basis")
+	       .x(function(datum, index) {
+	       		return xScale(index + 1) + 20; 
+	       	})
+	       .y(function(datum) { 
+	       		return yScale(datum); 
+	       	});
+
+	    svg.append('path')
+	    	.attr('d', line(chartData));
+
+		// Draw line from (0,0) to d3.max(data)
+		var rootLineData = [{
+			'x': xScale(0) + 20,
+			'y': yScale(0)
+		},
+		{
+			'x': xScale(1) + 20,
+			'y': yScale(chartData[0])
+		}];
+
+		var rootLine = d3.svg.line()
+			.x(function(datum) {
+				return datum.x;
+			})
+			.y(function(datum) {
+				return datum.y;
+			})
+			.interpolate("linear");
+
+		var rootPath = svg.append('path')
+			.attr('d', rootLine(rootLineData));
+
+	    // Draw N50
+
+/*			svg.selectAll('.n50-circle')
+			.data([n50])
+			.enter()
+			.append('circle')
+			.attr('cx', function(datum){
+				return xScale(datum.index) + 20;
+			})
+			.attr('cy', function(datum){
+				return yScale(datum.sum);
+			})
+			.attr('r', 6)
+			.attr('class', 'n50-circle')*/
+
+		// Group circle and text elements
+		var n50Group = svg.selectAll('.n50-circle')
+			.data([assemblyN50])
+			.enter()
+			.append('g')
+			.attr('class', 'n50-group');
+
+		// Append circle to group
+		var n50Circle = n50Group.append('circle')
+			.attr('cx', function(datum){
+				return xScale(datum.sequenceNumber) + 20;
+			})
+			.attr('cy', function(datum){
+				return yScale(datum.sum);
+			})
+			.attr('r', 6);
+			//.attr('class', 'n50-circle');
+		
+		// Append text to group
+		n50Group.append('text')
+			.attr('dx', function(datum){
+				return xScale(datum.sequenceNumber) + 20 + 9;
+			})
+			.attr('dy', function(datum){
+				return yScale(datum.sum) + 5;
+			})
+			.attr("text-anchor", 'right')
+			.text('N50');
+				//.attr('class', 'n50-text');
+
+		// Draw N50 lines
+		var d50LinesData = [{
+			'x': 54,
+			'y': yScale(assemblyN50.sum)
+		},
+		{
+			'x': xScale(assemblyN50.sequenceNumber) + 20,
+			'y': yScale(assemblyN50.sum)
+		},
+		{
+			'x': xScale(assemblyN50.sequenceNumber) + 20,
+			'y': chartHeight - 46
+		}];
+
+		var d50Line = d3.svg.line()
+			.x(function(datum) {
+				return datum.x;
+			})
+			.y(function(datum) {
+				return datum.y;
+			})
+			.interpolate("linear");
+
+		// N50 path
+		n50Group.append('path').attr('d', d50Line(d50LinesData));
+
+	};
+
 	var handleDragOver = function(evt) {
 		evt.stopPropagation();
 		evt.preventDefault();
@@ -961,9 +964,9 @@ $(function(){
 
 			// FileList object
 			// https://developer.mozilla.org/en-US/docs/Web/API/FileList
-		var files = evt.dataTransfer.files,
+		var droppedFiles = evt.dataTransfer.files,
 			// A single file from FileList object
-			file = files[0],
+			file = droppedFiles[0],
 			// Count files
 			fileCounter = 0,
 			// https://developer.mozilla.org/en-US/docs/Web/API/FileReader
@@ -972,7 +975,7 @@ $(function(){
 			fastaFileNameRegex = /^.+(.fa)$/i;
 			
 		// Check if user dropped only 1 assembly
-		if (files.length === 1) {
+		if (droppedFiles.length === 1) {
 			// Hide average number of contigs per assembly
 			$('.upload-multiple-assemblies-label').hide();
 		}
@@ -980,16 +983,16 @@ $(function(){
 		// Init assembly navigator
 
 		// Update total number of assemblies
-		$('.total-number-of-dropped-assemblies').text(files.length);
+		$('.total-number-of-dropped-assemblies').text(droppedFiles.length);
 
 		// Update assembly list slider
-		$('.assembly-list-slider').slider("option", "max", files.length);
+		$('.assembly-list-slider').slider("option", "max", droppedFiles.length);
 
 		// Set file name
 		$('.assembly-file-name').text(file.name);
 
 		// If there is more than 1 file dropped then show assembly navigator
-		if (files.length > 1) {
+		if (droppedFiles.length > 1) {
 			// Show assembly navigator
 			$('.assembly-navigator').show();
 			// Focus on slider handle
@@ -997,9 +1000,9 @@ $(function(){
 		}
 
 		// Process each file/assembly (1 file === 1 assembly)
-		for (fileCounter = 0; fileCounter < files.length; fileCounter++) {
+		for (fileCounter = 0; fileCounter < droppedFiles.length; fileCounter++) {
 			// https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
-			file = files.item(fileCounter);	
+			file = droppedFiles.item(fileCounter);	
 			// Validate file name	
 			if (file.name.match(fastaFileNameRegex)) {
 				// Create new file reader
@@ -1012,7 +1015,7 @@ $(function(){
 					// A handler for the load event. This event is triggered each time the reading operation is successfully completed
 					fileReader.onload = function(event){
 						// Once file is loaded, parse it
-						parseFastaFile(event, savedFileCounter, currentFile, files);
+						parseFastaFile(event, savedFileCounter, currentFile, droppedFiles);
 					};
 					/* Alternative code:
 					fileReader.addEventListener('load', function(event){
@@ -1029,13 +1032,13 @@ $(function(){
 		} // for
 
 		// Update total number of assemblies to upload
-		$('.assembly-upload-total-number').text(files.length);
+		$('.assembly-upload-total-number').text(droppedFiles.length);
 		// Update lable for total number of assemblies to upload
-		$('.assembly-upload-total-number-label').text((files.length === 1 ? 'assembly': 'assemblies'));
+		$('.assembly-upload-total-number-label').text((droppedFiles.length === 1 ? 'assembly': 'assemblies'));
 
 	};
 
-	// Init Drag and Drop
+	// Listen to dragover and drop events
 	dropZone.addEventListener('dragover', handleDragOver, false);
 	dropZone.addEventListener('drop', handleFileDrop, false);
 
@@ -1250,6 +1253,7 @@ $(function(){
 		$('.progress-bar').width('100%');
 		$('.uploading-progress-container .progress-percentage').text('100%');
 		$('.uploading-progress-container .progress').removeClass('active');
+		
 		setTimeout(function(){
 			$('.uploading-progress-container .progress-percentage').text('All done!');
 			$('.uploading-progress-container .progress').slideUp(function(){
