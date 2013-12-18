@@ -972,7 +972,7 @@ $(function(){
 			// https://developer.mozilla.org/en-US/docs/Web/API/FileReader
 			fileReader = new FileReader(),
 			// FASTA file name regex
-			fastaFileNameRegex = /^.+(.fa)$/i;
+			fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.contig)$/i;
 			
 		// Check if user dropped only 1 assembly
 		if (droppedFiles.length === 1) {
