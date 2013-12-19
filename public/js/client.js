@@ -120,14 +120,17 @@ $(function(){
             $('.assembly-data-table tbody').append(
                 // This is not verbose enough
                 ((sortableScoreCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
-                + '<td>'
-                    + sortableScores[sortableScoreCounter].referenceId
-                + '</td>'
-                + '<td>'
-                    // Convert score values into percentages where the highest number is 100%
-                    //+ Math.floor(sortableScoresArray[i].score * 100 / maxScore) + '%'
-                    + Math.floor(sortableScores[sortableScoreCounter].score * 100 / requestedAssembly.fingerprintSize) + '%'
-                + '</td>'
+                    + '<td>'
+                        + sortableScores[sortableScoreCounter].referenceId
+                    + '</td>'
+                    + '<td>'
+                        + sortableScores[sortableScoreCounter].score
+                    + '</td>'
+                    + '<td>'
+                        // Convert score values into percentages where the highest number is 100%
+                        //+ Math.floor(sortableScoresArray[i].score * 100 / maxScore) + '%'
+                        + Math.floor(sortableScores[sortableScoreCounter].score * 100 / requestedAssembly.fingerprintSize) + '%'
+                    + '</td>'
                 + '<tr/>'
             );
         }

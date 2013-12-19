@@ -167,24 +167,45 @@ body {
             margin-bottom: 0;
             margin: 0 2%;
             border-top: 1px solid #ddd;
-            .row-stripe {
-                background-color: #F9F9F9;
-            }
-            .col-target-fp {
-                width: 80%;
-            }
-            .col-score {
-                width: 20%;
+            colgroup {
+                .col-target-fp {
+                    width: 60%;
+                }
+                .col-score {
+                    width: 20%;
+                }
+                .col-score-percentage {
+                    width: 20%;
+                }
             }
             th {
                 border-bottom: 1px;
                 font-weight: 500;
-                font-size: 12px;
+                font-size: 14px;
                 text-transform: uppercase;
             }
+            th, td {
+                text-align: right;
+                padding-left: 12px;
+                padding-right: 12px;
+                &:first-child {
+                    text-align: left;
+                }
+            }
             tbody {
-                tr:hover {
-                    background-color: #F0F7FF;
+                tr {
+                    /*
+
+                    Order is important.
+                    You want :hover to overwrite .row-stripe.
+
+                    */
+                    &.row-stripe {
+                        background-color: #F9F9F9;
+                    }
+                    &:hover {
+                        background-color: #F0F7FF;
+                    }
                 }
             }
         }
