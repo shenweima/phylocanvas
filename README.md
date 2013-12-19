@@ -11,6 +11,8 @@ Run
 ----------------
 `node app`
 
+Open `http://localhost:3000` in your browser.
+
 ### Supported FASTA file extensions
 * .fa
 * .fas
