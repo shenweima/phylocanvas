@@ -166,587 +166,588 @@ $(function(){
         // Element on which user can drag and drop files
         dropZone = document.getElementsByTagName('body')[0],
         // Store individual assembly objects used for displaying data
-        assemblies = [];
+        assemblies = [],
+        // DNA sequence regex
+        dnaSequenceRegex = /^[CTAGNUX]+$/i;
 
-        var parseFastaFile = function(e, fileCounter, file, droppedFiles) {
 
-                // Array of contigs
-            var contigs = [],
-                // Array of sequence parts
-                contigParts = [],
-                // Count total number of contigs in a single assembly
-                contigsSum = 0,
-                // Count contigs
-                contigCounter = 0,
-                // Array of DNA sequence strings
-                dnaSequenceStrings = [],
-                // Single DNA sequence string
-                dnaSequenceString = '',
-                // Single DNA sequence id
-                dnaSequenceId = '',
-                // DNA sequence regex
-                dnaSequenceRegex = /^[CTAGNUX]+$/i,
-                // Empty jQuery object
-                assemblyListItem = $(),
-                // ???
-                chartData = [];
+    var parseFastaFile = function(e, fileCounter, file, droppedFiles) {
 
-            // Trim, and split assembly string into array of individual contigs
-            // then filter that array by removing empty strings
-            contigs = e.target.result.trim().split('>').filter(function(element){
-                return (element.length > 0);
-            });
+            // Array of contigs
+        var contigs = [],
+            // Array of sequence parts
+            contigParts = [],
+            // Count total number of contigs in a single assembly
+            contigsSum = 0,
+            // Count contigs
+            contigCounter = 0,
+            // Array of DNA sequence strings
+            dnaSequenceStrings = [],
+            // Single DNA sequence string
+            dnaSequenceString = '',
+            // Single DNA sequence id
+            dnaSequenceId = '',
+            // Empty jQuery object
+            assemblyListItem = $(),
+            // ???
+            chartData = [];
 
-            assemblies[fileCounter] = {
-                'name': file.name,
-                'id': '',
-                'contigs': {
-                    'total': contigs.length,
-                    'invalid': 0,
-                    'individual': []
-                }
-            };
+        // Trim, and split assembly string into array of individual contigs
+        // then filter that array by removing empty strings
+        contigs = e.target.result.trim().split('>').filter(function(element){
+            return (element.length > 0);
+        });
 
-            // Clear this array of DNA sequence strings
-            dnaSequenceStrings = [];
-            // Clear this DNA sequence string
-            dnaSequenceString = '';
-            // Clear this DNA sequence id string
-            dnaSequenceId = '';
+        assemblies[fileCounter] = {
+            'name': file.name,
+            'id': '',
+            'contigs': {
+                'total': contigs.length,
+                'invalid': 0,
+                'individual': []
+            }
+        };
 
-            // Parse each contig
-            for (; contigCounter < contigs.length; contigCounter++) {
+        // Clear this array of DNA sequence strings
+        dnaSequenceStrings = [];
+        // Clear this DNA sequence string
+        dnaSequenceString = '';
+        // Clear this DNA sequence id string
+        dnaSequenceId = '';
 
-                // Split contig string into parts
-                contigParts = contigs[contigCounter].split(/\n/)
-                    // Filter out empty parts
-                    .filter(function(part){
-                        return (part.length > 0);
-                    });
+        // Parse each contig
+        for (; contigCounter < contigs.length; contigCounter++) {
 
-                // Trim each contig part
-                var contigPartCounter = 0;
-                for (; contigPartCounter < contigParts; i++) {
-                    contigParts[contigPartCounter] = contigParts[contigPartCounter].trim();
+            // Split contig string into parts
+            contigParts = contigs[contigCounter].split(/\n/)
+                // Filter out empty parts
+                .filter(function(part){
+                    return (part.length > 0);
+                });
+
+            // Trim each contig part
+            var contigPartCounter = 0;
+            for (; contigPartCounter < contigParts; i++) {
+                contigParts[contigPartCounter] = contigParts[contigPartCounter].trim();
+            }
+
+            /*
+
+            Validate contig parts
+
+            */
+
+            // If there is only one contig part then this contig is invalid
+            if (contigParts.length > 1) {
+
+                /*
+
+                DNA sequence can contain:
+                1) [CTAGNUX] characters.
+                2) White spaces (e.g.: new line characters).
+
+                The first line of FASTA file contains id and description.
+                The second line theoretically contains comments (starts with #).
+
+                To parse FASTA file you need to:
+                1. Separate assembly into individual contigs by splitting file's content by > character.
+                   Note: id and description can contain > character.
+                2. For each sequence: split it by a new line character, 
+                   then convert resulting array to string ignoring the first (and rarely the second) element of that array.
+
+                */
+
+                // Parse sequence DNA string
+
+                // Create sub array of the contig parts array - cut the first element (id and description).
+                //var sequenceDNAStringArray = contigParts.splice(1, contigParts.length);
+                var contigPartsNoIdDescription = contigParts.splice(1, contigParts.length);
+
+                // Very rarely the second line can be a comment
+                // If the first element won't match regex then assume it is a comment
+                if (! dnaSequenceRegex.test(contigPartsNoIdDescription[0].trim())) {
+                    // Remove comment element from the array
+                    contigPartsNoIdDescription = contigPartsNoIdDescription.splice(1, contigPartsNoIdDescription.length);
                 }
 
                 /*
 
-                Validate contig parts
+                Contig string without id, description, comment is only left with DNA sequence string(s)
 
                 */
+                // Convert array of DNA sequence substrings into a single string
+                // Remove whitespace
+                dnaSequenceString = contigPartsNoIdDescription.join('').replace(/\s/g, '');
 
-                // If there is only one contig part then this contig is invalid
-                if (contigParts.length > 1) {
+                // Parse sequence id
+                dnaSequenceId = contigParts[0].trim().replace('>','');
 
-                    /*
-
-                    DNA sequence can contain:
-                    1) [CTAGNUX] characters.
-                    2) White spaces (e.g.: new line characters).
-
-                    The first line of FASTA file contains id and description.
-                    The second line theoretically contains comments (starts with #).
-
-                    To parse FASTA file you need to:
-                    1. Separate assembly into individual contigs by splitting file's content by > character.
-                       Note: id and description can contain > character.
-                    2. For each sequence: split it by a new line character, 
-                       then convert resulting array to string ignoring the first (and rarely the second) element of that array.
-
-                    */
-
-                    // Parse sequence DNA string
-
-                    // Create sub array of the contig parts array - cut the first element (id and description).
-                    //var sequenceDNAStringArray = contigParts.splice(1, contigParts.length);
-                    var contigPartsNoIdDescription = contigParts.splice(1, contigParts.length);
-
-                    // Very rarely the second line can be a comment
-                    // If the first element won't match regex then assume it is a comment
-                    if (! dnaSequenceRegex.test(contigPartsNoIdDescription[0].trim())) {
-                        // Remove comment element from the array
-                        contigPartsNoIdDescription = contigPartsNoIdDescription.splice(1, contigPartsNoIdDescription.length);
-                    }
-
-                    /*
-
-                    Contig string without id, description, comment is only left with DNA sequence string(s)
-
-                    */
-                    // Convert array of DNA sequence substrings into a single string
-                    // Remove whitespace
-                    dnaSequenceString = contigPartsNoIdDescription.join('').replace(/\s/g, '');
-
-                    // Parse sequence id
-                    dnaSequenceId = contigParts[0].trim().replace('>','');
-
-                    // Validate DNA sequence string
-                    if (dnaSequenceRegex.test(dnaSequenceString)) {
-                        // Store it in array
-                        dnaSequenceStrings.push(dnaSequenceString);
-                        // Init sequence object
-                        assemblies[fileCounter]['contigs']['individual'][contigCounter] = {};
-                        // Store sequence id
-                        assemblies[fileCounter]['contigs']['individual'][contigCounter]['id'] = dnaSequenceId;
-                        // Store sequence string
-                        assemblies[fileCounter]['contigs']['individual'][contigCounter]['sequence'] = dnaSequenceString;
-                    // Invalid DNA sequence string
-                    } else {
-                        // Count as invalid sequence
-                        assemblies[fileCounter]['contigs']['invalid'] = assemblies[fileCounter]['contigs']['invalid'] + 1;
-                    }
+                // Validate DNA sequence string
+                if (dnaSequenceRegex.test(dnaSequenceString)) {
+                    // Store it in array
+                    dnaSequenceStrings.push(dnaSequenceString);
+                    // Init sequence object
+                    assemblies[fileCounter]['contigs']['individual'][contigCounter] = {};
+                    // Store sequence id
+                    assemblies[fileCounter]['contigs']['individual'][contigCounter]['id'] = dnaSequenceId;
+                    // Store sequence string
+                    assemblies[fileCounter]['contigs']['individual'][contigCounter]['sequence'] = dnaSequenceString;
+                // Invalid DNA sequence string
                 } else {
                     // Count as invalid sequence
                     assemblies[fileCounter]['contigs']['invalid'] = assemblies[fileCounter]['contigs']['invalid'] + 1;
                 }
-
-            } // for
-
-            // Store fasta file and metadata
-            fastaFilesAndMetadata.push({
-                // Cut FASTA file extension from the file name
-                name: file.name.substr(0, file.name.lastIndexOf('.')),
-                assembly: e.target.result,
-                metadata: {}
-            });
-
-            /*
-
-            Calculate N50
-            http://www.nature.com/nrg/journal/v13/n5/box/nrg3174_BX1.html
-
-            */
-
-            // Order array by sequence length DESC
-            var sortedDnaSequenceStrings = dnaSequenceStrings.sort(function(a, b){
-                return b.length - a.length;
-            });
-
-            // Calculate sums of all nucleotides in this assembly by adding current contig's length to the sum of all previous contig lengths
-            // Contig length === number of nucleotides in this contig
-            var assemblyNucleotideSums = [],
-                // Count sorted dna sequence strings
-                sortedDnaSequenceStringCounter = 0;
-
-            for (; sortedDnaSequenceStringCounter < sortedDnaSequenceStrings.length; sortedDnaSequenceStringCounter++) {
-                if (assemblyNucleotideSums.length > 0) {
-                    // Add current contig's length to the sum of all previous contig lengths
-                    assemblyNucleotideSums.push(sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length + assemblyNucleotideSums[assemblyNucleotideSums.length - 1]);
-                } else {
-                    // This is a "sum" of a single contig's length
-                    assemblyNucleotideSums.push(sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length);
-                }
+            } else {
+                // Count as invalid sequence
+                assemblies[fileCounter]['contigs']['invalid'] = assemblies[fileCounter]['contigs']['invalid'] + 1;
             }
 
-            // Calculate one-half of the total sum of all nucleotides in the assembly
-            var assemblyNucleotidesHalfSum = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / 2);
+        } // for
 
-            /*
+        // Store fasta file and metadata
+        fastaFilesAndMetadata.push({
+            // Cut FASTA file extension from the file name
+            name: file.name.substr(0, file.name.lastIndexOf('.')),
+            assembly: e.target.result,
+            metadata: {}
+        });
 
-            Sum lengths of every contig starting from the longest contig
-            until this running sum equals one-half of the total length of all contigs in the assembly.
+        /*
 
-            */
+        Calculate N50
+        http://www.nature.com/nrg/journal/v13/n5/box/nrg3174_BX1.html
 
-                // Store nucleotides sum
-            var assemblyNucleotidesSum = 0,
-                // N50 object
-                assemblyN50 = {},
-                // Count again sorted dna sequence strings
-                sortedDnaSequenceStringCounter = 0;
+        */
 
-            for (; sortedDnaSequenceStringCounter < sortedDnaSequenceStrings.length; sortedDnaSequenceStringCounter++) {
-                // Update nucleotides sum
-                assemblyNucleotidesSum = assemblyNucleotidesSum + sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length;
-                // Contig N50 of an assembly is the length of the shortest contig in this list
-                // Check if current sum of nucleotides is greater or equals to half sum of nucleotides in this assembly
-                if (assemblyNucleotidesSum >= assemblyNucleotidesHalfSum) {
-                    assemblyN50['sequenceNumber'] = sortedDnaSequenceStringCounter + 1;
-                    assemblyN50['sum'] = assemblyNucleotidesSum;
-                    assemblyN50['sequenceLength'] = sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length;
-                    break;
-                }
+        // Order array by sequence length DESC
+        var sortedDnaSequenceStrings = dnaSequenceStrings.sort(function(a, b){
+            return b.length - a.length;
+        });
+
+        // Calculate sums of all nucleotides in this assembly by adding current contig's length to the sum of all previous contig lengths
+        // Contig length === number of nucleotides in this contig
+        var assemblyNucleotideSums = [],
+            // Count sorted dna sequence strings
+            sortedDnaSequenceStringCounter = 0;
+
+        for (; sortedDnaSequenceStringCounter < sortedDnaSequenceStrings.length; sortedDnaSequenceStringCounter++) {
+            if (assemblyNucleotideSums.length > 0) {
+                // Add current contig's length to the sum of all previous contig lengths
+                assemblyNucleotideSums.push(sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length + assemblyNucleotideSums[assemblyNucleotideSums.length - 1]);
+            } else {
+                // This is a "sum" of a single contig's length
+                assemblyNucleotideSums.push(sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length);
             }
+        }
 
-            // Calculate average nucleotides per sequence
-            var averageNucleotidesPerSequence = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / dnaSequenceStrings.length);
+        // Calculate one-half of the total sum of all nucleotides in the assembly
+        var assemblyNucleotidesHalfSum = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / 2);
 
-            // Calculate N50 quality
-            // If sequence length is greater than average sequence length then quality is good
-            /*
-            if (assemblyN50['sequenceLength'] > averageNucleotidesPerSequence) {
-                assemblyN50['quality'] = true;
-            } else { // Quality is bad
-                assemblyN50['quality'] = false;
+        /*
+
+        Sum lengths of every contig starting from the longest contig
+        until this running sum equals one-half of the total length of all contigs in the assembly.
+
+        */
+
+            // Store nucleotides sum
+        var assemblyNucleotidesSum = 0,
+            // N50 object
+            assemblyN50 = {},
+            // Count again sorted dna sequence strings
+            sortedDnaSequenceStringCounter = 0;
+
+        for (; sortedDnaSequenceStringCounter < sortedDnaSequenceStrings.length; sortedDnaSequenceStringCounter++) {
+            // Update nucleotides sum
+            assemblyNucleotidesSum = assemblyNucleotidesSum + sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length;
+            // Contig N50 of an assembly is the length of the shortest contig in this list
+            // Check if current sum of nucleotides is greater or equals to half sum of nucleotides in this assembly
+            if (assemblyNucleotidesSum >= assemblyNucleotidesHalfSum) {
+                assemblyN50['sequenceNumber'] = sortedDnaSequenceStringCounter + 1;
+                assemblyN50['sum'] = assemblyNucleotidesSum;
+                assemblyN50['sequenceLength'] = sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length;
+                break;
             }
-            */
+        }
 
-            // Update total number of contigs to upload
-            contigsSum = contigsSum + contigs.length;
+        // Calculate average nucleotides per sequence
+        var averageNucleotidesPerSequence = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / dnaSequenceStrings.length);
 
-            // Show average number of contigs per assembly
-            $('.assembly-sequences-average').text(Math.floor(contigsSum / droppedFiles.length));
+        // Calculate N50 quality
+        // If sequence length is greater than average sequence length then quality is good
+        /*
+        if (assemblyN50['sequenceLength'] > averageNucleotidesPerSequence) {
+            assemblyN50['quality'] = true;
+        } else { // Quality is bad
+            assemblyN50['quality'] = false;
+        }
+        */
 
-            // TODO: Convert multiple strings concatenation to array and use join('')
-            // Display current assembly
-            assemblyListItem = $(
-                '<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
+        // Update total number of contigs to upload
+        contigsSum = contigsSum + contigs.length;
 
-                    // Assembly overview
-                    + '<div class="assembly-overview">'
+        // Show average number of contigs per assembly
+        $('.assembly-sequences-average').text(Math.floor(contigsSum / droppedFiles.length));
 
-                        /*
-                        + '<div class="assembly-stats-container assembly-file-name">'
-                            + '<div>' + assemblies[fileCounter]['name'] + '</div>'
-                        + '</div>'
-                        */
+        // TODO: Convert multiple strings concatenation to array and use join('')
+        // Display current assembly
+        assemblyListItem = $(
+            '<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
 
-                        + '<div class="assembly-stats-container">'
-                            // Print a number with commas as thousands separators
-                            // http://stackoverflow.com/a/2901298
-                            + '<div class="assembly-stats-label">total nucleotides</div>'
-                            + '<div class="assembly-stats-number">' + assemblyNucleotideSums[assemblyNucleotideSums.length - 1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
-                            //+ '<div class="assembly-stats-label">sequences</div>'
-                        + '</div>'
+                // Assembly overview
+                + '<div class="assembly-overview">'
 
-                        + '<div class="assembly-stats-container">'
-                            // Print a number with commas as thousands separators
-                            // http://stackoverflow.com/a/2901298
-                            + '<div class="assembly-stats-label">total contigs</div>'
-                            + '<div class="assembly-stats-number">' + assemblies[fileCounter]['contigs']['total'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
-                            //+ '<div class="assembly-stats-label">sequences</div>'
-                        + '</div>'
+                    /*
+                    + '<div class="assembly-stats-container assembly-file-name">'
+                        + '<div>' + assemblies[fileCounter]['name'] + '</div>'
+                    + '</div>'
+                    */
 
-                        + '<div class="assembly-stats-container">'
-                            // Print a number with commas as thousands separators
-                            // http://stackoverflow.com/a/2901298
-                            + '<div class="assembly-stats-label">min contig</div>'
-                            + '<div class="assembly-stats-number">' + sortedDnaSequenceStrings[sortedDnaSequenceStrings.length - 1].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
-                            //+ '<div class="assembly-stats-label">sequences</div>'
-                        + '</div>'
-
-                        + '<div class="assembly-stats-container">'
-                            // Print a number with commas as thousands separators
-                            // http://stackoverflow.com/a/2901298
-                            + '<div class="assembly-stats-label">mean contig</div>'
-                            + '<div class="assembly-stats-number">' + averageNucleotidesPerSequence.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
-                            //+ '<div class="assembly-stats-label">nucleotides per sequence<br/> on average</div>'
-                        + '</div>'
-
-                        + '<div class="assembly-stats-container">'
-                            // Print a number with commas as thousands separators
-                            // http://stackoverflow.com/a/2901298
-                            + '<div class="assembly-stats-label">max contig</div>'
-                            + '<div class="assembly-stats-number">' + sortedDnaSequenceStrings[0].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
-                            //+ '<div class="assembly-stats-label">sequences</div>'
-                        + '</div>'
-
-                        + '<div class="assembly-stats-container">'
-                            // Print a number with commas as thousands separators
-                            // http://stackoverflow.com/a/2901298
-                            + '<div class="assembly-stats-label">contig N50</div>'
-                            + '<div class="assembly-stats-number assembly-stats-n50-number">' + assemblyN50['sequenceLength'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
-                            //+ '<div class="assembly-stats-label">nucleotides in<br>N50 contig</div>'
-                        + '</div>'
-
+                    + '<div class="assembly-stats-container">'
+                        // Print a number with commas as thousands separators
+                        // http://stackoverflow.com/a/2901298
+                        + '<div class="assembly-stats-label">total nucleotides</div>'
+                        + '<div class="assembly-stats-number">' + assemblyNucleotideSums[assemblyNucleotideSums.length - 1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
+                        //+ '<div class="assembly-stats-label">sequences</div>'
                     + '</div>'
 
-                    // Summary
-                    + '<div class="assembly-content-data">'
+                    + '<div class="assembly-stats-container">'
+                        // Print a number with commas as thousands separators
+                        // http://stackoverflow.com/a/2901298
+                        + '<div class="assembly-stats-label">total contigs</div>'
+                        + '<div class="assembly-stats-number">' + assemblies[fileCounter]['contigs']['total'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
+                        //+ '<div class="assembly-stats-label">sequences</div>'
+                    + '</div>'
+
+                    + '<div class="assembly-stats-container">'
+                        // Print a number with commas as thousands separators
+                        // http://stackoverflow.com/a/2901298
+                        + '<div class="assembly-stats-label">min contig</div>'
+                        + '<div class="assembly-stats-number">' + sortedDnaSequenceStrings[sortedDnaSequenceStrings.length - 1].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+                        //+ '<div class="assembly-stats-label">sequences</div>'
+                    + '</div>'
+
+                    + '<div class="assembly-stats-container">'
+                        // Print a number with commas as thousands separators
+                        // http://stackoverflow.com/a/2901298
+                        + '<div class="assembly-stats-label">mean contig</div>'
+                        + '<div class="assembly-stats-number">' + averageNucleotidesPerSequence.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+                        //+ '<div class="assembly-stats-label">nucleotides per sequence<br/> on average</div>'
+                    + '</div>'
+
+                    + '<div class="assembly-stats-container">'
+                        // Print a number with commas as thousands separators
+                        // http://stackoverflow.com/a/2901298
+                        + '<div class="assembly-stats-label">max contig</div>'
+                        + '<div class="assembly-stats-number">' + sortedDnaSequenceStrings[0].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+                        //+ '<div class="assembly-stats-label">sequences</div>'
+                    + '</div>'
+
+                    + '<div class="assembly-stats-container">'
+                        // Print a number with commas as thousands separators
+                        // http://stackoverflow.com/a/2901298
+                        + '<div class="assembly-stats-label">contig N50</div>'
+                        + '<div class="assembly-stats-number assembly-stats-n50-number">' + assemblyN50['sequenceLength'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+                        //+ '<div class="assembly-stats-label">nucleotides in<br>N50 contig</div>'
+                    + '</div>'
+
+                + '</div>'
+
+                // Summary
+                + '<div class="assembly-content-data">'
 /*
-                        + '<div class="assembly-stats-container">'
-                            + '<div class="assembly-stats-number">' + assemblies[fileCounter]['sequences']['total'] + '</div>'
-                            + '<div class="assembly-stats-label">sequences</div>'
-                        + '</div>'
+                    + '<div class="assembly-stats-container">'
+                        + '<div class="assembly-stats-number">' + assemblies[fileCounter]['sequences']['total'] + '</div>'
+                        + '<div class="assembly-stats-label">sequences</div>'
+                    + '</div>'
 
-                        + '<div class="assembly-stats-container">'
-                            // Print a number with commas as thousands separators
-                            // http://stackoverflow.com/a/2901298
-                            + '<div class="assembly-stats-number">' + averageNucleotidesPerSequence.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
-                            + '<div class="assembly-stats-label">nucleotides per sequence<br/> on average</div>'
-                        + '</div>'
+                    + '<div class="assembly-stats-container">'
+                        // Print a number with commas as thousands separators
+                        // http://stackoverflow.com/a/2901298
+                        + '<div class="assembly-stats-number">' + averageNucleotidesPerSequence.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
+                        + '<div class="assembly-stats-label">nucleotides per sequence<br/> on average</div>'
+                    + '</div>'
 */
-                        + '<div class="sequence-length-distribution-chart-' + fileCounter + '"></div>'
+                    + '<div class="sequence-length-distribution-chart-' + fileCounter + '"></div>'
+                + '</div>'
+
+                // Metadata form
+                //+ '<div class="assembly-metadata">'
+                    //+ '<h4>Please provide mandatory assembly metadata:</h4>'
+                    /*+ '<form role="form">'
+
+                        + '<div class="form-block assembly-metadata-' + fileCounter + '">'
+                            + '<div class="form-group">'
+                                + '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
+                                + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
+                            + '</div>'
+                            + '<div class="checkbox">'
+                                + '<label>'
+                                  + '<input type="checkbox" id="assemblySampleDatetimeNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
+                                + '</label>'
+                            + '</div>'
+                        + '</div>'
+
+                        + '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
+                            + '<div class="form-group">'
+                                + '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
+                                + '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
+                            + '</div>'
+
+                            + '<div class="checkbox">'
+                                + '<label>'
+                                  + '<input type="checkbox" id="assemblySampleLocationNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
+                                + '</label>'
+                            + '</div>'  
+                        + '</div>'
+
+                        + '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
+                            + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next assembly</button>'
+                            + ' <button class="btn btn-default apply-to-all-assemblies-button">Copy to all assemblies</button>'
+                        + '</div>'
+
+                    + '</form>'*/
+                //+ '</div>'
+
+                //+ '<div class="assembly-total-sequences">' + assemblies[fileCounter]['sequences']['all'] + '</div>'
+
+/*                          + '<div class="assembly-identifier-container">'
+                    + '<span class="assembly-identifier-label">Identifier:</span>'
+                    + '<span class="assembly-identifier">' + assemblyCollection[assemblyCounter].identifier + '</span>'
+                + '</div>'
+                + '<div class="assembly-string-container">'
+                    + '<span class="assembly-string-label">assembly preview:</span>'
+                    + '<span class="assembly-string">' + assemblyCollection[assemblyCounter].assembly.slice(0, 100) + '...</span>'
+                + '</div>'*/
+
+            + '</li>'
+        );
+
+        var assemblyMetadataFormContainer = $('<div class="assembly-metadata"></div>'),
+            assemblyMetadataFormHeader = $('<h4>Please provide mandatory assembly metadata:</h4>'),
+            assemblyMetadataForm = $('<form role="form"></form>'),
+            assemblySampleSpeciesFormBlock = $(
+            '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block">'
+                + '<div class="form-group">'
+                    + '<label for="assemblySampleSpeciesSelect' + fileCounter + '">What species have you sampled?</label>'
+                    + '<select class="form-control assembly-sample-species-select" id="assemblySampleSpeciesSelect' + fileCounter + '">'
+                        + '<option value="0" selected="selected">Choose species...</option>'
+                        + '<option value="1">Staphylococcus aureus</option>'
+                        + '<option value="2">Streptococcus pneumoniae</option>'
+                    + '</select>'
+                + '</div>'
+            + '</div>'
+            ),
+            assemblySampleDatetimeFormBlock = $(
+            '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
+                + '<div class="form-group">'
+                    + '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
+                    + '<div class="input-group">'
+                        + '<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'
+                        + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
                     + '</div>'
-
-                    // Metadata form
-                    //+ '<div class="assembly-metadata">'
-                        //+ '<h4>Please provide mandatory assembly metadata:</h4>'
-                        /*+ '<form role="form">'
-
-                            + '<div class="form-block assembly-metadata-' + fileCounter + '">'
-                                + '<div class="form-group">'
-                                    + '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
-                                    + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
-                                + '</div>'
-                                + '<div class="checkbox">'
-                                    + '<label>'
-                                      + '<input type="checkbox" id="assemblySampleDatetimeNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
-                                    + '</label>'
-                                + '</div>'
-                            + '</div>'
-
-                            + '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
-                                + '<div class="form-group">'
-                                    + '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
-                                    + '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
-                                + '</div>'
-
-                                + '<div class="checkbox">'
-                                    + '<label>'
-                                      + '<input type="checkbox" id="assemblySampleLocationNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
-                                    + '</label>'
-                                + '</div>'  
-                            + '</div>'
-
-                            + '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
-                                + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next assembly</button>'
-                                + ' <button class="btn btn-default apply-to-all-assemblies-button">Copy to all assemblies</button>'
-                            + '</div>'
-
-                        + '</form>'*/
-                    //+ '</div>'
-
-                    //+ '<div class="assembly-total-sequences">' + assemblies[fileCounter]['sequences']['all'] + '</div>'
-
-    /*                          + '<div class="assembly-identifier-container">'
-                        + '<span class="assembly-identifier-label">Identifier:</span>'
-                        + '<span class="assembly-identifier">' + assemblyCollection[assemblyCounter].identifier + '</span>'
+                + '</div>'
+                + '<div class="checkbox">'
+                    + '<label>'
+                      + '<input type="checkbox" id="assemblySampleDatetimeNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
+                    + '</label>'
+                + '</div>'
+            + '</div>'
+            ),
+            assemblySampleLocationFormBlock = $(
+            '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
+                + '<div class="form-group">'
+                    + '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
+                    + '<div class="input-group">'
+                        + '<span class="input-group-addon"><span class="glyphicon glyphicon-globe"></span></span>'
+                        + '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
                     + '</div>'
-                    + '<div class="assembly-string-container">'
-                        + '<span class="assembly-string-label">assembly preview:</span>'
-                        + '<span class="assembly-string">' + assemblyCollection[assemblyCounter].assembly.slice(0, 100) + '...</span>'
-                    + '</div>'*/
+                + '</div>'
 
-                + '</li>'
+                + '<div class="checkbox">'
+                    + '<label>'
+                      + '<input type="checkbox" id="assemblySampleLocationNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
+                    + '</label>'
+                + '</div>'  
+            + '</div>'
+            ),
+            assemblyControlsFormBlock = $(
+            '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
+                + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next empty metadata</button>'
+                + ' <button class="btn btn-default apply-to-all-assemblies-button">Copy to all assemblies</button>'
+            + '</div>'
+            ),
+            assemblyMeatadataDoneBlock = $(
+            '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
+                + 'Ready? Click "Upload" button to upload your assemblies and metadata.'
+            + '</div>'
             );
 
-            var assemblyMetadataFormContainer = $('<div class="assembly-metadata"></div>'),
-                assemblyMetadataFormHeader = $('<h4>Please provide mandatory assembly metadata:</h4>'),
-                assemblyMetadataForm = $('<form role="form"></form>'),
-                assemblySampleSpeciesFormBlock = $(
-                '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block">'
-                    + '<div class="form-group">'
-                        + '<label for="assemblySampleSpeciesSelect' + fileCounter + '">What species have you sampled?</label>'
-                        + '<select class="form-control assembly-sample-species-select" id="assemblySampleSpeciesSelect' + fileCounter + '">'
-                            + '<option value="0" selected="selected">Choose species...</option>'
-                            + '<option value="1">Staphylococcus aureus</option>'
-                            + '<option value="2">Streptococcus pneumoniae</option>'
-                        + '</select>'
-                    + '</div>'
-                + '</div>'
-                ),
-                assemblySampleDatetimeFormBlock = $(
-                '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
-                    + '<div class="form-group">'
-                        + '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
-                        + '<div class="input-group">'
-                            + '<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'
-                            + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
-                        + '</div>'
-                    + '</div>'
-                    + '<div class="checkbox">'
-                        + '<label>'
-                          + '<input type="checkbox" id="assemblySampleDatetimeNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
-                        + '</label>'
-                    + '</div>'
-                + '</div>'
-                ),
-                assemblySampleLocationFormBlock = $(
-                '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
-                    + '<div class="form-group">'
-                        + '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
-                        + '<div class="input-group">'
-                            + '<span class="input-group-addon"><span class="glyphicon glyphicon-globe"></span></span>'
-                            + '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
-                        + '</div>'
-                    + '</div>'
+        assemblyMetadataForm.append(assemblySampleSpeciesFormBlock);
+        assemblyMetadataForm.append(assemblySampleDatetimeFormBlock);
+        assemblyMetadataForm.append(assemblySampleLocationFormBlock);
 
-                    + '<div class="checkbox">'
-                        + '<label>'
-                          + '<input type="checkbox" id="assemblySampleLocationNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
-                        + '</label>'
-                    + '</div>'  
-                + '</div>'
-                ),
-                assemblyControlsFormBlock = $(
-                '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
-                    + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next empty metadata</button>'
-                    + ' <button class="btn btn-default apply-to-all-assemblies-button">Copy to all assemblies</button>'
-                + '</div>'
-                ),
-                assemblyMeatadataDoneBlock = $(
-                '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
-                    + 'Ready? Click "Upload" button to upload your assemblies and metadata.'
-                + '</div>'
-                );
+        // Show form navigation buttons only when you're at the last assembly
+        if (fileCounter < droppedFiles.length) {
+            assemblyMetadataForm.append(assemblyControlsFormBlock);
+        } else {
+            assemblyMetadataForm.append(assemblyMeatadataDoneBlock);
+        }
+        assemblyMetadataFormContainer.append(assemblyMetadataFormHeader);
+        assemblyMetadataFormContainer.append(assemblyMetadataForm);
 
-            assemblyMetadataForm.append(assemblySampleSpeciesFormBlock);
-            assemblyMetadataForm.append(assemblySampleDatetimeFormBlock);
-            assemblyMetadataForm.append(assemblySampleLocationFormBlock);
+        assemblyListItem.append(assemblyMetadataFormContainer);
 
-            // Show form navigation buttons only when you're at the last assembly
-            if (fileCounter < droppedFiles.length) {
-                assemblyMetadataForm.append(assemblyControlsFormBlock);
-            } else {
-                assemblyMetadataForm.append(assemblyMeatadataDoneBlock);
+        // Append assembly
+        $('.assembly-list-container ul').append(assemblyListItem);
+
+        // Draw N50 chart
+        drawN50Chart(assemblyNucleotideSums, assemblyN50, fileCounter);
+
+        // Chart 1
+        /*          
+        var data = [
+            {   sequenceLength: 100,
+                lengthFrequency: 10
+            },
+            {
+                sequenceLength: 200,
+                lengthFrequency: 20
+            },
+            {
+                sequenceLength: 300,
+                lengthFrequency: 30
+            },
+            {
+                sequenceLength: 400,
+                lengthFrequency: 40
+            },
+            {
+                sequenceLength: 500,
+                lengthFrequency: 50
             }
-            assemblyMetadataFormContainer.append(assemblyMetadataFormHeader);
-            assemblyMetadataFormContainer.append(assemblyMetadataForm);
+        ];
+        data = chartData;
+        console.log(JSON.stringify(data));
 
-            assemblyListItem.append(assemblyMetadataFormContainer);
+        var chartWidth = 460,
+            chartHeight = 312;
 
-            // Append assembly
-            $('.assembly-list-container ul').append(assemblyListItem);
+        // Extent
+        var xExtent = d3.extent(chartData, function(datum){
+            return datum.sequenceLength;
+        });
 
-            // Draw N50 chart
-            drawN50Chart(assemblyNucleotideSums, assemblyN50, fileCounter);
+        // Scales
 
-            // Chart 1
-            /*          
-            var data = [
-                {   sequenceLength: 100,
-                    lengthFrequency: 10
-                },
-                {
-                    sequenceLength: 200,
-                    lengthFrequency: 20
-                },
-                {
-                    sequenceLength: 300,
-                    lengthFrequency: 30
-                },
-                {
-                    sequenceLength: 400,
-                    lengthFrequency: 40
-                },
-                {
-                    sequenceLength: 500,
-                    lengthFrequency: 50
-                }
-            ];
-            data = chartData;
-            console.log(JSON.stringify(data));
+        // X
+        var xScale = d3.scale.linear()
+            //.domain(xExtent) // your data min and max
+            .domain([0, d3.max(chartData, function(datum){
+                return +datum.sequenceLength;
+            })])
+            .range([40, chartWidth - 50]); // the pixels to map, i.e. the width of the diagram
 
-            var chartWidth = 460,
-                chartHeight = 312;
+        // Y
+        var yScale = d3.scale.linear()
+            .domain([d3.max(chartData, function(datum){ // Can't use d3.extent in this case because min value has to be 0.
+                return +datum.lengthFrequency;
+            }), 0])
+            .range([30, chartHeight - 52]);
 
-            // Extent
-            var xExtent = d3.extent(chartData, function(datum){
-                return datum.sequenceLength;
-            });
+        // Axes
 
-            // Scales
+        // X
+        var xAxis = d3.svg.axis()
+            .scale(xScale)
+            .orient('bottom');
 
-            // X
-            var xScale = d3.scale.linear()
-                //.domain(xExtent) // your data min and max
-                .domain([0, d3.max(chartData, function(datum){
-                    return +datum.sequenceLength;
-                })])
-                .range([40, chartWidth - 50]); // the pixels to map, i.e. the width of the diagram
+        // Y
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient('left')
+            // http://stackoverflow.com/a/18822793
+            .ticks(d3.max(chartData, function(datum){
+                return datum.lengthFrequency;
+            }))
+            .tickFormat(d3.format("d"));
 
-            // Y
-            var yScale = d3.scale.linear()
-                .domain([d3.max(chartData, function(datum){ // Can't use d3.extent in this case because min value has to be 0.
-                    return +datum.lengthFrequency;
-                }), 0])
-                .range([30, chartHeight - 52]);
+        // Append SVG to DOM
+        var svg = d3.select('.sequence-length-distribution-chart-' + fileCounter)
+            .append('svg')
+            .attr('width', chartWidth)
+            .attr('height', chartHeight);
 
-            // Axes
+        // Append axis
 
-            // X
-            var xAxis = d3.svg.axis()
-                .scale(xScale)
-                .orient('bottom');
+        // X
+        svg.append('g')
+            .attr('class', 'x axis')
+            .attr('transform', 'translate(20, 260)')
+            .call(xAxis);
 
-            // Y
-            var yAxis = d3.svg.axis()
-                .scale(yScale)
-                .orient('left')
-                // http://stackoverflow.com/a/18822793
-                .ticks(d3.max(chartData, function(datum){
-                    return datum.lengthFrequency;
-                }))
-                .tickFormat(d3.format("d"));
+        // Y
+        svg.append('g')
+            .attr('class', 'y axis')
+            .attr('transform', 'translate(60, 0)')
+            .call(yAxis);
 
-            // Append SVG to DOM
-            var svg = d3.select('.sequence-length-distribution-chart-' + fileCounter)
-                .append('svg')
-                .attr('width', chartWidth)
-                .attr('height', chartHeight);
+        // Axis labels
 
-            // Append axis
+        // X
+        svg.select('.x.axis')
+            .append('text')
+            .text('Sequence length')
+            .attr('class', 'axis-label')
+            .attr('text-anchor', 'end')
+            //.attr('x', chartWidth - 49)
+            .attr('x', (chartWidth / 2) + 49)
+            .attr('y', 45);
 
-            // X
-            svg.append('g')
-                .attr('class', 'x axis')
-                .attr('transform', 'translate(20, 260)')
-                .call(xAxis);
+        // Y
+        svg.select('.y.axis')
+            .append('text')
+            .text('Frequency')
+            .attr('class', 'axis-label')
+            .attr('transform', 'rotate(-90)')
+            //.attr('x', -80)
+            .attr('x', -(chartHeight / 2) - 22)
+            //.attr('y', chartHeight / 2)
+            .attr('y', -30);
 
-            // Y
-            svg.append('g')
-                .attr('class', 'y axis')
-                .attr('transform', 'translate(60, 0)')
-                .call(yAxis);
+        // Circles
+        svg.selectAll('circle')
+            .data(chartData)
+            .enter()
+            .append('circle')
+            .attr('cx', function(datum){
+                return xScale(datum.sequenceLength) + 20;
+            })
+            .attr('cy', function(datum){
+                return yScale(datum.lengthFrequency);
+            })
+            .attr('r', 5);
+        */
 
-            // Axis labels
+        // Show first assembly
+        $('.assembly-item-1').removeClass('hide-this');
 
-            // X
-            svg.select('.x.axis')
-                .append('text')
-                .text('Sequence length')
-                .attr('class', 'axis-label')
-                .attr('text-anchor', 'end')
-                //.attr('x', chartWidth - 49)
-                .attr('x', (chartWidth / 2) + 49)
-                .attr('y', 45);
+        // Init bootstrap datetimepicker
+        //$('.assembly-upload-panel .assembly-sample-datetime-input').datetimepicker();
+        $('#assemblySampleDatetimeInput' + fileCounter).datetimepicker();
 
-            // Y
-            svg.select('.y.axis')
-                .append('text')
-                .text('Frequency')
-                .attr('class', 'axis-label')
-                .attr('transform', 'rotate(-90)')
-                //.attr('x', -80)
-                .attr('x', -(chartHeight / 2) - 22)
-                //.attr('y', chartHeight / 2)
-                .attr('y', -30);
+        // Init Goolge Maps API Places Autocomplete
+        /*var autocomplete = */new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
+        //autocomplete.bindTo('bounds', WGST.map);
 
-            // Circles
-            svg.selectAll('circle')
-                .data(chartData)
-                .enter()
-                .append('circle')
-                .attr('cx', function(datum){
-                    return xScale(datum.sequenceLength) + 20;
-                })
-                .attr('cy', function(datum){
-                    return yScale(datum.lengthFrequency);
-                })
-                .attr('r', 5);
-            */
-
-            // Show first assembly
-            $('.assembly-item-1').removeClass('hide-this');
-
-            // Init bootstrap datetimepicker
-            //$('.assembly-upload-panel .assembly-sample-datetime-input').datetimepicker();
-            $('#assemblySampleDatetimeInput' + fileCounter).datetimepicker();
-
-            // Init Goolge Maps API Places Autocomplete
-            /*var autocomplete = */new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
-            //autocomplete.bindTo('bounds', WGST.map);
-
-            /*
-            google.maps.event.addListener(autocomplete, 'place_changed', function() {
-                var place = autocomplete.getPlace();
-                console.log('Place: ' + place);
-            });
-            */
-        
-        }; // parseFastaFile()
+        /*
+        google.maps.event.addListener(autocomplete, 'place_changed', function() {
+            var place = autocomplete.getPlace();
+            console.log('Place: ' + place);
+        });
+        */
+    
+    }; // parseFastaFile()
 
     var drawN50Chart = function(chartData, assemblyN50, fileCounter) {
 
@@ -952,6 +953,9 @@ $(function(){
         evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy
     };
 
+    // FASTA file name regex
+    var fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.contig)$/i;
+
     var handleFileDrop = function(evt) {
         evt.stopPropagation();
         evt.preventDefault();
@@ -967,9 +971,7 @@ $(function(){
             // Count files
             fileCounter = 0,
             // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
-            fileReader = new FileReader(),
-            // FASTA file name regex
-            fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.contig)$/i;
+            fileReader = new FileReader();
             
         // Check if user dropped only 1 assembly
         if (droppedFiles.length === 1) {
