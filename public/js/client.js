@@ -90,7 +90,7 @@ $(function(){
 		// Sort data by score
 		// http://stackoverflow.com/a/15322129
 		var sortableScoresArray = [],
-			maxScore = 0,
+			//maxScore = 0,
 			score;
 
 		// First create the array of keys/values so that we can sort it
@@ -100,11 +100,13 @@ $(function(){
 					'referenceId': requestedAssembly.scores[score].referenceId,
 					'score': requestedAssembly.scores[score].score
 				});
+				/* No need to know max score anymore as fingerprint size is now known
 				// Check for max score
 				if (requestedAssembly.scores[score].score > maxScore) {
 					// Update max score
 					maxScore = requestedAssembly.scores[score].score;
 				}
+				*/
 			}
 		}
 
@@ -124,7 +126,8 @@ $(function(){
 				+ '</td>'
 				+ '<td>'
 					// Convert score values into percentages where the highest number is 100%
-					+ Math.floor(sortableScoresArray[i].score * 100 / maxScore) + '%'
+					//+ Math.floor(sortableScoresArray[i].score * 100 / maxScore) + '%'
+					+ Math.floor(sortableScoresArray[i].score * 100 / requestedAssembly.fingerprintSize) + '%'
 				+ '</td>'
 				+ '<tr/>'
 			);
@@ -1302,7 +1305,7 @@ $(function(){
 						}).done(function(message){
 							console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
 							// Create assembly URL
-							var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FINGERPRINT_COMPARISON_' + JSON.parse(message).assemblyId;
+							var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FP_COMP_' + JSON.parse(message).assemblyId;
 							//console.log(url);
 							$('.uploaded-assembly-url-input').val(url);
 							endProgressBar();
