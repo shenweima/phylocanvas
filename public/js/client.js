@@ -99,13 +99,6 @@ $(function(){
                     'referenceId': requestedAssembly.scores[score].referenceId,
                     'score': requestedAssembly.scores[score].score
                 });
-                /* No need to know max score anymore as fingerprint size is now known
-                // Check for max score
-                if (requestedAssembly.scores[score].score > maxScore) {
-                    // Update max score
-                    maxScore = requestedAssembly.scores[score].score;
-                }
-                */
             }
         }
 
@@ -128,7 +121,6 @@ $(function(){
                     + '</td>'
                     + '<td>'
                         // Convert score values into percentages where the highest number is 100%
-                        //+ Math.floor(sortableScoresArray[i].score * 100 / maxScore) + '%'
                         + Math.floor(sortableScores[sortableScoreCounter].score * 100 / requestedAssembly.fingerprintSize) + '%'
                     + '</td>'
                 + '<tr/>'
