@@ -1,7 +1,27 @@
-
-/*
- * GET users listing.
- */
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+if ( !Date.prototype.toISOString ) {
+  ( function() {
+    
+    function pad(number) {
+      if ( number < 10 ) {
+        return '0' + number;
+      }
+      return number;
+    }
+ 
+    Date.prototype.toISOString = function() {
+      return this.getUTCFullYear() +
+        '-' + pad( this.getUTCMonth() + 1 ) +
+        '-' + pad( this.getUTCDate() ) +
+        'T' + pad( this.getUTCHours() ) +
+        ':' + pad( this.getUTCMinutes() ) +
+        ':' + pad( this.getUTCSeconds() ) +
+        '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice( 2, 5 ) +
+        'Z';
+    };
+  
+  }() );
+}
 
 exports.add = function(req, res) {
 
@@ -93,11 +113,65 @@ exports.add = function(req, res) {
 			
 				console.log('[MLST] Received response');
 
+				// Insert assembly metadata into db
+				var demoKey = "art", // 'assembly_metadata' + userAssemblyId
+					demoMetadata = {
+					docType: "The type of the document", // 'assembly_metadata'
+					docId: "uuid_" + message.assemblyId,
+					assemblyId: message.assemblyId,
+					uploaderId: "uploader_uuid",
+					owners: ['user_uuid', 'user_uuid', 'user_uuid'],
+					institutes: ['Imperial College London', 'Wellcome Trust Sanger Institute'], // Auto suggest (as far as we can)
+					isolateName: 'Isolate name', // Freetext field
+					species: 12345678, // Change data type from integer to string
+					dateLoaded: "2013-12-19T11:54:30.207Z",
+					dateCollected: "2013-12-19T11:54:30.207Z",
+					geographicLocation: {
+					    type: "Point", 
+					    coordinates: [[30, 10], [15, 25]]
+					},
+					geographicDescription: "London, United Kingdom",
+					isolationSource: "Left hand.", // Auto suggest
+					primaryPublication: "12748199", // PubMed or DOI | { idType: "string", id: "string" }
+					otherPublications: ['12748196', '12748197', '12748198'], // PubMed or DOI | { idType: "string", id: "string" }
+					sraLink: "1234567890", // just use numerical id
+					genbankLink: "1234567890", // just use numerical id
+					sequencingMethod: "Type of sequencing device", // Freetext + suggestions
+					assemblyMethod: {
+						method: "method_name", // Freetext
+						parameters: "parameters" // Freetext
+					},
+					experimentalPhenotypes: {
+						extraField1: "extra information 1", // Free key, free value
+						extraField2: "extra information 2" // Free key, free value
+					}
+				};
+
+				var couchbase = require('couchbase');
+				var db = new couchbase.Connection({
+					host: 'http://129.31.26.151:8091/pools',
+					bucket: 'test_wgst',
+					password: '.oneir66'
+				}, function(err) {
+					if (err) {
+						console.error('[MLST][ERROR] ' + error);
+						return;
+					}
+
+					db.set(demoKey, demoMetadata, function(err, result) {
+						if (err) {
+							console.error('[MLST][ERROR] ' + error);
+							return;
+						}
+
+						console.log("Inserted metadata");
+						console.log(result);
+					});
+				});
+
 				var buffer = new Buffer(message.data);
 
 				console.log(buffer.toString());
-
-				// TODO: Insert metadata into db
 
 				// Return result data
 				res.json(buffer.toString());
