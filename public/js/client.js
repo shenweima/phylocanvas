@@ -89,14 +89,14 @@ $(function(){
 
 		// Sort data by score
 		// http://stackoverflow.com/a/15322129
-		var sortableScoresArray = [],
+		var sortableScores = [],
 			//maxScore = 0,
 			score;
 
 		// First create the array of keys/values so that we can sort it
 		for (score in requestedAssembly.scores) {
 			if (requestedAssembly.scores.hasOwnProperty(score)) {
-				sortableScoresArray.push({ 
+				sortableScores.push({ 
 					'referenceId': requestedAssembly.scores[score].referenceId,
 					'score': requestedAssembly.scores[score].score
 				});
@@ -111,23 +111,23 @@ $(function(){
 		}
 
 		// Sort scores
-		sortableScoresArray = sortableScoresArray.sort(function(a,b){
+		sortableScores = sortableScores.sort(function(a,b){
 			return b.score - a.score;
 		});
 
 		// Create assembly data table
 		var scoreCounter = 0;
-		for (var i = 0; i < sortableScoresArray.length; i++ ) {
+		for (var i = 0; i < sortableScores.length; i++ ) {
 			scoreCounter++;
 			$('.assembly-data-table tbody').append(
 				((scoreCounter % 2 === 0) ? '<tr>' : '<tr class="row-stripe">')
 				+ '<td>'
-					+ sortableScoresArray[i].referenceId
+					+ sortableScores[i].referenceId
 				+ '</td>'
 				+ '<td>'
 					// Convert score values into percentages where the highest number is 100%
 					//+ Math.floor(sortableScoresArray[i].score * 100 / maxScore) + '%'
-					+ Math.floor(sortableScoresArray[i].score * 100 / requestedAssembly.fingerprintSize) + '%'
+					+ Math.floor(sortableScores[i].score * 100 / requestedAssembly.fingerprintSize) + '%'
 				+ '</td>'
 				+ '<tr/>'
 			);
