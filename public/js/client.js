@@ -104,7 +104,7 @@ $(function(){
 
         // Sort scores
         sortableScores = sortableScores.sort(function(a,b){
-            return b.score - a.score;
+            return b.score - a.score; // Descending sort (Z-A)
         });
 
         // Create assembly data table
@@ -340,7 +340,7 @@ $(function(){
             }
 
             // Calculate one-half of the total sum of all nucleotides in the assembly
-            var assemblyNucleotidesHalfSum = assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / 2;
+            var assemblyNucleotidesHalfSum = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / 2);
 
             /*
 
