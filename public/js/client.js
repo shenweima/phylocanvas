@@ -146,20 +146,29 @@ $(function(){
     var WGST = window.WGST || {};
 
     // Map
-    WGST.map = {
+    WGST.geo = {
         map: {},
         mapOptions: {
             zoom: 8,
             center: new google.maps.LatLng(51.511214, -0.119824),
             mapTypeId: google.maps.MapTypeId.ROADMAP
         },
+        markers: {
+            metadata: {}
+        },
+        //geocoder: new google.maps.Geocoder(),
         init: function() {
             this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions);
+            this.markers.metadata = new google.maps.Marker({
+                position: new google.maps.LatLng(51.511214, -0.119824),
+                map: WGST.geo.map,
+                visible: false
+            });
         }
     };
 
     // Init map
-    WGST.map.init();
+    WGST.geo.init();
 
         // Array of objects that store content of FASTA file and user-provided metadata
     var fastaFilesAndMetadata = [],
@@ -737,8 +746,37 @@ $(function(){
         $('#assemblySampleDatetimeInput' + fileCounter).datetimepicker();
 
         // Init Goolge Maps API Places Autocomplete
-        /*var autocomplete = */new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
-        //autocomplete.bindTo('bounds', WGST.map);
+        // TODO: This creates new Autocomplete object for each drag and drop file. This needs to be optimized.
+        WGST.geo.metadataAutocomplete = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
+
+        // When the user selects an address from the dropdown,
+        // get geo coordinates
+        // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
+        // TODO: Remove this event listener after metadata was sent
+        google.maps.event.addListener(WGST.geo.metadataAutocomplete, 'place_changed', function() {
+            // Get the place details from the autocomplete object.
+            var place = WGST.geo.metadataAutocomplete.getPlace();
+            // Set map center to selected address
+            WGST.geo.map.setCenter(place.geometry.location);
+            // Set metadata marker's position to selected address
+            WGST.geo.markers.metadata.setPosition(place.geometry.location);
+            // Show metadata marker
+            WGST.geo.markers.metadata.setVisible(true);
+            // Geocode address
+            /*
+            WGST.geo.geocoder.geocode({ 'address': place.address_components[0] }, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    map.setCenter(results[0].geometry.location);
+                    var marker = new google.maps.Marker({
+                        map: WGST.geo.map,
+                        position: results[0].geometry.location
+                    });
+                } else {
+                    console.log('Geocode was not successful for the following reason: ' + status);
+                }
+            });
+            */
+        });
 
         /*
         google.maps.event.addListener(autocomplete, 'place_changed', function() {

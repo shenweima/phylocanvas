@@ -116,35 +116,35 @@ exports.add = function(req, res) {
 				// Insert assembly metadata into db
 				var demoKey = "art", // 'assembly_metadata' + userAssemblyId
 					demoMetadata = {
-					docType: "The type of the document", // 'assembly_metadata'
-					docId: "uuid_" + message.assemblyId,
-					assemblyId: message.assemblyId,
-					uploaderId: "uploader_uuid",
-					owners: ['user_uuid', 'user_uuid', 'user_uuid'],
-					institutes: ['Imperial College London', 'Wellcome Trust Sanger Institute'], // Auto suggest (as far as we can)
-					isolateName: 'Isolate name', // Freetext field
-					species: 12345678, // Change data type from integer to string
-					dateLoaded: "2013-12-19T11:54:30.207Z",
-					dateCollected: "2013-12-19T11:54:30.207Z",
-					geographicLocation: {
-					    type: "Point", 
-					    coordinates: [[30, 10], [15, 25]]
-					},
-					geographicDescription: "London, United Kingdom",
-					isolationSource: "Left hand.", // Auto suggest
-					primaryPublication: "12748199", // PubMed or DOI | { idType: "string", id: "string" }
-					otherPublications: ['12748196', '12748197', '12748198'], // PubMed or DOI | { idType: "string", id: "string" }
-					sraLink: "1234567890", // just use numerical id
-					genbankLink: "1234567890", // just use numerical id
-					sequencingMethod: "Type of sequencing device", // Freetext + suggestions
-					assemblyMethod: {
-						method: "method_name", // Freetext
-						parameters: "parameters" // Freetext
-					},
-					experimentalPhenotypes: {
-						extraField1: "extra information 1", // Free key, free value
-						extraField2: "extra information 2" // Free key, free value
-					}
+						docType: "The type of the document", // 'assembly_metadata'
+						docId: "uuid_" + message.assemblyId,
+						assemblyId: message.assemblyId,
+						uploaderId: "uploader_uuid",
+						owners: ['user_uuid', 'user_uuid', 'user_uuid'],
+						institutes: ['Imperial College London', 'Wellcome Trust Sanger Institute'], // Auto suggest (as far as we can)
+						isolateName: 'Isolate name', // Freetext field
+						species: 12345678, // Change data type from integer to string
+						dateLoaded: "2013-12-19T11:54:30.207Z",
+						dateCollected: "2013-12-19T11:54:30.207Z",
+						geographicLocation: {
+						    type: "Point", 
+						    coordinates: [[30, 10], [15, 25]]
+						},
+						geographicDescription: "London, United Kingdom",
+						isolationSource: "Left hand.", // Auto suggest
+						primaryPublication: "12748199", // PubMed or DOI | { idType: "string", id: "string" }
+						otherPublications: ['12748196', '12748197', '12748198'], // PubMed or DOI | { idType: "string", id: "string" }
+						sraLink: "1234567890", // just use numerical id
+						genbankLink: "1234567890", // just use numerical id
+						sequencingMethod: "Type of sequencing device", // Freetext + suggestions
+						assemblyMethod: {
+							method: "method_name", // Freetext
+							parameters: "parameters" // Freetext
+						},
+						experimentalPhenotypes: {
+							extraField1: "extra information 1", // Free key, free value
+							extraField2: "extra information 2" // Free key, free value
+						}
 				};
 
 				var couchbase = require('couchbase');
