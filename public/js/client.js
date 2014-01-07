@@ -1192,8 +1192,6 @@ $(function(){
 
         // Set total number of selected assemblies/files
         $('.assembly-upload-total-number').text(Object.keys(fastaFilesAndMetadata).length);
-
-        // TO DO: Fix bug with the average number of contigs on drop
     }
 
     var assemblyListSliderEventHandler = function(event, ui) {
