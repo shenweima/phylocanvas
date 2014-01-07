@@ -10,6 +10,8 @@
     "ejs": "*",
     "amqp": "*",
     "couchbase": "*",
-    "node-uuid": "*"
+    "node-uuid": "*",
+    "passport": "*",
+    "passport-local": "*"
   }
 }

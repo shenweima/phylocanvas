@@ -1,5 +1,7 @@
 'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
+/* Polyfills */
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
 if (!Array.prototype.filter) {
   Array.prototype.filter = function (fn, context) {
@@ -24,6 +26,48 @@ if (!Array.prototype.filter) {
         }
     return result;
   };
+}
+
+// From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+if (!Object.keys) {
+  Object.keys = (function () {
+    'use strict';
+    var hasOwnProperty = Object.prototype.hasOwnProperty,
+        hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
+        dontEnums = [
+          'toString',
+          'toLocaleString',
+          'valueOf',
+          'hasOwnProperty',
+          'isPrototypeOf',
+          'propertyIsEnumerable',
+          'constructor'
+        ],
+        dontEnumsLength = dontEnums.length;
+
+    return function (obj) {
+      if (typeof obj !== 'object' && (typeof obj !== 'function' || obj === null)) {
+        throw new TypeError('Object.keys called on non-object');
+      }
+
+      var result = [], prop, i;
+
+      for (prop in obj) {
+        if (hasOwnProperty.call(obj, prop)) {
+          result.push(prop);
+        }
+      }
+
+      if (hasDontEnumBug) {
+        for (i = 0; i < dontEnumsLength; i++) {
+          if (hasOwnProperty.call(obj, dontEnums[i])) {
+            result.push(dontEnums[i]);
+          }
+        }
+      }
+      return result;
+    };
+  }());
 }
 
 $(function(){
@@ -171,14 +215,15 @@ $(function(){
     WGST.geo.init();
 
         // Array of objects that store content of FASTA file and user-provided metadata
-    var fastaFilesAndMetadata = [],
+    var fastaFilesAndMetadata = {},
+        // Selected FASTA file
+        selectedFastaFile = {},
         // Element on which user can drag and drop files
         dropZone = document.getElementsByTagName('body')[0],
         // Store individual assembly objects used for displaying data
         assemblies = [],
         // DNA sequence regex
         dnaSequenceRegex = /^[CTAGNUX]+$/i;
-
 
     var parseFastaFile = function(e, fileCounter, file, droppedFiles) {
 
@@ -198,7 +243,7 @@ $(function(){
             dnaSequenceId = '',
             // Empty jQuery object
             assemblyListItem = $(),
-            // ???
+            // N50 chart data
             chartData = [];
 
         // Trim, and split assembly string into array of individual contigs
@@ -314,12 +359,20 @@ $(function(){
         } // for
 
         // Store fasta file and metadata
+        fastaFilesAndMetadata[file.name] = {
+            // Cut FASTA file extension from the file name
+            name: file.name.substr(0, file.name.lastIndexOf('.')),
+            assembly: e.target.result,
+            metadata: {}
+        };
+        /*
         fastaFilesAndMetadata.push({
             // Cut FASTA file extension from the file name
             name: file.name.substr(0, file.name.lastIndexOf('.')),
             assembly: e.target.result,
             metadata: {}
         });
+        */
 
         /*
 
@@ -1305,7 +1358,7 @@ $(function(){
         // Show countdown timer
 
         // It takes less than 10 seconds to process one assembly
-        var seconds = 10 * fastaFilesAndMetadata.length;
+        var seconds = 10 * Object.keys(fastaFilesAndMetadata).length;
         var timer = setInterval(
             function() {
                 $('.visit-url-seconds-number').text(seconds);
@@ -1325,7 +1378,36 @@ $(function(){
     $('.upload-assemblies-button').on('click', function() {
         $('.uploading-assembly-progress-container').fadeIn('slow', function(){
             $('.adding-metadata-progress-container').slideUp('normal', function(){
+                // Add delay for smooth visual transition
                 setTimeout(function(){
+                    for (var fastaFile in fastaFilesAndMetadata) {
+                        if (fastaFilesAndMetadata.hasOwnProperty(fastaFile)) {
+
+                            incrementProgressBar(25);
+
+                            // POST to Node.js end
+                            $.ajax({
+                                type: 'POST',
+                                url: '/assembly/add/',
+                                datatype: 'json', // http://stackoverflow.com/a/9155217
+                                data: fastaFilesAndMetadata[fastaFile]
+                            }).done(function(message){
+                                console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
+                                // Create assembly URL
+                                var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FP_COMP_' + JSON.parse(message).assemblyId;
+                                //console.log(url);
+                                $('.uploaded-assembly-url-input').val(url);
+                                endProgressBar();
+                            }).fail(function(jqXHR, textStatus, errorThrown){
+                                console.log('[WGST] Failed to send FASTA file object to server or received error message');
+                                console.error(textStatus);
+                                console.error(errorThrown);
+                                console.error(jqXHR);
+                                endProgressBar();
+                            });
+                        }
+                    }
+                    /*
                     for (var i = 0; i < fastaFilesAndMetadata.length; i++) {
 
                         incrementProgressBar(25);
@@ -1351,8 +1433,14 @@ $(function(){
                             endProgressBar();
                         });
                     }
+                    */
                 }, 300);
             });
         });
     });
+
+    $('.cancel-assembly-upload-button').on('click', function(){
+
+    });
+
 });

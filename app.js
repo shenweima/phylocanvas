@@ -3,12 +3,14 @@
  * Module dependencies.
  */
 
-var express = require('express');
-var routes = require('./routes');
-var user = require('./routes/user');
-var assembly = require('./routes/assembly');
-var http = require('http');
-var path = require('path');
+var express = require('express'),
+	routes = require('./routes'),
+	user = require('./routes/user'),
+	assembly = require('./routes/assembly'),
+	http = require('http'),
+	path = require('path'),
+	passport = require('passport'),
+	LocalStrategy = require('passport-local').Strategy;
 
 var app = express();
 
@@ -24,6 +26,8 @@ app.use(express.urlencoded({limit: '50mb'}));
 app.use(express.methodOverride());
 app.use(express.cookieParser('your secret here'));
 app.use(express.session());
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -37,6 +41,8 @@ app.get('/users', user.list);
 app.get('/users/name/:name', user.name);
 app.post('/assembly/add', assembly.add);
 app.get('/assembly/:id', assembly.get);
+//app.post('/join', user.join);
+//app.post('/signin', user.signIn);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
