@@ -216,14 +216,16 @@ $(function(){
 
         // Array of objects that store content of FASTA file and user-provided metadata
     var fastaFilesAndMetadata = {},
-        // Selected FASTA file
-        selectedFastaFile = {},
+        // Stores file name of displayed FASTA file
+        selectedFastaFileName = '',
         // Element on which user can drag and drop files
         dropZone = document.getElementsByTagName('body')[0],
         // Store individual assembly objects used for displaying data
         assemblies = [],
         // DNA sequence regex
-        dnaSequenceRegex = /^[CTAGNUX]+$/i;
+        dnaSequenceRegex = /^[CTAGNUX]+$/i,
+        // Count total number of contigs in all selected assemblies
+        totalContigsSum = 0;
 
     var parseFastaFile = function(e, fileCounter, file, droppedFiles) {
 
@@ -446,15 +448,17 @@ $(function(){
         */
 
         // Update total number of contigs to upload
-        contigsSum = contigsSum + contigs.length;
+        //contigsSum = contigsSum + contigs.length; // TO DO: Depricate contigsSum
+        totalContigsSum = totalContigsSum + contigs.length;
 
         // Show average number of contigs per assembly
-        $('.assembly-sequences-average').text(Math.floor(contigsSum / droppedFiles.length));
+        $('.assembly-sequences-average').text(Math.floor(totalContigsSum / droppedFiles.length));
 
         // TODO: Convert multiple strings concatenation to array and use join('')
         // Display current assembly
         assemblyListItem = $(
-            '<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
+            //'<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
+            '<li class="assembly-item hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
 
                 // Assembly overview
                 + '<div class="assembly-overview">'
@@ -477,7 +481,7 @@ $(function(){
                         // Print a number with commas as thousands separators
                         // http://stackoverflow.com/a/2901298
                         + '<div class="assembly-stats-label">total contigs</div>'
-                        + '<div class="assembly-stats-number">' + assemblies[fileCounter]['contigs']['total'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
+                        + '<div class="assembly-stats-number assembly-stats-number-contigs">' + assemblies[fileCounter]['contigs']['total'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
                         //+ '<div class="assembly-stats-label">sequences</div>'
                     + '</div>'
 
@@ -792,7 +796,11 @@ $(function(){
         */
 
         // Show first assembly
-        $('.assembly-item-1').removeClass('hide-this');
+        //$('.assembly-item-1').removeClass('hide-this');
+        $('.assembly-item').eq('0').show();
+        // Store displayed fasta file name
+        //selectedFastaFileName = $('.assembly-item-1').attr('data-name');
+        selectedFastaFileName = $('.assembly-item').eq('0').attr('data-name');
 
         // Init bootstrap datetimepicker
         //$('.assembly-upload-panel .assembly-sample-datetime-input').datetimepicker();
@@ -1154,34 +1162,61 @@ $(function(){
             $('.nav-prev-item').removeAttr('disabled', 'disabled');
         }
     };
+    
+    var updateSelectedFilesUI = function(elementCounter) {
+        // Update sequence counter label
+        $('.selected-assembly-counter').text(elementCounter);
+        // Update sequence list item content
+        // Hide all sequences
+        $('.assembly-item').hide();
+        // Show selected sequence
+        //$('.assembly-item-' + ui.value).show();
+        $('.assembly-item').eq(elementCounter - 1).show(); // Convert one-based index to zero-based index used by .eq()
+        // Update assembly file name
+        //$('.assembly-file-name').text($('.assembly-item-' + elementCounter).attr('data-name'));
+        $('.assembly-file-name').text($('.assembly-item').eq(elementCounter - 1).attr('data-name'));
+        // Update sequence counter label
+        updateRangeNavigationButtons(elementCounter);
+        // Store displayed fasta file name
+        selectedFastaFileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name');  
+    };
+
+    var updateSelectedFilesSummary = function() {
+        // Calculate average number of selected contigs
+        var contigsTotalNumber = 0;
+        // Count all contigs
+        $.each($('.assembly-item'), function(key, value){
+            contigsTotalNumber = contigsTotalNumber + parseInt($(value).find('.assembly-stats-number-contigs').text(), 10);
+        });
+        $('.assembly-sequences-average').text(Math.floor(contigsTotalNumber / Object.keys(fastaFilesAndMetadata).length));
+
+        // Set total number of selected assemblies/files
+        $('.assembly-upload-total-number').text(Object.keys(fastaFilesAndMetadata).length);
+
+        // TO DO: Fix bug with the average number of contigs on drop
+    }
+
+    var assemblyListSliderEventHandler = function(event, ui) {
+        updateSelectedFilesUI(ui.value);
+        /*
+        // Update sequence list item content
+        // Hide all sequences
+        $('.assembly-item').hide();
+        // Show selected sequence
+        //$('.assembly-item-' + ui.value).show();
+        $('.assembly-item').eq(ui.value-1).show();
+        // Update assembly file name
+        $('.assembly-file-name').text($('.assembly-item-' + ui.value).attr('data-name'));
+        // Store displayed fasta file name
+        selectedFastaFileName = $('.assembly-item-' + ui.value).attr('data-name');
+        */
+    };
     // Handle slide event
     // Triggered when user moved but didn't release range handle
-    $('.assembly-list-slider').on( "slide", function(event, ui) {
-        // Update sequence counter label
-        $('.selected-assembly-counter').text(ui.value);
-        updateRangeNavigationButtons(ui.value);
-        // Update sequence list item content
-        // Hide all sequences
-        $('.assembly-item').hide();
-        // Show selected sequence
-        $('.assembly-item-' + ui.value).show();
-        // Update assembly file name
-        $('.assembly-file-name').text($('.assembly-item-' + ui.value).attr('data-name'));
-    });
+    $('.assembly-list-slider').on( "slide", assemblyListSliderEventHandler);
     // Handle slidechange event
     // Triggered when user clicks a button or releases range handle
-    $('.assembly-list-slider').on( "slidechange", function(event, ui) {
-        // Update sequence counter label
-        $('.selected-assembly-counter').text(ui.value);
-        updateRangeNavigationButtons(ui.value);
-        // Update sequence list item content
-        // Hide all sequences
-        $('.assembly-item').hide();
-        // Show selected sequence
-        $('.assembly-item-' + ui.value).show();
-        // Update assembly file name
-        $('.assembly-file-name').text($('.assembly-item-' + ui.value).attr('data-name'));
-    });
+    $('.assembly-list-slider').on( "slidechange", assemblyListSliderEventHandler);
     // Navigate to the previous sequence
     $('.nav-prev-item').on('click', function(e){
         // Check if selected sequence counter is greater than 1
@@ -1440,7 +1475,31 @@ $(function(){
     });
 
     $('.cancel-assembly-upload-button').on('click', function(){
+        // Remove selected FASTA file
+
+        // Remove HTML element
+        $('.assembly-item[data-name="' + selectedFastaFileName + '"]').remove();
+        // Delete data object
+        delete fastaFilesAndMetadata[selectedFastaFileName];
+
+        // Update assembly list slider
+        $('.assembly-list-slider').slider("option", "max", Object.keys(fastaFilesAndMetadata).length);
+        // Recalculate total number of selected files
+        $('.total-number-of-dropped-assemblies').text(Object.keys(fastaFilesAndMetadata).length);
+
+        updateSelectedFilesUI($('.assembly-list-slider').slider('value'));
+        // Check if only 1 selected file left
+        if (Object.keys(fastaFilesAndMetadata).length === 1) {
+            // Only 1 selected file left - hide assembly navigator
+            $('.assembly-navigator').hide();
+        } else {
+            // More than 1 selected files left - update assembly navigator
+            updateRangeNavigationButtons($('.assembly-list-slider').slider('value')); 
+        }
+
+        updateSelectedFilesSummary();
+
+        // TO DO: Update progress bar
 
     });
-
 });
