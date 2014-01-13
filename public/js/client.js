@@ -1160,18 +1160,20 @@ $(function(){
 
         // Init Goolge Maps API Places Autocomplete
         // TO DO: This creates new Autocomplete object for each drag and drop file - possibly needs refactoring/performance optimization
-        window.WGST.geo.metadataAutocomplete[fileCounter] = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
+        WGST.geo.metadataAutocomplete[fileCounter] = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
 
         // When the user selects an address from the dropdown,
         // get geo coordinates
         // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
         // TO DO: Remove this event listener after metadata was sent
-        google.maps.event.addListener(window.WGST.geo.metadataAutocomplete[fileCounter], 'place_changed', function() {
+        google.maps.event.addListener(WGST.geo.metadataAutocomplete[fileCounter], 'place_changed', function() {
 
             // Get the place details from the autocomplete object.
             var place = window.WGST.geo.metadataAutocomplete[fileCounter].getPlace();
             // Set map center to selected address
             WGST.geo.map.setCenter(place.geometry.location);
+            // Set map
+            WGST.geo.markers.metadata.setMap(WGST.geo.map);
             // Set metadata marker's position to selected address
             WGST.geo.markers.metadata.setPosition(place.geometry.location);
             // Show metadata marker
@@ -1780,11 +1782,15 @@ $(function(){
         selectedFastaFileName = '';
         // Remove HTML element
         $('.assembly-list-container ul').html('');
-        // TO DO: Reset progress bar
-        //updateMetadataProgressBar();
+        // Reset progress bar
+        // Update bar's width
+        $('.adding-metadata-progress-container .progress-bar').width('0%');
+        // Update aria-valuenow attribute
+        $('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow', 0);
+        // Update percentage value
+        $('.adding-metadata-progress-container .progress-percentage').text('0%');
         // Remove metadata marker
         window.WGST.geo.markers.metadata.setMap(null);
-        window.WGST.geo.markers.metadata = {};
     });
 
     $('.assemblies-upload-ready-button').on('click', function() {
