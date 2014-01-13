@@ -43,6 +43,11 @@ app.post('/assembly/add', assembly.add);
 app.get('/assembly/:id', assembly.get);
 //app.post('/join', user.join);
 //app.post('/signin', user.signIn);
+app.get('/dev/d3tree', require('./routes/dev').d3tree);
+app.get('/dev/d3test', require('./routes/dev').d3test);
+app.get('/dev/d3dots-svg', require('./routes/dev').d3dotsSVG);
+app.get('/dev/d3dots-canvas', require('./routes/dev').d3dotsCanvas);
+app.get('/dev/canvas', require('./routes/dev').canvas);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
