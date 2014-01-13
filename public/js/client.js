@@ -1782,6 +1782,9 @@ $(function(){
         $('.assembly-list-container ul').html('');
         // TO DO: Reset progress bar
         //updateMetadataProgressBar();
+        // Remove metadata marker
+        window.WGST.geo.markers.metadata.setMap(null);
+        window.WGST.geo.markers.metadata = {};
     });
 
     $('.assemblies-upload-ready-button').on('click', function() {
@@ -1873,6 +1876,6 @@ $(function(){
 
         updateSelectedFilesSummary();
         updateMetadataProgressBar();
-
     });
+
 });
