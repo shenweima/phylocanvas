@@ -552,6 +552,7 @@ $(function(){
             metadata: {}
         },
         //geocoder: new google.maps.Geocoder(),
+        metadataAutocomplete: [], // Store Google Autocomplete object for each dropped file
         init: function() {
             this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions);
             this.markers.metadata = new google.maps.Marker({
@@ -1158,16 +1159,17 @@ $(function(){
         $('#assemblySampleDatetimeInput' + fileCounter).datetimepicker();
 
         // Init Goolge Maps API Places Autocomplete
-        // TODO: This creates new Autocomplete object for each drag and drop file. This needs to be optimized.
-        WGST.geo.metadataAutocomplete = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
+        // TO DO: This creates new Autocomplete object for each drag and drop file - possibly needs refactoring/performance optimization
+        window.WGST.geo.metadataAutocomplete[fileCounter] = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
 
         // When the user selects an address from the dropdown,
         // get geo coordinates
         // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
         // TO DO: Remove this event listener after metadata was sent
-        google.maps.event.addListener(WGST.geo.metadataAutocomplete, 'place_changed', function() {
+        google.maps.event.addListener(window.WGST.geo.metadataAutocomplete[fileCounter], 'place_changed', function() {
+
             // Get the place details from the autocomplete object.
-            var place = WGST.geo.metadataAutocomplete.getPlace();
+            var place = window.WGST.geo.metadataAutocomplete[fileCounter].getPlace();
             // Set map center to selected address
             WGST.geo.map.setCenter(place.geometry.location);
             // Set metadata marker's position to selected address
@@ -1599,6 +1601,7 @@ $(function(){
             $('.assembly-sample-species-select').length
             + $('.assembly-sample-datetime-input').length
             + $('.assembly-sample-location-input').length;
+
         // Calculate number of non empty metadata form elements
         var numberOfNonEmptyMetadataItems =
             // Filter out default value
@@ -1676,7 +1679,7 @@ $(function(){
             //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
             $(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
             // Enable 'Upload' button
-            $('.upload-assemblies-button').removeAttr('disabled');
+            $('.assemblies-upload-ready-button').removeAttr('disabled');
         }
     });
     // Increment metadata progress bar
@@ -1766,9 +1769,22 @@ $(function(){
                 }
             }, 1000
         );
-    };  
+    };
 
-    $('.upload-assemblies-button').on('click', function() {
+    $('.assemblies-upload-cancel-button').on('click', function() {
+        // Close FASTA files upload panel
+        $('.assembly-upload-panel').hide();
+        // Remove stored dropped FASTA files
+        fastaFilesAndMetadata = {};
+        // Remove stored selected FASTA file
+        selectedFastaFileName = '';
+        // Remove HTML element
+        $('.assembly-list-container ul').html('');
+        // TO DO: Reset progress bar
+        //updateMetadataProgressBar();
+    });
+
+    $('.assemblies-upload-ready-button').on('click', function() {
         $('.uploading-assembly-progress-container').fadeIn('slow', function(){
             $('.adding-metadata-progress-container').slideUp('normal', function(){
                 // Add delay for smooth visual transition
@@ -1856,8 +1872,7 @@ $(function(){
         }
 
         updateSelectedFilesSummary();
-
-        // TO DO: Update progress bar
+        updateMetadataProgressBar();
 
     });
 });
