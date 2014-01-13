@@ -349,7 +349,6 @@ if (!d3) { throw "d3 wasn't included!"};
   }
 }());
 
-
 'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
 /* Polyfills */
@@ -1594,39 +1593,48 @@ $(function(){
         $(this).closest('label').find('.not-sure-hint').toggleClass('hide-this');
     });
 
-    /*  
-    var updateProgressBar = function(stepNumber) {
-        var progressBar = $('.progress-bar'),
-            currentProgress = progressBar.css('width'),
-            // Multiply number of assemblies by number of metadata input fields
-            stepWidth = $('assembly-upload-total-number').text() * 2;
-        // Set new progress value
-        progressBar.css('width', currentProgress + (stepWidth * stepNumber));
-        console.log('Updating progress bar!');
-    };
-    */
+    var updateMetadataProgressBar = function() {
+        // Calculate total number of metadata form elements
+        var totalNumberOfMetadataItems = 
+            $('.assembly-sample-species-select').length
+            + $('.assembly-sample-datetime-input').length
+            + $('.assembly-sample-location-input').length;
+        // Calculate number of non empty metadata form elements
+        var numberOfNonEmptyMetadataItems =
+            // Filter out default value
+            $('.assembly-sample-species-select').filter(function(){
+                return $(this).val() !== '0';
+            }).length
+            // Filter out empty datetime inputs
+            + $('.assembly-sample-datetime-input').filter(function(){
+                return this.value.length !== 0;
+            }).length
+            // Filter out empty location inputs
+            + $('.assembly-sample-location-input').filter(function(){
+                return this.value.length !== 0;
+            }).length;
 
-    // TODO: This should work for general case where number of increment steps is unknown
-    var incrementMetadataProgressBar = function() {
-        var newProgressValue = parseInt($('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow'), 10) + 30;
+        // Calculate new progress bar percentage value
+        var newProgressBarPercentageValue = Math.floor(numberOfNonEmptyMetadataItems * 100 / totalNumberOfMetadataItems);
+
         // Update bar's width
-        $('.adding-metadata-progress-container .progress-bar').width(newProgressValue + '%');
+        $('.adding-metadata-progress-container .progress-bar').width(newProgressBarPercentageValue + '%');
         // Update aria-valuenow attribute
-        $('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow', newProgressValue);
+        $('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow', newProgressBarPercentageValue);
         // Update percentage value
-        $('.adding-metadata-progress-container .progress-percentage').text(newProgressValue + '%');
+        $('.adding-metadata-progress-container .progress-percentage').text(newProgressBarPercentageValue + '%');
     };
 
     // Show next form block when user selects species
-    // TODO: Do now increment metadata progress bar more than once
+    // TO DO: Do now increment metadata progress bar more than once
     $('.assembly-list-container').on('change', '.assembly-sample-species-select', function(){
         // Show next form block
         $(this).closest('.form-block').next('.form-block').fadeIn();
     });
-    // Increment metadata progress bar only once
-    $('.assembly-list-container').one('change', '.assembly-sample-species-select', function(){
+    // Increment metadata progress bar
+    $('.assembly-list-container').on('change', '.assembly-sample-species-select', function(){
         // Increment progress bar
-        incrementMetadataProgressBar();
+        updateMetadataProgressBar();
     });
 
     // Show next form block when user fills in an input
@@ -1643,10 +1651,10 @@ $(function(){
         $(this).closest('.form-block').next('.form-block').find('.assembly-sample-location-input').focus();
         //$('.assembly-sample-location-input').focus();
     });
-    // Increment metadata progress bar only once
-    $('.assembly-list-container').one('change change.dp', '.assembly-sample-datetime-input', function(){
+    // Increment metadata progress bar
+    $('.assembly-list-container').on('change change.dp', '.assembly-sample-datetime-input', function(){
         // Increment progress bar
-        incrementMetadataProgressBar();
+        updateMetadataProgressBar();
     });
     $('.assembly-list-container').one('hide.dp', '.assembly-sample-datetime-input', function(event){
         var that = $(this);
@@ -1671,10 +1679,10 @@ $(function(){
             $('.upload-assemblies-button').removeAttr('disabled');
         }
     });
-    // Increment metadata progress bar only once
-    $('.assembly-list-container').one('change', '.assembly-sample-location-input', function(){
+    // Increment metadata progress bar
+    $('.assembly-list-container').on('change', '.assembly-sample-location-input', function(){
         // Increment progress bar
-        incrementMetadataProgressBar();
+        updateMetadataProgressBar();
         // Hide progress hint
         $('.adding-metadata-progress-container .progress-hint').fadeOut();
     });
