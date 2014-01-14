@@ -7,6 +7,7 @@ var express = require('express'),
 	routes = require('./routes'),
 	user = require('./routes/user'),
 	assembly = require('./routes/assembly'),
+	collection = require('./routes/collection');
 	http = require('http'),
 	path = require('path'),
 	passport = require('passport'),
@@ -41,6 +42,7 @@ app.get('/users', user.list);
 app.get('/users/name/:name', user.name);
 app.post('/assembly/add', assembly.add);
 app.get('/assembly/:id', assembly.get);
+app.get('/collection/:id', collection.get);
 //app.post('/join', user.join);
 //app.post('/signin', user.signIn);
 app.get('/dev/d3tree', require('./routes/dev').d3tree);

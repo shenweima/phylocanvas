@@ -76,7 +76,7 @@ exports.add = function(req, res) {
 		console.log('[MLST] Assembly file content: ' + req.body.assembly.substr(0, 50) + '...');
 		console.log('[MLST] User assembly id: ' + req.body.name);
 
-		// TO DO: Prepare object to publish
+		// TODO: Prepare object to publish
 		var assembly = {
 			"speciesId" : "1280",
 			"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
@@ -183,12 +183,11 @@ exports.add = function(req, res) {
 	});
 };
 
-// TODO: Return fingerprint data
 exports.get = function(req, res) {
 
-	console.log('[MLST] Received assembly id: ' + req.params.id);
+	console.log('[MLST][LOG] Received collection id: ' + req.params.id);
 
-	var assembly = {};
+	var collection = {};
 
 	// Get requested assembly from db
 	var couchbase = require('couchbase');
@@ -200,12 +199,12 @@ exports.get = function(req, res) {
 		if (err) throw err;
 		db.get(req.params.id, function(err, result) {
 			if (err) throw err;
-
-			assembly = result.value;
+			
+			collection = result.value;
 
 			console.log(result.value);
 
-			res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
+			res.render('index', { requestedAssemblyObject: JSON.stringify(collection) });
 
 		});
 	});

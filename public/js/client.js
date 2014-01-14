@@ -1732,22 +1732,60 @@ $(function(){
         // Do something
     });*/
 
+    /*
     var incrementProgressBar = function(stepWidth) {
         $('.uploading-progress-container .progress-bar').width(parseInt($('.uploading-progress-container .progress-bar').width() + stepWidth, 10) + '%');
         $('.uploading-progress-container .progress-percentage').text(parseInt($('.uploading-progress-container .progress-bar').width() + stepWidth, 10) + '%');
     };
+    */
 
-    var endProgressBar = function(stepWidth) {
-        $('.progress-bar').width('100%');
-        $('.uploading-progress-container .progress-percentage').text('100%');
-        $('.uploading-progress-container .progress').removeClass('active');
+    var updateAssemblyUploadProgressBar = function() {
+        // Get total number of assemblies to upload
+        var totalNumberOfAssemblies = Object.keys(fastaFilesAndMetadata).length;
+        // Calculate number of uploaded assemblies
+        var numberOfUploadedAssemblies = 0;
+        for (var fastaFileAndMetadata in fastaFilesAndMetadata) {
+            if (fastaFilesAndMetadata.hasOwnProperty(fastaFileAndMetadata)) {
+                if (fastaFilesAndMetadata[fastaFileAndMetadata].uploaded) {
+                    numberOfUploadedAssemblies = numberOfUploadedAssemblies + 1;
+                }
+            }
+        }
 
+        // If all assemblies have been uploaded then end progress bar
+        if (numberOfUploadedAssemblies === totalNumberOfAssemblies) {
+            endAssemblyUploadProgressBar();
+        } else {
+            // Calculate new progress bar percentage value
+            var newProgressBarPercentageValue = Math.floor(numberOfUploadedAssemblies * 100 / totalNumberOfAssemblies);
+
+            // Update bar's width
+            $('.uploading-assembly-progress-container .progress-bar').width(newProgressBarPercentageValue + '%');
+            // Update aria-valuenow attribute
+            $('.uploading-assembly-progress-container .progress-bar').attr('aria-valuenow', newProgressBarPercentageValue);
+            // Update percentage value
+            $('.uploading-assembly-progress-container .progress-percentage').text(newProgressBarPercentageValue + '%');
+        }
+    };
+
+    var endAssemblyUploadProgressBar = function() {
+        // Update bar's width
+        $('.uploading-assembly-progress-container .progress-bar').width('100%');
+        // Update aria-valuenow attribute
+        $('.uploading-assembly-progress-container .progress-bar').attr('aria-valuenow', 100);
+        // Update percentage value
+        $('.uploading-assembly-progress-container .progress-percentage').text('100%');
+
+        $('.uploading-assembly-progress-container .progress').removeClass('active');       
+
+        // Allow smooth visual transition of elements
         setTimeout(function(){
-            $('.uploading-progress-container .progress-percentage').text('All done!');
-            $('.uploading-progress-container .progress').slideUp(function(){
+            $('.uploading-assembly-progress-container .progress-percentage').text('All done!');
+            $('.uploading-assembly-progress-container .progress').slideUp(function(){
+                // Allow smooth visual transition of elements
                 setTimeout(function(){
                     $('.uploaded-assembly-url').slideDown(function(){
-                        $('.uploading-progress-container .progress-label').slideUp();
+                        $('.uploading-assembly-progress-container .progress-label').slideUp();
                     });
                 }, 500);
             });
@@ -1760,7 +1798,7 @@ $(function(){
         var timer = setInterval(
             function() {
                 $('.visit-url-seconds-number').text(seconds);
-                seconds--;
+                seconds = seconds - 1;
                 if (seconds === 0) {
                     // Hide processing assembly seconds countdown
                     $('.uploaded-assembly-process-countdown-label').fadeOut(function(){
@@ -1769,8 +1807,7 @@ $(function(){
                     });
                     clearInterval(timer);
                 }
-            }, 1000
-        );
+            }, 1000);
     };
 
     $('.assemblies-upload-cancel-button').on('click', function() {
@@ -1793,65 +1830,45 @@ $(function(){
         window.WGST.geo.markers.metadata.setMap(null);
     });
 
+    var assemblyUploadDoneHandler = function(fastaFile) {
+        return function(data, textStatus, jqXHR) {
+            console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
+            // Create assembly URL
+            var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FP_COMP_' + JSON.parse(data).assemblyId;
+            $('.uploaded-assembly-url-input').val(url);
+
+            // Mark assembly as uploaded
+            fastaFilesAndMetadata[fastaFile].uploaded = true;
+
+            updateAssemblyUploadProgressBar();
+        };
+    };
+
     $('.assemblies-upload-ready-button').on('click', function() {
         $('.uploading-assembly-progress-container').fadeIn('slow', function(){
             $('.adding-metadata-progress-container').slideUp('normal', function(){
                 // Add delay for smooth visual transition
                 setTimeout(function(){
+                    // Post each FASTA file separately
                     for (var fastaFile in fastaFilesAndMetadata) {
                         if (fastaFilesAndMetadata.hasOwnProperty(fastaFile)) {
-
-                            incrementProgressBar(25);
-
-                            // POST to Node.js end
                             $.ajax({
                                 type: 'POST',
                                 url: '/assembly/add/',
                                 datatype: 'json', // http://stackoverflow.com/a/9155217
                                 data: fastaFilesAndMetadata[fastaFile]
-                            }).done(function(message){
-                                console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
-                                // Create assembly URL
-                                var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FP_COMP_' + JSON.parse(message).assemblyId;
-                                //console.log(url);
-                                $('.uploaded-assembly-url-input').val(url);
-                                endProgressBar();
-                            }).fail(function(jqXHR, textStatus, errorThrown){
+                            })
+                            .done(assemblyUploadDoneHandler(fastaFile))
+                            .fail(function(jqXHR, textStatus, errorThrown) {
                                 console.log('[WGST] Failed to send FASTA file object to server or received error message');
                                 console.error(textStatus);
                                 console.error(errorThrown);
                                 console.error(jqXHR);
-                                endProgressBar();
+                                //endProgressBar();
+                                updateAssemblyUploadProgressBar();
                             });
-                        }
-                    }
-                    /*
-                    for (var i = 0; i < fastaFilesAndMetadata.length; i++) {
-
-                        incrementProgressBar(25);
-
-                        // POST to Node.js end
-                        $.ajax({
-                            type: 'POST',
-                            url: '/assembly/add/',
-                            datatype: 'json', // http://stackoverflow.com/a/9155217
-                            data: fastaFilesAndMetadata[i]
-                        }).done(function(message){
-                            console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
-                            // Create assembly URL
-                            var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FP_COMP_' + JSON.parse(message).assemblyId;
-                            //console.log(url);
-                            $('.uploaded-assembly-url-input').val(url);
-                            endProgressBar();
-                        }).fail(function(jqXHR, textStatus, errorThrown){
-                            console.log('[WGST] Failed to send FASTA file object to server or received error message');
-                            console.error(textStatus);
-                            console.error(errorThrown);
-                            console.error(jqXHR);
-                            endProgressBar();
-                        });
-                    }
-                    */
+                        } // if
+                    } // for
                 }, 300);
             });
         });
@@ -1871,6 +1888,7 @@ $(function(){
         $('.total-number-of-dropped-assemblies').text(Object.keys(fastaFilesAndMetadata).length);
 
         updateSelectedFilesUI($('.assembly-list-slider').slider('value'));
+
         // Check if only 1 selected file left
         if (Object.keys(fastaFilesAndMetadata).length === 1) {
             // Only 1 selected file left - hide assembly navigator
