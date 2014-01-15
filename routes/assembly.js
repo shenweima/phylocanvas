@@ -45,10 +45,9 @@ exports.add = function(req, res) {
 
 	var uuid = require('node-uuid');
 
-	// TODO: Validate request
+	// TO DO: Validate request
 
 	// Call RabbitMQ
-
 	var amqp = require('amqp'),
 		connection = amqp.createConnection({
 			host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
@@ -58,23 +57,22 @@ exports.add = function(req, res) {
 		});
 
 	connection.on('error', function(error) {
-	    console.error("[MLST][ERROR] Ignoring error: " + error);
+	    console.error("[WGST][ERROR] Ignoring error: " + error);
 	});
 
 	connection.on("ready", function(){
-
-		console.log('[MLST] Connection is ready');
+		console.log('[WGST] Connection is ready');
 
 		var queueId = uuid.v4(),
 			exchange = connection.exchange('wgst-ex', {
 				type: 'direct',
 				passive: true
 			}, function(exchange) {
-				console.log('[MLST] Exchange "' + exchange.name + '" is open');
+				console.log('[WGST] Exchange "' + exchange.name + '" is open');
 			});
 
-		console.log('[MLST] Assembly file content: ' + req.body.assembly.substr(0, 50) + '...');
-		console.log('[MLST] User assembly id: ' + req.body.name);
+		console.log('[WGST] Assembly file content: ' + req.body.assembly.substr(0, 50) + '...');
+		console.log('[WGST] User assembly id: ' + req.body.name);
 
 		// TO DO: Prepare object to publish
 		var assembly = {
@@ -93,11 +91,11 @@ exports.add = function(req, res) {
 			replyTo: queueId
 		}, function(err){
 			if (err) {
-				console.log('[MLST][ERROR] Error in trying to publish');
+				console.log('[WGST][ERROR] Error in trying to publish');
 				return; // return undefined?
 			}
 
-			console.log('[MLST] Message was published');
+			console.log('[WGST] Message was published');
 
 		});
 
@@ -105,45 +103,43 @@ exports.add = function(req, res) {
 			.queue(queueId, { // Create queue
 				exclusive: true
 			}, function(queue){
-
-				console.log('[MLST] Queue "' + queue.name + '" is open');
-
+				console.log('[WGST] Queue "' + queue.name + '" is open');
 			}) // Subscribe to response message
 			.subscribe(function(message, headers, deliveryInfo){
-			
-				console.log('[MLST] Received response');
+				console.log('[WGST] Received response');
+				console.log('[WGST] Preparing metadata object');
 
 				// Insert assembly metadata into db
-				var demoKey = "art", // 'assembly_metadata' + userAssemblyId
-					demoMetadata = {
-						docType: "The type of the document", // 'assembly_metadata'
-						docId: "uuid_" + message.assemblyId,
+				var metadataKey = 'assembly_metadata_' + message.assemblyId, // 'assembly_metadata_' + userAssemblyId
+					metadata = {
+						docType: 'The type of the document', // 'assembly_metadata'
+						docId: 'uuid_' + message.assemblyId,
 						assemblyId: message.assemblyId,
-						uploaderId: "uploader_uuid",
+						uploaderId: 'uploader_uuid',
 						owners: ['user_uuid', 'user_uuid', 'user_uuid'],
 						institutes: ['Imperial College London', 'Wellcome Trust Sanger Institute'], // Auto suggest (as far as we can)
 						isolateName: 'Isolate name', // Freetext field
 						species: 12345678, // Change data type from integer to string
-						dateLoaded: "2013-12-19T11:54:30.207Z",
-						dateCollected: "2013-12-19T11:54:30.207Z",
+						dateLoaded: '2013-12-19T11:54:30.207Z',
+						dateCollected: '2013-12-19T11:54:30.207Z',
 						geographicLocation: {
-						    type: "Point", 
+						    type: 'Point', 
 						    coordinates: [[30, 10], [15, 25]]
 						},
-						geographicDescription: "London, United Kingdom",
-						isolationSource: "Left hand.", // Auto suggest
-						primaryPublication: "12748199", // PubMed or DOI | { idType: "string", id: "string" }
-						otherPublications: ['12748196', '12748197', '12748198'], // PubMed or DOI | { idType: "string", id: "string" }
-						sraLink: "1234567890", // just use numerical id
-						genbankLink: "1234567890", // just use numerical id
-						sequencingMethod: "Type of sequencing device", // Freetext + suggestions
+						geographicDescription: 'London, United Kingdom',
+						isolationSource: 'Left hand', // Auto suggest
+						primaryPublication: '12748195', // PubMed or DOI | { idType: 'string', id: 'string' }
+						otherPublications: ['12748196', '12748197', '12748198'], // PubMed or DOI | { idType: 'string', id: 'string' }
+						sraLink: '1234567890', // just use numerical id
+						genbankLink: '1234567890', // just use numerical id
+						sequencingMethod: 'Type of sequencing device', // Freetext + suggestions
 						assemblyMethod: {
-							method: "method_name", // Freetext
-							parameters: "parameters" // Freetext
+							method: 'method_name', // Freetext
+							parameters: 'parameters' // Freetext
 						},
 						experimentalPhenotypes: {
-							extraField1: "extra information 1", // Free key, free value
-							extraField2: "extra information 2" // Free key, free value
+							extraField1: 'extra information 1', // Free key, free value
+							extraField2: 'extra information 2' // Free key, free value
 						}
 				};
 
@@ -154,17 +150,17 @@ exports.add = function(req, res) {
 					password: '.oneir66'
 				}, function(err) {
 					if (err) {
-						console.error('[MLST][ERROR] ' + error);
+						console.error('[WGST][ERROR] ' + error);
 						return;
 					}
 
-					db.set(demoKey, demoMetadata, function(err, result) {
+					db.set(metadataKey, metadata, function(err, result) {
 						if (err) {
-							console.error('[MLST][ERROR] ' + error);
+							console.error('[WGST][ERROR] ' + error);
 							return;
 						}
 
-						console.log("Inserted metadata");
+						console.log("[WGST] Inserted metadata");
 						console.log(result);
 					});
 				});
@@ -183,10 +179,10 @@ exports.add = function(req, res) {
 	});
 };
 
-// TODO: Return fingerprint data
+// TO DO: Return fingerprint data
 exports.get = function(req, res) {
 
-	console.log('[MLST] Received assembly id: ' + req.params.id);
+	console.log('[WGST] Received assembly id: ' + req.params.id);
 
 	var assembly = {};
 

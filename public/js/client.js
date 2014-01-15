@@ -427,7 +427,9 @@ $(function(){
     (function(){
 
         // Init jQuery UI draggable interaction
-        $('.wgst-draggable').draggable({ handle: ".wgst-panel-header" });
+        //$('.wgst-draggable').draggable({ handle: ".wgst-panel-header" });
+        $('.wgst-draggable').draggable({ handle: ".wgst-draggable-handle" });
+        //$('.wgst-resizable').resizable();
 
         // Init jQuery IU slider widget
         $('.assembly-list-slider').slider({
@@ -462,9 +464,9 @@ $(function(){
         // Toggle graph
         $('.graph-toggle-button').on('click', function(){
             if ($(this).hasClass('active')) {
-                $('#graph').hide();
+                $('.tree-panel').hide();
             } else {
-                $('#graph').show();
+                $('.tree-panel').show();
             }
         });
 
@@ -476,6 +478,97 @@ $(function(){
                 $('#map').show();
             }
         });
+
+
+
+        // Show graph
+        $('.graph-toggle-button').trigger('click');
+
+        // Store all graph markers
+        var markers = {};
+
+        // Init tree
+        var phylocanvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas'));
+        phylocanvas.load('/data/EARSS.nwk');
+        phylocanvas.treeType = 'rectangular';
+        //phylocanvas.showLabels = false;
+        phylocanvas.baseNodeSize = 0.5;
+        phylocanvas.selectedNodeSizeIncrease = 0.5;
+        phylocanvas.selectedColor = '#0059DE';
+        phylocanvas.rightClickZoom = true;
+
+        phylocanvas.onselected = function(nodeIds) {
+
+            console.log('Clicked on canvas');
+            console.log('Keys: ' + Object.keys(markers));
+
+            if (typeof nodeIds === 'string' && nodeIds.length > 0) {
+                // Get metadata for each node
+
+                // Remove existing markers
+                var existingMarkerCounter = 0,
+                    existingMarker;
+
+                for (existingMarker in markers) {
+                    if (markers.hasOwnProperty(existingMarker)) {
+                        markers[existingMarker].setMap(null);
+                    }
+                }
+
+                // Convert list of node ids to array
+                var arrayOfNodeIds = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];//nodeIds.split(',');
+
+                // Create new markers
+                var nodeCounter = 0,
+                    nodeId = 0,
+                    marker;
+
+                for (; nodeCounter < arrayOfNodeIds.length;) {
+                    console.log(arrayOfNodeIds[nodeCounter]);
+
+                    nodeId = arrayOfNodeIds[nodeCounter];
+
+                    console.log(parseFloat('-25.' + nodeCounter + '3882'));
+
+                    // Create marker for this node
+                    marker = new google.maps.Marker({
+                        //position: new google.maps.LatLng(-25.363882, 131.044922),
+                        position: new google.maps.LatLng(parseFloat('51.' + (Math.floor(Math.random() * 30) + 1) + '1214'), parseFloat('-0.' + (Math.floor(Math.random() * 30) + 1) + '9824')),
+                        map: window.WGST.geo.map,
+                        optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+                    });
+
+                    markers[nodeId] = marker;
+
+                    // Increment counter
+                    nodeCounter = nodeCounter + 1;
+                }
+            }
+        };
+
+        //$('canvas').attr('height', '500').attr('width', '500');
+
+        //phylocanvas.canvas.width = 100;
+        //phylocanvas.canvas.height = 100;
+
+        /*
+        $.ajax({
+            type: 'GET',
+            url: '/collection/global',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: fastaFile
+        })
+        .done(function(data, textStatus, jqXHR){
+            // Convert NWK to JSON
+            var initTreeJSON = NEWICK.parse(data);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log('[WGST] Failed to load init NWK tree file');
+            console.error(textStatus);
+            console.error(errorThrown);
+            console.error(jqXHR);
+        });
+        */
 
     })();
 
@@ -1833,6 +1926,7 @@ $(function(){
     var assemblyUploadDoneHandler = function(fastaFile) {
         return function(data, textStatus, jqXHR) {
             console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
+
             // Create assembly URL
             var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FP_COMP_' + JSON.parse(data).assemblyId;
             $('.uploaded-assembly-url-input').val(url);
@@ -1845,6 +1939,11 @@ $(function(){
     };
 
     $('.assemblies-upload-ready-button').on('click', function() {
+        // Remove metadata marker
+        window.WGST.geo.markers.metadata.setMap(null);
+        
+        // TO DO: Disable this button
+
         $('.uploading-assembly-progress-container').fadeIn('slow', function(){
             $('.adding-metadata-progress-container').slideUp('normal', function(){
                 // Add delay for smooth visual transition

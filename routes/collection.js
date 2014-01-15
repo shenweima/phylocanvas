@@ -185,6 +185,15 @@ exports.add = function(req, res) {
 
 exports.get = function(req, res) {
 
+	// TO DO: Switch to '0' to represent global
+	if (req.param('id') === 'global') {
+		// Read EARSS.nwk file, convert to JSON and send it back
+
+		
+
+	}
+
+	/*
 	console.log('[MLST][LOG] Received collection id: ' + req.params.id);
 
 	var collection = {};
@@ -199,7 +208,7 @@ exports.get = function(req, res) {
 		if (err) throw err;
 		db.get(req.params.id, function(err, result) {
 			if (err) throw err;
-			
+
 			collection = result.value;
 
 			console.log(result.value);
@@ -208,6 +217,7 @@ exports.get = function(req, res) {
 
 		});
 	});
+	*/
 
 	/*
 	var assembly = {
