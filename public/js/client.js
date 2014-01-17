@@ -1254,6 +1254,41 @@ $(function(){
         selectedFastaFileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name');  
     };
 
+    var resetAssemlyUploadPanel = function() {
+
+        // Empty list of selected FASTA files and metadata
+        fastaFilesAndMetadata = {};
+
+        // Reset stats
+
+        // Clear list of assembly items
+        $('.assembly-list-container ul').html('');
+        // Set average number of contigs per assembly
+        $('.assembly-sequences-average').text(0);
+        // Set total number of selected assemblies/files
+        $('.assembly-upload-total-number').text(0);
+
+        // Reset adding metadata progress bar
+
+        // Update bar's width
+        $('.adding-metadata-progress-container .progress-bar').width('0%');
+        // Update aria-valuenow attribute
+        $('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow', 0);
+        // Update percentage value
+        $('.adding-metadata-progress-container .progress-percentage').text('0%');
+
+        // Reset uploading assemblies and metadata progress bar
+
+        // Update bar's width
+        $('.uploading-assembly-progress-container .progress-bar').width('0%');
+        // Update aria-valuenow attribute
+        $('.uploading-assembly-progress-container .progress-bar').attr('aria-valuenow', 0);
+        // Update percentage value
+        $('.uploading-assembly-progress-container .progress-percentage').text('0%');
+ 
+        //$('.uploading-assembly-progress-container .progress').removeClass('active');
+    };
+
     var updateSelectedFilesSummary = function() {
         // Calculate average number of selected contigs
         var contigsTotalNumber = 0;
@@ -1265,7 +1300,7 @@ $(function(){
 
         // Set total number of selected assemblies/files
         $('.assembly-upload-total-number').text(Object.keys(fastaFilesAndMetadata).length);
-    }
+    };
 
     var assemblyListSliderEventHandler = function(event, ui) {
         updateSelectedFilesUI(ui.value);
@@ -1454,14 +1489,7 @@ $(function(){
         // Do something
     });*/
 
-    /*
-    var incrementProgressBar = function(stepWidth) {
-        $('.uploading-progress-container .progress-bar').width(parseInt($('.uploading-progress-container .progress-bar').width() + stepWidth, 10) + '%');
-        $('.uploading-progress-container .progress-percentage').text(parseInt($('.uploading-progress-container .progress-bar').width() + stepWidth, 10) + '%');
-    };
-    */
-
-    var updateAssemblyUploadProgressBar = function() {
+    var updateAssemblyUploadProgressBar = function(collectionId) {
         // Get total number of assemblies to upload
         var totalNumberOfAssemblies = Object.keys(fastaFilesAndMetadata).length;
         // Calculate number of uploaded assemblies
@@ -1476,7 +1504,7 @@ $(function(){
 
         // If all assemblies have been uploaded then end progress bar
         if (numberOfUploadedAssemblies === totalNumberOfAssemblies) {
-            endAssemblyUploadProgressBar();
+            endAssemblyUploadProgressBar(collectionId);
         } else {
             // Calculate new progress bar percentage value
             var newProgressBarPercentageValue = Math.floor(numberOfUploadedAssemblies * 100 / totalNumberOfAssemblies);
@@ -1490,7 +1518,7 @@ $(function(){
         }
     };
 
-    var endAssemblyUploadProgressBar = function() {
+    var endAssemblyUploadProgressBar = function(collectionId) {
         // Update bar's width
         $('.uploading-assembly-progress-container .progress-bar').width('100%');
         // Update aria-valuenow attribute
@@ -1498,7 +1526,7 @@ $(function(){
         // Update percentage value
         $('.uploading-assembly-progress-container .progress-percentage').text('100%');
 
-        $('.uploading-assembly-progress-container .progress').removeClass('active');
+        //$('.uploading-assembly-progress-container .progress').removeClass('active');
 
         // Allow smooth visual transition of elements
         setTimeout(function(){
@@ -1524,6 +1552,43 @@ $(function(){
                     $('.uploaded-assembly-process-countdown-label').fadeOut(function(){
                         // Update status
                         $('.uploaded-assembly-process-status').text('finished processing');
+
+                        console.log('[WGST] Getting collection with id: ' + collectionId);
+
+                        // Get collection that you just created/modified
+                        $.ajax({
+                            type: 'POST',
+                            url: '/collection/',
+                            datatype: 'json', // http://stackoverflow.com/a/9155217
+                            data: {
+                                collectionId: collectionId
+                            }
+                        })
+                        .done(function(data, textStatus, jqXHR) {
+                            console.log('[WGST] Received collection with id: ' + collectionId);
+                            //console.log(data);
+
+                            // TO DO: Parse results data
+                            // TO DO: Create table with results for each assembly in this collection
+                            // TO DO: Highlight parent node on the reference tree
+                            // TO DO: Create markers for each assembly in this collection?
+
+                            // Close assembly-upload-panel
+                            $('.assembly-upload-panel').fadeOut('fast', function(){
+                                // Reset assembly upload panel
+                                resetAssemlyUploadPanel();
+                            });
+
+                            // Open assembly-panel
+                            $('.assembly-panel').fadeIn('fast');
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            console.log('[WGST][ERROR] Failed to get collection id');
+                            console.error(textStatus);
+                            console.error(errorThrown);
+                            console.error(jqXHR);
+                        });
+
                     });
                     clearInterval(timer);
                 }
@@ -1550,7 +1615,7 @@ $(function(){
         window.WGST.geo.markers.metadata.setMap(null);
     });
 
-    var assemblyUploadDoneHandler = function(fastaFile) {
+    var assemblyUploadDoneHandler = function(collectionId, fastaFile) {
         return function(data, textStatus, jqXHR) {
             console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
 
@@ -1561,7 +1626,7 @@ $(function(){
             // Mark assembly as uploaded
             fastaFilesAndMetadata[fastaFile].uploaded = true;
 
-            updateAssemblyUploadProgressBar();
+            updateAssemblyUploadProgressBar(collectionId);
         };
     };
 
@@ -1607,7 +1672,7 @@ $(function(){
                                     datatype: 'json', // http://stackoverflow.com/a/9155217
                                     data: fastaFilesAndMetadata[fastaFile]
                                 })
-                                .done(assemblyUploadDoneHandler(fastaFile))
+                                .done(assemblyUploadDoneHandler(collectionIdResponse.uuid, fastaFile))
                                 .fail(function(jqXHR, textStatus, errorThrown) {
                                     console.log('[WGST][ERROR] Failed to send FASTA file object to server or received error message');
                                     console.error(textStatus);

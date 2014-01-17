@@ -45,7 +45,7 @@ app.get('/users', user.list);
 app.get('/users/name/:name', user.name);
 
 // Collection routes
-app.get('/collection/:id', collection.get);
+app.post('/collection/', collection.get);
 app.post('/collection/add', collection.add);
 
 // Assembly routes
