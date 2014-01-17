@@ -73,13 +73,15 @@ exports.add = function(req, res) {
 
 		console.log('[WGST] Assembly file content: ' + req.body.assembly.substr(0, 50) + '...');
 		console.log('[WGST] User assembly id: ' + req.body.name);
+		console.log('[WGST] Collection id: ' + req.body.collectionId);
 
-		// TO DO: Prepare object to publish
+		// Prepare object to publish
 		var assembly = {
 			"speciesId" : "1280",
 			"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
 			"userAssemblyId" : req.body.name,
-			"taskId" : "Experiment_1"
+			"taskId" : "Experiment_1",
+			"collectionId": req.body.collectionId
 		};
 
 		// Publish message
@@ -96,7 +98,6 @@ exports.add = function(req, res) {
 			}
 
 			console.log('[WGST] Message was published');
-
 		});
 
 		connection

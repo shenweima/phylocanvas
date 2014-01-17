@@ -37,19 +37,30 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+// App home route
 app.get('/', routes.index);
+
+// User routes
 app.get('/users', user.list);
 app.get('/users/name/:name', user.name);
-app.post('/assembly/add', assembly.add);
-app.get('/assembly/:id', assembly.get);
+
+// Collection routes
 app.get('/collection/:id', collection.get);
-//app.post('/join', user.join);
-//app.post('/signin', user.signIn);
+app.post('/collection/add', collection.add);
+
+// Assembly routes
+app.get('/assembly/:id', assembly.get);
+app.post('/assembly/add', assembly.add);
+
+// Test routes
 app.get('/dev/d3tree', require('./routes/dev').d3tree);
 app.get('/dev/d3test', require('./routes/dev').d3test);
 app.get('/dev/d3dots-svg', require('./routes/dev').d3dotsSVG);
 app.get('/dev/d3dots-canvas', require('./routes/dev').d3dotsCanvas);
 app.get('/dev/canvas', require('./routes/dev').canvas);
+
+//app.post('/join', user.join);
+//app.post('/signin', user.signIn);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
