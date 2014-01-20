@@ -128,8 +128,6 @@ $(function(){
             }
         });
 
-
-
         // Show graph
         $('.graph-toggle-button').trigger('click');
 
@@ -1136,7 +1134,7 @@ $(function(){
         $('.assembly-upload-panel').fadeIn('fast');
 
         // Set the highest z index for this panel
-        $('.assembly-upload-panel').trigger('click');
+        $('.assembly-upload-panel').trigger('mousedown');
 
             // FileList object
             // https://developer.mozilla.org/en-US/docs/Web/API/FileList
@@ -1568,22 +1566,47 @@ $(function(){
                             }
                         })
                         .done(function(data, textStatus, jqXHR) {
-                            console.log('[WGST] Received collection with id: ' + collectionId);
-                            //console.log(data);
+                            console.log('[WGST] Got collection with id: ' + collectionId);
+                            console.log(data);
 
-                            // TO DO: Parse results data
-                            // TO DO: Create table with results for each assembly in this collection
-                            // TO DO: Highlight parent node on the reference tree
-                            // TO DO: Create markers for each assembly in this collection?
+                            console.log('[WGST] Requesting assembly data for ids: ' + data.assemblyIdentifiers);
 
-                            // Close assembly-upload-panel
-                            $('.assembly-upload-panel').fadeOut('fast', function(){
-                                // Reset assembly upload panel
-                                resetAssemlyUploadPanel();
+                            // Get assemblies data
+                            $.ajax({
+                                type: 'POST',
+                                url: '/assembly',
+                                datatype: 'json', // http://stackoverflow.com/a/9155217
+                                data: {
+                                    assemblyIds: data.assemblyIdentifiers
+                                }
+                            })
+                            .done(function(data, textStatus, jqXHR) {
+
+                                console.log('Assemblies:');
+                                console.log(data);
+
+                                // TO DO: Create table with results for each assembly in this collection
+                                
+
+                                // TO DO: Highlight parent node on the reference tree
+                                // TO DO: Create markers for each assembly in this collection?
+
+                                // Close assembly-upload-panel
+                                $('.assembly-upload-panel').fadeOut('fast', function(){
+                                    // Reset assembly upload panel
+                                    resetAssemlyUploadPanel();
+                                });
+
+                                // Bring assembly-panel panel to front and open
+                                $('.assembly-panel').trigger('mousedown').fadeIn('fast');
+
+                            })
+                            .fail(function(jqXHR, textStatus, errorThrown) {
+                                console.log('[WGST][ERROR] Failed to get assembly data');
+                                console.error(textStatus);
+                                console.error(errorThrown);
+                                console.error(jqXHR);
                             });
-
-                            // Open assembly-panel
-                            $('.assembly-panel').fadeIn('fast');
                         })
                         .fail(function(jqXHR, textStatus, errorThrown) {
                             console.log('[WGST][ERROR] Failed to get collection id');
@@ -1591,7 +1614,6 @@ $(function(){
                             console.error(errorThrown);
                             console.error(jqXHR);
                         });
-
                     });
                     clearInterval(timer);
                 }
@@ -1726,10 +1748,10 @@ $(function(){
         updateMetadataProgressBar();
     });
 
-    $('.wgst-panel').on('click', function(){
+    $('.wgst-panel').on('mousedown', function(){
         // Change z index for all panels
         $('.wgst-panel').css('z-index', 100);
-        // Set the highest z index for this (selected) panel
+        // Set the  highest z index for this (selected) panel
         $(this).css('z-index', 1000);
     });
 

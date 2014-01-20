@@ -180,7 +180,7 @@ exports.add = function(req, res) {
 	});
 };
 
-// TO DO: Return fingerprint data
+// Return fingerprint data
 exports.get = function(req, res) {
 
 	console.log('[WGST] Received assembly id: ' + req.params.id);
@@ -370,4 +370,281 @@ exports.get = function(req, res) {
 	}
 	*/
 
+};
+
+// Return fingerprint data
+exports.getData = function(req, res) {
+	console.log('[WGST] Received assembly ids: ' + req.body.assemblyIds);
+
+	//var assemblies = [];
+
+	// Get requested assembly from db
+	var couchbase = require('couchbase');
+	var db = new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: 'test_wgst',
+		password: '.oneir66'
+	}, function(err) {
+		if (err) throw err;
+
+		// Prepend FP_COMP_ to each assembly id
+		var assemblyIds = req.body.assemblyIds.map(function(assemblyId){
+			return 'FP_COMP_' + assemblyId;
+		});
+
+		console.log(assemblyIds);
+
+		var assemblies = [{
+			"type": "FINGERPRINT_COMPARISON",
+			"documentKey": "FINGERPRINT_COMPARISON_100547576489977442319713545768032221790",
+			"assemblyId": "100547576489977442319713545768032221790",
+			"speciesId": "1280",
+			"timestamp": "20131203_170734",
+			"scores": {
+				"gi|82655308|emb|AJ938182.1|": {
+					"targetFp": "gi|82655308|emb|AJ938182.1|",
+					"score": 0
+				},
+				"gi|47118324|dbj|BA000018.3|": {
+					"targetFp": "gi|47118324|dbj|BA000018.3|",
+					"score": 0
+				},
+				"gi|150373012|dbj|AP009351.1|": {
+					"targetFp": "gi|150373012|dbj|AP009351.1|",
+					"score": 0
+				},
+				"gi|49240382|emb|BX571856.1|": {
+					"targetFp": "gi|49240382|emb|BX571856.1|",
+					"score": 0
+				},
+				"gi|386829725|ref|NC_017763.1|": {
+					"targetFp": "gi|386829725|ref|NC_017763.1|",
+					"score": 0
+				},
+				"gi|87125858|gb|CP000255.1|": {
+					"targetFp": "gi|87125858|gb|CP000255.1|",
+					"score": 0
+				},
+				"gi|283469229|emb|AM990992.1|": {
+					"targetFp": "gi|283469229|emb|AM990992.1|",
+					"score": 0
+				},
+				"gi|156720466|dbj|AP009324.1|": {
+					"targetFp": "gi|156720466|dbj|AP009324.1|",
+					"score": 0
+				},
+				"gi|87201381|gb|CP000253.1|": {
+					"targetFp": "gi|87201381|gb|CP000253.1|",
+					"score": 0
+				},
+				"gi|49243355|emb|BX571857.1|": {
+					"targetFp": "gi|49243355|emb|BX571857.1|",
+					"score": 0
+				},
+				"gi|312436391|gb|CP002110.1|": {
+					"targetFp": "gi|312436391|gb|CP002110.1|",
+					"score": 0
+				},
+				"gi|302749911|gb|CP002120.1|": {
+					"targetFp": "gi|302749911|gb|CP002120.1|",
+					"score": 0
+				},
+				"gi|47118312|dbj|BA000033.2|": {
+					"targetFp": "gi|47118312|dbj|BA000033.2|",
+					"score": 0
+				},
+				"gi|329312723|gb|CP002643.1|": {
+					"targetFp": "gi|329312723|gb|CP002643.1|",
+					"score": 0
+				},
+				"gi|312828563|emb|FR714927.1|": {
+					"targetFp": "gi|312828563|emb|FR714927.1|",
+					"score": 0
+				},
+				"gi|147739516|gb|CP000703.1|": {
+					"targetFp": "gi|147739516|gb|CP000703.1|",
+					"score": 0
+				},
+				"gi|298693322|gb|CP001996.1|": {
+					"targetFp": "gi|298693322|gb|CP001996.1|",
+					"score": 0
+				},
+				"gi|311222926|gb|CP001844.2|": {
+					"targetFp": "gi|311222926|gb|CP001844.2|",
+					"score": 0
+				},
+				"gi|262073980|gb|CP001781.1|": {
+					"targetFp": "gi|262073980|gb|CP001781.1|",
+					"score": 0
+				},
+				"gi|47208328|dbj|BA000017.4|": {
+					"targetFp": "gi|47208328|dbj|BA000017.4|",
+					"score": 0
+				},
+				"gi|344176319|emb|FR821779.1|": {
+					"targetFp": "gi|344176319|emb|FR821779.1|",
+					"score": 0
+				},
+				"gi|304365608|gb|CP002114.2|": {
+					"targetFp": "gi|304365608|gb|CP002114.2|",
+					"score": 0
+				},
+				"gi|269939526|emb|FN433596.1|": {
+					"targetFp": "gi|269939526|emb|FN433596.1|",
+					"score": 0
+				},
+				"gi|160367075|gb|CP000730.1|": {
+					"targetFp": "gi|160367075|gb|CP000730.1|",
+					"score": 0
+				},
+				"gi|149944932|gb|CP000736.1|": {
+					"targetFp": "gi|149944932|gb|CP000736.1|",
+					"score": 0
+				}
+			},
+			"fingerprintSize": 0,
+			"fingerprintId": "100547576489977442319713545768032221790",
+			"parameters": {
+				"blastLibrary": "/nfs/wgst/blast_libs/1280_fingerprints",
+				"referenceResourceId": "ref_fps_1280"
+			}
+		},
+		{
+			"type": "FINGERPRINT_COMPARISON",
+			"documentKey": "FINGERPRINT_COMPARISON_100547576489977442319713545768032221790",
+			"assemblyId": "100547576489977442319713545768032221790",
+			"speciesId": "1280",
+			"timestamp": "20131203_170734",
+			"scores": {
+				"gi|82655308|emb|AJ938182.1|": {
+					"targetFp": "gi|82655308|emb|AJ938182.1|",
+					"score": 0
+				},
+				"gi|47118324|dbj|BA000018.3|": {
+					"targetFp": "gi|47118324|dbj|BA000018.3|",
+					"score": 0
+				},
+				"gi|150373012|dbj|AP009351.1|": {
+					"targetFp": "gi|150373012|dbj|AP009351.1|",
+					"score": 0
+				},
+				"gi|49240382|emb|BX571856.1|": {
+					"targetFp": "gi|49240382|emb|BX571856.1|",
+					"score": 0
+				},
+				"gi|386829725|ref|NC_017763.1|": {
+					"targetFp": "gi|386829725|ref|NC_017763.1|",
+					"score": 0
+				},
+				"gi|87125858|gb|CP000255.1|": {
+					"targetFp": "gi|87125858|gb|CP000255.1|",
+					"score": 0
+				},
+				"gi|283469229|emb|AM990992.1|": {
+					"targetFp": "gi|283469229|emb|AM990992.1|",
+					"score": 0
+				},
+				"gi|156720466|dbj|AP009324.1|": {
+					"targetFp": "gi|156720466|dbj|AP009324.1|",
+					"score": 0
+				},
+				"gi|87201381|gb|CP000253.1|": {
+					"targetFp": "gi|87201381|gb|CP000253.1|",
+					"score": 0
+				},
+				"gi|49243355|emb|BX571857.1|": {
+					"targetFp": "gi|49243355|emb|BX571857.1|",
+					"score": 0
+				},
+				"gi|312436391|gb|CP002110.1|": {
+					"targetFp": "gi|312436391|gb|CP002110.1|",
+					"score": 0
+				},
+				"gi|302749911|gb|CP002120.1|": {
+					"targetFp": "gi|302749911|gb|CP002120.1|",
+					"score": 0
+				},
+				"gi|47118312|dbj|BA000033.2|": {
+					"targetFp": "gi|47118312|dbj|BA000033.2|",
+					"score": 0
+				},
+				"gi|329312723|gb|CP002643.1|": {
+					"targetFp": "gi|329312723|gb|CP002643.1|",
+					"score": 0
+				},
+				"gi|312828563|emb|FR714927.1|": {
+					"targetFp": "gi|312828563|emb|FR714927.1|",
+					"score": 0
+				},
+				"gi|147739516|gb|CP000703.1|": {
+					"targetFp": "gi|147739516|gb|CP000703.1|",
+					"score": 0
+				},
+				"gi|298693322|gb|CP001996.1|": {
+					"targetFp": "gi|298693322|gb|CP001996.1|",
+					"score": 0
+				},
+				"gi|311222926|gb|CP001844.2|": {
+					"targetFp": "gi|311222926|gb|CP001844.2|",
+					"score": 0
+				},
+				"gi|262073980|gb|CP001781.1|": {
+					"targetFp": "gi|262073980|gb|CP001781.1|",
+					"score": 0
+				},
+				"gi|47208328|dbj|BA000017.4|": {
+					"targetFp": "gi|47208328|dbj|BA000017.4|",
+					"score": 0
+				},
+				"gi|344176319|emb|FR821779.1|": {
+					"targetFp": "gi|344176319|emb|FR821779.1|",
+					"score": 0
+				},
+				"gi|304365608|gb|CP002114.2|": {
+					"targetFp": "gi|304365608|gb|CP002114.2|",
+					"score": 0
+				},
+				"gi|269939526|emb|FN433596.1|": {
+					"targetFp": "gi|269939526|emb|FN433596.1|",
+					"score": 0
+				},
+				"gi|160367075|gb|CP000730.1|": {
+					"targetFp": "gi|160367075|gb|CP000730.1|",
+					"score": 0
+				},
+				"gi|149944932|gb|CP000736.1|": {
+					"targetFp": "gi|149944932|gb|CP000736.1|",
+					"score": 0
+				}
+			},
+			"fingerprintSize": 0,
+			"fingerprintId": "100547576489977442319713545768032221790",
+			"parameters": {
+				"blastLibrary": "/nfs/wgst/blast_libs/1280_fingerprints",
+				"referenceResourceId": "ref_fps_1280"
+			}
+		}
+		];
+
+		res.json(assemblies);
+
+		/*
+		db.getMulti(assemblyIds, {}, function(err, results) {
+
+			console.log(results);
+
+			if (err) throw err;
+
+			console.log('[WGST] Got assembly data: ' + results.value);
+
+			//assembly = result.value;
+
+			console.log(results.value);
+
+			res.json(results.value);
+
+			//res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
+		});
+		*/
+	});
 };

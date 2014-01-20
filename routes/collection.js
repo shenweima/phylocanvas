@@ -77,5 +77,24 @@ exports.add = function(req, res) {
 exports.get = function(req, res) {
 	console.log('[WGST] Getting collection with collection id: ' + req.body.collectionId);
 
-	res.json({});
+	// Get requested collection from db
+	var couchbase = require('couchbase');
+	var db = new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: 'test_wgst',
+		password: '.oneir66'
+	}, function(err) {
+		if (err) throw err;
+		db.get('COLLECTION_LIST_' + req.body.collectionId, function(err, results) {
+			if (err) throw err;
+
+			console.log('[WGST] Returning collection with assembly ids');
+			console.log(results);
+
+			// Return result data
+			res.json(results.value);
+		});
+	});
+
+	//res.json({});
 };

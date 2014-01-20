@@ -50,6 +50,7 @@ app.post('/collection/add', collection.add);
 
 // Assembly routes
 app.get('/assembly/:id', assembly.get);
+app.post('/assembly', assembly.getData); // For ajax requests
 app.post('/assembly/add', assembly.add);
 
 // Test routes
