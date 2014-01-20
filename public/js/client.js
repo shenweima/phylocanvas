@@ -1135,6 +1135,9 @@ $(function(){
         // Show upload panel
         $('.assembly-upload-panel').fadeIn('fast');
 
+        // Set the highest z index for this panel
+        $('.assembly-upload-panel').trigger('click');
+
             // FileList object
             // https://developer.mozilla.org/en-US/docs/Web/API/FileList
         var droppedFiles = evt.dataTransfer.files,
@@ -1721,6 +1724,13 @@ $(function(){
 
         updateSelectedFilesSummary();
         updateMetadataProgressBar();
+    });
+
+    $('.wgst-panel').on('click', function(){
+        // Change z index for all panels
+        $('.wgst-panel').css('z-index', 100);
+        // Set the highest z index for this (selected) panel
+        $(this).css('z-index', 1000);
     });
 
 });
