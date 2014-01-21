@@ -394,6 +394,7 @@ exports.getData = function(req, res) {
 
 		console.log(assemblyIds);
 
+		/*
 		var assemblies = [{
 			"type": "FINGERPRINT_COMPARISON",
 			"documentKey": "FINGERPRINT_COMPARISON_100547576489977442319713545768032221790",
@@ -625,10 +626,10 @@ exports.getData = function(req, res) {
 			}
 		}
 		];
+		*/
 
-		res.json(assemblies);
+		//res.json(assemblies);
 
-		/*
 		db.getMulti(assemblyIds, {}, function(err, results) {
 
 			console.log(results);
@@ -645,6 +646,5 @@ exports.getData = function(req, res) {
 
 			//res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
 		});
-		*/
 	});
 };

@@ -1150,6 +1150,15 @@ $(function(){
         if (droppedFiles.length === 1) {
             // Hide average number of contigs per assembly
             $('.upload-multiple-assemblies-label').hide();
+            // Set file name of dropped file
+            $('.upload-single-assembly-file-name').text(file.name);
+            // Show single assembly upload label
+            $('.upload-single-assembly-label').show();
+        } else {
+            // Hide text that belongs to a single assembly upload summary
+            $('.upload-single-assembly-label').hide();
+            // Show multiple assemblies upload label
+            $('.upload-multiple-assemblies-label').show();
         }
 
         // Init assembly navigator
@@ -1206,7 +1215,7 @@ $(function(){
         // Update total number of assemblies to upload
         $('.assembly-upload-total-number').text(droppedFiles.length);
         // Update lable for total number of assemblies to upload
-        $('.assembly-upload-total-number-label').text((droppedFiles.length === 1 ? 'assembly': 'assemblies'));
+        $('.assembly-upload-total-number-label').html((droppedFiles.length === 1 ? 'assembly': 'assemblies'));
 
     };
 
@@ -1587,7 +1596,6 @@ $(function(){
 
                                 // TO DO: Create table with results for each assembly in this collection
                                 
-
                                 // TO DO: Highlight parent node on the reference tree
                                 // TO DO: Create markers for each assembly in this collection?
 
@@ -1737,6 +1745,14 @@ $(function(){
 
         // Check if only 1 selected file left
         if (Object.keys(fastaFilesAndMetadata).length === 1) {
+            // Update label
+            $('.assembly-upload-total-number-label').text('assembly');
+            // Update file name of assembly
+            $('.upload-single-assembly-file-name').text(fastaFilesAndMetadata[Object.getOwnPropertyNames(fastaFilesAndMetadata)[0]].name);
+            // Hide multiple assemblies label
+            $('.upload-multiple-assemblies-label').hide();
+            // Show single assembly label
+            $('.upload-single-assembly-label').show();
             // Only 1 selected file left - hide assembly navigator
             $('.assembly-navigator').hide();
         } else {
