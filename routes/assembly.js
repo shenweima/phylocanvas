@@ -374,7 +374,7 @@ exports.get = function(req, res) {
 
 // Return fingerprint data
 exports.getData = function(req, res) {
-	console.log('[WGST] Received assembly ids: ' + req.body.assemblyIds);
+	console.log('[WGST] Getting assemblies with ids: ' + req.body.assemblyIds);
 
 	//var assemblies = [];
 
@@ -626,9 +626,9 @@ exports.getData = function(req, res) {
 			}
 		}
 		];
+		
+		res.json(assemblies);
 		*/
-
-		//res.json(assemblies);
 
 		db.getMulti(assemblyIds, {}, function(err, results) {
 
@@ -642,7 +642,7 @@ exports.getData = function(req, res) {
 
 			console.log(results.value);
 
-			res.json(results.value);
+			res.json(results);
 
 			//res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
 		});

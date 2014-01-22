@@ -40,6 +40,8 @@ if ('development' == app.get('env')) {
 // App home route
 app.get('/', routes.index);
 
+app.post('/representative-tree-metadata', routes.getRepresentativeTreeMetadata);
+
 // User routes
 app.get('/users', user.list);
 app.get('/users/name/:name', user.name);

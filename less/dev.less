@@ -3,7 +3,7 @@
 */
 
 // CSS Reset
-// Source: http://www.cssreset.com/
+// http://www.cssreset.com/
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -265,7 +265,140 @@ body {
     }
 }
 
+.wgst-panel.collection-panel {
+    top: 86px;
+    .wgst-panel-header {
+        //border-bottom: 1px solid #000;
+        line-height: 1em;
+        font-weight: 300;
+        .assembly-id {
+            font-weight: 400;
+        }
+    }
+    .wgst-panel-body {
+        max-height: 560px;
+        overflow: scroll;
+        padding: 20px;
+        h2 {
+            font-size: 12px;
+            font-weight: 400;
+            margin: 20px 8px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .mlst-number {
+            font-weight: 300;
+            font-size: 22px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .assembly-resistance-profile-container {
+            border: 1px solid #bbb;
+            padding: 1px;
+            //width: 96%;
+            //border-bottom: 1px solid #ddd;
+            //margin-bottom: 0;
+            //margin: 0 2%;
+            margin: 0 12px;
+        }
+        table.assemblies-summary-table { // TODO: Rename to .assembly-score-table
+            //width: 96%;
+            margin-bottom: 0;
+            //margin: 0 2%;
+            border-top: 1px solid #ddd;
+            colgroup {
+                .col-target-fp {
+                    width: 60%;
+                }
+                .col-score, .col-score-percentage {
+                    width: 20%;
+                }
+            }
+            th {
+                border-bottom: 1px;
+                font-weight: 500;
+                font-size: 14px;
+                text-transform: uppercase;
+            }
+            th, td {
+                text-align: right;
+                padding-left: 12px;
+                padding-right: 12px;
+                &:first-child {
+                    text-align: left;
+                }
+            }
+            tbody {
+                tr {
+                    /*
+
+                    Order is important.
+                    You want :hover to overwrite .row-stripe rule.
+
+                    */
+                    &.row-stripe {
+                        background-color: #F9F9F9;
+                    }
+                    &:hover {
+                        background-color: #F0F7FF;
+                    }
+                }
+            }
+        }
+        table.assembly-resistance-profile {
+            //width: 96%;
+            //border-bottom: 1px solid #ddd;
+            margin-bottom: 0;
+            //margin: 0 2%;
+            .glyphicon {
+                color: #fff;
+            }
+            thead {
+                th {
+                    font-weight: 400;
+                }
+            }
+            tbody {
+                /*
+                tr {
+                    background-color: #f9f9f9;
+                }
+                */
+                td {
+                    width: auto;
+                    color: #fff;
+                    font-weight: 300;
+                    text-align: center;
+                    border: 0;
+                    font-weight: 400;
+                    &.resistance-fail {
+                        background-color: #CF0000;
+                    }
+                    &.resistance-unknown {
+                        background-color: #f5f5f5;
+                        color: #000;
+                    }
+                    &.resistance-success {
+                        background-color: #038F05;
+                    }
+                }
+            }
+        }
+    }
+    .wgst-panel-footer {
+        //border-top: 1px solid #000;
+        text-align: center;
+        font-weight: 300;
+        padding: 10px;
+        font-size: 12px;
+        .assembly-upload-datetime {
+            font-weight: 400;
+        }
+    }
+}
+
 .wgst-panel {
+    display: none;
     position: absolute;
     width: auto;
     height: auto;
@@ -278,7 +411,6 @@ body {
     background-color: #fff;
     z-index: 10;
     .no-user-select;
-    display: none;
     &.assembly-upload-panel {
         top: 28px;
     }

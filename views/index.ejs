@@ -274,9 +274,44 @@
           </footer><!-- /.wgst-panel-footer -->
         </div><!-- /.wgst-panel.assembly-upload-panel -->
 
+
+
+        <div class="wgst-panel collection-panel wgst-draggable">
+          <header class="wgst-panel-header wgst-draggable-handle">
+            <!-- Collection id: <span class="collection-id"></span> -->Collection
+          </header>
+          <div class="wgst-panel-body">
+
+            <!-- <h2>Assemblies:</h2> -->
+
+            <table class="table assemblies-summary-table">
+              <colgroup>
+                <col class="col-target-fp">
+                <col class="col-reference-id">
+                <col class="col-score">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Assembly</th>
+                  <th>Reference Id</th>
+                  <th>Top Score</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>            
+
+          </div><!-- /.wgst-panel-body -->
+          <footer class="wgst-panel-footer">
+            Created <span class="assembly-created-datetime timeago" title=""></span>.
+          </footer><!-- /.wgst-panel-footer -->
+        </div><!-- /.wgst-panel.assembly-list-panel -->
+
+
+
         <div class="wgst-panel tree-panel wgst-draggable wgst-resizable">
           <header class="wgst-panel-header wgst-draggable-handle">
-            EARSS.nwk
+            Representative Tree
           </header>
           <div class="wgst-panel-body">
             <div id="phylocanvas"></div>
@@ -303,6 +338,8 @@
         <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
         <!-- Moment.js -->
         <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.4.0/moment.min.js"></script>
+        <!-- TimeAgo http://timeago.yarp.com/ -->
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.1.0/jquery.timeago.min.js"></script>
         <!-- Bootstrap v3 datetimepicker widget -->
         <script src="/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
         <!-- HiDPI Canvas Polyfill https://github.com/jondavidjohn/hidpi-canvas-polyfill -->

@@ -17,3 +17,33 @@ exports.index = function(req, res) {
     // http://raphaeljs.com/
     // http://coding.smashingmagazine.com/2013/10/29/get-up-running-grunt/
 };
+
+// Return representative tree metadata
+exports.getRepresentativeTreeMetadata = function(req, res) {
+	console.log('[WGST] Getting representative tree metadata');
+
+	// Get requested assembly from db
+	var couchbase = require('couchbase');
+	var db = new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: 'test_wgst_resources',
+		password: '.oneir66'
+	}, function(err) {
+		if (err) throw err;
+
+		db.get('REP_METADATA_1280', function(err, results) {
+
+			console.log(results);
+
+			if (err) throw err;
+
+			console.log('[WGST] Got representative tree metadata: ' + results.value);
+
+			//assembly = result.value;
+
+			console.log(results.value);
+
+			res.json(results);
+		});
+	});
+};

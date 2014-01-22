@@ -130,69 +130,6 @@ $(function(){
 
         // Show graph
         $('.graph-toggle-button').trigger('click');
-
-        // Store all graph markers
-        var markers = {};
-
-        // Init tree
-        var phylocanvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas'));
-        phylocanvas.load('/data/EARSS.nwk');
-        phylocanvas.treeType = 'rectangular';
-        //phylocanvas.showLabels = false;
-        phylocanvas.baseNodeSize = 0.5;
-        phylocanvas.selectedNodeSizeIncrease = 0.5;
-        phylocanvas.selectedColor = '#0059DE';
-        phylocanvas.rightClickZoom = true;
-
-        phylocanvas.onselected = function(nodeIds) {
-
-            console.log('Clicked on canvas');
-            console.log('Keys: ' + Object.keys(markers));
-
-            if (typeof nodeIds === 'string' && nodeIds.length > 0) {
-                // Get metadata for each node
-
-                // Remove existing markers
-                var existingMarkerCounter = 0,
-                    existingMarker;
-
-                for (existingMarker in markers) {
-                    if (markers.hasOwnProperty(existingMarker)) {
-                        markers[existingMarker].setMap(null);
-                    }
-                }
-
-                // Convert list of node ids to array
-                var arrayOfNodeIds = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];//nodeIds.split(',');
-
-                // Create new markers
-                var nodeCounter = 0,
-                    nodeId = 0,
-                    marker;
-
-                for (; nodeCounter < arrayOfNodeIds.length;) {
-                    console.log(arrayOfNodeIds[nodeCounter]);
-
-                    nodeId = arrayOfNodeIds[nodeCounter];
-
-                    console.log(parseFloat('-25.' + nodeCounter + '3882'));
-
-                    // Create marker for this node
-                    marker = new google.maps.Marker({
-                        //position: new google.maps.LatLng(-25.363882, 131.044922),
-                        position: new google.maps.LatLng(parseFloat('51.' + (Math.floor(Math.random() * 30) + 1) + '1214'), parseFloat('-0.' + (Math.floor(Math.random() * 30) + 1) + '9824')),
-                        map: window.WGST.geo.map,
-                        optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
-                    });
-
-                    markers[nodeId] = marker;
-
-                    // Increment counter
-                    nodeCounter = nodeCounter + 1;
-                }
-            }
-        };
-
     })();
 
     var loadRequestedAssembly = function(requestedAssembly) {
@@ -265,8 +202,10 @@ $(function(){
             mapTypeId: google.maps.MapTypeId.ROADMAP
         },
         markers: {
-            metadata: {}
+            metadata: {},
+            representativeTree: []
         },
+        markerBounds: new google.maps.LatLngBounds(),
         //geocoder: new google.maps.Geocoder(),
         metadataAutocomplete: [], // Store Google Autocomplete object for each dropped file
         init: function() {
@@ -281,6 +220,144 @@ $(function(){
 
     // Init map
     WGST.geo.init();
+
+    WGST.representativeTree = {
+        metadata: {}
+    };
+
+    // Init representative tree
+    (function(){
+
+        // ==============================
+        // Load reference tree
+        // ==============================
+
+        // Init tree
+        var phylocanvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas'));
+        //phylocanvas.load('/data/EARSS.nwk');
+        phylocanvas.load('/data/reference_tree.nwk');
+        phylocanvas.treeType = 'rectangular';
+        //phylocanvas.showLabels = false;
+        phylocanvas.baseNodeSize = 0.5;
+        phylocanvas.selectedNodeSizeIncrease = 0.5;
+        phylocanvas.selectedColor = '#0059DE';
+        phylocanvas.rightClickZoom = true;
+
+        phylocanvas.onselected = function(nodeIds) {
+
+            //console.log('Clicked on canvas');
+            //console.log('Keys: ' + Object.keys(markers));
+
+            if (typeof nodeIds === 'string' && nodeIds.length > 0) {
+                console.log('[WGST] Selected representative tree nodes: ' + nodeIds);
+
+                var selectedNodeIds = nodeIds.split(','),
+                    markers = window.WGST.geo.markers.representativeTree,
+                    existingMarker;
+
+                // Remove existing markers
+                for (existingMarker in markers) {
+                    if (markers.hasOwnProperty(existingMarker)) {
+                        markers[existingMarker].setMap(null);
+                    }
+                }
+
+                // Reset marker bounds
+                window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
+                //window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
+                //window.WGST.geo.markerBounds.extend(marker.getPosition());
+                
+                // Create representative tree markers
+                var nodeCounter = selectedNodeIds.length,
+                    accession,
+                    metadata,
+                    marker;
+
+                // For each node create representative tree marker
+                for (; nodeCounter !== 0;) {
+                    // Decrement counter
+                    nodeCounter = nodeCounter - 1;
+
+                    accession = selectedNodeIds[nodeCounter];
+
+                    metadata = window.WGST.representativeTree[accession]; 
+                    
+                    // Check if both latitude and longitude provided
+                    if (metadata.latitude && metadata.longitude) {
+
+                        marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
+                            map: window.WGST.geo.map,
+                            optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+                        });
+                        // Set marker
+                        window.WGST.geo.markers.representativeTree[accession] = marker;
+                        // Extend markerBounds with each metadata marker
+                        window.WGST.geo.markerBounds.extend(marker.getPosition());
+                    }
+                } // for
+
+                if (Object.keys(window.WGST.geo.markers.representativeTree).length > 0) {
+                    // Set the map to fit marker bounds
+                    window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
+                    // Pan to marker bounds
+                    window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
+                }
+            }
+        };
+
+        // ==============================
+        // Load reference tree metadata
+        // ==============================
+
+        console.log('[WGST] Getting representative tree metadata');
+
+        $.ajax({
+            type: 'POST',
+            url: '/representative-tree-metadata/',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: {}
+        })
+        .done(function(data, textStatus, jqXHR) {
+            console.log('[WGST] Got representative tree metadata');
+            console.log(data.value);
+
+            // Create representative tree markers
+            var metadataCounter = data.value.metadata.length,
+                metadata = data.value.metadata,
+                accession,
+                marker;
+
+            for (; metadataCounter !== 0;) {
+                // Decrement counter
+                metadataCounter = metadataCounter - 1;
+
+                console.log(metadata[metadataCounter]);
+
+                accession = metadata[metadataCounter].accession;
+
+                // Check if both latitude and longitude provided
+                if (metadata[metadataCounter].latitude && metadata[metadataCounter].longitude) {
+                    marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(metadata[metadataCounter].latitude, metadata[metadataCounter].longitude),
+                        map: window.WGST.geo.map,
+                        optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+                    });
+                    // Set marker
+                    window.WGST.geo.markers.representativeTree[accession] = marker;
+                }
+
+                // Set representative tree metadata
+                window.WGST.representativeTree[accession] = metadata[metadataCounter];
+            } // for
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log('[WGST][ERROR] Failed to get representative tree metadata');
+            console.error(textStatus);
+            console.error(errorThrown);
+            console.error(jqXHR);
+        });
+    }());
 
         // Array of objects that store content of FASTA file and user-provided metadata
     var fastaFilesAndMetadata = {},
@@ -1528,6 +1605,30 @@ $(function(){
         }
     };
 
+    var getAssemblyTopScore = function(assemblyScores) {
+        // Sort data by score
+        // http://stackoverflow.com/a/15322129
+        var sortedScores = [],
+            score;
+
+        // First create the array of keys/values so that we can sort it
+        for (score in assemblyScores) {
+            if (assemblyScores.hasOwnProperty(score)) {
+                sortedScores.push({ 
+                    'referenceId': assemblyScores[score].referenceId,
+                    'score': assemblyScores[score].score
+                });
+            }
+        }
+
+        // Sort scores
+        sortedScores = sortedScores.sort(function(a,b){
+            return b.score - a.score; // Descending sort (Z-A)
+        });
+
+        return sortedScores[0];
+    };
+
     var endAssemblyUploadProgressBar = function(collectionId) {
         // Update bar's width
         $('.uploading-assembly-progress-container .progress-bar').width('100%');
@@ -1551,8 +1652,8 @@ $(function(){
             });
         }, 500);
 
-        // It takes less than 10 seconds to process one assembly
-        var seconds = 10 * Object.keys(fastaFilesAndMetadata).length;
+        // It takes less than 30 seconds to process one assembly
+        var seconds = 30 * Object.keys(fastaFilesAndMetadata).length;
         var timer = setInterval(
             function() {
                 $('.visit-url-seconds-number').text(seconds);
@@ -1591,8 +1692,100 @@ $(function(){
                             })
                             .done(function(data, textStatus, jqXHR) {
 
-                                console.log('Assemblies:');
+                                console.log('[WGST] Received assemblies:');
                                 console.log(data);
+
+                                var assemblyId,
+                                    assemblyCounter = 0;
+
+                                // Set collection id
+                                //$('.collection-panel .collection-id').text(collectionId);
+
+                                // Set created date
+                                // Get the last property (assembly) of the object
+                                var assemblyIds = Object.keys(data),
+                                    lastAssemblyId = assemblyIds[assemblyIds.length - 1],
+                                    lastAssembly = data[lastAssemblyId].value;
+
+                                console.log(lastAssembly.timestamp);
+
+                                $('.assembly-created-datetime').attr('title', moment(lastAssembly.timestamp, "YYYYMMDD_HHmmss").format('YYYY-MM-DD HH:mm:ss'));
+                                $('.timeago').timeago();
+
+                                // Parse each assembly object
+                                for (assemblyId in data) {
+                                    console.log('[WGST] Parsing assembly with id: ' + assemblyId);
+                                    console.log(data[assemblyId]);
+                                    //console.log('Top score: ' + getAssemblyTopScore(data[assemblyId].value.scores));
+
+                                    //AAA
+
+                                    assemblyCounter = assemblyCounter + 1;
+
+                                    $('.assemblies-summary-table tbody').append(
+                                        // This is not verbose enough
+                                        ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
+                                            + '<td>' + assemblyId + '</td>'
+                                            + '<td>' + getAssemblyTopScore(data[assemblyId].value.scores).referenceId + '</td>'
+                                            + '<td>' + getAssemblyTopScore(data[assemblyId].value.scores).score + '</td>'
+                                        + '</tr>'
+                                    );
+                                }
+
+
+
+/*        // Sort data by score
+        // http://stackoverflow.com/a/15322129
+        var sortableScores = [],
+            score;
+
+        // First create the array of keys/values so that we can sort it
+        for (score in requestedAssembly.scores) {
+            if (requestedAssembly.scores.hasOwnProperty(score)) {
+                sortableScores.push({ 
+                    'referenceId': requestedAssembly.scores[score].referenceId,
+                    'score': requestedAssembly.scores[score].score
+                });
+            }
+        }
+
+        // Sort scores
+        sortableScores = sortableScores.sort(function(a,b){
+            return b.score - a.score; // Descending sort (Z-A)
+        });
+
+        // Create assembly data table
+        var sortableScoreCounter = 0;
+        for (; sortableScoreCounter < sortableScores.length; sortableScoreCounter++ ) {
+            $('.assembly-data-table tbody').append(
+                // This is not verbose enough
+                ((sortableScoreCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
+                    + '<td>'
+                        + sortableScores[sortableScoreCounter].referenceId
+                    + '</td>'
+                    + '<td>'
+                        + sortableScores[sortableScoreCounter].score
+                    + '</td>'
+                    + '<td>'
+                        // Convert score values into percentages where the highest number is 100%
+                        + Math.floor(sortableScores[sortableScoreCounter].score * 100 / requestedAssembly.fingerprintSize) + '%'
+                    + '</td>'
+                + '<tr/>'
+            );
+        }
+
+        // Set assembly panel header text
+        $('.assembly-panel .wgst-panel-header .assembly-id').text(requestedAssembly.assemblyId);
+
+        // Set assembly upload datetime in footer
+        $('.assembly-upload-datetime').text(moment(requestedAssembly.timestamp, "YYYYMMDD_HHmmss").fromNow());
+
+        // Show assembly data
+        $('.assembly-panel').show();*/
+
+
+
+
 
                                 // TO DO: Create table with results for each assembly in this collection
                                 
@@ -1605,8 +1798,11 @@ $(function(){
                                     resetAssemlyUploadPanel();
                                 });
 
+                                // Bring collection-panel panel to front and open
+                                $('.collection-panel').trigger('mousedown').fadeIn('fast');
+
                                 // Bring assembly-panel panel to front and open
-                                $('.assembly-panel').trigger('mousedown').fadeIn('fast');
+                                //$('.assembly-panel').trigger('mousedown').fadeIn('fast');
 
                             })
                             .fail(function(jqXHR, textStatus, errorThrown) {
