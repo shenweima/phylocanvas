@@ -204,7 +204,7 @@ $(function(){
         markers: {
             assembly: {},
             metadata: {},
-            representativeTree: [],
+            representativeTree: []
         },
         markerBounds: new google.maps.LatLngBounds(),
         //geocoder: new google.maps.Geocoder(),
@@ -2019,20 +2019,50 @@ $(function(){
 
     // User wants to select representative tree branch
     $(".collection-panel .assemblies-summary-table").on('change', 'input[type="checkbox"]', function(e) {
-        // Add/remove highlight class
+
+        //======================================================
+        // Map
+        //======================================================
+
+        var checkedAssemblyId = $(this).attr('data-assembly-id');
+
+        // Checked
         if ($(this).is(":checked")) {
+
+            // Create marker
+            console.log('[WGST] Creating marker for assembly id: ' + checkedAssemblyId);
+
+            window.WGST.geo.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
+                position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
+                map: window.WGST.geo.map,
+                icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+            });
+
+            // Highlight row
             $(this).closest('tr').addClass("row-highlighted");
+
+        // Unchecked
         } else {
+
+            // Remove marker
+            console.log('[WGST] Removing marker for assembly id: ' + checkedAssemblyId);
+
+            window.WGST.geo.markers.assembly[checkedAssemblyId].setMap(null);
+
+            // Remove node highlighing
             $(this).closest('tr').removeClass("row-highlighted");
         }
 
+        //======================================================
+        // Tree
+        //======================================================
+
         // Store node ids to highlight in a string
-        var checkedAssemblyNodesString = '',
-            checkedAssemblyNodesArray = [];
+        var checkedAssemblyNodesString = '';
 
         // Get node id of each node that use selected via checked checkbox 
         $('.collection-panel .assemblies-summary-table input[type="checkbox"]:checked').each(function(){
-
             // Concat assembly ids to string
             // Use this string to highlight nodes on tree
             if (checkedAssemblyNodesString.length > 0) {
@@ -2040,67 +2070,10 @@ $(function(){
             } else {
                 checkedAssemblyNodesString = $(this).attr('data-reference-id');
             }
-
-            // Push assembly ids to array
-            // Use them to create map markers
-            checkedAssemblyNodesArray.push($(this).attr('data-assembly-id'));
         });
 
         // Highlight assembly with the highest score on the representative tree
         window.WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
-
-        // Create assembly markers
-        var assemblyCounter = checkedAssemblyNodesArray.length;
-        for (; assemblyCounter !== 0;) {
-            assemblyCounter = assemblyCounter - 1;
-
-            // CONTINUE HERE: for some reason these markers are not being created on checkbox check
-
-            var existingMarkers = window.WGST.geo.markers.assembly,
-                existingMarker;
-
-            // Remove existing markers
-            for (existingMarker in existingMarkers) {
-                if (existingMarkers.hasOwnProperty(existingMarker)) {
-                    existingMarkers[existingMarker].setMap(null);
-                }
-            }
-
-            // Reset marker bounds
-            window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
-
-            window.WGST.geo.markers.assembly[checkedAssemblyNodesArray[assemblyCounter]] = new google.maps.Marker({
-                position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
-                map: WGST.geo.map,
-                visible: false
-            });
-
-            //AAA
-
-        }
-
-        //showRepresentativeTreeNodesOnMap(selectNodesWithIds);
-
-
-/*        var selectNodesWithIds = '',
-            nodeCounter = $('.collection-panel .assemblies-summary-table input[type="checkbox"]:checked').length;
-*/
-        /*
-        for (; nodeCounter !== 0;) {
-            nodeCounter = nodeCounter - 1;
-
-            if (selectNodesWithIds.length > 0) {
-                selectNodesWithIds = selectNodesWithIds + ',' + $('.collection-panel .assemblies-summary-table input[type="checkbox"]:checked')[nodeCounter].attr('data-reference-id');
-            } else {
-                selectNodesWithIds = $('.collection-panel .assemblies-summary-table input[type="checkbox"]:checked')[nodeCounter].attr('data-reference-id');
-            }
-
-        }
-        */
-
-        //console.log(selectNodeWithIds);
-
-
     });
 
     $('.assemblies-upload-cancel-button').on('click', function() {
