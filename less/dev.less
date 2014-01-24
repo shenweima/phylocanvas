@@ -301,7 +301,7 @@ body {
             //margin: 0 2%;
             margin: 0 12px;
         }
-        table.assemblies-summary-table { // TODO: Rename to .assembly-score-table
+        table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
             //width: 96%;
             margin-bottom: 0;
             //margin: 0 2%;
@@ -319,14 +319,17 @@ body {
                 font-weight: 500;
                 font-size: 14px;
                 text-transform: uppercase;
+                &:first-child {
+                    text-align: center;
+                }
+            }
+            td.selected-checkbox {
+                padding: 6px 5px 5px 5px;
+                text-align: center;
             }
             th, td {
-                text-align: right;
                 padding-left: 12px;
                 padding-right: 12px;
-                &:first-child {
-                    text-align: left;
-                }
             }
             tbody {
                 tr {
@@ -337,10 +340,13 @@ body {
 
                     */
                     &.row-stripe {
-                        background-color: #F9F9F9;
+                        background-color: #FAFAFA; //#F9F9F9;
+                    }
+                    &.row-highlighted {
+                        background-color: #F0F7FF;
                     }
                     &:hover {
-                        background-color: #F0F7FF;
+                        background-color: #FFF8F0;
                     }
                 }
             }
@@ -417,9 +423,16 @@ body {
     &.tree-panel {
         display: block;
         top: 70px;
-        #phylocanvas {
-            width: 800px;
-            height: 600px;
+        overflow: hidden;
+        .wgst-panel-body {
+            max-height: 500px;
+            .tree-controls {
+                padding: 20px;
+            }
+            #phylocanvas {
+                width: 780px;
+                height: 400px;
+            }
         }
     }
     .wgst-panel-header {

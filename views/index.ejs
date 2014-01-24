@@ -55,14 +55,16 @@
                 <input type="checkbox"> Map
               </label>-->
               <label class="btn btn-primary graph-toggle-button">
-                <input type="checkbox"> Graph
+                <input type="checkbox"><span class="glyphicon glyphicon-tree-conifer"></span>
               </label>
+              <!--
               <label class="btn btn-primary timeline-toggle-button">
                 <input type="checkbox"> Timeline
               </label>
               <label class="btn btn-primary">
                 <input type="checkbox"> Metadata
               </label>
+              -->
             </div>
           </div><!-- /.data-filters -->
 
@@ -286,12 +288,14 @@
 
             <table class="table assemblies-summary-table">
               <colgroup>
+                <col class="col-highlight">
                 <col class="col-target-fp">
                 <col class="col-reference-id">
                 <col class="col-score">
               </colgroup>
               <thead>
                 <tr>
+                  <th><span class="glyphicon glyphicon-tree-conifer"></span></th>
                   <th>Assembly</th>
                   <th>Reference Id</th>
                   <th>Top Score</th>
@@ -314,6 +318,10 @@
             Representative Tree
           </header>
           <div class="wgst-panel-body">
+            <div class="tree-controls">
+              <button type="button" class="btn btn-sm btn-default tree-controls-select-all">Select all nodes</button>
+              <button type="button" class="btn btn-sm btn-default tree-controls-select-none">Select no nodes</button>
+            </div>
             <div id="phylocanvas"></div>
           </div><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer wgst-draggable-handle">

@@ -110,8 +110,16 @@ exports.add = function(req, res) {
 				console.log('[WGST] Received response');
 				console.log('[WGST] Preparing metadata object');
 
+				var buffer = new Buffer(message.data),
+					bufferJSON = buffer.toString(),
+					parsedMessage = JSON.parse(bufferJSON);
+
+				console.log('[WGST] Queue returned message: ');
+				console.log(parsedMessage);
+
 				// Insert assembly metadata into db
-				var metadataKey = 'assembly_metadata_' + message.assemblyId, // 'assembly_metadata_' + userAssemblyId
+				var metadataKey = 'ASSEMBLY_METADATA_' + parsedMessage.assemblyId,
+					/*
 					metadata = {
 						docType: 'The type of the document', // 'assembly_metadata'
 						docId: 'uuid_' + message.assemblyId,
@@ -142,7 +150,17 @@ exports.add = function(req, res) {
 							extraField1: 'extra information 1', // Free key, free value
 							extraField2: 'extra information 2' // Free key, free value
 						}
-				};
+					};
+					*/
+					metadata = {
+						assemblyId: parsedMessage.assemblyId,
+						geographicLocation: {
+							type: 'Point',
+							coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
+						}
+					};
+
+					console.log('[WGST] Coordinates: ' + req.body.metadata.location.latitude + ', ' + req.body.metadata.location.longitude);
 
 				var couchbase = require('couchbase');
 				var db = new couchbase.Connection({
@@ -155,27 +173,24 @@ exports.add = function(req, res) {
 						return;
 					}
 
+					console.log('[WGST] Inserting metadata with key: ' + metadataKey);
+
 					db.set(metadataKey, metadata, function(err, result) {
 						if (err) {
 							console.error('[WGST][ERROR] ' + error);
 							return;
 						}
 
-						console.log("[WGST] Inserted metadata");
+						console.log('[WGST] Inserted metadata:');
 						console.log(result);
 					});
 				});
 
-				var buffer = new Buffer(message.data);
-
-				console.log(buffer.toString());
-
 				// Return result data
-				res.json(buffer.toString());
+				res.json(parsedMessage);
 
 				// End connection, however in reality it's being dropped before it's ended so listen for error too
 				connection.end();
-
 			});
 	});
 };
@@ -388,262 +403,53 @@ exports.getData = function(req, res) {
 		if (err) throw err;
 
 		// Prepend FP_COMP_ to each assembly id
-		var assemblyIds = req.body.assemblyIds.map(function(assemblyId){
+		var scoresAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
 			return 'FP_COMP_' + assemblyId;
 		});
 
+		// Prepend ASSEMBLY_METADATA_ to each assembly id
+		var metadataAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
+			return 'ASSEMBLY_METADATA_' + assemblyId;
+		});
+
+		// Merge assembly ids
+		var assemblyIds = scoresAssemblyIds.concat(metadataAssemblyIds);
+
+		console.log('[WGST] Querying keys: ');
 		console.log(assemblyIds);
 
-		/*
-		var assemblies = [{
-			"type": "FINGERPRINT_COMPARISON",
-			"documentKey": "FINGERPRINT_COMPARISON_100547576489977442319713545768032221790",
-			"assemblyId": "100547576489977442319713545768032221790",
-			"speciesId": "1280",
-			"timestamp": "20131203_170734",
-			"scores": {
-				"gi|82655308|emb|AJ938182.1|": {
-					"targetFp": "gi|82655308|emb|AJ938182.1|",
-					"score": 0
-				},
-				"gi|47118324|dbj|BA000018.3|": {
-					"targetFp": "gi|47118324|dbj|BA000018.3|",
-					"score": 0
-				},
-				"gi|150373012|dbj|AP009351.1|": {
-					"targetFp": "gi|150373012|dbj|AP009351.1|",
-					"score": 0
-				},
-				"gi|49240382|emb|BX571856.1|": {
-					"targetFp": "gi|49240382|emb|BX571856.1|",
-					"score": 0
-				},
-				"gi|386829725|ref|NC_017763.1|": {
-					"targetFp": "gi|386829725|ref|NC_017763.1|",
-					"score": 0
-				},
-				"gi|87125858|gb|CP000255.1|": {
-					"targetFp": "gi|87125858|gb|CP000255.1|",
-					"score": 0
-				},
-				"gi|283469229|emb|AM990992.1|": {
-					"targetFp": "gi|283469229|emb|AM990992.1|",
-					"score": 0
-				},
-				"gi|156720466|dbj|AP009324.1|": {
-					"targetFp": "gi|156720466|dbj|AP009324.1|",
-					"score": 0
-				},
-				"gi|87201381|gb|CP000253.1|": {
-					"targetFp": "gi|87201381|gb|CP000253.1|",
-					"score": 0
-				},
-				"gi|49243355|emb|BX571857.1|": {
-					"targetFp": "gi|49243355|emb|BX571857.1|",
-					"score": 0
-				},
-				"gi|312436391|gb|CP002110.1|": {
-					"targetFp": "gi|312436391|gb|CP002110.1|",
-					"score": 0
-				},
-				"gi|302749911|gb|CP002120.1|": {
-					"targetFp": "gi|302749911|gb|CP002120.1|",
-					"score": 0
-				},
-				"gi|47118312|dbj|BA000033.2|": {
-					"targetFp": "gi|47118312|dbj|BA000033.2|",
-					"score": 0
-				},
-				"gi|329312723|gb|CP002643.1|": {
-					"targetFp": "gi|329312723|gb|CP002643.1|",
-					"score": 0
-				},
-				"gi|312828563|emb|FR714927.1|": {
-					"targetFp": "gi|312828563|emb|FR714927.1|",
-					"score": 0
-				},
-				"gi|147739516|gb|CP000703.1|": {
-					"targetFp": "gi|147739516|gb|CP000703.1|",
-					"score": 0
-				},
-				"gi|298693322|gb|CP001996.1|": {
-					"targetFp": "gi|298693322|gb|CP001996.1|",
-					"score": 0
-				},
-				"gi|311222926|gb|CP001844.2|": {
-					"targetFp": "gi|311222926|gb|CP001844.2|",
-					"score": 0
-				},
-				"gi|262073980|gb|CP001781.1|": {
-					"targetFp": "gi|262073980|gb|CP001781.1|",
-					"score": 0
-				},
-				"gi|47208328|dbj|BA000017.4|": {
-					"targetFp": "gi|47208328|dbj|BA000017.4|",
-					"score": 0
-				},
-				"gi|344176319|emb|FR821779.1|": {
-					"targetFp": "gi|344176319|emb|FR821779.1|",
-					"score": 0
-				},
-				"gi|304365608|gb|CP002114.2|": {
-					"targetFp": "gi|304365608|gb|CP002114.2|",
-					"score": 0
-				},
-				"gi|269939526|emb|FN433596.1|": {
-					"targetFp": "gi|269939526|emb|FN433596.1|",
-					"score": 0
-				},
-				"gi|160367075|gb|CP000730.1|": {
-					"targetFp": "gi|160367075|gb|CP000730.1|",
-					"score": 0
-				},
-				"gi|149944932|gb|CP000736.1|": {
-					"targetFp": "gi|149944932|gb|CP000736.1|",
-					"score": 0
-				}
-			},
-			"fingerprintSize": 0,
-			"fingerprintId": "100547576489977442319713545768032221790",
-			"parameters": {
-				"blastLibrary": "/nfs/wgst/blast_libs/1280_fingerprints",
-				"referenceResourceId": "ref_fps_1280"
-			}
-		},
-		{
-			"type": "FINGERPRINT_COMPARISON",
-			"documentKey": "FINGERPRINT_COMPARISON_100547576489977442319713545768032221790",
-			"assemblyId": "100547576489977442319713545768032221790",
-			"speciesId": "1280",
-			"timestamp": "20131203_170734",
-			"scores": {
-				"gi|82655308|emb|AJ938182.1|": {
-					"targetFp": "gi|82655308|emb|AJ938182.1|",
-					"score": 0
-				},
-				"gi|47118324|dbj|BA000018.3|": {
-					"targetFp": "gi|47118324|dbj|BA000018.3|",
-					"score": 0
-				},
-				"gi|150373012|dbj|AP009351.1|": {
-					"targetFp": "gi|150373012|dbj|AP009351.1|",
-					"score": 0
-				},
-				"gi|49240382|emb|BX571856.1|": {
-					"targetFp": "gi|49240382|emb|BX571856.1|",
-					"score": 0
-				},
-				"gi|386829725|ref|NC_017763.1|": {
-					"targetFp": "gi|386829725|ref|NC_017763.1|",
-					"score": 0
-				},
-				"gi|87125858|gb|CP000255.1|": {
-					"targetFp": "gi|87125858|gb|CP000255.1|",
-					"score": 0
-				},
-				"gi|283469229|emb|AM990992.1|": {
-					"targetFp": "gi|283469229|emb|AM990992.1|",
-					"score": 0
-				},
-				"gi|156720466|dbj|AP009324.1|": {
-					"targetFp": "gi|156720466|dbj|AP009324.1|",
-					"score": 0
-				},
-				"gi|87201381|gb|CP000253.1|": {
-					"targetFp": "gi|87201381|gb|CP000253.1|",
-					"score": 0
-				},
-				"gi|49243355|emb|BX571857.1|": {
-					"targetFp": "gi|49243355|emb|BX571857.1|",
-					"score": 0
-				},
-				"gi|312436391|gb|CP002110.1|": {
-					"targetFp": "gi|312436391|gb|CP002110.1|",
-					"score": 0
-				},
-				"gi|302749911|gb|CP002120.1|": {
-					"targetFp": "gi|302749911|gb|CP002120.1|",
-					"score": 0
-				},
-				"gi|47118312|dbj|BA000033.2|": {
-					"targetFp": "gi|47118312|dbj|BA000033.2|",
-					"score": 0
-				},
-				"gi|329312723|gb|CP002643.1|": {
-					"targetFp": "gi|329312723|gb|CP002643.1|",
-					"score": 0
-				},
-				"gi|312828563|emb|FR714927.1|": {
-					"targetFp": "gi|312828563|emb|FR714927.1|",
-					"score": 0
-				},
-				"gi|147739516|gb|CP000703.1|": {
-					"targetFp": "gi|147739516|gb|CP000703.1|",
-					"score": 0
-				},
-				"gi|298693322|gb|CP001996.1|": {
-					"targetFp": "gi|298693322|gb|CP001996.1|",
-					"score": 0
-				},
-				"gi|311222926|gb|CP001844.2|": {
-					"targetFp": "gi|311222926|gb|CP001844.2|",
-					"score": 0
-				},
-				"gi|262073980|gb|CP001781.1|": {
-					"targetFp": "gi|262073980|gb|CP001781.1|",
-					"score": 0
-				},
-				"gi|47208328|dbj|BA000017.4|": {
-					"targetFp": "gi|47208328|dbj|BA000017.4|",
-					"score": 0
-				},
-				"gi|344176319|emb|FR821779.1|": {
-					"targetFp": "gi|344176319|emb|FR821779.1|",
-					"score": 0
-				},
-				"gi|304365608|gb|CP002114.2|": {
-					"targetFp": "gi|304365608|gb|CP002114.2|",
-					"score": 0
-				},
-				"gi|269939526|emb|FN433596.1|": {
-					"targetFp": "gi|269939526|emb|FN433596.1|",
-					"score": 0
-				},
-				"gi|160367075|gb|CP000730.1|": {
-					"targetFp": "gi|160367075|gb|CP000730.1|",
-					"score": 0
-				},
-				"gi|149944932|gb|CP000736.1|": {
-					"targetFp": "gi|149944932|gb|CP000736.1|",
-					"score": 0
-				}
-			},
-			"fingerprintSize": 0,
-			"fingerprintId": "100547576489977442319713545768032221790",
-			"parameters": {
-				"blastLibrary": "/nfs/wgst/blast_libs/1280_fingerprints",
-				"referenceResourceId": "ref_fps_1280"
-			}
-		}
-		];
-		
-		res.json(assemblies);
-		*/
-
 		db.getMulti(assemblyIds, {}, function(err, results) {
-
+			console.log('[WGST] Got assemblies data: ');
 			console.log(results);
 
 			if (err) throw err;
 
-			console.log('[WGST] Got assembly data: ' + results.value);
+			// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
+			var assemblies = {},
+				assemblyId,
+				cleanAssemblyId;
+
+			for (assemblyId in results) {
+                // Parsing assembly scores
+                if (assemblyId.indexOf('FP_COMP_') !== -1) {
+                	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
+                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
+                // Parsing assembly metadata
+                } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
+                	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
+                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
+				}
+			}
+
+			console.log('[WGST] Assemblies with merged FP_COMP and ASSEMBLY_METADATA: ');
+			console.log(assemblies);
+
+			res.json(assemblies);
 
 			//assembly = result.value;
-
-			console.log(results.value);
-
-			res.json(results);
-
+			//console.log(results.value);
 			//res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
 		});
 	});

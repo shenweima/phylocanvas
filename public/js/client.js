@@ -197,17 +197,18 @@ $(function(){
     WGST.geo = {
         map: {},
         mapOptions: {
-            zoom: 8,
-            center: new google.maps.LatLng(51.511214, -0.119824),
+            zoom: 5,
+            center: new google.maps.LatLng(48.6908333333, 9.14055555556), // new google.maps.LatLng(51.511214, -0.119824),
             mapTypeId: google.maps.MapTypeId.ROADMAP
         },
         markers: {
+            assembly: {},
             metadata: {},
-            representativeTree: []
+            representativeTree: [],
         },
         markerBounds: new google.maps.LatLngBounds(),
         //geocoder: new google.maps.Geocoder(),
-        metadataAutocomplete: [], // Store Google Autocomplete object for each dropped file
+        metadataAutocomplete: {}, // Store Google Autocomplete object for each dropped file
         init: function() {
             this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions);
             this.markers.metadata = new google.maps.Marker({
@@ -222,7 +223,104 @@ $(function(){
     WGST.geo.init();
 
     WGST.representativeTree = {
+        tree: new PhyloCanvas.Tree(document.getElementById('phylocanvas')),
         metadata: {}
+    };
+
+    $('.tree-controls-select-none').on('click', function(){
+        // This is a workaround
+        // TO DO: Refactor using official API
+        window.WGST.representativeTree.tree.selectNodes('');
+
+        showRepresentativeTreeNodesOnMap('');
+    });
+
+    $('.tree-controls-select-all').on('click', function(){
+        
+        var allNodes = WGST.representativeTree.tree.leaves,
+            nodeCounter = allNodes.length,
+            nodeIds = '';
+
+        for (; nodeCounter !== 0;) {
+            nodeCounter = nodeCounter - 1;
+
+            if (nodeIds.length > 0) {
+                nodeIds = nodeIds + ',' + allNodes[nodeCounter].id;
+            } else {
+                nodeIds = allNodes[nodeCounter].id;
+            }
+        }
+
+        // This is a workaround
+        // TO DO: Refactor using official API
+        window.WGST.representativeTree.tree.root.setSelected(true, true);
+        window.WGST.representativeTree.tree.draw();
+
+        showRepresentativeTreeNodesOnMap(nodeIds);
+    });
+
+    var showRepresentativeTreeNodesOnMap = function(nodeIds) {
+
+        var existingMarkers = window.WGST.geo.markers.representativeTree,
+            existingMarker;
+
+        // Remove existing markers
+        for (existingMarker in existingMarkers) {
+            if (existingMarkers.hasOwnProperty(existingMarker)) {
+                existingMarkers[existingMarker].setMap(null);
+            }
+        }
+
+        // Reset marker bounds
+        window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
+
+        if (typeof nodeIds === 'string' && nodeIds.length > 0) {
+            console.log('[WGST] Selected representative tree nodes: ' + nodeIds);
+
+            // Create representative tree markers
+            var selectedNodeIds = nodeIds.split(','),
+                nodeCounter = selectedNodeIds.length,
+                accession,
+                metadata;
+
+            // For each node create representative tree marker
+            for (; nodeCounter !== 0;) {
+                // Decrement counter
+                nodeCounter = nodeCounter - 1;
+
+                accession = selectedNodeIds[nodeCounter];
+
+                metadata = window.WGST.representativeTree[accession];
+                
+                // Check if both latitude and longitude provided
+                if (metadata.latitude && metadata.longitude) {
+
+                    console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
+                    console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
+
+                    var marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
+                        map: window.WGST.geo.map,
+                        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                        optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+                    });
+                    // Set marker
+                    window.WGST.geo.markers.representativeTree[accession] = marker;
+                    // Extend markerBounds with each metadata marker
+                    window.WGST.geo.markerBounds.extend(marker.getPosition());
+                }
+            } // for
+
+            // Pan to marker bounds
+            window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
+            // Set the map to fit marker bounds
+            window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
+        } else { // No nodes were selected
+            console.log('[WGST] No selected nodes');
+            // Show Europe
+            window.WGST.geo.map.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
+            window.WGST.geo.map.setZoom(5);
+        }
     };
 
     // Init representative tree
@@ -233,20 +331,20 @@ $(function(){
         // ==============================
 
         // Init tree
-        var phylocanvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas'));
+        //var phylocanvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas'));
         //phylocanvas.load('/data/EARSS.nwk');
-        phylocanvas.load('/data/reference_tree.nwk');
-        phylocanvas.treeType = 'rectangular';
+        window.WGST.representativeTree.tree.load('/data/reference_tree.nwk');
+        window.WGST.representativeTree.tree.treeType = 'rectangular';
         //phylocanvas.showLabels = false;
-        phylocanvas.baseNodeSize = 0.5;
-        phylocanvas.selectedNodeSizeIncrease = 0.5;
-        phylocanvas.selectedColor = '#0059DE';
-        phylocanvas.rightClickZoom = true;
+        window.WGST.representativeTree.tree.baseNodeSize = 0.5;
+        window.WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
+        window.WGST.representativeTree.tree.selectedColor = '#0059DE';
+        window.WGST.representativeTree.tree.rightClickZoom = true;
 
-        phylocanvas.onselected = function(nodeIds) {
+        window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
 
-            //console.log('Clicked on canvas');
-            //console.log('Keys: ' + Object.keys(markers));
+        /*
+        function(nodeIds) {
 
             if (typeof nodeIds === 'string' && nodeIds.length > 0) {
                 console.log('[WGST] Selected representative tree nodes: ' + nodeIds);
@@ -285,9 +383,13 @@ $(function(){
                     // Check if both latitude and longitude provided
                     if (metadata.latitude && metadata.longitude) {
 
+                        console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
+                        console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
+
                         marker = new google.maps.Marker({
                             position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
                             map: window.WGST.geo.map,
+                            icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
                             optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
                         });
                         // Set marker
@@ -305,6 +407,7 @@ $(function(){
                 }
             }
         };
+        */
 
         // ==============================
         // Load reference tree metadata
@@ -337,15 +440,18 @@ $(function(){
                 accession = metadata[metadataCounter].accession;
 
                 // Check if both latitude and longitude provided
+                /*
                 if (metadata[metadataCounter].latitude && metadata[metadataCounter].longitude) {
                     marker = new google.maps.Marker({
                         position: new google.maps.LatLng(metadata[metadataCounter].latitude, metadata[metadataCounter].longitude),
                         map: window.WGST.geo.map,
+                        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
                         optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
                     });
                     // Set marker
                     window.WGST.geo.markers.representativeTree[accession] = marker;
                 }
+                */
 
                 // Set representative tree metadata
                 window.WGST.representativeTree[accession] = metadata[metadataCounter];
@@ -599,7 +705,7 @@ $(function(){
         // Show average number of contigs per assembly
         $('.assembly-sequences-average').text(Math.floor(totalContigsSum / droppedFiles.length));
 
-        // TODO: Convert multiple strings concatenation to array and use join('')
+        // TO DO: Convert multiple strings concatenation to array and use join('')
         // Display current assembly
         assemblyListItem = $(
             //'<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
@@ -951,48 +1057,60 @@ $(function(){
         //$('.assembly-upload-panel .assembly-sample-datetime-input').datetimepicker();
         $('#assemblySampleDatetimeInput' + fileCounter).datetimepicker();
 
-        // Init Goolge Maps API Places Autocomplete
-        // TO DO: This creates new Autocomplete object for each drag and drop file - possibly needs refactoring/performance optimization
-        WGST.geo.metadataAutocomplete[fileCounter] = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
+        // Create closure to save value of fileName
+        (function(fileName){
 
-        // When the user selects an address from the dropdown,
-        // get geo coordinates
-        // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
-        // TO DO: Remove this event listener after metadata was sent
-        google.maps.event.addListener(WGST.geo.metadataAutocomplete[fileCounter], 'place_changed', function() {
+            // Get autocomplete input (jQuery) element
+            var autocompleteInput = $('.assembly-upload-panel .assembly-list-container li[data-name="' + fileName + '"] .assembly-sample-location-input');
 
-            // Get the place details from the autocomplete object.
-            var place = window.WGST.geo.metadataAutocomplete[fileCounter].getPlace();
-            // Set map center to selected address
-            WGST.geo.map.setCenter(place.geometry.location);
-            // Set map
-            WGST.geo.markers.metadata.setMap(WGST.geo.map);
-            // Set metadata marker's position to selected address
-            WGST.geo.markers.metadata.setPosition(place.geometry.location);
-            // Show metadata marker
-            WGST.geo.markers.metadata.setVisible(true);
-            // Geocode address
-            /*
-            WGST.geo.geocoder.geocode({ 'address': place.address_components[0] }, function(results, status) {
-                if (status == google.maps.GeocoderStatus.OK) {
-                    map.setCenter(results[0].geometry.location);
-                    var marker = new google.maps.Marker({
-                        map: WGST.geo.map,
-                        position: results[0].geometry.location
-                    });
-                } else {
-                    console.log('Geocode was not successful for the following reason: ' + status);
-                }
+            // Init Goolge Maps API Places Autocomplete
+            // TO DO: This creates new Autocomplete object for each drag and drop file - possibly needs refactoring/performance optimization
+            //WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
+            // [0] returns native DOM element: http://learn.jquery.com/using-jquery-core/faq/how-do-i-pull-a-native-dom-element-from-a-jquery-object/
+            WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(autocompleteInput[0]);
+
+            // When the user selects an address from the dropdown,
+            // get geo coordinates
+            // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
+            // TO DO: Remove this event listener after metadata was sent
+            google.maps.event.addListener(WGST.geo.metadataAutocomplete[fileName], 'place_changed', function() {
+
+                // Get the place details from the autocomplete object.
+                var place = window.WGST.geo.metadataAutocomplete[fileName].getPlace();
+                // Set map center to selected address
+                WGST.geo.map.setCenter(place.geometry.location);
+                // Set map
+                WGST.geo.markers.metadata.setMap(WGST.geo.map);
+                // Set metadata marker's position to selected address
+                WGST.geo.markers.metadata.setPosition(place.geometry.location);
+                // Show metadata marker
+                WGST.geo.markers.metadata.setVisible(true);
+
+                // Geocode address
+                /*
+                WGST.geo.geocoder.geocode({ 'address': place.address_components[0] }, function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        map.setCenter(results[0].geometry.location);
+                        var marker = new google.maps.Marker({
+                            map: WGST.geo.map,
+                            position: results[0].geometry.location
+                        });
+                    } else {
+                        console.log('Geocode was not successful for the following reason: ' + status);
+                    }
+                });
+                */
+
+                // Remember latitude
+                autocompleteInput.attr('data-latitude', place.geometry.location.lat());
+                // Remember longitude
+                autocompleteInput.attr('data-longitude', place.geometry.location.lng());
+
+                //console.log('Lat: ' + place.geometry.location.lat());
+                //console.log('Lng: ' + place.geometry.location.lng());
+
             });
-            */
-        });
-
-        /*
-        google.maps.event.addListener(autocomplete, 'place_changed', function() {
-            var place = autocomplete.getPlace();
-            console.log('Place: ' + place);
-        });
-        */
+        }(file.name));
     
     }; // parseFastaFile()
 
@@ -1520,7 +1638,7 @@ $(function(){
     $('.assembly-list-container').on('change', '.assembly-sample-location-input', function(){
         // Show next form block if current input has some value
         if ($(this).val().length) {
-            // TODO: validate input value
+            // TO DO: validate input value
             // Show next form block
             $(this).closest('.form-block').next('.form-block').fadeIn();
             // Scroll to the next form block
@@ -1695,21 +1813,22 @@ $(function(){
                                 console.log('[WGST] Received assemblies:');
                                 console.log(data);
 
-                                var assemblyId,
-                                    assemblyCounter = 0;
-
                                 // Set collection id
                                 //$('.collection-panel .collection-id').text(collectionId);
-
-                                // Set created date
-                                // Get the last property (assembly) of the object
-                                var assemblyIds = Object.keys(data),
+                                
+                                var assemblyId,
+                                    assemblyIds = Object.keys(data),
+                                    assemblyCounter = 0,
+                                    // Get the last property (assembly) of the object
                                     lastAssemblyId = assemblyIds[assemblyIds.length - 1],
-                                    lastAssembly = data[lastAssemblyId].value;
+                                    lastAssembly = data[lastAssemblyId]['FP_COMP'],
+                                    assemblyTopScore,
+                                    selectNodesWithIds = '';
 
-                                console.log(lastAssembly.timestamp);
-
+                                // Set assembly created date
+                                // Format to readable string so that user could read exact time on mouse over
                                 $('.assembly-created-datetime').attr('title', moment(lastAssembly.timestamp, "YYYYMMDD_HHmmss").format('YYYY-MM-DD HH:mm:ss'));
+                                // Convert to time ago
                                 $('.timeago').timeago();
 
                                 // Parse each assembly object
@@ -1717,21 +1836,89 @@ $(function(){
                                     console.log('[WGST] Parsing assembly with id: ' + assemblyId);
                                     console.log(data[assemblyId]);
                                     //console.log('Top score: ' + getAssemblyTopScore(data[assemblyId].value.scores));
+                                   
+                                    // Get top score for this assembly
+                                    assemblyTopScore = getAssemblyTopScore(data[assemblyId]['FP_COMP'].scores);
 
-                                    //AAA
+                                    console.log('[WGST] Top score reference id: ' + assemblyTopScore.referenceId);
 
-                                    assemblyCounter = assemblyCounter + 1;
+                                    var assemblyLatitude = data[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[0],
+                                        assemblyLongitude = data[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[1];
+
+                                    console.log('[WGST] Assembly coordinates: ' + assemblyLatitude + ', ' + assemblyLongitude);
 
                                     $('.assemblies-summary-table tbody').append(
                                         // This is not verbose enough
                                         ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
+                                        //'<tr>'
+                                            + '<td class="selected-checkbox">'
+                                                + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
+                                            + '</td>'
                                             + '<td>' + assemblyId + '</td>'
-                                            + '<td>' + getAssemblyTopScore(data[assemblyId].value.scores).referenceId + '</td>'
-                                            + '<td>' + getAssemblyTopScore(data[assemblyId].value.scores).score + '</td>'
+                                            + '<td>' + assemblyTopScore.referenceId + '</td>'
+                                            + '<td>' + assemblyTopScore.score + '</td>'
                                         + '</tr>'
                                     );
-                                }
 
+                                    /*
+                                    // Check if string of nodes is not empty
+                                    if (selectNodesWithIds.length > 0) {
+                                        // Append reference id to existing string and separate by comma
+                                        selectNodesWithIds = selectNodesWithIds + ',' + assemblyTopScore.referenceId;
+                                    } else {
+                                        // Append reference id to existing string
+                                        selectNodesWithIds = assemblyTopScore.referenceId;
+                                    }
+                                    */
+
+                                    /*
+                                    // Parsing assembly scores
+                                    if (assemblyId.indexOf('FP_COMP_') !== -1) {
+                                        // Get top score for this assembly
+                                        assemblyTopScore = getAssemblyTopScore(data[assemblyId].value.scores);
+
+                                        $('.assemblies-summary-table tbody').append(
+                                            // This is not verbose enough
+                                            ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
+                                            //'<tr>'
+                                                + '<td class="selected-checkbox">'
+                                                    + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId].value.assemblyId + '">'
+                                                + '</td>'
+                                                + '<td>' + assemblyId + '</td>'
+                                                + '<td>' + assemblyTopScore.referenceId + '</td>'
+                                                + '<td>' + assemblyTopScore.score + '</td>'
+                                            + '</tr>'
+                                        );
+
+                                        console.log('[WGST] Top score reference id: ' + assemblyTopScore.referenceId);
+
+                                        // Check if string of nodes is not empty
+                                        if (selectNodesWithIds.length > 0) {
+                                            // Append reference id to existing string and separate by comma
+                                            selectNodesWithIds = selectNodesWithIds + ',' + assemblyTopScore.referenceId;
+                                        } else {
+                                            // Append reference id to existing string
+                                            selectNodesWithIds = assemblyTopScore.referenceId;
+                                        }
+
+                                    // Parsing assembly metadata
+                                    } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
+                                        var assemblyLatitude = data[assemblyId].value.geographicLocation.coordinates[0],
+                                            assemblyLongitude = data[assemblyId].value.geographicLocation.coordinates[1];
+
+                                        console.log('[WGST] Assembly coordinates: ' + assemblyLatitude + ', ' + assemblyLongitude);
+
+                                        console.log($('.assemblies-summary-table tbody input[data-assembly-id="' + data[assemblyId].assemblyId + '"'));
+                                        console.log();
+
+                                        $('.assemblies-summary-table tbody input[data-assembly-id="' + data[assemblyId].assemblyId + '"').attr('data-latitude', assemblyLatitude);
+                                        $('.assemblies-summary-table tbody input[data-assembly-id="' + data[assemblyId].assemblyId + '"').attr('data-longitude', assemblyLongitude);
+                                    } // else if
+                                    */
+
+                                    // Increment counter
+                                    assemblyCounter = assemblyCounter + 1;
+                                } // for
 
 
 /*        // Sort data by score
@@ -1824,6 +2011,98 @@ $(function(){
             }, 1000);
     };
 
+    $('.collection-panel .assemblies-summary-table').on('click', 'tr', function(event) {
+        if (event.target.type !== 'checkbox') {
+            $(':checkbox', this).trigger('click');
+        }
+    });
+
+    // User wants to select representative tree branch
+    $(".collection-panel .assemblies-summary-table").on('change', 'input[type="checkbox"]', function(e) {
+        // Add/remove highlight class
+        if ($(this).is(":checked")) {
+            $(this).closest('tr').addClass("row-highlighted");
+        } else {
+            $(this).closest('tr').removeClass("row-highlighted");
+        }
+
+        // Store node ids to highlight in a string
+        var checkedAssemblyNodesString = '',
+            checkedAssemblyNodesArray = [];
+
+        // Get node id of each node that use selected via checked checkbox 
+        $('.collection-panel .assemblies-summary-table input[type="checkbox"]:checked').each(function(){
+
+            // Concat assembly ids to string
+            // Use this string to highlight nodes on tree
+            if (checkedAssemblyNodesString.length > 0) {
+                checkedAssemblyNodesString = checkedAssemblyNodesString + ',' + $(this).attr('data-reference-id');
+            } else {
+                checkedAssemblyNodesString = $(this).attr('data-reference-id');
+            }
+
+            // Push assembly ids to array
+            // Use them to create map markers
+            checkedAssemblyNodesArray.push($(this).attr('data-assembly-id'));
+        });
+
+        // Highlight assembly with the highest score on the representative tree
+        window.WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
+
+        // Create assembly markers
+        var assemblyCounter = checkedAssemblyNodesArray.length;
+        for (; assemblyCounter !== 0;) {
+            assemblyCounter = assemblyCounter - 1;
+
+            // CONTINUE HERE: for some reason these markers are not being created on checkbox check
+
+            var existingMarkers = window.WGST.geo.markers.assembly,
+                existingMarker;
+
+            // Remove existing markers
+            for (existingMarker in existingMarkers) {
+                if (existingMarkers.hasOwnProperty(existingMarker)) {
+                    existingMarkers[existingMarker].setMap(null);
+                }
+            }
+
+            // Reset marker bounds
+            window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
+
+            window.WGST.geo.markers.assembly[checkedAssemblyNodesArray[assemblyCounter]] = new google.maps.Marker({
+                position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
+                map: WGST.geo.map,
+                visible: false
+            });
+
+            //AAA
+
+        }
+
+        //showRepresentativeTreeNodesOnMap(selectNodesWithIds);
+
+
+/*        var selectNodesWithIds = '',
+            nodeCounter = $('.collection-panel .assemblies-summary-table input[type="checkbox"]:checked').length;
+*/
+        /*
+        for (; nodeCounter !== 0;) {
+            nodeCounter = nodeCounter - 1;
+
+            if (selectNodesWithIds.length > 0) {
+                selectNodesWithIds = selectNodesWithIds + ',' + $('.collection-panel .assemblies-summary-table input[type="checkbox"]:checked')[nodeCounter].attr('data-reference-id');
+            } else {
+                selectNodesWithIds = $('.collection-panel .assemblies-summary-table input[type="checkbox"]:checked')[nodeCounter].attr('data-reference-id');
+            }
+
+        }
+        */
+
+        //console.log(selectNodeWithIds);
+
+
+    });
+
     $('.assemblies-upload-cancel-button').on('click', function() {
         // Close FASTA files upload panel
         $('.assembly-upload-panel').hide();
@@ -1849,7 +2128,7 @@ $(function(){
             console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
 
             // Create assembly URL
-            var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FP_COMP_' + JSON.parse(data).assemblyId;
+            var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FP_COMP_' + data.assemblyId;
             $('.uploaded-assembly-url-input').val(url);
 
             // Mark assembly as uploaded
@@ -1893,6 +2172,20 @@ $(function(){
 
                                 // Add collection id to each FASTA file object
                                 fastaFilesAndMetadata[fastaFile].collectionId = collectionIdResponse.uuid;
+
+                                var autocompleteInput = $('li[data-name="' + fastaFile + '"] .assembly-sample-location-input');
+
+                                // Add metadata to each FASTA file object
+                                fastaFilesAndMetadata[fastaFile].metadata = {
+                                    location: {
+                                        // TO DO: Change 'data-name' to 'data-file-name'
+                                        latitude: autocompleteInput.attr('data-latitude'),
+                                        longitude: autocompleteInput.attr('data-longitude')
+                                    }
+                                };
+
+                                console.log('[WGST] Metadata for ' + fastaFile + ': ');
+                                console.log(fastaFilesAndMetadata[fastaFile].metadata);
 
                                 // Post assembly
                                 $.ajax({
