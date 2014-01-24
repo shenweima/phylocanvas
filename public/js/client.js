@@ -237,6 +237,7 @@ $(function(){
 
     $('.tree-controls-select-all').on('click', function(){
         
+        // Create a list of all nodes in the tree
         var allNodes = WGST.representativeTree.tree.leaves,
             nodeCounter = allNodes.length,
             nodeIds = '';
@@ -291,7 +292,7 @@ $(function(){
                 accession = selectedNodeIds[nodeCounter];
 
                 metadata = window.WGST.representativeTree[accession];
-                
+
                 // Check if both latitude and longitude provided
                 if (metadata.latitude && metadata.longitude) {
 
@@ -302,7 +303,9 @@ $(function(){
                         position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
                         map: window.WGST.geo.map,
                         icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                        optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+                        // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
+                        // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+                        optimized: true
                     });
                     // Set marker
                     window.WGST.geo.markers.representativeTree[accession] = marker;
@@ -2035,8 +2038,8 @@ $(function(){
             window.WGST.geo.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
                 position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
                 map: window.WGST.geo.map,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+                icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                optimized: true // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
             });
 
             // Highlight row
