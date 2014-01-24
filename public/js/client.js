@@ -2147,10 +2147,16 @@ $(function(){
         updateMetadataProgressBar();
     });
 
+    // Bring to front selected panel
     $('.wgst-panel').on('mousedown', function(){
         // Change z index for all panels
         $('.wgst-panel').css('z-index', 100);
         // Set the  highest z index for this (selected) panel
         $(this).css('z-index', 1000);
+    });
+
+    // Deselect Twitter Bootstrap button on click
+    $('.tree-panel .tree-controls button').on('click', function(){
+        $(this).blur();
     });
 });
