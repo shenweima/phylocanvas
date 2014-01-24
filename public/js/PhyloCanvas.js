@@ -1298,6 +1298,8 @@ var PhyloCanvas = (function(){
                 }
                 else if(this.unselectOnClickAway && !this.dragging)
                 {
+                    // Disable deselect
+                    return;
                    this.root.setSelected(false, true);
                    if(this.onselected) this.onselected("");
                 }

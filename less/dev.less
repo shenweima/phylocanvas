@@ -301,8 +301,9 @@ body {
         }
         table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
             width: 900px;
+            max-height: 700px;
+            overflow: scroll;
             margin-bottom: 0;
-            //margin: 0 2%;
             border-top: 1px solid #ddd;
             colgroup {
                 .col-target-fp {
@@ -425,7 +426,12 @@ body {
         .wgst-panel-body {
             max-height: 500px;
             .tree-controls {
-                padding: 20px;
+                padding: 10px;
+                border-bottom: 1px solid #eee;
+                text-align: center;
+                button {
+                    outline: none;
+                }
             }
             #phylocanvas {
                 width: 780px;

@@ -306,7 +306,7 @@
             </table>            
 
           </div><!-- /.wgst-panel-body -->
-          <footer class="wgst-panel-footer">
+          <footer class="wgst-panel-footer wgst-draggable-handle">
             Created <span class="assembly-created-datetime timeago" title=""></span>.
           </footer><!-- /.wgst-panel-footer -->
         </div><!-- /.wgst-panel.assembly-list-panel -->
@@ -319,8 +319,14 @@
           </header>
           <div class="wgst-panel-body">
             <div class="tree-controls">
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-default tree-controls-select-all">Select all nodes</button>
+                <button type="button" class="btn btn-sm btn-default tree-controls-select-none">Deselect all nodes</button>
+              </div>
+              <!--
               <button type="button" class="btn btn-sm btn-default tree-controls-select-all">Select all nodes</button>
               <button type="button" class="btn btn-sm btn-default tree-controls-select-none">Select no nodes</button>
+              -->
             </div>
             <div id="phylocanvas"></div>
           </div><!-- /.wgst-panel-body -->

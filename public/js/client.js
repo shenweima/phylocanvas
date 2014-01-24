@@ -334,83 +334,14 @@ $(function(){
         // ==============================
 
         // Init tree
-        //var phylocanvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas'));
-        //phylocanvas.load('/data/EARSS.nwk');
         window.WGST.representativeTree.tree.load('/data/reference_tree.nwk');
         window.WGST.representativeTree.tree.treeType = 'rectangular';
-        //phylocanvas.showLabels = false;
+        //window.WGST.representativeTree.tree.showLabels = false;
         window.WGST.representativeTree.tree.baseNodeSize = 0.5;
         window.WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
         window.WGST.representativeTree.tree.selectedColor = '#0059DE';
         window.WGST.representativeTree.tree.rightClickZoom = true;
-
         window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
-
-        /*
-        function(nodeIds) {
-
-            if (typeof nodeIds === 'string' && nodeIds.length > 0) {
-                console.log('[WGST] Selected representative tree nodes: ' + nodeIds);
-
-                var selectedNodeIds = nodeIds.split(','),
-                    markers = window.WGST.geo.markers.representativeTree,
-                    existingMarker;
-
-                // Remove existing markers
-                for (existingMarker in markers) {
-                    if (markers.hasOwnProperty(existingMarker)) {
-                        markers[existingMarker].setMap(null);
-                    }
-                }
-
-                // Reset marker bounds
-                window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
-                //window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
-                //window.WGST.geo.markerBounds.extend(marker.getPosition());
-                
-                // Create representative tree markers
-                var nodeCounter = selectedNodeIds.length,
-                    accession,
-                    metadata,
-                    marker;
-
-                // For each node create representative tree marker
-                for (; nodeCounter !== 0;) {
-                    // Decrement counter
-                    nodeCounter = nodeCounter - 1;
-
-                    accession = selectedNodeIds[nodeCounter];
-
-                    metadata = window.WGST.representativeTree[accession]; 
-                    
-                    // Check if both latitude and longitude provided
-                    if (metadata.latitude && metadata.longitude) {
-
-                        console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
-                        console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
-
-                        marker = new google.maps.Marker({
-                            position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
-                            map: window.WGST.geo.map,
-                            icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                            optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
-                        });
-                        // Set marker
-                        window.WGST.geo.markers.representativeTree[accession] = marker;
-                        // Extend markerBounds with each metadata marker
-                        window.WGST.geo.markerBounds.extend(marker.getPosition());
-                    }
-                } // for
-
-                if (Object.keys(window.WGST.geo.markers.representativeTree).length > 0) {
-                    // Set the map to fit marker bounds
-                    window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
-                    // Pan to marker bounds
-                    window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
-                }
-            }
-        };
-        */
 
         // ==============================
         // Load reference tree metadata
@@ -438,23 +369,10 @@ $(function(){
                 // Decrement counter
                 metadataCounter = metadataCounter - 1;
 
+                console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
                 console.log(metadata[metadataCounter]);
 
                 accession = metadata[metadataCounter].accession;
-
-                // Check if both latitude and longitude provided
-                /*
-                if (metadata[metadataCounter].latitude && metadata[metadataCounter].longitude) {
-                    marker = new google.maps.Marker({
-                        position: new google.maps.LatLng(metadata[metadataCounter].latitude, metadata[metadataCounter].longitude),
-                        map: window.WGST.geo.map,
-                        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                        optimized: false // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
-                    });
-                    // Set marker
-                    window.WGST.geo.markers.representativeTree[accession] = marker;
-                }
-                */
 
                 // Set representative tree metadata
                 window.WGST.representativeTree[accession] = metadata[metadataCounter];
@@ -2235,5 +2153,4 @@ $(function(){
         // Set the  highest z index for this (selected) panel
         $(this).css('z-index', 1000);
     });
-
 });
