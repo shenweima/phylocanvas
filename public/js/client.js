@@ -764,6 +764,7 @@ $(function(){
         var assemblyMetadataFormContainer = $('<div class="assembly-metadata"></div>'),
             assemblyMetadataFormHeader = $('<h4>Please provide mandatory assembly metadata:</h4>'),
             assemblyMetadataForm = $('<form role="form"></form>'),
+            /*
             assemblySampleSpeciesFormBlock = $(
             '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block">'
                 + '<div class="form-group">'
@@ -776,8 +777,9 @@ $(function(){
                 + '</div>'
             + '</div>'
             ),
+            */
             assemblySampleDatetimeFormBlock = $(
-            '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
+            '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block">'
                 + '<div class="form-group">'
                     + '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
                     + '<div class="input-group">'
@@ -821,7 +823,7 @@ $(function(){
             + '</div>'
             );
 
-        assemblyMetadataForm.append(assemblySampleSpeciesFormBlock);
+        //assemblyMetadataForm.append(assemblySampleSpeciesFormBlock);
         assemblyMetadataForm.append(assemblySampleDatetimeFormBlock);
         assemblyMetadataForm.append(assemblySampleLocationFormBlock);
 
@@ -1479,16 +1481,18 @@ $(function(){
     var updateMetadataProgressBar = function() {
         // Calculate total number of metadata form elements
         var totalNumberOfMetadataItems = 
-            $('.assembly-sample-species-select').length
+            //$('.assembly-sample-species-select').length
             + $('.assembly-sample-datetime-input').length
             + $('.assembly-sample-location-input').length;
 
         // Calculate number of non empty metadata form elements
         var numberOfNonEmptyMetadataItems =
+            /*
             // Filter out default value
             $('.assembly-sample-species-select').filter(function(){
                 return $(this).val() !== '0';
             }).length
+            */
             // Filter out empty datetime inputs
             + $('.assembly-sample-datetime-input').filter(function(){
                 return this.value.length !== 0;
@@ -1515,6 +1519,7 @@ $(function(){
         }
     };
 
+    /*
     // Show next form block when user selects species
     // TO DO: Do now increment metadata progress bar more than once
     $('.assembly-list-container').on('change', '.assembly-sample-species-select', function(){
@@ -1526,6 +1531,7 @@ $(function(){
         // Increment progress bar
         updateMetadataProgressBar();
     });
+    */
 
     // Show next form block when user fills in an input
     // http://stackoverflow.com/a/6458946
