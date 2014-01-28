@@ -119,6 +119,15 @@ $(function(){
             }
         });
 
+        // Toggle all panels
+        $('.all-panels-toggle-button').on('click', function(){
+            if ($(this).hasClass('active')) {
+                $('.wgst-panel-active').hide();
+            } else {
+                $('.wgst-panel-active').show();
+            }
+        });
+
         // Toggle map
         $('.map-toggle-button').on('click', function(){
             if ($(this).hasClass('active')) {
@@ -199,7 +208,9 @@ $(function(){
         mapOptions: {
             zoom: 5,
             center: new google.maps.LatLng(48.6908333333, 9.14055555556), // new google.maps.LatLng(51.511214, -0.119824),
-            mapTypeId: google.maps.MapTypeId.ROADMAP
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            minZoom: 2,
+            maxZoom: 6
         },
         markers: {
             assembly: {},
@@ -1248,6 +1259,11 @@ $(function(){
         evt.stopPropagation();
         evt.preventDefault();
 
+        // Make assembly upload panel active
+        if (! $('.assembly-upload-panel').hasClass('wgst-panel-active')) {
+            $('.assembly-upload-panel').addClass('wgst-panel-active');
+        }
+
         // Show upload panel
         $('.assembly-upload-panel').fadeIn('fast');
 
@@ -1781,9 +1797,9 @@ $(function(){
                                             + '<td class="selected-checkbox">'
                                                 + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                                             + '</td>'
-                                            + '<td>' + assemblyId + '</td>'
+                                            + '<td>' + data[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] /*assemblyId*/ + '</td>'
                                             + '<td>' + assemblyTopScore.referenceId + '</td>'
-                                            + '<td>' + assemblyTopScore.score + '</td>'
+                                            + '<td>' + assemblyTopScore.score.toFixed(2) + ' = ' + Math.round(assemblyTopScore.score * parseInt(data[assemblyId]['FP_COMP']['fingerprintSize'], 10)) + '/' + data[assemblyId]['FP_COMP']['fingerprintSize'] + '</td>'
                                         + '</tr>'
                                     );
 
@@ -1908,9 +1924,16 @@ $(function(){
 
                                 // Close assembly-upload-panel
                                 $('.assembly-upload-panel').fadeOut('fast', function(){
+                                    // Make it inactive
+                                    $(this).removeClass('wgst-panel-active');
                                     // Reset assembly upload panel
                                     resetAssemlyUploadPanel();
                                 });
+
+                                // Make collection panel active
+                                if (! $('.collection-panel').hasClass('wgst-panel-active')) {
+                                    $('.collection-panel').addClass('wgst-panel-active');
+                                }
 
                                 // Bring collection-panel panel to front and open
                                 $('.collection-panel').trigger('mousedown').fadeIn('fast');

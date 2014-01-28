@@ -154,6 +154,7 @@ exports.add = function(req, res) {
 					*/
 					metadata = {
 						assemblyId: parsedMessage.assemblyId,
+						assemblyUserId: assembly['userAssemblyId'],
 						geographicLocation: {
 							type: 'Point',
 							coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
