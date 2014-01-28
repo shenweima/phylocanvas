@@ -219,7 +219,8 @@ $(function(){
         },
         markerBounds: new google.maps.LatLngBounds(),
         //geocoder: new google.maps.Geocoder(),
-        metadataAutocomplete: {}, // Store Google Autocomplete object for each dropped file
+        //metadataAutocomplete: {}, // Store Google Autocomplete object for each dropped file
+        metadataSearchBox: {}, // Store Google Autocomplete object for each dropped file
         init: function() {
             this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions);
             this.markers.metadata = new google.maps.Marker({
@@ -1001,22 +1002,30 @@ $(function(){
             // TO DO: This creates new Autocomplete object for each drag and drop file - possibly needs refactoring/performance optimization
             //WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
             // [0] returns native DOM element: http://learn.jquery.com/using-jquery-core/faq/how-do-i-pull-a-native-dom-element-from-a-jquery-object/
-            WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(autocompleteInput[0]);
+            //WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(autocompleteInput[0]);
+            WGST.geo.metadataSearchBox[fileName] = new google.maps.places.SearchBox(autocompleteInput[0]);
 
             // When the user selects an address from the dropdown,
             // get geo coordinates
             // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
             // TO DO: Remove this event listener after metadata was sent
-            google.maps.event.addListener(WGST.geo.metadataAutocomplete[fileName], 'place_changed', function() {
+            google.maps.event.addListener(WGST.geo.metadataSearchBox[fileName], 'places_changed', function() {
 
                 // Get the place details from the autocomplete object.
-                var place = window.WGST.geo.metadataAutocomplete[fileName].getPlace();
+                var places = window.WGST.geo.metadataSearchBox[fileName].getPlaces();
+
+                console.log('[WGST] Google Places API first SearchBox place:');
+                console.log(places[0].formatted_address);
+
+                // Set first place to as input's value
+                $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-location-input').val(places[0].formatted_address);
+
                 // Set map center to selected address
-                WGST.geo.map.setCenter(place.geometry.location);
+                WGST.geo.map.setCenter(places[0].geometry.location);
                 // Set map
                 WGST.geo.markers.metadata.setMap(WGST.geo.map);
                 // Set metadata marker's position to selected address
-                WGST.geo.markers.metadata.setPosition(place.geometry.location);
+                WGST.geo.markers.metadata.setPosition(places[0].geometry.location);
                 // Show metadata marker
                 WGST.geo.markers.metadata.setVisible(true);
 
@@ -1036,13 +1045,9 @@ $(function(){
                 */
 
                 // Remember latitude
-                autocompleteInput.attr('data-latitude', place.geometry.location.lat());
+                autocompleteInput.attr('data-latitude', places[0].geometry.location.lat());
                 // Remember longitude
-                autocompleteInput.attr('data-longitude', place.geometry.location.lng());
-
-                //console.log('Lat: ' + place.geometry.location.lat());
-                //console.log('Lng: ' + place.geometry.location.lng());
-
+                autocompleteInput.attr('data-longitude', places[0].geometry.location.lng());
             });
         }(file.name));
     
@@ -1579,16 +1584,25 @@ $(function(){
 
     // Show next form block when user fills in an input
     $('.assembly-list-container').on('change', '.assembly-sample-location-input', function(){
+
         // Show next form block if current input has some value
-        if ($(this).val().length) {
+        if ($(this).val().length > 0) {
+
             // TO DO: validate input value
-            // Show next form block
-            $(this).closest('.form-block').next('.form-block').fadeIn();
+            // TO DO: This line triggers button click - investigate and prevent from happening
+            //$(this).closest('.form-block').next('.form-block').fadeIn();
             // Scroll to the next form block
             //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
             $(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
         }
+
+        // Increment metadata progress bar
+        updateMetadataProgressBar();
+        // Hide progress hint
+        $('.adding-metadata-progress-container .progress-hint').fadeOut();
     });
+
+    /*
     // Increment metadata progress bar
     $('.assembly-list-container').on('change', '.assembly-sample-location-input', function(){
         // Increment progress bar
@@ -1596,9 +1610,14 @@ $(function(){
         // Hide progress hint
         $('.adding-metadata-progress-container .progress-hint').fadeOut();
     });
+    */
 
     // When 'Next assembly' button is pressed
     $('.assembly-list-container').on('click', '.next-assembly-button', function(e){
+
+        console.log('This is this: ');
+        console.log(this);
+
         // Find assembly with empty or incomplete metadata
         //console.log($(this).closest('.assembly-list-container').find('.assembly-item input:text[value=""]'));
 
@@ -1621,6 +1640,7 @@ $(function(){
 
         console.log($(this).closest('.assembly-item').next('.assembly-item input'));
 */
+
         // Trigger to show next assembly
         $('.nav-next-item').trigger('click');
 
@@ -2181,7 +2201,7 @@ $(function(){
         // Change z index for all panels
         $('.wgst-panel').css('z-index', 100);
         // Set the  highest z index for this (selected) panel
-        $(this).css('z-index', 1000);
+        $(this).css('z-index', 101);
     });
 
     // Deselect Twitter Bootstrap button on click
