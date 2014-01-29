@@ -775,7 +775,8 @@ $(function(){
 
         var assemblyMetadataFormContainer = $('<div class="assembly-metadata"></div>'),
             assemblyMetadataFormHeader = $('<h4>Please provide mandatory assembly metadata:</h4>'),
-            assemblyMetadataForm = $('<form role="form"></form>'),
+            //assemblyMetadataForm = $('<form role="form"></form>'),
+            assemblyMetadataForm = $('<div></div>'),
             /*
             assemblySampleSpeciesFormBlock = $(
             '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block">'
@@ -840,6 +841,7 @@ $(function(){
         assemblyMetadataForm.append(assemblySampleLocationFormBlock);
 
         // Show form navigation buttons only when you're at the last assembly
+        // TO DO: Append to .assembly-metadata instead of the classless div
         if (fileCounter < droppedFiles.length) {
             assemblyMetadataForm.append(assemblyControlsFormBlock);
         } else {
@@ -983,7 +985,8 @@ $(function(){
 
         // Show first assembly
         //$('.assembly-item-1').removeClass('hide-this');
-        $('.assembly-item').eq('0').show();
+        //$('.assembly-item').eq('0').show();
+        $('#assembly-item-1').show();
         // Store displayed fasta file name
         //selectedFastaFileName = $('.assembly-item-1').attr('data-name');
         selectedFastaFileName = $('.assembly-item').eq('0').attr('data-name');
@@ -1393,14 +1396,17 @@ $(function(){
         $('.assembly-item').hide();
         // Show selected sequence
         //$('.assembly-item-' + ui.value).show();
-        $('.assembly-item').eq(elementCounter - 1).show(); // Convert one-based index to zero-based index used by .eq()
+        //$('.assembly-item').eq(elementCounter - 1).show(); // Convert one-based index to zero-based index used by .eq()
+        var selectedFastaFileElement = $('#assembly-item-' + elementCounter);
+        selectedFastaFileElement.show();
         // Update assembly file name
         //$('.assembly-file-name').text($('.assembly-item-' + elementCounter).attr('data-name'));
         $('.assembly-file-name').text($('.assembly-item').eq(elementCounter - 1).attr('data-name'));
         // Update sequence counter label
         updateRangeNavigationButtons(elementCounter);
         // Store displayed fasta file name
-        selectedFastaFileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name');  
+        //selectedFastaFileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name'); 
+        selectedFastaFileName = selectedFastaFileElement.attr('data-name'); 
     };
 
     var resetAssemlyUploadPanel = function() {
@@ -1468,13 +1474,13 @@ $(function(){
     };
     // Handle slide event
     // Triggered when user moved but didn't release range handle
-    $('.assembly-list-slider').on( "slide", assemblyListSliderEventHandler);
+    $('.assembly-list-slider').on('slide', assemblyListSliderEventHandler);
     // Handle slidechange event
     // Triggered when user clicks a button or releases range handle
-    $('.assembly-list-slider').on( "slidechange", assemblyListSliderEventHandler);
+    $('.assembly-list-slider').on('slidechange', assemblyListSliderEventHandler);
     // Navigate to the previous sequence
     $('.nav-prev-item').on('click', function(e){
-        // Check if selected sequence counter is greater than 1
+        // Check if selected sequence counter value is greater than 1
         if ($('.assembly-list-slider').slider('value') > 1) {
             // Decrement slider's value
             $('.assembly-list-slider').slider('value', $('.assembly-list-slider').slider('value') - 1);
@@ -1483,9 +1489,9 @@ $(function(){
     });
     // Navigate to the next sequence
     $('.nav-next-item').on('click', function(e){
-        // Check if selected sequence counter is greater than 1
-        if ($('.assembly-list-slider').slider('value') < parseInt($('.total-number-of-dropped-assemblies').text())) {
-            // Decrement slider's value
+        // Check if selected sequence counter value is less than total number of dropped assemblies
+        if ($('.assembly-list-slider').slider('value') < parseInt($('.total-number-of-dropped-assemblies').text(), 10)) {
+            // Increment slider's value
             $('.assembly-list-slider').slider('value', $('.assembly-list-slider').slider('value') + 1);
         }
         e.preventDefault();
@@ -1588,9 +1594,11 @@ $(function(){
         // Show next form block if current input has some value
         if ($(this).val().length > 0) {
 
-            // TO DO: validate input value
-            // TO DO: This line triggers button click - investigate and prevent from happening
-            //$(this).closest('.form-block').next('.form-block').fadeIn();
+            // TO DO: Validate input value
+
+            // Show next metadata form block
+            $(this).closest('.form-block').next('.form-block').fadeIn();
+
             // Scroll to the next form block
             //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
             $(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
@@ -1602,21 +1610,8 @@ $(function(){
         $('.adding-metadata-progress-container .progress-hint').fadeOut();
     });
 
-    /*
-    // Increment metadata progress bar
-    $('.assembly-list-container').on('change', '.assembly-sample-location-input', function(){
-        // Increment progress bar
-        updateMetadataProgressBar();
-        // Hide progress hint
-        $('.adding-metadata-progress-container .progress-hint').fadeOut();
-    });
-    */
-
     // When 'Next assembly' button is pressed
-    $('.assembly-list-container').on('click', '.next-assembly-button', function(e){
-
-        console.log('This is this: ');
-        console.log(this);
+    $('.assembly-list-container').on('click', '.assembly-metadata button.next-assembly-button', function(e){
 
         // Find assembly with empty or incomplete metadata
         //console.log($(this).closest('.assembly-list-container').find('.assembly-item input:text[value=""]'));
