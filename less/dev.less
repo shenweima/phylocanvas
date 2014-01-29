@@ -318,12 +318,16 @@ body {
                 font-weight: 500;
                 font-size: 14px;
                 text-transform: uppercase;
-                &:first-child {
+                &:nth-child(1), &:nth-child(2) {
                     text-align: center;
                 }
             }
-            td.selected-checkbox {
+            td.show-on-map-checkbox {
                 padding: 6px 5px 5px 5px;
+                text-align: center;
+            }
+            td.show-on-tree-radio-button {
+                padding: 7px 5px 5px 5px;
                 text-align: center;
             }
             th, td {

@@ -1809,7 +1809,11 @@ $(function(){
                                         // This is not verbose enough
                                         ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
                                         //'<tr>'
-                                            + '<td class="selected-checkbox">'
+                                            + '<td class="show-on-tree-radio-button">'
+                                                + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '" checked>'
+                                                //+ '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
+                                            + '</td>'
+                                            + '<td class="show-on-map-checkbox">'
                                                 + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                                             + '</td>'
                                             + '<td>' + data[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] /*assemblyId*/ + '</td>'
@@ -1977,13 +1981,13 @@ $(function(){
     };
 
     $('.collection-panel .assemblies-summary-table').on('click', 'tr', function(event) {
-        if (event.target.type !== 'checkbox') {
+        if (event.target.type !== 'radio' && event.target.type !== 'checkbox') {
             $(':checkbox', this).trigger('click');
         }
     });
 
-    // User wants to select representative tree branch
-    $(".collection-panel .assemblies-summary-table").on('change', 'input[type="checkbox"]', function(e) {
+    // User wants to show assembly on map
+    $('.collection-panel .assemblies-summary-table').on('change', 'input[type="checkbox"]', function(e) {
 
         //======================================================
         // Map
@@ -1993,10 +1997,9 @@ $(function(){
 
         // Checked
         if ($(this).is(":checked")) {
-
-            // Create marker
             console.log('[WGST] Creating marker for assembly id: ' + checkedAssemblyId);
 
+            // Create marker
             window.WGST.geo.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
                 position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
                 map: window.WGST.geo.map,
@@ -2009,15 +2012,27 @@ $(function(){
 
         // Unchecked
         } else {
-
-            // Remove marker
             console.log('[WGST] Removing marker for assembly id: ' + checkedAssemblyId);
 
+            // Remove marker
             window.WGST.geo.markers.assembly[checkedAssemblyId].setMap(null);
 
             // Remove node highlighing
             $(this).closest('tr').removeClass("row-highlighted");
         }
+
+        // AAA
+        
+        // Extend markerBounds with each metadata marker
+        window.WGST.geo.markerBounds.extend(window.WGST.geo.markers.assembly[checkedAssemblyId].getPosition());
+        // Pan to marker bounds
+        window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
+        // Set the map to fit marker bounds
+        window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
+    });
+
+    // User wants to select representative tree branch
+    $(".collection-panel .assemblies-summary-table").on('change', 'input[type="radio"]', function(e) {
 
         //======================================================
         // Tree
@@ -2027,7 +2042,7 @@ $(function(){
         var checkedAssemblyNodesString = '';
 
         // Get node id of each node that use selected via checked checkbox 
-        $('.collection-panel .assemblies-summary-table input[type="checkbox"]:checked').each(function(){
+        $('.collection-panel .assemblies-summary-table input[type="radio"]:checked').each(function(){
             // Concat assembly ids to string
             // Use this string to highlight nodes on tree
             if (checkedAssemblyNodesString.length > 0) {
