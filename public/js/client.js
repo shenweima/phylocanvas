@@ -1612,30 +1612,7 @@ $(function(){
 
     // When 'Next assembly' button is pressed
     $('.assembly-list-container').on('click', '.assembly-metadata button.next-assembly-button', function(e){
-
-        // Find assembly with empty or incomplete metadata
-        //console.log($(this).closest('.assembly-list-container').find('.assembly-item input:text[value=""]'));
-
-        // Get current assembly's id and split it
-        //var currentAssemblyIdPartArray = $(this).closest('.assembly-item').attr('id').split('-');
-        // Get id's number
-        //var currentAssemblyIdCounter = currentAssemblyIdPartArray[currentAssemblyIdPartArray.length - 1];
-        // Focus
-
-        //console.log($('#assembly-item-' + (+currentAssemblyIdCounter + 1)).find('input:first'));
-
-/*      // Focus on the next fist input of the next assembly metadata form
-        var currentAssemblyCounter = $(this).closest('.assembly-item').attr('id').split('-')[];
-
-
-        // http://stackoverflow.com/questions/267615/focusing-first-control-in-the-form-using-jquery
-        var currentAssemblyCounter = $(this).closest('.assembly-item').next('.assembly-item')
-
-        $(this).closest('.assembly-item').next('.assembly-item').find('input:first').focus();
-
-        console.log($(this).closest('.assembly-item').next('.assembly-item input'));
-*/
-
+        
         // Trigger to show next assembly
         $('.nav-next-item').trigger('click');
 
@@ -1646,11 +1623,6 @@ $(function(){
 
         e.preventDefault();
     });
-
-    // On
-/*  $('.assembly-list-container').on('click', '.next-assembly-button', function(e){
-        // Do something
-    });*/
 
     var updateAssemblyUploadProgressBar = function(collectionId) {
         // Get total number of assemblies to upload
@@ -2021,8 +1993,6 @@ $(function(){
             $(this).closest('tr').removeClass("row-highlighted");
         }
 
-        // AAA
-        
         // Extend markerBounds with each metadata marker
         window.WGST.geo.markerBounds.extend(window.WGST.geo.markers.assembly[checkedAssemblyId].getPosition());
         // Pan to marker bounds
