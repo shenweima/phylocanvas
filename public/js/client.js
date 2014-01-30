@@ -1777,7 +1777,8 @@ $(function(){
 
                                     console.log('[WGST] Assembly coordinates: ' + assemblyLatitude + ', ' + assemblyLongitude);
 
-                                    $('.assemblies-summary-table tbody').append(
+                                    // Append to only first tbody tag (currently there more than one)
+                                    $('.assemblies-summary-table tbody').eq(0).append(
                                         // This is not verbose enough
                                         ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
                                         //'<tr>'
@@ -1791,8 +1792,60 @@ $(function(){
                                             + '<td>' + data[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] /*assemblyId*/ + '</td>'
                                             + '<td>' + assemblyTopScore.referenceId + '</td>'
                                             + '<td>' + assemblyTopScore.score.toFixed(2) + ' = ' + Math.round(assemblyTopScore.score * parseInt(data[assemblyId]['FP_COMP']['fingerprintSize'], 10)) + '/' + data[assemblyId]['FP_COMP']['fingerprintSize'] + '</td>'
+                                            + '<td>'
+                                                // Resistance profile
+                                                +'<div class="assembly-resistance-profile-container">'
+                                                  + '<table class="table assembly-resistance-profile">'
+                                                    + '<tbody>'
+                                                      + '<tr>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                        + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
+                                                      + '</tr>'
+                                                    + '</tbody>'
+                                                  + '</table>'
+                                                + '</div>'
+
+                                            + '</td>'
                                         + '</tr>'
                                     );
+
+                                    //AAA
+
+/*            <div class="assembly-resistance-profile-container">
+              <table class="table assembly-resistance-profile">
+                <tbody>
+                  <tr>
+                    <td class="resistance-fail">PCG</td>
+                    <td class="resistance-fail">FOX</td>
+                    <td class="resistance-fail">CIP</td>
+                    <td class="resistance-fail">MOX</td>
+                    <td class="resistance-unknown">AMI</td>
+                    <td class="resistance-unknown">GEN</td>
+                    <td class="resistance-unknown">TOB</td>
+                    <td class="resistance-fail">ERY</td>
+                    <td class="resistance-fail">CLI</td>
+                    <td class="resistance-unknown">TET</td>
+                    <td class="resistance-unknown">FUS</td>
+                    <td class="resistance-fail">MUP</td>
+                    <td class="resistance-unknown">RIF</td>
+                    <td class="resistance-unknown">TRI</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div><!-- /.assembly-resistance-profile-container -->*/
+
 
                                     /*
                                     // Check if string of nodes is not empty
