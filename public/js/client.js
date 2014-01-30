@@ -1612,7 +1612,7 @@ $(function(){
 
     // When 'Next assembly' button is pressed
     $('.assembly-list-container').on('click', '.assembly-metadata button.next-assembly-button', function(e){
-        
+
         // Trigger to show next assembly
         $('.nav-next-item').trigger('click');
 
@@ -1782,7 +1782,7 @@ $(function(){
                                         ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
                                         //'<tr>'
                                             + '<td class="show-on-tree-radio-button">'
-                                                + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '" checked>'
+                                                + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
                                                 //+ '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                                             + '</td>'
                                             + '<td class="show-on-map-checkbox">'
