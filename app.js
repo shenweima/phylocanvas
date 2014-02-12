@@ -54,6 +54,7 @@ app.post('/collection/add', collection.add);
 app.get('/assembly/:id', assembly.get);
 app.post('/assembly', assembly.getData); // For ajax requests
 app.post('/assembly/add', assembly.add);
+app.post('/assembly/resistance-profile', assembly.getResistanceProfile);
 
 // Test routes
 app.get('/dev/d3tree', require('./routes/dev').d3tree);

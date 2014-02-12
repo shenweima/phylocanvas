@@ -263,149 +263,6 @@ body {
     }
 }
 
-.wgst-panel.collection-panel {
-    top: 86px;
-    .wgst-panel-header {
-        //border-bottom: 1px solid #000;
-        line-height: 1em;
-        font-weight: 300;
-        .assembly-id {
-            font-weight: 400;
-        }
-    }
-    .wgst-panel-body {
-        max-height: 560px;
-        overflow: scroll;
-        padding: 20px;
-        h2 {
-            font-size: 12px;
-            font-weight: 400;
-            margin: 20px 8px;
-            text-align: center;
-            text-transform: uppercase;
-        }
-        .mlst-number {
-            font-weight: 300;
-            font-size: 22px;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .assembly-resistance-profile-container {
-            border: 1px solid #bbb;
-            padding: 1px;
-            //width: 96%;
-            //border-bottom: 1px solid #ddd;
-            //margin-bottom: 0;
-            //margin: 0 2%;
-            //margin: 0 12px;
-        }
-        table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
-            width: 900px;
-            max-height: 700px;
-            overflow: scroll;
-            margin-bottom: 0;
-            //border-top: 1px solid #ddd;
-            colgroup {
-                .col-target-fp {
-                    width: auto; //45%;
-                }
-                .col-score, .col-score-percentage {
-                    width: 20%;
-                }
-            }
-            th {
-                border-bottom: 1px;
-                font-weight: 500;
-                font-size: 14px;
-                text-transform: uppercase;
-                &:nth-child(1), &:nth-child(2) {
-                    text-align: center;
-                }
-            }
-            td.show-on-map-checkbox {
-                padding: 6px 5px 5px 5px;
-                text-align: center;
-            }
-            td.show-on-tree-radio-button {
-                padding: 7px 5px 5px 5px;
-                text-align: center;
-            }
-            th, td {
-                padding-left: 12px;
-                padding-right: 12px;
-            }
-            tbody {
-                tr {
-                    /*
-
-                    Order is important.
-                    You want :hover to overwrite .row-stripe rule.
-
-                    */
-                    &.row-stripe {
-                        background-color: #FAFAFA; //#F9F9F9;
-                    }
-                    &.row-highlighted {
-                        background-color: #F0F7FF;
-                    }
-                    &:hover {
-                        background-color: #FFF8F0;
-                    }
-                }
-            }
-        }
-        table.assembly-resistance-profile {
-            //width: 96%;
-            //border-bottom: 1px solid #ddd;
-            margin-bottom: 0;
-            //margin: 0 2%;
-            .glyphicon {
-                color: #fff;
-            }
-            thead {
-                th {
-                    font-weight: 400;
-                }
-            }
-            tbody {
-                /*
-                tr {
-                    background-color: #f9f9f9;
-                }
-                */
-                td {
-                    width: auto;
-                    color: #fff;
-                    font-weight: 300;
-                    text-align: center;
-                    border: 0;
-                    font-weight: 400;
-                    &.resistance-fail {
-                        background-color: #CF0000;
-                    }
-                    &.resistance-unknown {
-                        background-color: #f5f5f5;
-                        color: #000;
-                    }
-                    &.resistance-success {
-                        background-color: #038F05;
-                    }
-                }
-            }
-        }
-    }
-    .wgst-panel-footer {
-        //border-top: 1px solid #000;
-        text-align: center;
-        font-weight: 300;
-        padding: 10px;
-        font-size: 12px;
-        .assembly-upload-datetime {
-            font-weight: 400;
-        }
-    }
-}
-
 .wgst-panel {
     display: none;
     position: absolute;
@@ -476,128 +333,16 @@ body {
             }
         }
     }
-    .wgst-panel-footer {
-        width: 100%;
-        min-height: 40px;
-        background-color: #f7f7f7;
-        border-radius: 0 0 8px 8px;
-        border-top: 1px solid #eee;
-        //padding: 15px;
-        font-weight: 300;
-        overflow: hidden;
-        .uploading-assembly-progress-container {
-            display: none;
-            margin: 15px;
-            overflow: hidden;
-            .uploading-progress-container {
-                width: 100%;
-                float: left;
-                //.no-user-select;
-                .uploaded-assembly-url {
-                    display: none;
-                    //margin-top: 10px;
-                    .uploaded-assembly-url-label {
-                        font-size: 12px;
-                        font-weight: 400;
-                        text-transform: uppercase;
-                        .visit-url-seconds-number {
-                            font-weight: 400;
-                            font-size: 22px;
-                            margin: 0 3px;
-                        }
-                        .uploaded-assembly-process-status {
-                            font-size: 22px;
-                            font-weight: 400;
-                            text-transform: uppercase;
-                            margin-right: 3px;
-                        }
-                    }
-                    .uploaded-assembly-url-input {
-                        margin-top: 5px;
-                        color: #000;
-                    }
-                }
-                .progress-label {
-                    //line-height: 1.2em;
-                    margin-bottom: 10px;
-                    .progress-percentage-label {
-                        font-size: 12px;
-                        font-weight: 400;
-                        text-transform: uppercase;
-                    }
-                    .progress-percentage {
-                        font-weight: 400;
-                        font-size: 22px;
-                        margin-left: 2px;
-                        line-height: 1em;
-                        text-transform: uppercase;
-                    }
-                    .progress-hint {
-                        //font-weight: 100;
-                        font-size: 14px;
-                        margin-left: 4px;
-                        //font-style: italic;
-                    }
-                }
-                .progress {
-                    margin: 0;
-                    margin-top: 10px;
-                }
-            }
-        }
-
-        .adding-metadata-progress-container {
-            margin: 15px;
-            overflow: hidden;
-            .progress-container {
-                width: 83%;
-                float: left;
-                //.no-user-select;
-                .progress-label {
-                    //line-height: 1.2em;
-                    //margin-bottom: 10px;
-                    .progress-percentage-label {
-                        font-size: 12px;
-                        font-weight: 400;
-                        text-transform: uppercase;
-                    }
-                    .progress-percentage {
-                        font-weight: 400;
-                        font-size: 22px;
-                        margin-left: 2px;
-                        line-height: 1em;
-                        text-transform: uppercase;
-                    }
-                    .progress-hint {
-                        //font-weight: 100;
-                        font-size: 14px;
-                        margin-left: 4px;
-                        //font-style: italic;
-                    }
-                }
-                .progress {
-                    margin: 0;
-                    margin-top: 10px;
-                }
-            }
-            .upload-controls-container {
-                float: right;
-                button {
-                    margin-top: 20px;
-                    margin-left: 8px;
-                    outline: none;
-                }
-            }
-        }
-    }
+    .wgst-panel-footer {}
     .wgst-panel-body {
         //border-top: 1px solid #fff;
         //padding: 12px 15px;
         //float: left;
         overflow: hidden;
         .assembly-navigator {
+            width: 602px;
             //border-top: 1px solid #eee;
-            border-bottom: 1px solid #eee;
+            //border-bottom: 1px solid #eee;
             .assembly-navigator-controls {
                 display: inline-block;
                 height: 80px;
@@ -677,7 +422,7 @@ body {
                     }
                 }
                 .assembly-list-slider {
-                    width: 798px;//500px;
+                    width: 400px;//798px;//500px;
                     margin: 10px;
                     clear: both;
                     // Overwrite default jQuery UI Slider widget styling
@@ -815,194 +560,532 @@ body {
                 }
             }
         }
-        .assembly-list-container {
-            float: left;
-            width: 1000px;
-            background-color: #fff;
-            //min-height: 395px;
-            //max-height: 395px;
-            //overflow: scroll;
-            //padding: 20px;
-            ul {
-                list-style: none;
-                margin: 0;
-                padding: 0;
-                .assembly-item {
-                    .assembly-overview {
-                        display: inline-block;
+    }
+}
+
+/*
+ * Refactored CSS
+ */
+
+/* CSS Reset */
+h2, h4 {
+    margin: 0;
+    padding: 0;
+}
+
+.assembly-list-container {
+    float: left;
+    width: 500px;
+    background-color: #fff;
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        .assembly-item {
+            .assembly-overview {
+                display: inline-block;
+                width: 100%;
+                float: left;
+                margin: 0 auto;
+                padding-bottom: 25px; 
+                border-bottom: 1px solid #eee;
+                text-align: center;
+                .assembly-stats-container {
+                    display: inline-block;
+                    width: 100px;
+                    margin: 25px 25px 0 25px;
+                    vertical-align: top;
+                    text-align: left;
+                    .assembly-stats-number {
+                        float: left;
+                        clear: both;
+                        font-weight: 400;
+                        font-size: 22px;
+                        small {
+                            font-size: 11px;
+                            font-weight: 400;
+                            text-transform: uppercase;
+                            margin-left: 2px;
+                        }
+                    }
+                    .assembly-stats-label {
                         width: 100%;
                         float: left;
-                        margin: 0 auto;
-                        //padding: 25px 20px 0 20px;
-                        padding: 20px 0 18px 0;
-                        border-bottom: 1px solid #eee;
-                        text-align: center;
-                        .assembly-stats-container {
-/*                            float: left;
-                            margin-right: 20px;*/
-                            display: inline-block;
-                            margin: 0 25px;
-                            vertical-align: top;
-                            text-align: left;
-                            .assembly-stats-number {
-                                float: left;
-                                clear: both;
-                                //display: inline-block;
-                                font-weight: 400;
-                                font-size: 22px;
-                                //line-height: 30px;
-                                small {
-                                    font-size: 11px;
-                                    font-weight: 400;
-                                    text-transform: uppercase;
-                                    margin-left: 2px;
-                                }
-                            }
-                            .assembly-stats-label {
-                                width: 100%;
-                                float: left;
-                                clear: both;
-                                //display: inline-block;
-                                font-size: 11px;
-                                line-height: 14px;
-                                text-transform: uppercase;
-                                margin-top: 2px;
-                                margin-left: 1px;
-                                //margin-left: 6px;
-                            }
-                            /*
-                            .assembly-file-name {
-                                float: left;
-                                //display: inline;
-                                font-weight: 300;
-                                font-size: 18px;
-                                line-height: 30px;
-                            }
-                            */
-                        }
-                        button {
-                            float: right;
-                        }  
+                        clear: both;
+                        font-size: 11px;
+                        line-height: 14px;
+                        text-transform: uppercase;
+                        margin-top: 2px;
+                        margin-left: 1px;
                     }
-                    .assembly-content-data {
-                        //position: absolute;
-                        float: left;
-                        width: 500px;
-                        text-align: center;
-                        /*
-                        .assembly-stats-container {
-                            display: inline-block;
-                            margin: 0 auto;
-                            padding: 25px 20px 0 20px;
-                            div {
-                                float: left;
-                                &.assembly-stats-number {
-                                    font-weight: 400;
-                                    font-size: 32px;
-                                    line-height: 30px;
-                                }
-                                &.assembly-stats-label {
-                                    font-size: 11px;
-                                    line-height: 14px;
-                                    text-transform: uppercase;
-                                    text-align: left;
-                                    margin-top: 2px;
-                                    margin-left: 6px;
-                                }
-                            }
-                        }
-                        */
-                        svg {
-                            .axis {
-                                fill: none;
-                                stroke: #000;
-                            }
-                            text {
-                                font-size: 11px;
-                                font-weight: 100;
-                                &.axis-label {
-                                    stroke: #888;
-                                    stroke-width: 0.05em;
-                                    letter-spacing: 0.03em;
-                                    font-size: 12px;
-                                    text-transform: uppercase;
-                                }
-                            }
-                            circle {
-                                //stroke: #000;
-                                stroke-width: 0.5px;
-                                fill: #908CFF;
-                                opacity: 0.5;
-                            }
-                            path {
-                                stroke: #aaa;
-                                fill: none;
-                                &.n50-path {
-                                    fill: none;
-                                    //stroke: #5cb85c;
-                                }
-                            }
-                            .n50-group {
-                                circle {
-                                    fill: #000;
-                                    opacity: 1;
-                                }
-                                text {
-                                    fill: #000;
-                                    font-weight: 400;
-                                    font-size: 11px;
-                                }
-                                path {
-                                    stroke: #000;
-                                }
-                            }
+                }
+                button {
+                    float: right;
+                }  
+            }
+            .assembly-content-data {
+                float: left;
+                width: 500px;
+                text-align: center;
+                svg {
+                    .axis {
+                        fill: none;
+                        stroke: #000;
+                    }
+                    text {
+                        font-size: 11px;
+                        font-weight: 100;
+                        &.axis-label {
+                            stroke: #888;
+                            stroke-width: 0.05em;
+                            letter-spacing: 0.03em;
+                            font-size: 12px;
+                            text-transform: uppercase;
                         }
                     }
-                    .assembly-metadata {
-                        width: 500px;
-                        float: right;
-                        padding: 20px;
-                        border-left: 1px solid #eee;
-                        min-height: 325px;
-                        max-height: 325px;
-                        overflow: scroll;
-                        h4 {
-                            margin: 0;
-                            margin-bottom: 20px;
+                    circle {
+                        stroke-width: 0.5px;
+                        fill: #908CFF;
+                        opacity: 0.5;
+                    }
+                    path {
+                        stroke: #aaa;
+                        fill: none;
+                        &.n50-path {
+                            fill: none;
+                        }
+                    }
+                    .n50-group {
+                        circle {
+                            fill: #000;
+                            opacity: 1;
+                        }
+                        text {
+                            fill: #000;
+                            font-weight: 400;
+                            font-size: 11px;
+                        }
+                        path {
+                            stroke: #000;
+                        }
+                    }
+                }
+            }
+            .assembly-metadata {
+                width: 500px;
+                float: right;
+                padding: 20px;
+                border-left: 1px solid #eee;
+                min-height: 325px;
+                max-height: 325px;
+                overflow: scroll;
+                h4 {
+                    margin: 0;
+                    margin-bottom: 20px;
+                    font-weight: 300;
+                    font-size: 14px;
+                }
+                .form-block {
+                    border-top: 1px solid #eee;
+                    padding-top: 10px;
+                    &:first-child {
+                        border-top: 0;
+                        padding-top: 0;
+                    }
+                    label {
+                        font-weight: 400;
+                        margin-bottom: 10px;
+                        //.no-user-select;
+                        .not-sure-hint {
                             font-weight: 300;
-                            font-size: 14px;
-                        }
-                        .form-block {
-                            border-top: 1px solid #eee;
-                            padding-top: 10px;
-                            &:first-child {
-                                border-top: 0;
-                                padding-top: 0;
-                            }
-                            label {
-                                font-weight: 400;
-                                margin-bottom: 10px;
-                                //.no-user-select;
-                                .not-sure-hint {
-                                    font-weight: 300;
-                                    margin-left: 4px;
-                                    color: #FF9524;
-                                }
-                            }
-                            button {
-                                margin-top: 5px;
-                                margin-right: 10px;
-                            }
-                            input {
-                                color: #000;
-                            }
+                            margin-left: 4px;
+                            color: #FF9524;
                         }
                     }
-                    .sequence-string {
-                        word-wrap: break-word;
+                    button {
+                        margin-top: 5px;
+                        margin-right: 10px;
+                    }
+                    input {
+                        color: #000;
+                    }
+                }
+            }
+            .sequence-string {
+                word-wrap: break-word;
+            }
+        }
+    }
+}
+
+.assembly-metadata-list-container {
+    width: 500px;
+    background-color: #fff;
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        .assembly-item {
+            .assembly-overview {
+                display: inline-block;
+                width: 100%;
+                float: left;
+                margin: 0 auto;
+                padding-bottom: 25px; 
+                border-bottom: 1px solid #eee;
+                text-align: center;
+                button {
+                    float: right;
+                }  
+            }
+            .assembly-metadata {
+                width: 500px;
+                height: 335px;
+                float: right;
+                padding: 20px;
+                border-left: 1px solid #eee;
+                /*
+                min-height: 325px;
+                max-height: 325px;
+                */
+                overflow: scroll;
+                h4 {
+                    margin: 0;
+                    margin-bottom: 20px;
+                    font-weight: 300;
+                    font-size: 14px;
+                }
+                .form-block {
+                    border-top: 1px solid #eee;
+                    padding-top: 10px;
+                    &:first-child {
+                        border-top: 0;
+                        padding-top: 0;
+                    }
+                    label {
+                        font-weight: 400;
+                        margin-bottom: 10px;
+                        //.no-user-select;
+                        .not-sure-hint {
+                            font-weight: 300;
+                            margin-left: 4px;
+                            color: #FF9524;
+                        }
+                    }
+                    button {
+                        margin-top: 5px;
+                        margin-right: 10px;
+                    }
+                    input {
+                        color: #000;
+                    }
+                }
+            }
+            .sequence-string {
+                word-wrap: break-word;
+            }
+        }
+    }
+}
+
+// Class
+.wgst-panel {
+    // State
+    display: none; // Hidden by default
+}
+
+// Class state
+.wgst-panel--visible {
+    display: block;
+}
+
+// Class element
+.wgst-panel-header {
+    height: 40px;
+    // Object element
+    .header-title {
+        font-size: 14px;
+        font-weight: 300;
+        text-align: center;
+        small {
+            font-size: 100%;
+            font-weight: 400;
+            color: #000;
+        }
+    }
+}
+// Class element
+.wgst-panel-body {}
+// Class element
+.wgst-panel-footer {
+    width: 100%;
+    height: 20px;
+    background-color: #f7f7f7;
+    border-radius: 0 0 8px 8px;
+    border-top: 1px solid #eee;
+    font-weight: 300;
+    overflow: hidden;
+}
+
+// Object
+.wgst-panel__assembly-upload-navigator {
+
+    // Position
+    top: 70px;
+    left: 110px;
+
+}
+
+// Object
+.wgst-panel__assembly-upload-analytics {
+
+    // Position
+    top: 70px;
+    left: 726px;
+
+}
+
+// Object
+.wgst-panel__assembly-upload-metadata {
+
+    // Position
+    top: 225px;
+    left: 110px;
+
+    // Object element
+    .adding-metadata-progress-container {
+        padding: 15px;
+        overflow: hidden;
+        clear: both;
+        border-top: 1px solid #eee;
+        .progress-container {
+            .progress-label {
+                .progress-percentage-label {
+                    font-size: 12px;
+                    font-weight: 400;
+                    text-transform: uppercase;
+                }
+                .progress-percentage {
+                    font-weight: 400;
+                    font-size: 22px;
+                    margin-left: 2px;
+                    line-height: 1em;
+                    text-transform: uppercase;
+                }
+                .progress-hint {
+                    font-size: 14px;
+                    margin-left: 4px;
+                }
+            }
+            .progress {
+                margin: 0;
+                margin-top: 10px;
+            }
+        }
+        .upload-controls-container {
+            display: none;
+            .assemblies-upload-ready-button {
+                margin-right: 10px;
+                margin-left: 10px;
+            }
+        }
+    }
+
+    // Object element
+    .uploading-assembly-progress-container {
+        display: none;
+        padding: 15px;
+        clear: both;
+        overflow: hidden;
+        border-top: 1px solid #eee;
+        .uploading-progress-container {
+            width: 100%;
+            float: left;
+            //.no-user-select;
+            .uploaded-assembly-url {
+                display: none;
+                //margin-top: 10px;
+                .uploaded-assembly-url-label {
+                    font-size: 12px;
+                    font-weight: 400;
+                    text-transform: uppercase;
+                    .visit-url-seconds-number {
+                        font-weight: 400;
+                        font-size: 22px;
+                        margin: 0 3px;
+                    }
+                    .uploaded-assembly-process-status {
+                        font-size: 22px;
+                        font-weight: 400;
+                        text-transform: uppercase;
+                        margin-right: 3px;
+                    }
+                }
+                .uploaded-assembly-url-input {
+                    margin-top: 5px;
+                    color: #000;
+                }
+            }
+            .progress-label {
+                //line-height: 1.2em;
+                margin-bottom: 10px;
+                .progress-percentage-label {
+                    font-size: 12px;
+                    font-weight: 400;
+                    text-transform: uppercase;
+                }
+                .progress-percentage {
+                    font-weight: 400;
+                    font-size: 22px;
+                    margin-left: 2px;
+                    line-height: 1em;
+                    text-transform: uppercase;
+                }
+                .progress-hint {
+                    //font-weight: 100;
+                    font-size: 14px;
+                    margin-left: 4px;
+                    //font-style: italic;
+                }
+            }
+            .progress {
+                margin: 0;
+                margin-top: 10px;
+            }
+        }
+    }
+}
+
+// Object
+.wgst-panel__collection-panel {
+
+    // Position
+    top: 86px;
+
+    .collection-details {
+        max-height: 560px;
+        overflow: scroll;
+        padding: 20px;
+
+        .assembly-upload-datetime {
+            font-weight: 400;
+        }
+
+        h2 {
+            font-size: 12px;
+            font-weight: 400;
+            margin: 20px 8px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .mlst-number {
+            font-weight: 300;
+            font-size: 22px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .assembly-resistance-profile-container {
+            border: 1px solid #bbb;
+            padding: 1px;
+            //width: 96%;
+            //border-bottom: 1px solid #ddd;
+            //margin-bottom: 0;
+            //margin: 0 2%;
+            //margin: 0 12px;
+        }
+        table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
+            width: 900px;
+            max-height: 700px;
+            overflow: scroll;
+            margin-bottom: 0;
+            //border-top: 1px solid #ddd;
+            colgroup {
+                .col-target-fp {
+                    width: auto; //45%;
+                }
+                .col-score, .col-score-percentage {
+                    width: 20%;
+                }
+            }
+            th {
+                border-bottom: 1px;
+                font-weight: 500;
+                font-size: 14px;
+                text-transform: uppercase;
+                &:nth-child(1), &:nth-child(2) {
+                    text-align: center;
+                }
+            }
+            td.show-on-map-checkbox {
+                padding: 6px 5px 5px 5px;
+                text-align: center;
+            }
+            td.show-on-tree-radio-button {
+                padding: 7px 5px 5px 5px;
+                text-align: center;
+            }
+            th, td {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            tbody {
+                tr {
+                    /*
+
+                    Order is important.
+                    You want :hover to overwrite .row-stripe rule.
+
+                    */
+                    &.row-stripe {
+                        background-color: #FAFAFA; //#F9F9F9;
+                    }
+                    &.row-highlighted {
+                        background-color: #F0F7FF;
+                    }
+                    &:hover {
+                        background-color: #FFF8F0;
+                    }
+                }
+            }
+        }
+        table.assembly-resistance-profile {
+            //width: 96%;
+            //border-bottom: 1px solid #ddd;
+            margin-bottom: 0;
+            //margin: 0 2%;
+            .glyphicon {
+                color: #fff;
+            }
+            thead {
+                th {
+                    font-weight: 400;
+                }
+            }
+            tbody {
+                /*
+                tr {
+                    background-color: #f9f9f9;
+                }
+                */
+                td {
+                    width: 2px;
+                    height: 18px;
+                    border: 0;
+                    margin: 0;
+                    padding: 0;
+                    &.resistance-fail {
+                        background-color: #CF0000;
+                    }
+                    &.resistance-unknown {
+                        background-color: #f5f5f5;
+                        color: #000;
+                    }
+                    &.resistance-success {
+                        background-color: #038F05;
                     }
                 }
             }
         }
     }
 }
+
