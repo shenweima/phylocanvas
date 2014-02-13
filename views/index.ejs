@@ -18,7 +18,7 @@
         <![endif]-->
 
         <!-- Bootstrap -->
-        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
         <!-- Bootstrap Slider -->
         <!-- <link rel="stylesheet" href="/css/bootstrap-slider.css"> -->
         <!-- jQuery UI -->
@@ -203,7 +203,7 @@
 
 
         <!-- Representative tree -->
-        <div class="wgst-panel wgst-panel-active tree-panel wgst-draggable wgst-resizable">
+        <div class="wgst-panel wgst-panel--active tree-panel wgst-draggable wgst-resizable">
           <header class="wgst-panel-header wgst-draggable-handle">
             Representative Tree
           </header>
@@ -299,7 +299,17 @@
           <article class="wgst-panel-body">
 
             <div class="collection-details">
-              <h2>Assemblies:</h2>
+
+              <!--
+              <ul class="collection-properties">
+                <li class="collection-property collection-property-created-timestamp">
+                  <span class="glyphicon glyphicon-search"></span><span class="assembly-created-datetime timeago" title=""></span>
+                </li>
+              </ul>
+              -->
+
+              <!--<h2>Assemblies:</h2>-->
+              <!-- Created <span class="assembly-created-datetime timeago" title=""></span>. -->
               <table class="table assemblies-summary-table">
                 <colgroup>
                   <col class="col-marker">
@@ -316,7 +326,7 @@
                     <th>Assembly</th>
                     <th>Nearest Representative</th>
                     <th>Score</th>
-                    <th>Resistance Profile</th>
+                    <th>Predicted Resistance Profile</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -326,7 +336,6 @@
 
           </article><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer wgst-draggable-handle">
-            Created <span class="assembly-created-datetime timeago" title=""></span>.
           </footer><!-- /.wgst-panel-footer -->
         </section><!-- /.wgst-panel.assembly-list-panel -->
 
@@ -419,7 +428,7 @@
         <!-- Angular -->
         <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
         <!-- Bootstrap -->
-        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.1/js/bootstrap.min.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
         <!-- Bootstrap Slider -->
         <!-- <script src="/js/bootstrap-slider.min.js"></script> -->
         <!-- Google Maps v3 API with Places library -->

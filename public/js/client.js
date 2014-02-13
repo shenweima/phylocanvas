@@ -121,10 +121,10 @@ $(function(){
 
         // Toggle all panels
         $('.all-panels-toggle-button').on('click', function(){
-            if ($(this).hasClass('active')) {
-                $('.wgst-panel-active').hide();
+            if ($(this).hasClass('wgst-panel--active')) {
+                $('.wgst-panel--active').hide();
             } else {
-                $('.wgst-panel-active').show();
+                $('.wgst-panel--active').show();
             }
         });
 
@@ -1807,36 +1807,24 @@ $(function(){
                                 console.log('[WGST] Received assemblies:');
                                 console.log(data);
 
+                                // PASTE IT BACK
+
                                 var assemblies = data;
 
-                                // Get resistance profile data
+                                // Get list of all antibiotics
                                 $.ajax({
                                     type: 'POST',
-                                    url: '/assembly/resistance-profile',
+                                    url: '/all-antibiotics',
                                     datatype: 'json', // http://stackoverflow.com/a/9155217
-                                    data: {
-                                        assemblyIds: collectionAssemblyIdentifiers
-                                    }
+                                    data: {}
                                 })
                                 .done(function(data, textStatus, jqXHR) {
-                                    console.log('[WGST] Got resistance profile for assemblies: ' + collectionAssemblyIdentifiers);
+                                    console.log('[WGST] Got list of all antibiotics:');
                                     console.log(data);
-
-                                    console.log('[WGST] List of antibiotics: ');
-                                    console.log(data.antibiotics);
 
                                     var antibiotics = data.antibiotics;
 
-                                    // Merge resistance profile data with assembly data
-                                    var resistanceProfiles = data.resistanceProfiles;
-                                    for (assemblyId in assemblies) {
-                                        assemblies[assemblyId]['PAARSNP_RESULT'] = resistanceProfiles['PAARSNP_RESULT_' + assemblyId];
-                                    }
-
-                                    console.log('[WGST] Complete assemblies: ');
-                                    console.log(assemblies);
-
-                                    // TO DO: Refactor: Rename data to assemvlies
+                                    // TO DO: Refactor: Rename data to assemblies
                                     data = assemblies;
 
                                     var assemblyId,
@@ -1872,62 +1860,60 @@ $(function(){
 
                                         console.log('[WGST] Generating Resistance Profile table');
 
-                                        var resistanceProfileHtml = '<tr>';
+                                        var assemblyResistanceProfile = data[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile,
+                                            assemblyResistanceProfileHtml = '';
 
+                                        /*
 
-                                            var resistanceProfile = data[assemblyId]['PAARSNP_RESULT'].value.paarResult.resistanceProfile;
+                                        TO DO: Try changing .antibiotic span elements to div and see if that will introduce hover right border bug,
+                                        when Bootstrap Tooltip is activated.
+
+                                        */
+
+                                        // Parse each antibiotic group
+                                        for (var antibioticGroupName in antibiotics) {
+
+                                            var antibioticGroupHtml = '<div class="antibiotic-group" data-antibiotic-group-name="' + antibioticGroupName + '">';
 
                                             // Parse each antibiotic
-                                            // TO DO: Refactor
-                                            for (var antibioticName in antibiotics.antibiotics) {
+                                            for (var antibioticName in antibiotics[antibioticGroupName]) {
+
+                                                var antibioticHtml = '';
+
                                                 // Antibiotic found in Resistance Profile for this assembly
-                                                if (typeof resistanceProfile[antibioticName] !== 'undefined') {
-                                                    if (resistanceProfile[antibioticName].resistanceState === 'RESISTANT') {
-                                                        resistanceProfileHtml = resistanceProfileHtml + '<td class="resistance-fail" data-antibiotic-name="' + antibioticName + '"></td>';
-                                                    } else if (resistanceProfile[antibioticName].resistanceState === 'SENSITIVE') {
-                                                        resistanceProfileHtml = resistanceProfileHtml + '<td class="resistance-success" data-antibiotic-name="' + antibioticName + '"></td>';
+                                                if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
+                                                    
+                                                    if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
+
+                                                        var assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
+
+                                                        if (assemblyAntibioticResistanceState === 'RESISTANT') {
+                                                            antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-fail" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                                        } else if (assemblyAntibioticResistanceState === 'SENSITIVE') {
+                                                            antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-success" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                                        } else {
+                                                            antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                                        }
+
                                                     } else {
-                                                        resistanceProfileHtml = resistanceProfileHtml + '<td class="resistance-unknown" data-antibiotic-name="' + antibioticName + '"></td>';
+                                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
                                                     }
-                                                // Antibiotic is not found in Resistance Profile for this assembly
+
                                                 } else {
-                                                    resistanceProfileHtml = resistanceProfileHtml + '<td class="resistance-unknown" data-antibiotic-name="' + antibioticName + '"></td>';
+                                                    antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
                                                 }
-                                            }
 
+                                                antibioticGroupHtml = antibioticGroupHtml + antibioticHtml;
 
-                                        var resistanceProfileHtml = resistanceProfileHtml + '</tr>';
+                                            } // for
+
+                                            antibioticGroupHtml = antibioticGroupHtml + '</div>';
+
+                                            assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
+
+                                        } // for
 
                                         // Append to only first tbody tag (currently there more than one)
-                                        $('.assemblies-summary-table tbody').eq(0).append(
-                                            // This is not verbose enough
-                                            ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
-                                            //'<tr>'
-                                                + '<td class="show-on-tree-radio-button">'
-                                                    + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
-                                                    //+ '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                                                + '</td>'
-                                                + '<td class="show-on-map-checkbox">'
-                                                    + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                                                + '</td>'
-                                                + '<td>' + data[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] /*assemblyId*/ + '</td>'
-                                                + '<td>' + assemblyTopScore.referenceId + '</td>'
-                                                + '<td>' + assemblyTopScore.score.toFixed(2) + ' = ' + Math.round(assemblyTopScore.score * parseInt(data[assemblyId]['FP_COMP']['fingerprintSize'], 10)) + '/' + data[assemblyId]['FP_COMP']['fingerprintSize'] + '</td>'
-                                                + '<td>'
-                                                    // Resistance profile
-                                                    +'<div class="assembly-resistance-profile-container">'
-                                                      + '<table class="table assembly-resistance-profile">'
-                                                        + '<tbody>'
-                                                            + resistanceProfileHtml
-                                                        + '</tbody>'
-                                                      + '</table>'
-                                                    + '</div>'
-
-                                                + '</td>'
-                                            + '</tr>'
-                                        );
-
-/*                                        // Append to only first tbody tag (currently there more than one)
                                         $('.assemblies-summary-table tbody').eq(0).append(
                                             // This is not verbose enough
                                             ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
@@ -1945,174 +1931,19 @@ $(function(){
                                                 + '<td>'
                                                     // Resistance profile
                                                     +'<div class="assembly-resistance-profile-container">'
-                                                      + '<table class="table assembly-resistance-profile">'
-                                                        + '<tbody>'
-                                                          + '<tr>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                            + '<td class="' + ((Math.floor(Math.random() * 2) == 0) ? 'resistance-fail' : 'resistance-unknown') + '"></td>'
-                                                          + '</tr>'
-                                                        + '</tbody>'
-                                                      + '</table>'
+                                                        + assemblyResistanceProfileHtml
                                                     + '</div>'
 
                                                 + '</td>'
                                             + '</tr>'
-                                        );*/
-
-                                        //AAA
-
-    /*            <div class="assembly-resistance-profile-container">
-                  <table class="table assembly-resistance-profile">
-                    <tbody>
-                      <tr>
-                        <td class="resistance-fail">PCG</td>
-                        <td class="resistance-fail">FOX</td>
-                        <td class="resistance-fail">CIP</td>
-                        <td class="resistance-fail">MOX</td>
-                        <td class="resistance-unknown">AMI</td>
-                        <td class="resistance-unknown">GEN</td>
-                        <td class="resistance-unknown">TOB</td>
-                        <td class="resistance-fail">ERY</td>
-                        <td class="resistance-fail">CLI</td>
-                        <td class="resistance-unknown">TET</td>
-                        <td class="resistance-unknown">FUS</td>
-                        <td class="resistance-fail">MUP</td>
-                        <td class="resistance-unknown">RIF</td>
-                        <td class="resistance-unknown">TRI</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div><!-- /.assembly-resistance-profile-container -->*/
-
-
-                                        /*
-                                        // Check if string of nodes is not empty
-                                        if (selectNodesWithIds.length > 0) {
-                                            // Append reference id to existing string and separate by comma
-                                            selectNodesWithIds = selectNodesWithIds + ',' + assemblyTopScore.referenceId;
-                                        } else {
-                                            // Append reference id to existing string
-                                            selectNodesWithIds = assemblyTopScore.referenceId;
-                                        }
-                                        */
-
-                                        /*
-                                        // Parsing assembly scores
-                                        if (assemblyId.indexOf('FP_COMP_') !== -1) {
-                                            // Get top score for this assembly
-                                            assemblyTopScore = getAssemblyTopScore(data[assemblyId].value.scores);
-
-                                            $('.assemblies-summary-table tbody').append(
-                                                // This is not verbose enough
-                                                ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
-                                                //'<tr>'
-                                                    + '<td class="selected-checkbox">'
-                                                        + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId].value.assemblyId + '">'
-                                                    + '</td>'
-                                                    + '<td>' + assemblyId + '</td>'
-                                                    + '<td>' + assemblyTopScore.referenceId + '</td>'
-                                                    + '<td>' + assemblyTopScore.score + '</td>'
-                                                + '</tr>'
-                                            );
-
-                                            console.log('[WGST] Top score reference id: ' + assemblyTopScore.referenceId);
-
-                                            // Check if string of nodes is not empty
-                                            if (selectNodesWithIds.length > 0) {
-                                                // Append reference id to existing string and separate by comma
-                                                selectNodesWithIds = selectNodesWithIds + ',' + assemblyTopScore.referenceId;
-                                            } else {
-                                                // Append reference id to existing string
-                                                selectNodesWithIds = assemblyTopScore.referenceId;
-                                            }
-
-                                        // Parsing assembly metadata
-                                        } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
-                                            var assemblyLatitude = data[assemblyId].value.geographicLocation.coordinates[0],
-                                                assemblyLongitude = data[assemblyId].value.geographicLocation.coordinates[1];
-
-                                            console.log('[WGST] Assembly coordinates: ' + assemblyLatitude + ', ' + assemblyLongitude);
-
-                                            console.log($('.assemblies-summary-table tbody input[data-assembly-id="' + data[assemblyId].assemblyId + '"'));
-                                            console.log();
-
-                                            $('.assemblies-summary-table tbody input[data-assembly-id="' + data[assemblyId].assemblyId + '"').attr('data-latitude', assemblyLatitude);
-                                            $('.assemblies-summary-table tbody input[data-assembly-id="' + data[assemblyId].assemblyId + '"').attr('data-longitude', assemblyLongitude);
-                                        } // else if
-                                        */
+                                        );
 
                                         // Increment counter
                                         assemblyCounter = assemblyCounter + 1;
+
                                     } // for
 
-
-    /*        // Sort data by score
-            // http://stackoverflow.com/a/15322129
-            var sortableScores = [],
-                score;
-
-            // First create the array of keys/values so that we can sort it
-            for (score in requestedAssembly.scores) {
-                if (requestedAssembly.scores.hasOwnProperty(score)) {
-                    sortableScores.push({ 
-                        'referenceId': requestedAssembly.scores[score].referenceId,
-                        'score': requestedAssembly.scores[score].score
-                    });
-                }
-            }
-
-            // Sort scores
-            sortableScores = sortableScores.sort(function(a,b){
-                return b.score - a.score; // Descending sort (Z-A)
-            });
-
-            // Create assembly data table
-            var sortableScoreCounter = 0;
-            for (; sortableScoreCounter < sortableScores.length; sortableScoreCounter++ ) {
-                $('.assembly-data-table tbody').append(
-                    // This is not verbose enough
-                    ((sortableScoreCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
-                        + '<td>'
-                            + sortableScores[sortableScoreCounter].referenceId
-                        + '</td>'
-                        + '<td>'
-                            + sortableScores[sortableScoreCounter].score
-                        + '</td>'
-                        + '<td>'
-                            // Convert score values into percentages where the highest number is 100%
-                            + Math.floor(sortableScores[sortableScoreCounter].score * 100 / requestedAssembly.fingerprintSize) + '%'
-                        + '</td>'
-                    + '<tr/>'
-                );
-            }
-
-            // Set assembly panel header text
-            $('.assembly-panel .wgst-panel-header .assembly-id').text(requestedAssembly.assemblyId);
-
-            // Set assembly upload datetime in footer
-            $('.assembly-upload-datetime').text(moment(requestedAssembly.timestamp, "YYYYMMDD_HHmmss").fromNow());
-
-            // Show assembly data
-            $('.assembly-panel').show();*/
-
-
-
-
-
                                     // TO DO: Create table with results for each assembly in this collection
-                                    
                                     // TO DO: Highlight parent node on the reference tree
                                     // TO DO: Create markers for each assembly in this collection?
 
@@ -2149,10 +1980,16 @@ $(function(){
                                     // Bring assembly-panel panel to front and open
                                     //$('.assembly-panel').trigger('mousedown').fadeIn('fast');
 
+                                        // Set collection properties
+                                        //$('.collection-properties').append('<li class="collection-property collection-property-created-timestamp"><span class="glyphicon glyphicon-search"></span><span class="assembly-created-datetime timeago" title=""></span></li>');
+                                    
+                                        $('.antibiotic[data-toggle="tooltip"]').tooltip();
+
                                     });
 
                                     // Set collection id
                                     //$('.collection-panel .collection-id').text(collectionId);
+
 
                             })
                             .fail(function(jqXHR, textStatus, errorThrown) {
@@ -2174,14 +2011,16 @@ $(function(){
             }, 1000);
     };
 
-    $('.collection-panel .assemblies-summary-table').on('click', 'tr', function(event) {
+    /*
+    $('.wgst-panel__collection-panel .assemblies-summary-table').on('click', 'tr', function(event) {
         if (event.target.type !== 'radio' && event.target.type !== 'checkbox') {
             $(':checkbox', this).trigger('click');
         }
     });
+    */
 
     // User wants to show assembly on map
-    $('.collection-panel .assemblies-summary-table').on('change', 'input[type="checkbox"]', function(e) {
+    $('.wgst-panel__collection-panel .assemblies-summary-table').on('change', 'input[type="checkbox"]', function(e) {
 
         //======================================================
         // Map
@@ -2224,7 +2063,7 @@ $(function(){
     });
 
     // User wants to select representative tree branch
-    $(".collection-panel .assemblies-summary-table").on('change', 'input[type="radio"]', function(e) {
+    $(".wgst-panel__collection-panel .assemblies-summary-table").on('change', 'input[type="radio"]', function(e) {
 
         //======================================================
         // Tree
@@ -2234,7 +2073,7 @@ $(function(){
         var checkedAssemblyNodesString = '';
 
         // Get node id of each node that use selected via checked checkbox 
-        $('.collection-panel .assemblies-summary-table input[type="radio"]:checked').each(function(){
+        $('.wgst-panel__collection-panel .assemblies-summary-table input[type="radio"]:checked').each(function(){
             // Concat assembly ids to string
             // Use this string to highlight nodes on tree
             if (checkedAssemblyNodesString.length > 0) {

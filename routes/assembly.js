@@ -178,7 +178,7 @@ exports.add = function(req, res) {
 
 					db.set(metadataKey, metadata, function(err, result) {
 						if (err) {
-							console.error('[WGST][ERROR] ' + error);
+							console.error('[WGST][ERROR] ' + err);
 							return;
 						}
 
@@ -413,8 +413,15 @@ exports.getData = function(req, res) {
 			return 'ASSEMBLY_METADATA_' + assemblyId;
 		});
 
-		// Merge assembly ids
-		var assemblyIds = scoresAssemblyIds.concat(metadataAssemblyIds);
+		// Prepend PAARSNP_RESULT_ to each assembly id
+		var resistanceProfileAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
+			return 'PAARSNP_RESULT_' + assemblyId;
+		});
+
+		// Merge all assembly ids
+		var assemblyIds = scoresAssemblyIds
+							.concat(metadataAssemblyIds)
+							.concat(resistanceProfileAssemblyIds);
 
 		console.log('[WGST] Querying keys: ');
 		console.log(assemblyIds);
@@ -441,17 +448,18 @@ exports.getData = function(req, res) {
                 	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
                 	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
 					assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
+                // Parsing assembly resistance profile
+                } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
+                	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
+                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
 				}
 			}
 
-			console.log('[WGST] Assemblies with merged FP_COMP and ASSEMBLY_METADATA: ');
+			console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA and PAARSNP_RESULT data: ');
 			console.log(assemblies);
 
 			res.json(assemblies);
-
-			//assembly = result.value;
-			//console.log(results.value);
-			//res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
 		});
 	});
 };
@@ -509,5 +517,30 @@ exports.getResistanceProfile = function(req, res) {
 
 			});
 		});
+	});
+};
+
+// Return list of all antibiotics grouped by class name
+exports.getAllAntibiotics = function(req, res) {
+	console.log('[WGST] Getting list of all antibiotics.');
+
+	var couchbase = require('couchbase');
+	var db = new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: 'test_wgst_resources',
+		password: '.oneir66'
+	}, function(err) {
+		if (err) throw err;
+
+		// Get list of antibiotics
+		db.get('ANTIMICROBIALS_ALL', function(err, result) {
+			console.log('[WGST] Got list of all antibiotics: ');
+			console.log(result);
+
+			if (err) throw err;
+
+			res.json(result.value);
+		});
+
 	});
 };
