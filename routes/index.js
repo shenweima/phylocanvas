@@ -37,10 +37,7 @@ exports.getRepresentativeTreeMetadata = function(req, res) {
 
 			if (err) throw err;
 
-			console.log('[WGST] Got representative tree metadata: ' + results.value);
-
-			//assembly = result.value;
-
+			console.log('[WGST] Got representative tree metadata: ');
 			console.log(results.value);
 
 			res.json(results);

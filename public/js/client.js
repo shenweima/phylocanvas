@@ -1,5 +1,3 @@
-'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
-
 /* Polyfills */
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
@@ -72,13 +70,13 @@ if (!Object.keys) {
 
 $(function(){
 
+    'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
+
     // Init
     (function(){
 
         // Init jQuery UI draggable interaction
-        //$('.wgst-draggable').draggable({ handle: ".wgst-panel-header" });
         $('.wgst-draggable').draggable({ handle: ".wgst-draggable-handle" });
-        //$('.wgst-resizable').resizable();
 
         // Init jQuery IU slider widget
         $('.assembly-list-slider').slider({
@@ -121,7 +119,7 @@ $(function(){
 
         // Toggle all panels
         $('.all-panels-toggle-button').on('click', function(){
-            if ($(this).hasClass('wgst-panel--active')) {
+            if ($(this).hasClass('active')) {
                 $('.wgst-panel--active').hide();
             } else {
                 $('.wgst-panel--active').show();
@@ -1291,19 +1289,19 @@ $(function(){
         evt.stopPropagation();
         evt.preventDefault();
 
-        // Make Assembly Upload Navigator panel visible
-        if (! $('.wgst-panel__assembly-upload-navigator').hasClass('wgst-panel--visible')) {
-            $('.wgst-panel__assembly-upload-navigator').addClass('wgst-panel--visible');
+        // Make Assembly Upload Navigator panel active
+        if (! $('.wgst-panel__assembly-upload-navigator').hasClass('wgst-panel--active')) {
+            $('.wgst-panel__assembly-upload-navigator').addClass('wgst-panel--active');
         }  
 
-        // Make Assembly Upload Analytics panel visible
-        if (! $('.wgst-panel__assembly-upload-analytics').hasClass('wgst-panel--visible')) {
-            $('.wgst-panel__assembly-upload-analytics').addClass('wgst-panel--visible');
+        // Make Assembly Upload Analytics panel active
+        if (! $('.wgst-panel__assembly-upload-analytics').hasClass('wgst-panel--active')) {
+            $('.wgst-panel__assembly-upload-analytics').addClass('wgst-panel--active');
         }
 
-        // Make Assembly Upload Metadata panel visible
-        if (! $('.wgst-panel__assembly-upload-metadata').hasClass('wgst-panel--visible')) {
-            $('.wgst-panel__assembly-upload-metadata').addClass('wgst-panel--visible');
+        // Make Assembly Upload Metadata panel active
+        if (! $('.wgst-panel__assembly-upload-metadata').hasClass('wgst-panel--active')) {
+            $('.wgst-panel__assembly-upload-metadata').addClass('wgst-panel--active');
         }
 
         // Show upload panel
@@ -1443,6 +1441,9 @@ $(function(){
 
         // Update assembly file name
         var fileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name');
+
+        // Update file name in Assembly Upload Navigator
+        $('.wgst-panel__assembly-upload-navigator .assembly-file-name').text(fileName);
 
         // Update file name in Assembly Upload Metadata panel
         $('.wgst-panel__assembly-upload-metadata .header-title small').text(fileName);
