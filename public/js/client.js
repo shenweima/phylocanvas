@@ -1798,7 +1798,7 @@ $(function(){
                             // Get assemblies data
                             $.ajax({
                                 type: 'POST',
-                                url: '/assembly',
+                                url: '/api/assemblies',
                                 datatype: 'json', // http://stackoverflow.com/a/9155217
                                 data: {
                                     assemblyIds: collectionAssemblyIdentifiers
@@ -1814,8 +1814,8 @@ $(function(){
 
                                 // Get list of all antibiotics
                                 $.ajax({
-                                    type: 'POST',
-                                    url: '/all-antibiotics',
+                                    type: 'GET',
+                                    url: '/api/all-antibiotics',
                                     datatype: 'json', // http://stackoverflow.com/a/9155217
                                     data: {}
                                 })
@@ -1823,7 +1823,7 @@ $(function(){
                                     console.log('[WGST] Got list of all antibiotics:');
                                     console.log(data);
 
-                                    var antibiotics = data.antibiotics;
+                                    var antibiotics = data;
 
                                     // TO DO: Refactor: Rename data to assemblies
                                     data = assemblies;
@@ -1926,7 +1926,7 @@ $(function(){
                                                 + '<td class="show-on-map-checkbox">'
                                                     + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                                                 + '</td>'
-                                                + '<td>' + data[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</td>'
+                                                + '<td>' + '<a href="#" class="open-assembly-button" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '">' + data[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
                                                 + '<td>' + assemblyTopScore.referenceId + '</td>'
                                                 + '<td>' + assemblyTopScore.score.toFixed(2) + ' = ' + Math.round(assemblyTopScore.score * parseInt(data[assemblyId]['FP_COMP']['fingerprintSize'], 10)) + '/' + data[assemblyId]['FP_COMP']['fingerprintSize'] + '</td>'
                                                 + '<td>'
@@ -1951,28 +1951,28 @@ $(function(){
                                     // Close Assembly Upload Navigator panel
                                     $('.wgst-panel__assembly-upload-navigator').fadeOut('fast', function(){
                                         // Make it inactive
-                                        $(this).removeClass('wgst-panel--visible');
+                                        $(this).removeClass('wgst-panel--active');
                                     });
 
                                     // Close Assembly Upload Analytics panel
                                     $('.wgst-panel__assembly-upload-analytics').fadeOut('fast', function(){
                                         // Make it inactive
-                                        $(this).removeClass('wgst-panel--visible');
+                                        $(this).removeClass('wgst-panel--active');
                                     });
 
                                     // Close Assembly Upload Metadata panel
                                     $('.wgst-panel__assembly-upload-metadata').fadeOut('fast', function(){
                                         // Make it inactive
-                                        $(this).removeClass('wgst-panel--visible');
+                                        $(this).removeClass('wgst-panel--active');
                                     });
 
                                     // Reset assembly upload panel
                                     // TO DO: Refactor?
                                     resetAssemlyUploadPanel();
 
-                                    // Make collection panel active
-                                    if (! $('.wgst-panel__collection-panel').hasClass('wgst-panel--visible')) {
-                                        $('.wgst-panel__collection-panel').addClass('wgst-panel--visible');
+                                    // Make Collection panel active
+                                    if (! $('.wgst-panel__collection-panel').hasClass('wgst-panel--active')) {
+                                        $('.wgst-panel__collection-panel').addClass('wgst-panel--active');
                                     }
 
                                     // Bring collection-panel panel to front and open
@@ -2267,4 +2267,174 @@ $(function(){
             });
     });
 
+    // Open Assembly from Collection list
+    $('.wgst-panel__collection-panel').on('click', '.open-assembly-button', function(e){
+
+        var assemblyId = $(this).attr('data-assembly-id');
+
+        // Get assembly data
+        $.ajax({
+            type: 'POST',
+            url: '/api/assembly',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: {
+                assemblyId: assemblyId
+            }
+        })
+        .done(function(data, textStatus, jqXHR) {
+            console.log('[WGST] Received data for assembly id: ' + assemblyId);
+            console.log(data);
+
+            // ============================================================
+            // Prepare assembly panel
+            // ============================================================
+
+            var assembly = data.assemblies[assemblyId],
+                assemblyPanel = $('.wgst-panel__assembly-panel');
+
+            // Set assembly name
+            assemblyPanel.find('.header-title small').text(assembly.ASSEMBLY_METADATA.assemblyUserId);
+
+            // ============================================================
+            // Prepare predicted resistance profile
+            // ============================================================
+
+            var antibiotics = data.antibiotics,
+                assemblyResistanceProfile = assembly.PAARSNP_RESULT.paarResult.resistanceProfile,
+                assemblyResistanceProfileHtml = '',
+                antibioticGroupHtml = '',
+                antibioticResistancesHtml = '';
+
+            // Parse each antibiotic group
+            for (var antibioticGroupName in antibiotics) {
+                if (antibiotics.hasOwnProperty(antibioticGroupName)) {
+
+                    antibioticGroupHtml = 
+                    '<table class="antibiotic-group" data-antibiotic-group-name="{{antibioticGroupName}}">'
+                    + '<thead>'
+                        + '<tr>'
+                            + '<th>{{antibioticGroupName}}</th>'
+                        + '</tr>'
+                    + '</thead>'
+                    + '<tbody>'
+                        + '<tr>'
+                            + '<td>'
+                                + '<table>'
+                                    + '<tbody>'
+                                        + '<tr>{{antibioticResistancesHtml}}</tr>'
+                                    + '</tbody>'
+                                + '</table>'
+                            + '</td>'
+                        + '</tr>'
+                    + '</tbody>'
+                    + '</table>',
+                    antibioticNamesHtml = '',
+                    antibioticResistancesHtml = '';
+
+                    // Parse each antibiotic
+                    for (var antibioticName in antibiotics[antibioticGroupName]) {
+                        if (antibiotics[antibioticGroupName].hasOwnProperty(antibioticName)) {
+
+                            var antibioticNamesHtml = antibioticNamesHtml + '<td>' + antibioticName + '</td>';
+
+                            // Antibiotic found in Resistance Profile for this assembly
+                            if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
+                                
+                                if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
+
+                                    var assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
+
+                                    if (assemblyAntibioticResistanceState === 'RESISTANT') {
+                                        antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-fail" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
+                                    } else if (assemblyAntibioticResistanceState === 'SENSITIVE') {
+                                        antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-success" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
+                                    } else {
+                                        antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
+                                    }
+
+                                } else {
+                                    antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
+                                }
+
+                            } else {
+                                antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
+                            }
+
+                        } // if
+                    } // for
+
+                    antibioticGroupHtml = antibioticGroupHtml.replace(/{{antibioticGroupName}}/g, antibioticGroupName);
+                    antibioticGroupHtml = antibioticGroupHtml.replace(/{{antibioticResistancesHtml}}/, antibioticResistancesHtml);
+
+                    assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
+
+                } // if
+            } // for
+
+            $('.wgst-panel__assembly-panel .assembly-resistance-profile-container').append($(assemblyResistanceProfileHtml));
+
+            // ============================================================
+            // Prepare MLST
+            // ============================================================
+
+            var assemblyAlleles = assembly.MLST_RESULT.alleles,
+                assemblyMlstHtml = 
+                '<table>'
+                    + '<thead>'
+                        + '<tr>'
+                            + '<th>Locus Id</th>'
+                            + '<th>Allele Id</th>'
+                            + '<th>MD5</th>'
+                        + '</tr>'
+                    + '</thead>'
+                    + '<tbody>'
+                        + '{{mlstDataHtml}}'
+                    + '</tbody>'
+                + '</table>',
+                alleleDataHtml = '',
+                assemblyMlstDataHtml = '';
+
+            for (var assemblyAllele in assemblyAlleles) {
+                if (assemblyAlleles.hasOwnProperty(assemblyAllele)) {
+
+                    console.log('assemblyAlleles[assemblyAllele]:');
+                    console.log(assemblyAlleles[assemblyAllele]);
+
+                    alleleDataHtml = '<tr>';
+                    alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAllele].locusId + '</td>';
+                    alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAllele].alleleId + '</td>';
+                    alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAllele].checksum + '</td>';
+                    alleleDataHtml = alleleDataHtml + '</tr>';
+
+                    assemblyMlstDataHtml = assemblyMlstDataHtml + alleleDataHtml;
+
+                    console.log('assemblyMlstDataHtml: ');
+                    console.log(assemblyMlstDataHtml);
+
+                } // if
+            } // for
+
+
+            assemblyMlstHtml = assemblyMlstHtml.replace('{{mlstDataHtml}}', assemblyMlstDataHtml);
+
+            $('.wgst-panel__assembly-panel .assembly-mlst-container').append($(assemblyMlstHtml));
+
+            $('.wgst-panel__assembly-panel').addClass('wgst-panel--active');
+
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log('[WGST][ERROR] Failed to get collection id');
+            console.error(textStatus);
+            console.error(errorThrown);
+            console.error(jqXHR);
+        });
+
+        e.preventDefault();
+    });
 });
+
+// TO DO:
+// + Sort assemblies selected to upload alphabetically.
+
+
+

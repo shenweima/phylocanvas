@@ -52,10 +52,17 @@ app.post('/collection/add', collection.add);
 
 // Assembly routes
 app.get('/assembly/:id', assembly.get);
-app.post('/assembly', assembly.getData); // For ajax requests
+//app.post('/assembly', assembly.getData);
+
+app.post('/api/assembly', assembly.apiGetAssembly);
+app.post('/api/assemblies', assembly.apiGetAssemblies);
+
 app.post('/assembly/add', assembly.add);
-app.post('/assembly/resistance-profile', assembly.getResistanceProfile);
-app.post('/all-antibiotics', assembly.getAllAntibiotics);
+
+app.post('/api/assembly/resistance-profile', assembly.getResistanceProfile);
+
+// Data routes
+app.get('/api/all-antibiotics', assembly.getAllAntibiotics);
 
 // Test routes
 app.get('/dev/d3tree', require('./routes/dev').d3tree);

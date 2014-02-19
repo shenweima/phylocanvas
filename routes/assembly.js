@@ -388,8 +388,153 @@ exports.get = function(req, res) {
 
 };
 
+exports.apiGetAssembly = function(req, res) {
+	console.log('[WGST] Getting assembly with id: ' + req.body.assemblyId);
+
+	var requestedAssemblyId = req.body.assemblyId;
+
+	// Get requested assembly from db
+	var couchbase = require('couchbase');
+	var db = new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: 'test_wgst',
+		password: '.oneir66'
+	}, function(err) {
+		if (err) throw err;
+
+		// Prepare query keys
+		var scoresQueryKey = 'FP_COMP_' + requestedAssemblyId,
+			metadataQueryKey = 'ASSEMBLY_METADATA_' + requestedAssemblyId,
+			resistanceProfileQueryKey = 'PAARSNP_RESULT_' + requestedAssemblyId,
+			mlstQueryKey = 'MLST_RESULT_' + requestedAssemblyId;
+
+		var queryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey];
+
+		console.log('[WGST] Query keys: ');
+		console.log(queryKeys);
+
+		db.getMulti(queryKeys, {}, function(err, results) {
+			console.log('[WGST] Got assemblies data: ');
+			console.log(results);
+
+			if (err) throw err;
+
+			// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
+			var assemblies = {},
+				assemblyId,
+				cleanAssemblyId,
+				mlstAllelesQueryKeys = [];
+
+			for (assemblyId in results) {
+                // Parsing assembly scores
+                if (assemblyId.indexOf('FP_COMP_') !== -1) {
+                	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
+                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
+                // Parsing assembly metadata
+                } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
+                	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
+                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
+                // Parsing assembly resistance profile
+                } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
+                	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
+                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
+                // Parsing MLST
+                } else if (assemblyId.indexOf('MLST_RESULT_') !== -1) {
+                	cleanAssemblyId = assemblyId.replace('MLST_RESULT_','');
+                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['MLST_RESULT'] = results[assemblyId].value;
+				} // if
+			} // for
+
+			console.log('[WGST] Assembly with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data: ');
+			console.log(assemblies);
+
+
+
+
+			
+			// Extract all MLST alleles query keys
+			var alleles = assemblies[cleanAssemblyId]['MLST_RESULT'].alleles;
+
+			for (allele in alleles) {
+				if (alleles.hasOwnProperty(allele)) {
+					mlstAllelesQueryKeys.push(alleles[allele]);
+				}
+			}
+
+			// Get MLST alleles data
+			getMlstAlleles(mlstAllelesQueryKeys, function(error, mlstAlleles){
+				if (error) {
+					throw error;
+				}
+
+				var mlstAlleleAssemblyId,
+					mlstAlleleValue,
+					alleleId,
+					locusId;
+
+				// Parse mlst alleles data
+				for (var mlstAllele in mlstAlleles) {
+					console.log('[WGST] Parsing MLST allele data: ' + mlstAllele);
+
+					if (mlstAlleles.hasOwnProperty(mlstAllele)) {
+
+						// Get value object from query result object
+						mlstAlleleValue = mlstAlleles[mlstAllele].value;
+						// Get locus id from value object
+						locusId = mlstAlleleValue.locusId;
+						// Add allele value object to assembly object
+						assemblies[requestedAssemblyId].MLST_RESULT.alleles[locusId] = mlstAlleleValue;
+
+					} // if
+				} // for
+
+				// Get list of all antibiotics
+				getAllAntibiotics(function(error, antibiotics){
+					if (error) {
+						throw error;
+					}
+
+					res.json({
+						assemblies: assemblies,
+						antibiotics: antibiotics
+					});
+				});
+			});
+		});
+	});
+};
+
+var getMlstAlleles = function(queryKeys, callback) {
+	console.log('[WGST] Getting MLST alleles data.');
+
+	var couchbase = require('couchbase');
+	var db = new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: 'test_wgst_resources',
+		password: '.oneir66'
+	}, function(err) {
+		if (err) throw err;
+
+		// Get list of antibiotics
+		db.getMulti(queryKeys, {}, function(err, result) {
+			console.log('[WGST] Got MLST alleles data: ');
+			console.log(result);
+
+			if (err) {
+				callback(err, result);
+			}
+
+			callback(null, result);
+		});
+	});
+};
+
 // Return fingerprint data
-exports.getData = function(req, res) {
+exports.apiGetAssemblies = function(req, res) {
 	console.log('[WGST] Getting assemblies with ids: ' + req.body.assemblyIds);
 
 	//var assemblies = [];
@@ -466,6 +611,17 @@ exports.getData = function(req, res) {
 
 // Return resistance profile
 exports.getResistanceProfile = function(req, res) {
+
+	getResistanceProfile(function(error, resistanceProfile){
+
+		if (error) throw error;
+
+		res.json({
+			resistanceProfile: resistanceProfile
+		});
+	});
+
+	/*
 	console.log('[WGST] Getting resistance profile for assembly ids: ' + req.body.assemblyIds);
 
 	// Get requested assembly from db
@@ -518,12 +674,72 @@ exports.getResistanceProfile = function(req, res) {
 			});
 		});
 	});
+	*/
+};
+
+var getResistanceProfile = function(callback) {
+	console.log('[WGST] Getting resistance profile for assembly ids: ' + req.body.assemblyIds);
+
+	// Get requested assembly from db
+	var couchbase = require('couchbase');
+	var db = new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: 'test_wgst',
+		password: '.oneir66'
+	}, function(err) {
+		if (err) throw err;
+
+		// Prepend PAARSNP_RESULT_ to each assembly id
+		var resistanceProfileQueryKeys = req.body.assemblyIds.map(function(assemblyId){
+			return 'PAARSNP_RESULT_' + assemblyId;
+		});
+
+		console.log('[WGST] Query keys: ');
+		console.log(resistanceProfileQueryKeys);
+
+		db.getMulti(resistanceProfileQueryKeys, {}, function(error, results) {
+			console.log('[WGST] Got resistance profile data: ');
+			console.log(results);
+
+			if (error) {
+				callback(error, results);
+			}
+
+			callback(null, results);
+
+			/*
+			var resistanceProfilesAndAntibiotics = {
+				antibiotics: '',
+				resistanceProfiles: results
+			};
+
+			var db2 = new couchbase.Connection({
+				host: 'http://129.31.26.151:8091/pools',
+				bucket: 'test_wgst_resources',
+				password: '.oneir66'
+			}, function(err) {
+				if (err) throw err;
+
+				// Get list of antibiotics
+				db2.get('ANTIMICROBIALS_ALL', function(err, result) {
+					console.log('[WGST] Got list of antibiotics: ');
+					console.log(result);
+
+					if (err) throw err;
+
+					resistanceProfilesAndAntibiotics.antibiotics = result.value;
+
+					res.json(resistanceProfilesAndAntibiotics);
+				});
+
+			});*/
+		});
+	});
 };
 
 // Return list of all antibiotics grouped by class name
 exports.getAllAntibiotics = function(req, res) {
-	console.log('[WGST] Getting list of all antibiotics.');
-
+	/*
 	var couchbase = require('couchbase');
 	var db = new couchbase.Connection({
 		host: 'http://129.31.26.151:8091/pools',
@@ -542,5 +758,37 @@ exports.getAllAntibiotics = function(req, res) {
 			res.json(result.value);
 		});
 
+	});
+	*/
+
+	getAllAntibiotics(function(error, antibiotics){
+		if (error) throw error;
+
+		res.json(antibiotics);
+	});
+};
+
+var getAllAntibiotics = function(callback) {
+	console.log('[WGST] Getting list of all antibiotics.');
+
+	var couchbase = require('couchbase');
+	var db = new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: 'test_wgst_resources',
+		password: '.oneir66'
+	}, function(err) {
+		if (err) throw err;
+
+		// Get list of antibiotics
+		db.get('ANTIMICROBIALS_ALL', function(err, result) {
+			console.log('[WGST] Got list of all antibiotics: ');
+			console.log(result);
+
+			if (err) {
+				callback(err, result);
+			}
+
+			callback(null, result.value.antibiotics);
+		});
 	});
 };

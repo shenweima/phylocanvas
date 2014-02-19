@@ -203,7 +203,7 @@
 
 
         <!-- Representative tree -->
-        <div class="wgst-panel wgst-panel--active tree-panel wgst-draggable wgst-resizable">
+        <div class="wgst-panel wgst-panel__representative-tree-panel wgst-panel--active wgst-draggable">
           <header class="wgst-panel-header wgst-draggable-handle">
             Representative Tree
           </header>
@@ -425,53 +425,27 @@
 
 
 
-        <!-- Collection -->
-        <section class="wgst-panel wgst-panel__collection-panel wgst-draggable">
+        <!-- Assembly -->
+        <section class="wgst-panel wgst-panel__assembly-panel wgst-draggable">
           <header class="wgst-panel-header wgst-draggable-handle">
-            <h4 class="header-title">Collection</h4>
+            <h4 class="header-title">Assembly: <small></small></h4>
           </header>
           <article class="wgst-panel-body">
 
-            <div class="collection-details">
+            <div class="assembly-details">
 
-              <!--
-              <ul class="collection-properties">
-                <li class="collection-property collection-property-created-timestamp">
-                  <span class="glyphicon glyphicon-search"></span><span class="assembly-created-datetime timeago" title=""></span>
-                </li>
-              </ul>
-              -->
+              <h4>MLST</h4>
+              <div class="assembly-mlst-container"></div>              
 
-              <!--<h2>Assemblies:</h2>-->
-              <!-- Created <span class="assembly-created-datetime timeago" title=""></span>. -->
-              <table class="table assemblies-summary-table">
-                <colgroup>
-                  <col class="col-marker">
-                  <col class="col-highlight">
-                  <col class="col-target-fp">
-                  <col class="col-reference-id">
-                  <col class="col-score">
-                  <col class="col-resistance-profile">
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th><span class="glyphicon glyphicon-tree-conifer"></span></th>
-                    <th><span class="glyphicon glyphicon glyphicon-tag"></span></th>
-                    <th>Assembly</th>
-                    <th>Nearest Representative</th>
-                    <th>Score</th>
-                    <th>Predicted Resistance Profile</th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>
-            </div>       
+              <h4>Predicted Resistance Profile</h4>
+              <div class="assembly-resistance-profile-container"></div>
+
+            </div><!-- /.assembly-details -->   
 
           </article><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer wgst-draggable-handle">
           </footer><!-- /.wgst-panel-footer -->
-        </section><!-- /.wgst-panel.assembly-list-panel -->
+        </section>
 
 
 
