@@ -98,112 +98,13 @@
 
 
 
-        <div class="wgst-panel assembly-panel wgst-draggable">
-          <header class="wgst-panel-header wgst-draggable-handle">
-            Assembly id: <span class="assembly-id"></span>
-          </header>
-          <div class="wgst-panel-body">
-
-            <div class="mlst-number">MLST-22</div>
-
-            <h2>Resistance profile:</h2>
-
-            <div class="assembly-resistance-profile-container">
-              <table class="table assembly-resistance-profile">
-                <tbody>
-                  <tr>
-                    <td class="resistance-fail">PCG</td>
-                    <td class="resistance-fail">FOX</td>
-                    <td class="resistance-fail">CIP</td>
-                    <td class="resistance-fail">MOX</td>
-                    <td class="resistance-unknown">AMI</td>
-                    <td class="resistance-unknown">GEN</td>
-                    <td class="resistance-unknown">TOB</td>
-                    <td class="resistance-fail">ERY</td>
-                    <td class="resistance-fail">CLI</td>
-                    <td class="resistance-unknown">TET</td>
-                    <td class="resistance-unknown">FUS</td>
-                    <td class="resistance-fail">MUP</td>
-                    <td class="resistance-unknown">RIF</td>
-                    <td class="resistance-unknown">TRI</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div><!-- /.assembly-resistance-profile-container -->
-
-            <!--
-            <table class="table assembly-resistance-profile">
-              <thead>
-                <tr>
-                  <th>PCG</th>
-                  <th>FOX</th>
-                  <th>CIP</th>
-                  <th>MOX</th>
-                  <th>AMI</th>
-                  <th>GEN</th>
-                  <th>TOB</th>
-                  <th>ERY</th>
-                  <th>CLI</th>
-                  <th>TET</th>
-                  <th>FUS</th>
-                  <th>MUP</th>
-                  <th>RIF</th>
-                  <th>TRI</th>
-                </tr>
-              </thead>
-              <tbody>
-                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
-                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
-                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
-                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
-                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
-                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
-                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
-                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
-                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
-                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
-                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
-                <td class="resistance-fail"><span class="glyphicon glyphicon-remove"></span></td>
-                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
-                <td class="resistance-success"><span class="glyphicon glyphicon-ok"></span></td>
-              </tbody>
-            </table>
-            -->
-
-            <h2>Scores:</h2>
-
-            <table class="table assembly-data-table">
-              <colgroup>
-                <col class="col-target-fp">
-                <col class="col-score">
-                <col class="col-score-percentage">
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Reference Strain</th>
-                  <th>Score</th>
-                  <th>Score %</th>
-                </tr>
-              </thead>
-              <tbody>
-              </tbody>
-            </table>            
-
-          </div><!-- /.wgst-panel-body -->
-          <footer class="wgst-panel-footer">
-            Uploaded <span class="assembly-upload-datetime"></span>.
-          </footer><!-- /.wgst-panel-footer -->
-        </div><!-- /.wgst-panel.assembly-upload-panel -->
-
-
-
 
 
 
 
 
         <!-- Representative tree -->
-        <div class="wgst-panel wgst-panel__representative-tree-panel wgst-panel--active wgst-draggable">
+        <div class="wgst-panel wgst-panel__representative-tree-panel wgst-panel--active wgst-draggable" data-panel-name="representativeTree">
           <header class="wgst-panel-header wgst-draggable-handle">
             Representative Tree
           </header>
@@ -227,7 +128,7 @@
 
 
         <!-- Assembly upload navigator -->
-        <section class="wgst-panel wgst-panel__assembly-upload-navigator wgst-draggable">
+        <section class="wgst-panel wgst-panel__assembly-upload-navigator wgst-draggable" data-panel-name="assemblyUploadNavigator">
           <header class="wgst-panel-header wgst-draggable-handle">
 
             <div class="assembly-upload-summary">
@@ -272,7 +173,7 @@
 
 
         <!-- Assembly upload analytics -->
-        <section class="wgst-panel wgst-panel__assembly-upload-analytics wgst-draggable">
+        <section class="wgst-panel wgst-panel__assembly-upload-analytics wgst-draggable" data-panel-name="assemblyUploadAnalytics">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Analytics: <small></small></h4>
           </header><!-- /.wgst-draggable-handle -->
@@ -294,7 +195,7 @@
 
 
         <!-- Assembly upload metadata -->
-        <section class="wgst-panel wgst-panel__assembly-upload-metadata wgst-draggable">
+        <section class="wgst-panel wgst-panel__assembly-upload-metadata wgst-draggable" data-panel-name="assemblyUploadMetadata">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Metadata: <small></small></h4>
           </header><!-- /.wgst-draggable-handle -->
@@ -370,7 +271,7 @@
 
 
         <!-- Collection -->
-        <section class="wgst-panel wgst-panel__collection-panel wgst-draggable">
+        <section class="wgst-panel wgst-panel__collection-panel wgst-draggable" data-panel-name="collection">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Collection</h4>
           </header>
@@ -426,7 +327,7 @@
 
 
         <!-- Assembly -->
-        <section class="wgst-panel wgst-panel__assembly-panel wgst-draggable" data-panel-name="assemblyPanel">
+        <section class="wgst-panel wgst-panel__assembly-panel wgst-draggable" data-panel-name="assembly">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Assembly: <small></small></h4>
           </header>

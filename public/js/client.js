@@ -1,4 +1,6 @@
-/* Polyfills */
+// ============================================================
+// Polyfills
+// ============================================================    
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
 if (!Array.prototype.filter) {
@@ -78,12 +80,92 @@ $(function(){
 
     var WGST = window.WGST || {};
 
-    WGST.position = {
-        assemblyPanel: {
+    WGST.panels = {
+        assembly: {
             top: 80,
             left: 90
+        },
+        collection: {
+            top: 80,
+            left: 90
+        },
+        representativeTree: {
+            top: 80,
+            left: 90
+        },
+        assemblyUploadNavigator: {
+            top: 70,
+            left: 110
+        },
+        assemblyUploadAnalytics: {
+            top: 70,
+            left: 726
+        },
+        assemblyUploadMetadata: {
+            top: 225,
+            left: 110
+        },
+    };
+
+    // ============================================================
+    // Manage panels
+    // ============================================================    
+
+    var openPanel = function(panelName, callback) {
+        var panel = $('[data-panel-name="' + panelName + '"');
+
+        // Set position
+        panel.css('top', WGST.panels[panelName].top);
+        panel.css('left', WGST.panels[panelName].left);
+
+        // Show
+        panel.fadeIn('normal', function(){
+            panel.addClass('wgst-panel--active');
+
+            if (typeof callback === 'function') {
+                callback();
+            }
+        });
+    };
+
+    var closePanel = function(panelName, callback) {
+        var panel = $('[data-panel-name="' + panelName + '"');
+
+        panel.fadeOut('normal', function(){
+            panel.removeClass('wgst-panel--active');
+
+            if (typeof callback === 'function') {
+                callback();
+            }
+        });
+    };
+
+    var bringPanelToTop = function(panelName) {
+        var zIndexHighest = 0;
+
+        $('.wgst-panel').each(function(){
+            var zIndexCurrent = parseInt($(this).css('zIndex'), 10);
+            if (zIndexCurrent > zIndexHighest) {
+                zIndexHighest = zIndexCurrent;
+            }
+        });
+
+        $('[data-panel-name="' + panelName + '"').css('zIndex', zIndexHighest + 1);
+    };
+
+    var isOpenedPanel = function(panelName) {
+        var panel = $('[data-panel-name="' + panelName + '"');
+
+        if (panel.hasClass('wgst-panel--active')) {
+            return true;
+        } else {
+            return false;
         }
     };
+
+    // ============================================================
+    // Init app
+    // ============================================================    
 
     // Init
     (function(){
@@ -92,20 +174,10 @@ $(function(){
         $('.wgst-draggable').draggable({
             handle: ".wgst-draggable-handle",
             stop: function(event, ui) {
-
-                console.log('ui.position:');
-                console.log(ui.position);
-
-                console.log("ui.helper.attr('data-panel-name'):");
-                console.log(ui.helper.attr('data-panel-name'));
-
                 // Store current panel position
                 var panelName = ui.helper.attr('data-panel-name');
-                WGST.position[panelName].top = ui.position.top;
-                WGST.position[panelName].left = ui.position.left;
-
-                console.log("WGST.position['assemblyPanel']:");
-                console.log(WGST.position['assemblyPanel']);
+                WGST.panels[panelName].top = ui.position.top;
+                WGST.panels[panelName].left = ui.position.left;
             }
         });
 
@@ -168,6 +240,7 @@ $(function(){
 
         // Show graph
         $('.graph-toggle-button').trigger('click');
+
     })();
 
     var loadRequestedAssembly = function(requestedAssembly) {
@@ -260,13 +333,84 @@ $(function(){
         }
     };
 
+    var loadRepresentativeTree = function() {
+
+        // ==============================
+        // Load representative tree
+        // ==============================
+
+        // Init tree
+        window.WGST.representativeTree.tree.load('/data/reference_tree.nwk');
+        window.WGST.representativeTree.tree.treeType = 'rectangular';
+        //window.WGST.representativeTree.tree.showLabels = false;
+        window.WGST.representativeTree.tree.baseNodeSize = 0.5;
+        window.WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
+        window.WGST.representativeTree.tree.selectedColor = '#0059DE';
+        window.WGST.representativeTree.tree.rightClickZoom = true;
+        window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
+
+        // ==============================
+        // Load reference tree metadata
+        // ==============================
+
+        console.log('[WGST] Getting representative tree metadata');
+
+        $.ajax({
+            type: 'POST',
+            url: '/representative-tree-metadata/',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: {}
+        })
+        .done(function(data, textStatus, jqXHR) {
+            console.log('[WGST] Got representative tree metadata');
+            console.log(data.value);
+
+            // Create representative tree markers
+            var metadataCounter = data.value.metadata.length,
+                metadata = data.value.metadata,
+                accession,
+                marker;
+
+            for (; metadataCounter !== 0;) {
+                // Decrement counter
+                metadataCounter = metadataCounter - 1;
+
+                console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
+                console.log(metadata[metadataCounter]);
+
+                accession = metadata[metadataCounter].accession;
+
+                // Set representative tree metadata
+                window.WGST.representativeTree[accession] = metadata[metadataCounter];
+            } // for
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log('[WGST][ERROR] Failed to get representative tree metadata');
+            console.error(textStatus);
+            console.error(errorThrown);
+            console.error(jqXHR);
+        });
+    };
+
     // Init map
     WGST.geo.init();
 
-    WGST.representativeTree = {
-        tree: new PhyloCanvas.Tree(document.getElementById('phylocanvas')),
-        metadata: {}
-    };
+    // Handle Google Maps ready
+    google.maps.event.addListenerOnce(WGST.geo.map, 'idle', function() {
+
+        // Open representative tree panel
+        openPanel('representativeTree', function(){
+
+            // Init representative tree container
+            WGST.representativeTree = {
+                tree: new PhyloCanvas.Tree(document.getElementById('phylocanvas')),
+                metadata: {}
+            };
+
+            // Load representative tree
+            loadRepresentativeTree();
+        });
+    });
 
     $('.tree-controls-select-none').on('click', function(){
         // This is a workaround
@@ -366,66 +510,6 @@ $(function(){
             window.WGST.geo.map.setZoom(5);
         }
     };
-
-    // Init representative tree
-    (function(){
-
-        // ==============================
-        // Load reference tree
-        // ==============================
-
-        // Init tree
-        window.WGST.representativeTree.tree.load('/data/reference_tree.nwk');
-        window.WGST.representativeTree.tree.treeType = 'rectangular';
-        //window.WGST.representativeTree.tree.showLabels = false;
-        window.WGST.representativeTree.tree.baseNodeSize = 0.5;
-        window.WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
-        window.WGST.representativeTree.tree.selectedColor = '#0059DE';
-        window.WGST.representativeTree.tree.rightClickZoom = true;
-        window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
-
-        // ==============================
-        // Load reference tree metadata
-        // ==============================
-
-        console.log('[WGST] Getting representative tree metadata');
-
-        $.ajax({
-            type: 'POST',
-            url: '/representative-tree-metadata/',
-            datatype: 'json', // http://stackoverflow.com/a/9155217
-            data: {}
-        })
-        .done(function(data, textStatus, jqXHR) {
-            console.log('[WGST] Got representative tree metadata');
-            console.log(data.value);
-
-            // Create representative tree markers
-            var metadataCounter = data.value.metadata.length,
-                metadata = data.value.metadata,
-                accession,
-                marker;
-
-            for (; metadataCounter !== 0;) {
-                // Decrement counter
-                metadataCounter = metadataCounter - 1;
-
-                console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
-                console.log(metadata[metadataCounter]);
-
-                accession = metadata[metadataCounter].accession;
-
-                // Set representative tree metadata
-                window.WGST.representativeTree[accession] = metadata[metadataCounter];
-            } // for
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.log('[WGST][ERROR] Failed to get representative tree metadata');
-            console.error(textStatus);
-            console.error(errorThrown);
-            console.error(jqXHR);
-        });
-    }());
 
         // Array of objects that store content of FASTA file and user-provided metadata
     var fastaFilesAndMetadata = {},
@@ -1320,7 +1404,17 @@ $(function(){
         evt.stopPropagation();
         evt.preventDefault();
 
-        // Make Assembly Upload Navigator panel active
+        // Open assembly upload navigator panel
+        openPanel('assemblyUploadNavigator');
+
+        // Open assembly upload analytics panel
+        openPanel('assemblyUploadAnalytics');
+
+        // Open assembly upload metadata panel
+        openPanel('assemblyUploadMetadata');
+
+
+/*        // Make Assembly Upload Navigator panel active
         if (! $('.wgst-panel__assembly-upload-navigator').hasClass('wgst-panel--active')) {
             $('.wgst-panel__assembly-upload-navigator').addClass('wgst-panel--active');
         }  
@@ -1333,7 +1427,7 @@ $(function(){
         // Make Assembly Upload Metadata panel active
         if (! $('.wgst-panel__assembly-upload-metadata').hasClass('wgst-panel--active')) {
             $('.wgst-panel__assembly-upload-metadata').addClass('wgst-panel--active');
-        }
+        }*/
 
         // Show upload panel
         // REFACTOR!
@@ -1979,7 +2073,11 @@ $(function(){
                                     // TO DO: Highlight parent node on the reference tree
                                     // TO DO: Create markers for each assembly in this collection?
 
-                                    // Close Assembly Upload Navigator panel
+                                    closePanel('assemblyUploadNavigator');
+                                    closePanel('assemblyUploadAnalytics');
+                                    closePanel('assemblyUploadMetadata');
+
+/*                                    // Close Assembly Upload Navigator panel
                                     $('.wgst-panel__assembly-upload-navigator').fadeOut('fast', function(){
                                         // Make it inactive
                                         $(this).removeClass('wgst-panel--active');
@@ -1995,20 +2093,24 @@ $(function(){
                                     $('.wgst-panel__assembly-upload-metadata').fadeOut('fast', function(){
                                         // Make it inactive
                                         $(this).removeClass('wgst-panel--active');
-                                    });
+                                    });*/
 
                                     // Reset assembly upload panel
                                     // TO DO: Refactor?
                                     resetAssemlyUploadPanel();
 
-                                    // Make Collection panel active
+                                    openPanel('collection', function(){
+                                        bringPanelToTop('collection');
+                                    });
+
+/*                                    // Make Collection panel active
                                     if (! $('.wgst-panel__collection-panel').hasClass('wgst-panel--active')) {
                                         $('.wgst-panel__collection-panel').addClass('wgst-panel--active');
-                                    }
+                                    }*/
 
-                                    // Bring collection-panel panel to front and open
+/*                                    // Bring collection-panel panel to front and open
                                     $('.wgst-panel__collection-panel').trigger('mousedown').fadeIn('fast');
-
+*/
                                     // Bring assembly-panel panel to front and open
                                     //$('.assembly-panel').trigger('mousedown').fadeIn('fast');
 
@@ -2273,10 +2375,15 @@ $(function(){
 
     // Bring to front selected panel
     $('.wgst-panel').on('mousedown', function(){
+
+        bringPanelToTop($(this).attr('data-panel-name'));
+
+        /*
         // Change z index for all panels
         $('.wgst-panel').css('z-index', 100);
         // Set the  highest z index for this (selected) panel
         $(this).css('z-index', 101);
+        */
     });
 
     // Deselect Twitter Bootstrap button on click
@@ -2301,26 +2408,35 @@ $(function(){
     // Open Assembly from Collection list
     $('.wgst-panel__collection-panel').on('click', '.open-assembly-button', function(e){
 
+        var assemblyId = $(this).attr('data-assembly-id');
+
         // ============================================================
         // Close any previously openned assembly panels
         // ============================================================
 
-        if ($('.wgst-panel__assembly-panel').hasClass('wgst-panel--active')) {
+        if (isOpenedPanel('assembly')) {
 
-            // Remove class
-            $('.wgst-panel__assembly-panel').removeClass('wgst-panel--active');
+            closePanel('assembly', function(){
+                // Remove content
+                $('.wgst-panel__assembly-panel .assembly-mlst-container table').remove();
+                $('.wgst-panel__assembly-panel .assembly-resistance-profile-container table').remove();
 
-            // Remove content
-            $('.wgst-panel__assembly-panel .assembly-mlst-container table').remove();
-            $('.wgst-panel__assembly-panel .assembly-resistance-profile-container table').remove();
+                openAssemblyPanel(assemblyId);
+            });
+        } else {
+            openAssemblyPanel(assemblyId);
+        }
 
-        } // if
+        e.preventDefault();
+    });
+
+    var openAssemblyPanel = function(assemblyId) {
 
         // ============================================================
         // Get assembly data
         // ============================================================
 
-        var assemblyId = $(this).attr('data-assembly-id');
+        //var assemblyId = $(this).attr('data-assembly-id');
 
         // Get assembly data
         $.ajax({
@@ -2462,23 +2578,21 @@ $(function(){
             // Open panel
             // ============================================================
 
-            // Set position
-            $('.wgst-panel__assembly-panel').css('top', WGST.position['assemblyPanel'].top);
-            $('.wgst-panel__assembly-panel').css('left', WGST.position['assemblyPanel'].left);
-            
-            // Add class
-            $('.wgst-panel__assembly-panel').addClass('wgst-panel--active');
+            openPanel('assembly', function(){
+                // Bring panel to top
+                bringPanelToTop('assembly');
+            });
 
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
-            console.log('[WGST][ERROR] Failed to get collection id');
+            console.log('[WGST][ERROR] Failed to get assembly data');
             console.error(textStatus);
             console.error(errorThrown);
             console.error(jqXHR);
         });
 
         e.preventDefault();
-    });
+    };
 });
 
 // TO DO:
