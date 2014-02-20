@@ -426,7 +426,7 @@
 
 
         <!-- Assembly -->
-        <section class="wgst-panel wgst-panel__assembly-panel wgst-draggable">
+        <section class="wgst-panel wgst-panel__assembly-panel wgst-draggable" data-panel-name="assemblyPanel">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Assembly: <small></small></h4>
           </header>
@@ -434,11 +434,13 @@
 
             <div class="assembly-details">
 
-              <h4>MLST</h4>
-              <div class="assembly-mlst-container"></div>              
+              <div class="assembly-detail assembly-mlst-container">
+                <h4>MLST</h4>
+              </div>              
 
-              <h4>Predicted Resistance Profile</h4>
-              <div class="assembly-resistance-profile-container"></div>
+              <div class="assembly-detail assembly-resistance-profile-container">
+                <h4>Predicted Resistance Profile</h4>
+              </div>
 
             </div><!-- /.assembly-details -->   
 

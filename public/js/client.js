@@ -72,11 +72,42 @@ $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
+    // ============================================================
+    // Store application state
+    // ============================================================
+
+    var WGST = window.WGST || {};
+
+    WGST.position = {
+        assemblyPanel: {
+            top: 80,
+            left: 90
+        }
+    };
+
     // Init
     (function(){
 
         // Init jQuery UI draggable interaction
-        $('.wgst-draggable').draggable({ handle: ".wgst-draggable-handle" });
+        $('.wgst-draggable').draggable({
+            handle: ".wgst-draggable-handle",
+            stop: function(event, ui) {
+
+                console.log('ui.position:');
+                console.log(ui.position);
+
+                console.log("ui.helper.attr('data-panel-name'):");
+                console.log(ui.helper.attr('data-panel-name'));
+
+                // Store current panel position
+                var panelName = ui.helper.attr('data-panel-name');
+                WGST.position[panelName].top = ui.position.top;
+                WGST.position[panelName].left = ui.position.left;
+
+                console.log("WGST.position['assemblyPanel']:");
+                console.log(WGST.position['assemblyPanel']);
+            }
+        });
 
         // Init jQuery IU slider widget
         $('.assembly-list-slider').slider({
@@ -198,7 +229,7 @@ $(function(){
     }
 
     // WGST namespace
-    var WGST = window.WGST || {};
+    //var WGST = window.WGST || {};
 
     // Map
     WGST.geo = {
@@ -2270,6 +2301,25 @@ $(function(){
     // Open Assembly from Collection list
     $('.wgst-panel__collection-panel').on('click', '.open-assembly-button', function(e){
 
+        // ============================================================
+        // Close any previously openned assembly panels
+        // ============================================================
+
+        if ($('.wgst-panel__assembly-panel').hasClass('wgst-panel--active')) {
+
+            // Remove class
+            $('.wgst-panel__assembly-panel').removeClass('wgst-panel--active');
+
+            // Remove content
+            $('.wgst-panel__assembly-panel .assembly-mlst-container table').remove();
+            $('.wgst-panel__assembly-panel .assembly-resistance-profile-container table').remove();
+
+        } // if
+
+        // ============================================================
+        // Get assembly data
+        // ============================================================
+
         var assemblyId = $(this).attr('data-assembly-id');
 
         // Get assembly data
@@ -2378,47 +2428,45 @@ $(function(){
             // ============================================================
 
             var assemblyAlleles = assembly.MLST_RESULT.alleles,
-                assemblyMlstHtml = 
+                assemblyMlstHtml =
                 '<table>'
-                    + '<thead>'
-                        + '<tr>'
-                            + '<th>Locus Id</th>'
-                            + '<th>Allele Id</th>'
-                            + '<th>MD5</th>'
-                        + '</tr>'
-                    + '</thead>'
                     + '<tbody>'
-                        + '{{mlstDataHtml}}'
+                        + '<tr>'
+                            + '<td class="row-title">Locus Id</td>'
+                            + '{{locusIds}}'
+                        + '</tr>'
+                        + '<tr>'
+                            + '<td class="row-title">Allele Id</td>'
+                            + '{{alleleIds}}'
+                        + '</tr>'
                     + '</tbody>'
                 + '</table>',
-                alleleDataHtml = '',
-                assemblyMlstDataHtml = '';
+                locusDataHtml = '',
+                alleleDataHtml = '';
 
             for (var assemblyAllele in assemblyAlleles) {
                 if (assemblyAlleles.hasOwnProperty(assemblyAllele)) {
 
-                    console.log('assemblyAlleles[assemblyAllele]:');
-                    console.log(assemblyAlleles[assemblyAllele]);
-
-                    alleleDataHtml = '<tr>';
-                    alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAllele].locusId + '</td>';
+                    locusDataHtml = locusDataHtml + '<td>' + assemblyAlleles[assemblyAllele].locusId + '</td>'
                     alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAllele].alleleId + '</td>';
-                    alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAllele].checksum + '</td>';
-                    alleleDataHtml = alleleDataHtml + '</tr>';
-
-                    assemblyMlstDataHtml = assemblyMlstDataHtml + alleleDataHtml;
-
-                    console.log('assemblyMlstDataHtml: ');
-                    console.log(assemblyMlstDataHtml);
 
                 } // if
             } // for
 
-
-            assemblyMlstHtml = assemblyMlstHtml.replace('{{mlstDataHtml}}', assemblyMlstDataHtml);
+            assemblyMlstHtml = assemblyMlstHtml.replace('{{locusIds}}', locusDataHtml);
+            assemblyMlstHtml = assemblyMlstHtml.replace('{{alleleIds}}', alleleDataHtml);
 
             $('.wgst-panel__assembly-panel .assembly-mlst-container').append($(assemblyMlstHtml));
 
+            // ============================================================
+            // Open panel
+            // ============================================================
+
+            // Set position
+            $('.wgst-panel__assembly-panel').css('top', WGST.position['assemblyPanel'].top);
+            $('.wgst-panel__assembly-panel').css('left', WGST.position['assemblyPanel'].left);
+            
+            // Add class
             $('.wgst-panel__assembly-panel').addClass('wgst-panel--active');
 
         })

@@ -1115,7 +1115,6 @@ h2, h4 {
     .assembly-details {
         max-height: 560px;
         overflow: scroll;
-        padding: 20px;
         .assembly-upload-datetime {
             font-weight: 400;
         }
@@ -1126,16 +1125,22 @@ h2, h4 {
             text-align: center;
             text-transform: uppercase;
         }
-        .mlst-number {
-            font-weight: 300;
-            font-size: 22px;
-            text-align: center;
-            margin-top: 20px;
+        h4 {
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .assembly-detail {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            &:last-of-type {
+                border-bottom: 0;
+            }
         }
         .assembly-resistance-profile-container {
             overflow: hidden;
             .antibiotic-group {
-                margin: 10px 0;
+                margin-top: 10px;
                 .antibiotic {
                     width: 100%;
                     padding: 5px 10px;
@@ -1158,80 +1163,13 @@ h2, h4 {
                 font-weight: 500;
             }
         }
-        table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
-            width: 900px;
-            max-height: 700px;
-            overflow: scroll;
-            margin-bottom: 0;
-            colgroup {
-                .col-target-fp {
-                    width: auto;
-                }
-                .col-score, .col-score-percentage {
-                    width: 20%;
-                }
-            }
-            th {
-                border-bottom: 1px;
-                font-weight: 500;
-                font-size: 14px;
-                text-transform: uppercase;
-                &:nth-child(1), &:nth-child(2) {
-                    text-align: center;
-                }
-            }
-            td.show-on-map-checkbox {
-                padding: 6px 5px 5px 5px;
-                text-align: center;
-            }
-            td.show-on-tree-radio-button {
-                padding: 7px 5px 5px 5px;
-                text-align: center;
-            }
-            th, td {
-                padding-left: 12px;
-                padding-right: 12px;
-            }
-            tbody tr {
-                /*
-
-                Order is important.
-                You want :hover to overwrite .row-stripe rule.
-
-                */
-                &.row-stripe {
-                    background-color: #FAFAFA;
-                }
-                &.row-highlighted {
-                    background-color: #F0F7FF;
-                }
-                &:hover {
-                    background-color: #FFF8F0;
-
-                }
-            }
-        }
-        table.assembly-resistance-profile {
-            margin: 0;
-            th {
-                font-weight: 400;
-            }
+        .assembly-mlst-container {
             td {
-                width: 3px;
-                height: 18px;
-                border: 0;
-                margin: 0;
-                padding: 0;
-                &.resistance-fail {
-                    background-color: #CF0000;
-                }
-                &.resistance-success {
-                    background-color: #038F05;
-                }
-                &.resistance-unknown {
-                    background-color: #f5f5f5;
-                    color: #000;
-                }
+                padding: 5px 10px;
+                border: 1px solid #ddd;
+            }
+            .row-title {
+                font-weight: 500;
             }
         }
     }
