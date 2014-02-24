@@ -246,6 +246,16 @@ $(function(){
         // Show graph
         $('.graph-toggle-button').trigger('click');
 
+        // Open socket.io connection
+        var socket = io.connect('http://127.0.0.1');
+        socket.on('pong', function(data) {
+            console.log('[WGST][Socket.IO] Received pong:');
+            console.log(data);
+        });
+        
+        // Ping server
+        socket.emit('ping', { my: 'data' });
+
     })();
 
     var loadRequestedAssembly = function(requestedAssembly) {
@@ -2692,6 +2702,8 @@ $(function(){
 
 // TO DO:
 // + Sort assemblies selected to upload alphabetically.
+
+
 
 
 

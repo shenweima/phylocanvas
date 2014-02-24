@@ -11,7 +11,8 @@ var express = require('express'),
 	http = require('http'),
 	path = require('path'),
 	passport = require('passport'),
-	LocalStrategy = require('passport-local').Strategy;
+	LocalStrategy = require('passport-local').Strategy,
+	socket = require('socket.io');
 
 var app = express();
 
@@ -74,6 +75,26 @@ app.get('/dev/canvas', require('./routes/dev').canvas);
 //app.post('/join', user.join);
 //app.post('/signin', user.signIn);
 
-http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
+});
+
+// Sockets.io
+
+var io = socket.listen(server);
+
+io.sockets.on('connection', function (socket) {
+	console.log('[WGST][Socket.IO] Connnected');
+
+	socket.on('disconnect', function (socket) {
+		console.log('[WGST][Socket.IO] Disconnnected');
+	});
+
+	socket.emit("pong", { hello: "world" });
+
+	socket.on('ping', function (data) {
+		console.log('[WGST][Socket.IO] Received ping');
+
+		socket.emit("pong", { say: "It works!" });
+	});
 });

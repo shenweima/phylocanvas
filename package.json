@@ -12,6 +12,7 @@
     "couchbase": "*",
     "node-uuid": "*",
     "passport": "*",
-    "passport-local": "*"
+    "passport-local": "*",
+    "socket.io": "*"
   }
 }
