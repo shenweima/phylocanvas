@@ -119,7 +119,7 @@ $(function(){
         panel.css('left', WGST.panels[panelName].left);
 
         // Show
-        panel.fadeIn('normal', function(){
+        panel.fadeIn('fast', function(){
             panel.addClass('wgst-panel--active');
 
             if (typeof callback === 'function') {
@@ -131,7 +131,7 @@ $(function(){
     var closePanel = function(panelName, callback) {
         var panel = $('[data-panel-name="' + panelName + '"');
 
-        panel.fadeOut('normal', function(){
+        panel.fadeOut('fast', function(){
             panel.removeClass('wgst-panel--active');
 
             if (typeof callback === 'function') {
@@ -181,7 +181,7 @@ $(function(){
             }
         });
 
-        // Init jQuery IU slider widget
+        // Init jQuery UI slider widget
         $('.assembly-list-slider').slider({
             range: "max",
             min: 1,
@@ -192,6 +192,11 @@ $(function(){
                 $('.selected-assembly-counter').text(ui.value);
             }
         });
+
+        // Init jQuery UI accordion widget
+/*        $('.assembly-details').accordion({
+            header: '> div > h4'
+        });*/
 
         // Popover
         $('.add-data button').popover({
@@ -1404,15 +1409,16 @@ $(function(){
         evt.stopPropagation();
         evt.preventDefault();
 
-        // Open assembly upload navigator panel
-        openPanel('assemblyUploadNavigator');
+        closePanel('representativeTree', function(){
+            // Open assembly upload navigator panel
+            openPanel('assemblyUploadNavigator');
 
-        // Open assembly upload analytics panel
-        openPanel('assemblyUploadAnalytics');
+            // Open assembly upload analytics panel
+            openPanel('assemblyUploadAnalytics');
 
-        // Open assembly upload metadata panel
-        openPanel('assemblyUploadMetadata');
-
+            // Open assembly upload metadata panel
+            openPanel('assemblyUploadMetadata');
+        });
 
 /*        // Make Assembly Upload Navigator panel active
         if (! $('.wgst-panel__assembly-upload-navigator').hasClass('wgst-panel--active')) {
@@ -2052,8 +2058,9 @@ $(function(){
                                                     + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                                                 + '</td>'
                                                 + '<td>' + '<a href="#" class="open-assembly-button" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '">' + data[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
-                                                + '<td>' + assemblyTopScore.referenceId + '</td>'
-                                                + '<td>' + assemblyTopScore.score.toFixed(2) + ' = ' + Math.round(assemblyTopScore.score * parseInt(data[assemblyId]['FP_COMP']['fingerprintSize'], 10)) + '/' + data[assemblyId]['FP_COMP']['fingerprintSize'] + '</td>'
+                                                + '<td>' + assemblyTopScore.referenceId + ' (' + assemblyTopScore.score.toFixed(2) * 100 + '%)</td>'
+                                                //+ '<td>' + assemblyTopScore.score.toFixed(2) + ' = ' + Math.round(assemblyTopScore.score * parseInt(data[assemblyId]['FP_COMP']['fingerprintSize'], 10)) + '/' + data[assemblyId]['FP_COMP']['fingerprintSize'] + '</td>'
+                                                //+ '<td>' + assemblyTopScore.score.toFixed(2) * 100 + '%</td>'
                                                 + '<td>'
                                                     // Resistance profile
                                                     +'<div class="assembly-resistance-profile-container">'
@@ -2098,6 +2105,8 @@ $(function(){
                                     // Reset assembly upload panel
                                     // TO DO: Refactor?
                                     resetAssemlyUploadPanel();
+
+                                    openPanel('representativeTree');
 
                                     openPanel('collection', function(){
                                         bringPanelToTop('collection');
@@ -2417,9 +2426,9 @@ $(function(){
         if (isOpenedPanel('assembly')) {
 
             closePanel('assembly', function(){
+
                 // Remove content
-                $('.wgst-panel__assembly-panel .assembly-mlst-container table').remove();
-                $('.wgst-panel__assembly-panel .assembly-resistance-profile-container table').remove();
+                $('.wgst-panel__assembly-panel .assembly-details .assembly-detail-content').html('');
 
                 openAssemblyPanel(assemblyId);
             });
@@ -2537,7 +2546,7 @@ $(function(){
                 } // if
             } // for
 
-            $('.wgst-panel__assembly-panel .assembly-resistance-profile-container').append($(assemblyResistanceProfileHtml));
+            $('.wgst-panel__assembly-panel .assembly-detail__resistance-profile .assembly-detail-content').append($(assemblyResistanceProfileHtml));
 
             // ============================================================
             // Prepare MLST
@@ -2572,17 +2581,103 @@ $(function(){
             assemblyMlstHtml = assemblyMlstHtml.replace('{{locusIds}}', locusDataHtml);
             assemblyMlstHtml = assemblyMlstHtml.replace('{{alleleIds}}', alleleDataHtml);
 
-            $('.wgst-panel__assembly-panel .assembly-mlst-container').append($(assemblyMlstHtml));
+            $('.wgst-panel__assembly-panel .assembly-detail__mlst .assembly-detail-content').append($(assemblyMlstHtml));
+
+            // ============================================================
+            // Prepare nearest representative
+            // ============================================================
+
+            var assemblyScores = assembly['FP_COMP'].scores,
+                assemblyTopScore = getAssemblyTopScore(assemblyScores);
+
+            $('.wgst-panel__assembly-panel .assembly-detail__nearest-representative .assembly-detail-content').text(assemblyTopScore.referenceId);
+
+            // ============================================================
+            // Prepare scores
+            // ============================================================
+
+            var assemblyScoresHtml =
+                '<table>'
+                    + '<thead>'
+                        + '<tr>'
+                            + '<th>Reference Id</th>'
+                            + '<th>Score</th>'
+                        + '</tr>'
+                    + '</thead>'
+                    + '<tbody>'
+                        + '{{assemblyScoresDataHtml}}'
+                    + '</tbody>'
+                + '</table>',
+                assemblyScoresDataHtml = '',
+                scoreText;
+
+            // Sort scores
+            var sortedAssemblyScores = Object.keys(assemblyScores).sort(function(assemblyScoreReferenceId1, assemblyScoreReferenceId2){
+                return assemblyScores[assemblyScoreReferenceId1] - assemblyScores[assemblyScoreReferenceId2];
+            });
+
+            console.log('sortedAssemblyScores:');
+            console.log(sortedAssemblyScores);
+
+            /*
+            assemblyScores = [assemblyScores].sort(function(obj1, obj2){
+                var scoreOne = obj1.score.toFixed(2) + ' = ' + Math.round(obj1.score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize'];
+                var scoreTwo = obj2.score.toFixed(2) + ' = ' + Math.round(obj2.score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize'];
+
+                return scoreTwo - scoreOne;
+            });
+
+            console.log(assemblyScores);
+            assemblyScores = assemblyScores[0];
+            */
+
+            var assemblyScoreCounter = sortedAssemblyScores.length;
+            for (; assemblyScoreCounter !== 0;) {
+                assemblyScoreCounter = assemblyScoreCounter - 1;
+
+                    var referenceId = sortedAssemblyScores[assemblyScoreCounter],
+                        scoreData = assemblyScores[referenceId],
+                        scoreText = scoreData.score.toFixed(2) + ' = ' + Math.round(scoreData.score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize'];
+
+                    assemblyScoresDataHtml = assemblyScoresDataHtml 
+                        + '<tr>' 
+                            + '<td>' + scoreData.referenceId + '</td>'
+                            + '<td>' + scoreText + '</td>'
+                        + '</tr>';
+
+                console.log(scoreData.score);
+
+            } // for
+            
+            /*
+            for (var assemblyScore in assemblyScores) {
+                if (assemblyScores.hasOwnProperty(assemblyScore)) {
+
+                    var scoreText = assemblyScores[assemblyScore].score.toFixed(2) + ' = ' + Math.round(assemblyScores[assemblyScore].score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize'];
+
+                    assemblyScoresDataHtml = assemblyScoresDataHtml 
+                        + '<tr>' 
+                            + '<td>' + assemblyScores[assemblyScore].referenceId + '</td>'
+                            + '<td>' + scoreText + '</td>'
+                        + '</tr>';
+                }
+            } // for
+            */
+
+            assemblyScoresHtml = assemblyScoresHtml.replace('{{assemblyScoresDataHtml}}', assemblyScoresDataHtml);
+
+            //var score = assemblyTopScore.score.toFixed(2) + ' = ' + Math.round(assemblyTopScore.score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize']
+
+            $('.wgst-panel__assembly-panel .assembly-detail__score .assembly-detail-content').html(assemblyScoresHtml);
 
             // ============================================================
             // Open panel
             // ============================================================
 
-            openPanel('assembly', function(){
-                // Bring panel to top
-                bringPanelToTop('assembly');
-            });
-
+            // Bring panel to top
+            bringPanelToTop('assembly');
+            // Open panel
+            openPanel('assembly');
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log('[WGST][ERROR] Failed to get assembly data');

@@ -303,8 +303,8 @@
                     <th><span class="glyphicon glyphicon-tree-conifer"></span></th>
                     <th><span class="glyphicon glyphicon glyphicon-tag"></span></th>
                     <th>Assembly</th>
-                    <th>Nearest Representative</th>
-                    <th>Score</th>
+                    <th>Nearest Representative (Similarity)</th>
+                    <!-- <th>Similarity</th> -->
                     <th>Predicted Resistance Profile</th>
                   </tr>
                 </thead>
@@ -335,12 +335,24 @@
 
             <div class="assembly-details">
 
-              <div class="assembly-detail assembly-mlst-container">
+              <div class="assembly-detail assembly-detail__nearest-representative">
+                <h4>Nearest Representative</h4>
+                <div class="assembly-detail-content"></div>
+              </div> 
+
+              <div class="assembly-detail assembly-detail__score">
+                <h4>Score</h4>
+                <div class="assembly-detail-content"></div>
+              </div>
+
+              <div class="assembly-detail assembly-detail__mlst">
                 <h4>MLST</h4>
+                <div class="assembly-detail-content"></div>
               </div>              
 
-              <div class="assembly-detail assembly-resistance-profile-container">
+              <div class="assembly-detail assembly-detail__resistance-profile">
                 <h4>Predicted Resistance Profile</h4>
+                <div class="assembly-detail-content"></div>
               </div>
 
             </div><!-- /.assembly-details -->   
