@@ -43,7 +43,8 @@ exports.add = function(req, res) {
 	}, 1000);
 	*/
 
-	var uuid = require('node-uuid');
+	var uuid = require('node-uuid'),
+		collectionId = req.body.collectionId;
 
 	// TO DO: Validate request
 
@@ -73,7 +74,7 @@ exports.add = function(req, res) {
 
 		console.log('[WGST] Assembly file content: ' + req.body.assembly.substr(0, 50) + '...');
 		console.log('[WGST] User assembly id: ' + req.body.name);
-		console.log('[WGST] Collection id: ' + req.body.collectionId);
+		console.log('[WGST] Collection id: ' + collectionId);
 
 		// Prepare object to publish
 		var assembly = {
@@ -117,41 +118,101 @@ exports.add = function(req, res) {
 				console.log('[WGST] Queue returned message: ');
 				console.log(parsedMessage);
 
+				var assemblyId = parsedMessage.assemblyId;
+
+				// -------------------------------------
+				// RabbitMQ notifciations
+				// -------------------------------------
+
+				var notificationQueueId = uuid.v4();
+
+				// Create RabbitMQ connection
+				var notificationConnection = amqp.createConnection({
+						host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
+						port: 5672
+					}/*, {
+						reconnect: false
+					}*/);
+
+				notificationConnection.on('error', function(error) {
+				    console.error("[WGST][ERROR] " + error);
+				});
+
+				notificationConnection.on("ready", function(){
+					console.log('[WGST] Connection is ready');
+
+					// Create exchange
+					notificationConnection.exchange('notifications-ex',
+						{
+							type: 'topic',
+							passive: true
+						}, function(exchange) {
+							console.log('[WGST] Exchange "' + exchange.name + '" is open');
+
+							// Create queue
+							var queue = notificationConnection.queue(notificationQueueId, 
+								{
+									exclusive: true
+								}, function(queue){
+									console.log('[WGST] Queue "' + queue.name + '" is open');
+
+									queue.bind(exchange, "*.ASSEMBLY." + assemblyId);
+
+									// Subscribe to response message
+									queue.subscribe(function(message, headers, deliveryInfo){
+										console.log('[WGST] Received RabbitMQ notification message:');
+
+										var buffer = new Buffer(message.data),
+											bufferJSON = buffer.toString(),
+											parsedMessage = JSON.parse(bufferJSON);
+
+										console.log(parsedMessage);
+
+										var assemblyId = parsedMessage.assemblyId;
+
+										console.log('[WGST] Assembly id:');
+										console.log(assemblyId);
+
+										// Check task type
+										if (parsedMessage.taskType === 'FP_COMP') {
+											socket.emit("assemblyUploadNotification", {
+												collectionId: collectionId,
+												assemblyId: assemblyId,
+												status: "FP_COMP ready",
+												result: "FP_COMP"
+											});
+										} else if (parsedMessage.taskType === 'MLST_RESULT') {
+											socket.emit("assemblyUploadNotification", {
+												collectionId: collectionId,
+												assemblyId: assemblyId,
+												status: "MLST_RESULT ready",
+												result: "MLST_RESULT"
+											});
+										} else if (parsedMessage.taskType === 'PAARSNP_RESULT') {
+											socket.emit("assemblyUploadNotification", {
+												collectionId: collectionId,
+												assemblyId: assemblyId,
+												status: "PAARSNP_RESULT ready",
+												result: "PAARSNP_RESULT"
+											});
+										}
+
+										// Return result data
+										//res.json(parsedMessage);
+
+										// End connection, however in reality it's being dropped before it's ended so listen for error too
+										//notificationConnection.end();
+									});
+								});
+						});
+				});
+
+				// -------------------------------------
+				// Insert metadata
+				// -------------------------------------
+
 				// Insert assembly metadata into db
-				var metadataKey = 'ASSEMBLY_METADATA_' + parsedMessage.assemblyId,
-					/*
-					metadata = {
-						docType: 'The type of the document', // 'assembly_metadata'
-						docId: 'uuid_' + message.assemblyId,
-						assemblyId: message.assemblyId,
-						uploaderId: 'uploader_uuid',
-						owners: ['user_uuid', 'user_uuid', 'user_uuid'],
-						institutes: ['Imperial College London', 'Wellcome Trust Sanger Institute'], // Auto suggest (as far as we can)
-						isolateName: 'Isolate name', // Freetext field
-						species: 12345678, // Change data type from integer to string
-						dateLoaded: '2013-12-19T11:54:30.207Z',
-						dateCollected: '2013-12-19T11:54:30.207Z',
-						geographicLocation: {
-						    type: 'Point', 
-						    coordinates: [[30, 10], [15, 25]]
-						},
-						geographicDescription: 'London, United Kingdom',
-						isolationSource: 'Left hand', // Auto suggest
-						primaryPublication: '12748195', // PubMed or DOI | { idType: 'string', id: 'string' }
-						otherPublications: ['12748196', '12748197', '12748198'], // PubMed or DOI | { idType: 'string', id: 'string' }
-						sraLink: '1234567890', // just use numerical id
-						genbankLink: '1234567890', // just use numerical id
-						sequencingMethod: 'Type of sequencing device', // Freetext + suggestions
-						assemblyMethod: {
-							method: 'method_name', // Freetext
-							parameters: 'parameters' // Freetext
-						},
-						experimentalPhenotypes: {
-							extraField1: 'extra information 1', // Free key, free value
-							extraField2: 'extra information 2' // Free key, free value
-						}
-					};
-					*/
+				var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
 					metadata = {
 						assemblyId: parsedMessage.assemblyId,
 						assemblyUserId: assembly['userAssemblyId'],

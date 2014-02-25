@@ -12,12 +12,12 @@ var express = require('express'),
 	path = require('path'),
 	passport = require('passport'),
 	LocalStrategy = require('passport-local').Strategy,
-	socket = require('socket.io');
+	socketio = require('socket.io');
 
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', /*process.env.PORT || 3000*/ 80);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.favicon());
@@ -79,22 +79,26 @@ var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
-// Sockets.io
+// Socket.io
+var socketio = require('socket.io');
 
-var io = socket.listen(server);
+var io = socketio.listen(server);
+socket = undefined;
 
-io.sockets.on('connection', function (socket) {
+io.sockets.on('connection', function (socketConnection) {
 	console.log('[WGST][Socket.IO] Connnected');
 
-	socket.on('disconnect', function (socket) {
+	socket = socketConnection;
+
+	socketConnection.on('disconnect', function () {
 		console.log('[WGST][Socket.IO] Disconnnected');
 	});
 
-	socket.emit("pong", { hello: "world" });
+	socketConnection.emit("pong", { hello: "world" });
 
-	socket.on('ping', function (data) {
+	socketConnection.on('ping', function (data) {
 		console.log('[WGST][Socket.IO] Received ping');
 
-		socket.emit("pong", { say: "It works!" });
+		socketConnection.emit("pong", { say: "It works!" });
 	});
 });
