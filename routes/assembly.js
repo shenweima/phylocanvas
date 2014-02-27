@@ -25,24 +25,6 @@ if ( !Date.prototype.toISOString ) {
 
 exports.add = function(req, res) {
 
-	// For testing purposes only
-	/*
-	var demoResponse =
-	{
-		taskId : "154273030677208533352573798127987081488",
-		assemblyId : "154273030677208533352573798127987081488",
-		status : "SUCCESS"
-	};
-
-	setTimeout(function(){
-		console.log('Sending response...');
-
-		// Return data
-		res.json(demoResponse);
-
-	}, 1000);
-	*/
-
 	var uuid = require('node-uuid'),
 		collectionId = req.body.collectionId;
 
@@ -50,24 +32,30 @@ exports.add = function(req, res) {
 
 	// Call RabbitMQ
 	var amqp = require('amqp'),
-		connection = amqp.createConnection({
+		uploadConnection = amqp.createConnection({
 			host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
-			port: 5672
+			port: 5670
 		}, {
-			reconnect: false
+			reconnect: false,
+			autoDelete: true
 		});
 
-	connection.on('error', function(error) {
-	    console.error("[WGST][ERROR] Ignoring error: " + error);
+	uploadConnection.on('error', function(error) {
+	    console.error("[WGST][ERROR] Upload connection: " + error);
 	});
 
-	connection.on("ready", function(){
+	uploadConnection.on("ready", function(){
 		console.log('[WGST] Connection is ready');
 
 		var queueId = 'ART_ASSEMBLY_UPLOAD_' + uuid.v4(),
-			exchange = connection.exchange('wgst-ex', {
+			exchange = uploadConnection.exchange('wgst-ex', {
 				type: 'direct',
-				passive: true
+				passive: true,
+				durable: false,
+				confirm: false,
+				autoDelete: false,
+				noDeclare: false,
+				confirm: false
 			}, function(exchange) {
 				console.log('[WGST] Exchange "' + exchange.name + '" is open');
 			});
@@ -101,7 +89,7 @@ exports.add = function(req, res) {
 			console.log('[WGST] Message was published');
 		});
 
-		connection
+		uploadConnection
 			.queue(queueId, { // Create queue
 				passive: false,
 				durable: false,
@@ -126,7 +114,7 @@ exports.add = function(req, res) {
 				var assemblyId = parsedMessage.assemblyId;
 
 				// -------------------------------------
-				// RabbitMQ notifciations
+				// RabbitMQ notifications
 				// -------------------------------------
 
 				var notificationQueueId = 'ART_NOTIFICATION_' + uuid.v4();
@@ -140,7 +128,7 @@ exports.add = function(req, res) {
 					}*/);
 
 				notificationConnection.on('error', function(error) {
-				    console.error("[WGST][ERROR] " + error);
+				    console.error("[WGST][ERROR] Notification connection: " + error);
 				});
 
 				notificationConnection.on("ready", function(){
@@ -150,7 +138,12 @@ exports.add = function(req, res) {
 					notificationConnection.exchange('notifications-ex',
 						{
 							type: 'topic',
-							passive: true
+							passive: true,
+							durable: false,
+							confirm: false,
+							autoDelete: false,
+							noDeclare: false,
+							confirm: false
 						}, function(exchange) {
 							console.log('[WGST] Exchange "' + exchange.name + '" is open');
 
@@ -216,13 +209,15 @@ exports.add = function(req, res) {
 										// Destroy queue after all results were received
 										if (readyResults.length === 3) {
 											queue.destroy();
+											uploadConnection.end();
+											notificationConnection.end();
 										}
 
 										// Return result data
 										//res.json(parsedMessage);
 
 										// End connection, however in reality it's being dropped before it's ended so listen for error too
-										//notificationConnection.end();
+										
 									});
 								});
 						});
@@ -273,7 +268,7 @@ exports.add = function(req, res) {
 				res.json(parsedMessage);
 
 				// End connection, however in reality it's being dropped before it's ended so listen for error too
-				connection.end();
+				//connection.end();
 			});
 	});
 };

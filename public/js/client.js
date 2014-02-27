@@ -2245,13 +2245,16 @@ $(function(){
 
     // Listen to notifications
     socket.on('assemblyUploadNotification', function(data) {
-        console.log('[WGST][Socket.IO] Received assembly upload notification:');
+        console.log('[WGST][Socket.io] Received assembly upload notification:');
         console.log(data);
 
         //WGST.assemblyUploadProgress[data.collectionId][data.assemblyId].results.push(data.result);
         WGST.assemblyUploadProgress.results.push(data.collectionId + '__' + data.assemblyId + '__' + data.result);
 
         var assemblies = Object.keys(WGST.assemblyUploadProgress[data.collectionId]);
+
+        console.log('WGST.assemblyUploadProgress.results.length: ' + WGST.assemblyUploadProgress.results.length);
+        console.log('(assemblies.length * WGST.assemblyAnalysis.length): ' + (assemblies.length * WGST.assemblyAnalysis.length));
 
         if ((assemblies.length * WGST.assemblyAnalysis.length) === WGST.assemblyUploadProgress.results.length) {
             getCollection(data.collectionId);

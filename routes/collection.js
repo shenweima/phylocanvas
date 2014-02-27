@@ -11,9 +11,10 @@ exports.add = function(req, res) {
 	var amqp = require('amqp'),
 		connection = amqp.createConnection({
 			host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
-			port: 5672
+			port: 5670
 		}, {
-			reconnect: false
+			reconnect: false,
+			autoDelete: true
 		});
 
 	connection.on('error', function(error) {
@@ -26,7 +27,12 @@ exports.add = function(req, res) {
 		var queueId = 'ART_CREATE_COLLECTION_' + uuid.v4(),
 			exchange = connection.exchange('wgst-ex', {
 				type: 'direct',
-				passive: true
+				passive: true,
+				durable: false,
+				confirm: false,
+				autoDelete: false,
+				noDeclare: false,
+				confirm: false
 			}, function(exchange) {
 				console.log('[WGST] Exchange "' + exchange.name + '" is open');
 			});
