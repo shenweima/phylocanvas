@@ -9,9 +9,9 @@ Install
 
 Run
 ----------------
-`node app`
+`sudo node app`
 
-Open `http://localhost:3000` in your browser.
+Open `http://localhost` in your browser.
 
 ### Supported FASTA file extensions
 * .fa

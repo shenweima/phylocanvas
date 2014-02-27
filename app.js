@@ -1,3 +1,4 @@
+require('longjohn');
 
 /**
  * Module dependencies.
@@ -17,7 +18,7 @@ var express = require('express'),
 var app = express();
 
 // all environments
-app.set('port', /*process.env.PORT || 3000*/ 80);
+app.set('port', process.env.PORT || 80);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.favicon());
@@ -80,24 +81,25 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 });
 
 // Socket.io
-var socketio = require('socket.io');
+var socketio = require('socket.io'),
+	io = socketio.listen(server);
 
-var io = socketio.listen(server);
+// Global variable on purpose - will store socket connection and will be shared with routes
 socket = undefined;
 
 io.sockets.on('connection', function (socketConnection) {
-	console.log('[WGST][Socket.IO] Connnected');
+	console.log('[WGST][Socket.io] Connnected');
 
 	socket = socketConnection;
 
 	socketConnection.on('disconnect', function () {
-		console.log('[WGST][Socket.IO] Disconnnected');
+		console.log('[WGST][Socket.io] Disconnnected');
 	});
 
 	socketConnection.emit("pong", { hello: "world" });
 
 	socketConnection.on('ping', function (data) {
-		console.log('[WGST][Socket.IO] Received ping');
+		console.log('[WGST][Socket.io] Received ping');
 
 		socketConnection.emit("pong", { say: "It works!" });
 	});

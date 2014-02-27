@@ -23,7 +23,7 @@ exports.add = function(req, res) {
 	connection.on("ready", function(){
 		console.log('[WGST] Connection is ready');
 
-		var queueId = uuid.v4(),
+		var queueId = 'ART_CREATE_COLLECTION_' + uuid.v4(),
 			exchange = connection.exchange('wgst-ex', {
 				type: 'direct',
 				passive: true
@@ -54,7 +54,12 @@ exports.add = function(req, res) {
 
 		connection
 			.queue(queueId, { // Create queue
-				exclusive: true
+				passive: false,
+				durable: false,
+				exclusive: true,
+				autoDelete: true,
+				noDeclare: false,
+				closeChannelOnUnsubscribe: false
 			}, function(queue){
 				console.log('[WGST] Queue "' + queue.name + '" is open');
 

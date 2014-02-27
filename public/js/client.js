@@ -120,7 +120,85 @@ $(function(){
     // Manage panels
     // ============================================================    
 
-    var openPanel = function(panelName, callback) {
+    var openPanel = function(panelNames, callback) {
+        // Overwrite function
+        var openPanel = function(panelName) {
+            var panel = $('[data-panel-name="' + panelName + '"');
+
+            // Set position
+            panel.css('top', WGST.panels[panelName].top);
+            panel.css('left', WGST.panels[panelName].left);
+
+            // Show
+            panel.fadeIn('fast', function(){
+                panel.addClass('wgst-panel--active');
+            });
+        };
+
+        // Process multiple panels
+        if ($.isArray(panelNames)) {
+
+            var panelNameCounter = panelNames.length,
+                panelName;
+
+            for (;panelNameCounter !== 0;) {
+                panelNameCounter = panelNameCounter - 1;
+
+                panelName = panelNames[panelNameCounter];
+
+                openPanel(panelName);
+
+            } // for
+
+        // Process single panel
+        } else {
+
+            openPanel(panelNames);
+        }
+
+        if (typeof callback === 'function') {
+            callback();
+        }
+    };
+
+    var closePanel = function(panelNames, callback) {
+        // Overwrite function
+        var closePanel = function(panelName) {
+            var panel = $('[data-panel-name="' + panelName + '"');
+
+            // Hide
+            panel.fadeOut('fast', function(){
+                panel.removeClass('wgst-panel--active');
+            });
+        };
+
+        // Process multiple panels
+        if ($.isArray(panelNames)) {
+
+            var panelNameCounter = panelNames.length,
+                panelName;
+
+            for (;panelNameCounter !== 0;) {
+                panelNameCounter = panelNameCounter - 1;
+
+                panelName = panelNames[panelNameCounter];
+
+                closePanel(panelName);
+
+            } // for
+
+        // Process single panel
+        } else {
+
+            closePanel(panelNames);
+        }
+
+        if (typeof callback === 'function') {
+            callback();
+        }
+    };
+
+/*    var openPanel = function(panelName, callback) {
         var panel = $('[data-panel-name="' + panelName + '"');
 
         // Set position
@@ -135,9 +213,9 @@ $(function(){
                 callback();
             }
         });
-    };
+    };*/
 
-    var closePanel = function(panelNames, callback) {
+/*    var closePanel = function(panelNames, callback) {
 
         var closePanel = function(panelName) {
             var panel = $('[data-panel-name="' + panelName + '"');
@@ -170,7 +248,7 @@ $(function(){
         if (typeof callback === 'function') {
             callback();
         }
-    };
+    };*/
 
     var bringPanelToTop = function(panelName) {
         var zIndexHighest = 0;
@@ -1453,14 +1531,17 @@ $(function(){
         evt.preventDefault();
 
         closePanel('representativeTree', function(){
+            // Open assembly upload navigator panel, analytics panel and metadata panel
+            openPanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
+
             // Open assembly upload navigator panel
-            openPanel('assemblyUploadNavigator');
+            //openPanel('assemblyUploadNavigator');
 
             // Open assembly upload analytics panel
-            openPanel('assemblyUploadAnalytics');
+            //openPanel('assemblyUploadAnalytics');
 
             // Open assembly upload metadata panel
-            openPanel('assemblyUploadMetadata');
+            //openPanel('assemblyUploadMetadata');
         });
 
 /*        // Make Assembly Upload Navigator panel active
@@ -2118,9 +2199,9 @@ $(function(){
                     // TO DO: Refactor?
                     resetAssemlyUploadPanel();
 
-                    openPanel('representativeTree');
+                    //openPanel('representativeTree');
 
-                    openPanel('collection', function(){
+                    openPanel(['representativeTree', 'collection'], function(){
                         bringPanelToTop('collection');
                     });
 

@@ -64,7 +64,7 @@ exports.add = function(req, res) {
 	connection.on("ready", function(){
 		console.log('[WGST] Connection is ready');
 
-		var queueId = uuid.v4(),
+		var queueId = 'ART_ASSEMBLY_UPLOAD_' + uuid.v4(),
 			exchange = connection.exchange('wgst-ex', {
 				type: 'direct',
 				passive: true
@@ -103,7 +103,12 @@ exports.add = function(req, res) {
 
 		connection
 			.queue(queueId, { // Create queue
-				exclusive: true
+				passive: false,
+				durable: false,
+				exclusive: true,
+				autoDelete: true,
+				noDeclare: false,
+				closeChannelOnUnsubscribe: false
 			}, function(queue){
 				console.log('[WGST] Queue "' + queue.name + '" is open');
 			}) // Subscribe to response message
@@ -124,7 +129,7 @@ exports.add = function(req, res) {
 				// RabbitMQ notifciations
 				// -------------------------------------
 
-				var notificationQueueId = uuid.v4();
+				var notificationQueueId = 'ART_NOTIFICATION_' + uuid.v4();
 
 				// Create RabbitMQ connection
 				var notificationConnection = amqp.createConnection({
@@ -156,6 +161,8 @@ exports.add = function(req, res) {
 								}, function(queue){
 									console.log('[WGST] Queue "' + queue.name + '" is open');
 
+									var readyResults = [];
+
 									queue.bind(exchange, "*.ASSEMBLY." + assemblyId);
 
 									// Subscribe to response message
@@ -181,6 +188,9 @@ exports.add = function(req, res) {
 												status: "FP_COMP ready",
 												result: "FP_COMP"
 											});
+
+											readyResults.push('FP_COMP');
+
 										} else if (parsedMessage.taskType === 'MLST_RESULT') {
 											socket.emit("assemblyUploadNotification", {
 												collectionId: collectionId,
@@ -188,6 +198,9 @@ exports.add = function(req, res) {
 												status: "MLST_RESULT ready",
 												result: "MLST_RESULT"
 											});
+
+											readyResults.push('MLST_RESULT');
+
 										} else if (parsedMessage.taskType === 'PAARSNP_RESULT') {
 											socket.emit("assemblyUploadNotification", {
 												collectionId: collectionId,
@@ -195,6 +208,14 @@ exports.add = function(req, res) {
 												status: "PAARSNP_RESULT ready",
 												result: "PAARSNP_RESULT"
 											});
+
+											readyResults.push('PAARSNP_RESULT');
+
+										}
+
+										// Destroy queue after all results were received
+										if (readyResults.length === 3) {
+											queue.destroy();
 										}
 
 										// Return result data
