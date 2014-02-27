@@ -13,6 +13,7 @@
     "node-uuid": "*",
     "passport": "*",
     "passport-local": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "longjohn": "*"
   }
 }
