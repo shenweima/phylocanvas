@@ -2014,6 +2014,7 @@ $(function(){
             console.log(data);
 
             var collectionAssemblyIdentifiers = data.assemblyIdentifiers;
+            console.log('[WGST] Collection ' + collectionId + ' length: ' + data.assemblyIdentifiers.length);
             console.log('[WGST] Requesting assembly data for ids: ' + collectionAssemblyIdentifiers);
 
             // Get assemblies data
@@ -2569,18 +2570,25 @@ $(function(){
         $(this).blur();
     });
 
-    $('.apply-to-all-assemblies-button').on('click', function(){
-        console.debug('Clicked "Copy to all metadata"');
+    $('.wgst-panel__assembly-upload-metadata').on('click', '.apply-to-all-assemblies-button', function(){
+        
+        // Get metadata from selected assembly
+        var metadataElementTimestamp = $(this).closest('.assembly-metadata').find('.assembly-sample-datetime-input'),
+            metadataElementLocation = $(this).closest('.assembly-metadata').find('.assembly-sample-location-input');
 
+        // Set value
+        $('.assembly-metadata').find('.assembly-sample-datetime-input').val(metadataElementTimestamp.val());
+        $('.assembly-metadata').find('.assembly-sample-location-input').val(metadataElementLocation.val());
 
-            // Get metadata for current assembly
-        var sampleTimestamp = $(this).closest('.assembly-metadata').find('.assembly-sample-datetime-input').val(),
-            sampleLocation = $(this).closest('.assembly-metadata').find('.assembly-sample-location-input').val();
-            // Set metadata for all assemblies
-            $('.assembly-metadata').each(function() {
-                $(this).find('.assembly-sample-datetime-input').val(sampleTimestamp);
-                $(this).find('.assembly-sample-location-input').val(sampleLocation);
-            });
+        // Set data
+        $('.assembly-metadata').find('.assembly-sample-location-input').attr('data-latitude', metadataElementLocation.attr('data-latitude'));
+        $('.assembly-metadata').find('.assembly-sample-location-input').attr('data-longitude', metadataElementLocation.attr('data-longitude'));
+
+        // Show metadata
+        $('.assembly-metadata-block').show();
+
+        updateMetadataProgressBar();
+
     });
 
     // Open Assembly from Collection list

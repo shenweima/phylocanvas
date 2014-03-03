@@ -135,7 +135,7 @@ exports.add = function(req, res) {
 
 							} // else if
 
-							console.log('[LOGGING][IMPORTANT] readyResults.length: ' + readyResults);
+							console.log('[LOGGING][IMPORTANT] readyResults.length: ' + readyResults.length);
 
 							// Destroy queue after all results were received
 							if (readyResults.length === 3) {
