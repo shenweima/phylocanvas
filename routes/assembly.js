@@ -52,6 +52,13 @@ exports.add = function(req, res) {
 		assemblyId: assemblyId
 	});
 
+	// socket.emit("assemblyUploadNotification", {
+	// 	collectionId: collectionId,
+	// 	assemblyId: assemblyId,
+	// 	status: "Uploaded",
+	// 	result: "UPLOAD_OK"
+	// });
+
 	// -------------------------------------
 	// RabbitMQ Notifications
 	// -------------------------------------

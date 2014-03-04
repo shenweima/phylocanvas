@@ -1186,6 +1186,61 @@ h2, h4 {
     }
 }
 
+.wgst-panel__assembly-upload-progress-panel {
+    .assemblies-upload-progress {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        font-weight: 300;
+        .assemblies-upload-processed, .assemblies-upload-total {
+            font-weight: 500;
+        }
+        .progress {
+            margin-top: 10px;
+            margin-bottom: 7px;
+            .progress-bar {
+                text-shadow: 1px 1px #444;
+                font-weight: 400;
+            }
+        }
+    }
+    .assembly-list-upload-progress {
+        display: block;
+        max-height: 300px;
+        overflow: scroll;
+        margin: 10px;
+        th, td {
+            padding: 5px;
+        }
+        th {
+            font-weight: 500;
+        }
+        td {
+/*            width: 3px;
+            height: 18px;
+            border: 0;
+            margin: 0;
+            padding: 0;*/
+        }
+        .assembly-upload-progress {
+            padding: 0;
+        }
+        .assembly-upload-result {
+            text-align: center;
+            border-right: 1px solid #ddd;
+            &:last-of-type {
+                border-right: 0;
+            }
+        }
+        .progress {
+            margin: 5px;
+            width: 120px;
+            .progress-bar {
+                text-shadow: 1px 1px #444;
+            }
+        }
+    }
+}
+/*
 .loading {
     width: 200px;
     height: 200px;
@@ -1215,4 +1270,4 @@ h2, h4 {
 @-webkit-keyframes spin {
     from { -webkit-transform: rotate(0deg); }
     to { -webkit-transform: rotate(360deg); }
-}
+}*/

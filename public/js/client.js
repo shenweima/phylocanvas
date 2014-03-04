@@ -106,8 +106,8 @@ $(function(){
             left: 110
         },
         assemblyUploadProgress: {
-            top: 225,
-            left: 110
+            top: 80,
+            left: 90
         }
     };
 
@@ -2244,10 +2244,76 @@ $(function(){
         });
     };
 
+    var updateAssemblyUploadProgress = function(assemblyId, resultName) {
+
+        var assemblyId = assemblyId.replace('.fa', '');
+
+        console.log('---------------------------------');
+        console.log('assemblyId: ' + assemblyId);
+        console.log('resultName: ' + resultName);
+        console.log('---------------------------------');
+
+        // AAA
+
+        var assemblyRow = $('.assembly-list-upload-progress tr[data-assembly-id="' + assemblyId + '"] ');
+
+        if (resultName === 'UPLOAD_OK') {
+            assemblyRow.find('.assembly-upload-uploaded').html('<span class="glyphicon glyphicon-ok"></span>');
+        } else if (resultName === 'MLST_RESULT') {
+            assemblyRow.find('.assembly-upload-result-mlst').html('<span class="glyphicon glyphicon-ok"></span>');
+        } else if (resultName === 'PAARSNP_RESULT') {
+            assemblyRow.find('.assembly-upload-result-paarsnp').html('<span class="glyphicon glyphicon-ok"></span>');
+        } else if (resultName === 'FP_COMP') {
+            assemblyRow.find('.assembly-upload-result-fp-comp').html('<span class="glyphicon glyphicon-ok"></span>');
+        }
+
+        console.log('aria-valuenow: ' + assemblyRow.find('.progress-bar').attr('aria-valuenow'));
+        console.log('css width: ' + assemblyRow.find('.progress-bar').css('width'));
+
+        assemblyRow.find('.progress-bar').css('width', (parseInt(assemblyRow.find('.progress-bar').attr('aria-valuenow'), 10) + 25) + '%');
+        assemblyRow.find('.progress-bar').attr('aria-valuenow', (parseInt(assemblyRow.find('.progress-bar').attr('aria-valuenow'), 10) + 25));
+
+        if (assemblyRow.find('.progress-bar').attr('aria-valuenow') > 0) {
+            assemblyRow.find('.progress-bar').text(assemblyRow.find('.progress-bar').attr('aria-valuenow') + '%');
+        }
+
+        // When progress bar reached 100%...
+        if (assemblyRow.find('.progress-bar').attr('aria-valuenow') === '100') {
+            // Remove stripes from progress bar
+            assemblyRow.find('.progress').removeClass('active').removeClass('progress-striped');
+            // Change progress bar color to green
+            assemblyRow.find('.progress-bar').addClass('progress-bar-success');
+
+
+            // Update total number of processed assemblies
+            $('.assemblies-upload-processed').text(parseInt($('.assemblies-upload-processed').text(), 10) + 1);
+        } // if
+
+        // Update overall progress bar
+        var currentProgressValue = parseInt($('.assemblies-upload-progress').find('.progress-bar').attr('aria-valuenow'), 10),
+            totalNumberOfAssemblies = parseInt($('.assemblies-upload-total').text(), 10),
+            updatedProgressValue = parseInt(currentProgressValue + 100 / (totalNumberOfAssemblies * 4), 10);
+
+        console.debug('updatedProgressValue: ' + updatedProgressValue);
+
+        $('.assemblies-upload-progress').find('.progress-bar').css('width', updatedProgressValue + '%');
+        $('.assemblies-upload-progress').find('.progress-bar').attr('aria-valuenow', updatedProgressValue);
+
+        if (updatedProgressValue > 0) {
+            $('.assemblies-upload-progress').find('.progress-bar').text(updatedProgressValue + '%');            
+        }
+
+    };
+
     // Listen to notifications
     socket.on('assemblyUploadNotification', function(data) {
         console.log('[WGST][Socket.io] Received assembly upload notification:');
         console.log(data);
+
+        // ------------------------------------------
+        // Update view
+        // ------------------------------------------
+        updateAssemblyUploadProgress(data.assemblyId, data.result);
 
         //WGST.assemblyUploadProgress[data.collectionId][data.assemblyId].results.push(data.result);
         WGST.assemblyUploadProgress.results.push(data.collectionId + '__' + data.assemblyId + '__' + data.result);
@@ -2406,6 +2472,10 @@ $(function(){
         return function(data, textStatus, jqXHR) {
             console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
 
+            updateAssemblyUploadProgress(fastaFile, 'UPLOAD_OK');
+
+            // AAA
+
             // Create assembly URL
             var url = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '') + '/assembly/' + 'FP_COMP_' + data.assemblyId;
             $('.uploaded-assembly-url-input').val(url);
@@ -2433,77 +2503,129 @@ $(function(){
         // Close panels
         closePanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
 
+        // Post each FASTA file separately
+        for (var fastaFile in fastaFilesAndMetadata) {
+            if (fastaFilesAndMetadata.hasOwnProperty(fastaFile)) {
+
+                // AAA
+
+                var assemblyUploadProgressHtml = 
+                    '<tr data-assembly-id="' + fastaFile.replace('.fa','') + '">'
+                        + '<td>' + fastaFile + '</td>'
+                        + '<td class="assembly-upload-progress">'
+                            + '<div class="progress progress-striped active">'
+                              + '<div class="progress-bar"  role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">'
+                                //+ '<span class="sr-only">0% Complete</span>'
+                                //+ '0%'
+                              + '</div>'
+                            + '</div>'
+                        + '</td>'
+                        + '<td class="assembly-upload-result assembly-upload-uploaded"></td>'
+                        + '<td class="assembly-upload-result assembly-upload-result-mlst"></td>'
+                        + '<td class="assembly-upload-result assembly-upload-result-fp-comp"></td>'
+                        + '<td class="assembly-upload-result assembly-upload-result-paarsnp"></td>'
+                    + '</tr>';
+
+                $('.assembly-list-upload-progress tbody').append(assemblyUploadProgressHtml);
+
+            } // if
+        } // for
+
+        $('.wgst-panel__assembly-upload-progress-panel .header-title small').text(Object.keys(fastaFilesAndMetadata).length);
+        $('.wgst-panel__assembly-upload-progress-panel .assemblies-upload-total').text(Object.keys(fastaFilesAndMetadata).length);
+
         // Open assembly upload progress panel
         openPanel('assemblyUploadProgress', function(){
             console.log('[WGST] Getting collection id');
 
-            // Get collection id
-            $.ajax({
-                type: 'POST',
-                url: '/collection/add/',
-                datatype: 'json', // http://stackoverflow.com/a/9155217
-                data: {}
-            })
-            .done(function(data, textStatus, jqXHR) {
+            setTimeout(function(){
+                // Get collection id
+                $.ajax({
+                    type: 'POST',
+                    url: '/collection/add/',
+                    datatype: 'json', // http://stackoverflow.com/a/9155217
+                    data: {}
+                })
+                .done(function(data, textStatus, jqXHR) {
 
-                var collectionIdResponse = JSON.parse(data),
-                    collectionId = collectionIdResponse.uuid;
+                    var collectionIdResponse = JSON.parse(data),
+                        collectionId = collectionIdResponse.uuid;
 
-                console.log('[WGST] Collection id: ' + collectionId);
-                console.log('[WGST] Collection response: ');
-                console.log(collectionIdResponse);
+                    console.log('[WGST] Collection id: ' + collectionId);
+                    console.log('[WGST] Collection response: ');
+                    console.log(collectionIdResponse);
 
-                // Store ids of assemblies you're uploading
-                WGST.assemblyUploadProgress[collectionId] = [];
+                    // Store ids of assemblies you're uploading
+                    WGST.assemblyUploadProgress[collectionId] = [];
 
-                // Post each FASTA file separately
-                for (var fastaFile in fastaFilesAndMetadata) {
-                    if (fastaFilesAndMetadata.hasOwnProperty(fastaFile)) {
+                    // Post each FASTA file separately
+                    for (var fastaFile in fastaFilesAndMetadata) {
+                        if (fastaFilesAndMetadata.hasOwnProperty(fastaFile)) {
 
-                        // Add collection id to each FASTA file object
-                        fastaFilesAndMetadata[fastaFile].collectionId = collectionId;
+                            // AAA
 
-                        var autocompleteInput = $('li[data-name="' + fastaFile + '"] .assembly-sample-location-input');
+    /*                        var assemblyUploadProgressHtml = 
+                                '<tr data-assembly-id="' + fastaFile.replace('.fa','') + '">'
+                                    + '<td>' + fastaFile + '</td>'
+                                    + '<td class="assembly-upload-progress">'
+                                        + '<div class="progress progress-striped active">'
+                                          + '<div class="progress-bar"  role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">'
+                                            + '<span class="sr-only">0% Complete</span>'
+                                          + '</div>'
+                                        + '</div>'
+                                    + '</td>'
+                                    + '<td class="assembly-upload-result assembly-upload-uploaded"></td>'
+                                    + '<td class="assembly-upload-result assembly-upload-result-mlst"></td>'
+                                    + '<td class="assembly-upload-result assembly-upload-result-fp-comp"></td>'
+                                    + '<td class="assembly-upload-result assembly-upload-result-paarsnp"></td>'
+                                + '</tr>';
 
-                        // Add metadata to each FASTA file object
-                        fastaFilesAndMetadata[fastaFile].metadata = {
-                            location: {
-                                // TO DO: Change 'data-name' to 'data-file-name'
-                                latitude: autocompleteInput.attr('data-latitude'),
-                                longitude: autocompleteInput.attr('data-longitude')
-                            }
-                        };
+                            $('.assembly-list-upload-progress tbody').append(assemblyUploadProgressHtml);
+    */
+                            // Add collection id to each FASTA file object
+                            fastaFilesAndMetadata[fastaFile].collectionId = collectionId;
 
-                        console.log('[WGST] Metadata for ' + fastaFile + ': ');
-                        console.log(fastaFilesAndMetadata[fastaFile].metadata);
+                            var autocompleteInput = $('li[data-name="' + fastaFile + '"] .assembly-sample-location-input');
 
-                        // Post assembly
-                        $.ajax({
-                            type: 'POST',
-                            url: '/assembly/add/',
-                            datatype: 'json', // http://stackoverflow.com/a/9155217
-                            data: fastaFilesAndMetadata[fastaFile]
-                        })
-                        .done(assemblyUploadDoneHandler(collectionId, fastaFile))
-                        .fail(function(jqXHR, textStatus, errorThrown) {
-                            console.log('[WGST][ERROR] Failed to send FASTA file object to server or received error message');
-                            console.error(textStatus);
-                            console.error(errorThrown);
-                            console.error(jqXHR);
-                            updateAssemblyUploadProgressBar();
-                        });
+                            // Add metadata to each FASTA file object
+                            fastaFilesAndMetadata[fastaFile].metadata = {
+                                location: {
+                                    // TO DO: Change 'data-name' to 'data-file-name'
+                                    latitude: autocompleteInput.attr('data-latitude'),
+                                    longitude: autocompleteInput.attr('data-longitude')
+                                }
+                            };
 
-                    } // if
-                } // for
-            })
-            .fail(function(jqXHR, textStatus, errorThrown) {
-                console.log('[WGST][ERROR] Failed to get collection id');
-                console.error(textStatus);
-                console.error(errorThrown);
-                console.error(jqXHR);
-            });
+                            console.log('[WGST] Metadata for ' + fastaFile + ': ');
+                            console.log(fastaFilesAndMetadata[fastaFile].metadata);
 
-        });
+                            // Post assembly
+                            $.ajax({
+                                type: 'POST',
+                                url: '/assembly/add/',
+                                datatype: 'json', // http://stackoverflow.com/a/9155217
+                                data: fastaFilesAndMetadata[fastaFile]
+                            })
+                            .done(assemblyUploadDoneHandler(collectionId, fastaFile))
+                            .fail(function(jqXHR, textStatus, errorThrown) {
+                                console.log('[WGST][ERROR] Failed to send FASTA file object to server or received error message');
+                                console.error(textStatus);
+                                console.error(errorThrown);
+                                console.error(jqXHR);
+                                updateAssemblyUploadProgressBar();
+                            });
+
+                        } // if
+                    } // for
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.log('[WGST][ERROR] Failed to get collection id');
+                    console.error(textStatus);
+                    console.error(errorThrown);
+                    console.error(jqXHR);
+                });
+            }, 1000);
+        }); // openPanel()
 
 /*        $('.uploading-assembly-progress-container').fadeIn('slow', function(){
             $('.adding-metadata-progress-container').slideUp('normal', function(){
