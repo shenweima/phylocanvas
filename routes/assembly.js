@@ -43,6 +43,15 @@ exports.add = function(req, res) {
 	// Generate assembly id first and then listen to Notification queue
 	var assemblyId = uuid.v4();
 
+	console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+	console.log('Generated assembly id: ' + assemblyId);
+	console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+
+	// Return result data
+	res.json({
+		assemblyId: assemblyId
+	});
+
 	// -------------------------------------
 	// RabbitMQ Notifications
 	// -------------------------------------
@@ -200,6 +209,12 @@ exports.add = function(req, res) {
 								}
 
 								console.log('[WGST] Message was published to upload exchange');
+
+								// Return result data
+/*								res.json({
+									assemblyId: assemblyId
+								});*/
+
 							});
 
 							uploadQueue = uploadConnection
@@ -271,7 +286,7 @@ exports.add = function(req, res) {
 									});
 
 									// Return result data
-									res.json(parsedMessage);
+									//res.json(parsedMessage);
 
 								});
 						});

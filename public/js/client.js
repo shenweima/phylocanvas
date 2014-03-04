@@ -2149,7 +2149,7 @@ $(function(){
                                     + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                                 + '</td>'
                                 + '<td>' + '<a href="#" class="open-assembly-button" data-assembly-id="' + data[assemblyId]['FP_COMP'].assemblyId + '">' + data[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
-                                + '<td>' + assemblyTopScore.referenceId + ' (' + assemblyTopScore.score.toFixed(2) * 100 + '%)</td>'
+                                + '<td>' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</td>'
                                 //+ '<td>' + assemblyTopScore.score.toFixed(2) + ' = ' + Math.round(assemblyTopScore.score * parseInt(data[assemblyId]['FP_COMP']['fingerprintSize'], 10)) + '/' + data[assemblyId]['FP_COMP']['fingerprintSize'] + '</td>'
                                 //+ '<td>' + assemblyTopScore.score.toFixed(2) * 100 + '%</td>'
                                 + '<td>'
@@ -2571,7 +2571,7 @@ $(function(){
     });
 
     $('.wgst-panel__assembly-upload-metadata').on('click', '.apply-to-all-assemblies-button', function(){
-        
+
         // Get metadata from selected assembly
         var metadataElementTimestamp = $(this).closest('.assembly-metadata').find('.assembly-sample-datetime-input'),
             metadataElementLocation = $(this).closest('.assembly-metadata').find('.assembly-sample-location-input');
