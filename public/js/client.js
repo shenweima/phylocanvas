@@ -2244,35 +2244,53 @@ $(function(){
         });
     };
 
-    var updateAssemblyUploadProgress = function(assemblyId, resultName) {
+    var updateAssemblyUploadProgressCounter = 0;
 
+    var updateAssemblyUploadProgress = function(assemblyId, statusName) {
+
+        updateAssemblyUploadProgressCounter = updateAssemblyUploadProgressCounter + 1;
+        console.debug(updateAssemblyUploadProgressCounter);
+
+        // Get user assembly id
         var assemblyId = assemblyId.replace('.fa', '');
 
         console.log('---------------------------------');
-        console.log('assemblyId: ' + assemblyId);
-        console.log('resultName: ' + resultName);
+        console.debug('assemblyId: ' + assemblyId);
+        console.debug('statusName: ' + statusName);
         console.log('---------------------------------');
 
-        // AAA
+        // ------------------------------------------
+        // Create assembly row HTML
+        // ------------------------------------------
 
-        var assemblyRow = $('.assembly-list-upload-progress tr[data-assembly-id="' + assemblyId + '"] ');
+        var assemblyRow = $('.assembly-list-upload-progress tr[data-assembly-id="' + assemblyId + '"] '),
+            statusCompleteHtml = '<span class="glyphicon glyphicon-ok"></span>',
+            STATUS_UPLOAD_OK = 'UPLOAD_OK',
+            STATUS_MLST_RESULT = 'MLST_RESULT',
+            STATUS_PAARSNP_RESULT = 'PAARSNP_RESULT',
+            STATUS_FP_COMP = 'FP_COMP';
 
-        if (resultName === 'UPLOAD_OK') {
-            assemblyRow.find('.assembly-upload-uploaded').html('<span class="glyphicon glyphicon-ok"></span>');
-        } else if (resultName === 'MLST_RESULT') {
-            assemblyRow.find('.assembly-upload-result-mlst').html('<span class="glyphicon glyphicon-ok"></span>');
-        } else if (resultName === 'PAARSNP_RESULT') {
-            assemblyRow.find('.assembly-upload-result-paarsnp').html('<span class="glyphicon glyphicon-ok"></span>');
-        } else if (resultName === 'FP_COMP') {
-            assemblyRow.find('.assembly-upload-result-fp-comp').html('<span class="glyphicon glyphicon-ok"></span>');
+        if (statusName === STATUS_UPLOAD_OK) {
+            assemblyRow.find('.assembly-upload-uploaded').html(statusCompleteHtml);
+        } else if (statusName === STATUS_MLST_RESULT) {
+            assemblyRow.find('.assembly-upload-result-mlst').html(statusCompleteHtml);
+        } else if (statusName === STATUS_PAARSNP_RESULT) {
+            assemblyRow.find('.assembly-upload-result-paarsnp').html(statusCompleteHtml);
+        } else if (statusName === STATUS_FP_COMP) {
+            assemblyRow.find('.assembly-upload-result-fp-comp').html(statusCompleteHtml);
         }
 
-        console.log('aria-valuenow: ' + assemblyRow.find('.progress-bar').attr('aria-valuenow'));
-        console.log('css width: ' + assemblyRow.find('.progress-bar').css('width'));
+        //console.log('aria-valuenow: ' + assemblyRow.find('.progress-bar').attr('aria-valuenow'));
+        //console.log('css width: ' + assemblyRow.find('.progress-bar').css('width'));
 
-        assemblyRow.find('.progress-bar').css('width', (parseInt(assemblyRow.find('.progress-bar').attr('aria-valuenow'), 10) + 25) + '%');
-        assemblyRow.find('.progress-bar').attr('aria-valuenow', (parseInt(assemblyRow.find('.progress-bar').attr('aria-valuenow'), 10) + 25));
+        var ariaValueNowAttr = parseInt(assemblyRow.find('.progress-bar').attr('aria-valuenow'), 10);
 
+        // Update assembly upload progress bar value
+        assemblyRow.find('.progress-bar')
+                        .css('width', (ariaValueNowAttr + 25) + '%')
+                        .attr('aria-valuenow', (ariaValueNowAttr + 25));
+
+        // If assembly processing has started then show percentage value
         if (assemblyRow.find('.progress-bar').attr('aria-valuenow') > 0) {
             assemblyRow.find('.progress-bar').text(assemblyRow.find('.progress-bar').attr('aria-valuenow') + '%');
         }
@@ -2284,17 +2302,20 @@ $(function(){
             // Change progress bar color to green
             assemblyRow.find('.progress-bar').addClass('progress-bar-success');
 
-
             // Update total number of processed assemblies
             $('.assemblies-upload-processed').text(parseInt($('.assemblies-upload-processed').text(), 10) + 1);
         } // if
 
         // Update overall progress bar
-        var currentProgressValue = parseInt($('.assemblies-upload-progress').find('.progress-bar').attr('aria-valuenow'), 10),
+        var currentProgressValue = parseFloat($('.assemblies-upload-progress').find('.progress-bar').attr('aria-valuenow')),
             totalNumberOfAssemblies = parseInt($('.assemblies-upload-total').text(), 10),
-            updatedProgressValue = parseInt(currentProgressValue + 100 / (totalNumberOfAssemblies * 4), 10);
+            numberOfResultsPerAssembly = 4,
+            progressStepSize = 100 / (totalNumberOfAssemblies * numberOfResultsPerAssembly),
+            updatedProgressValue = currentProgressValue + progressStepSize;
 
-        console.debug('updatedProgressValue: ' + updatedProgressValue);
+        // console.debug('currentProgressValue: ' + currentProgressValue);
+        // console.debug('totalNumberOfAssemblies: ' + totalNumberOfAssemblies);
+        // console.debug('updatedProgressValue: ' + updatedProgressValue);
 
         $('.assemblies-upload-progress').find('.progress-bar').css('width', updatedProgressValue + '%');
         $('.assemblies-upload-progress').find('.progress-bar').attr('aria-valuenow', updatedProgressValue);
@@ -2324,7 +2345,8 @@ $(function(){
         console.log('(assemblies.length * WGST.assemblyAnalysis.length): ' + (assemblies.length * WGST.assemblyAnalysis.length));
 
         if ((assemblies.length * WGST.assemblyAnalysis.length) === WGST.assemblyUploadProgress.results.length) {
-            getCollection(data.collectionId);
+            setTimeout(getCollection(data.collectionId), 2000);
+            //getCollection(data.collectionId);
         }
     });
 
