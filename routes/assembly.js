@@ -114,15 +114,18 @@ exports.add = function(req, res) {
 
 							console.log(parsedMessage);
 
-							var messageAssemblyId = parsedMessage.assemblyId;
+							var messageAssemblyId = parsedMessage.assemblyId,
+								messageUserAssemblyId = parsedMessage.userAssemblyId;
 
-							console.log('[WGST] Assembly id from the message: ' + messageAssemblyId);
+							console.log('[WGST] Message assembly id: ' + messageAssemblyId);
+							console.log('[WGST] Message user assembly id: ' + messageUserAssemblyId);
 
 							// Check task type
 							if (parsedMessage.taskType === 'FP_COMP') {
 								socket.emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
+									userAssemblyId: messageUserAssemblyId,
 									status: "FP_COMP ready",
 									result: "FP_COMP"
 								});
@@ -133,6 +136,7 @@ exports.add = function(req, res) {
 								socket.emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
+									userAssemblyId: messageUserAssemblyId,
 									status: "MLST_RESULT ready",
 									result: "MLST_RESULT"
 								});
@@ -143,6 +147,7 @@ exports.add = function(req, res) {
 								socket.emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
+									userAssemblyId: messageUserAssemblyId,
 									status: "PAARSNP_RESULT ready",
 									result: "PAARSNP_RESULT"
 								});

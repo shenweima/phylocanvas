@@ -2246,7 +2246,7 @@ $(function(){
 
     var updateAssemblyUploadProgressCounter = 0;
 
-    var updateAssemblyUploadProgress = function(assemblyId, statusName) {
+    var updateAssemblyUploadProgress = function(userAssemblyId, assemblyId, statusName) {
 
         updateAssemblyUploadProgressCounter = updateAssemblyUploadProgressCounter + 1;
         console.debug(updateAssemblyUploadProgressCounter);
@@ -2263,7 +2263,7 @@ $(function(){
         // Create assembly row HTML
         // ------------------------------------------
 
-        var assemblyRow = $('.assembly-list-upload-progress tr[data-assembly-id="' + assemblyId + '"] '),
+        var assemblyRow = $('.assembly-list-upload-progress tr[data-assembly-id="' + userAssemblyId + '"] '),
             statusCompleteHtml = '<span class="glyphicon glyphicon-ok"></span>',
             STATUS_UPLOAD_OK = 'UPLOAD_OK',
             STATUS_MLST_RESULT = 'MLST_RESULT',
@@ -2302,6 +2302,9 @@ $(function(){
             // Change progress bar color to green
             assemblyRow.find('.progress-bar').addClass('progress-bar-success');
 
+            var assemblyName = assemblyRow.find('.assembly-upload-name').text();
+            assemblyRow.find('.assembly-upload-name').html('<a href="#" class="open-assembly-button" data-assembly-id="' + assemblyId + '">' + assemblyName + '</a>');
+
             // Update total number of processed assemblies
             $('.assemblies-upload-processed').text(parseInt($('.assemblies-upload-processed').text(), 10) + 1);
         } // if
@@ -2334,7 +2337,7 @@ $(function(){
         // ------------------------------------------
         // Update view
         // ------------------------------------------
-        updateAssemblyUploadProgress(data.assemblyId, data.result);
+        updateAssemblyUploadProgress(data.userAssemblyId, data.assemblyId, data.result);
 
         //WGST.assemblyUploadProgress[data.collectionId][data.assemblyId].results.push(data.result);
         WGST.assemblyUploadProgress.results.push(data.collectionId + '__' + data.assemblyId + '__' + data.result);
@@ -2492,9 +2495,10 @@ $(function(){
 
     var assemblyUploadDoneHandler = function(collectionId, fastaFile) {
         return function(data, textStatus, jqXHR) {
-            console.log('[WGST] Successfully sent FASTA file object to the server and received response message');
+            console.log('[WGST] Successfully sent FASTA file object to the server and received response message:');
+            console.log(data);
 
-            updateAssemblyUploadProgress(fastaFile, 'UPLOAD_OK');
+            updateAssemblyUploadProgress(fastaFile.replace('.fa', ''), data.assemblyId, 'UPLOAD_OK');
 
             // AAA
 
@@ -2533,7 +2537,7 @@ $(function(){
 
                 var assemblyUploadProgressHtml = 
                     '<tr data-assembly-id="' + fastaFile.replace('.fa','') + '">'
-                        + '<td>' + fastaFile + '</td>'
+                        + '<td class="assembly-upload-name">' + fastaFile + '</td>'
                         + '<td class="assembly-upload-progress">'
                             + '<div class="progress progress-striped active">'
                               + '<div class="progress-bar"  role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">'
@@ -2736,7 +2740,7 @@ $(function(){
     });
 
     // Open Assembly from Collection list
-    $('.wgst-panel__collection-panel').on('click', '.open-assembly-button', function(e){
+    $('.wgst-panel__collection-panel, .wgst-panel__assembly-upload-progress-panel').on('click', '.open-assembly-button', function(e){
 
         var assemblyId = $(this).attr('data-assembly-id');
 
