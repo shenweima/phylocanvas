@@ -106,7 +106,9 @@
         <!-- Representative tree -->
         <div class="wgst-panel wgst-panel__representative-tree-panel wgst-panel--active wgst-draggable" data-panel-name="representativeTree">
           <header class="wgst-panel-header wgst-draggable-handle">
-            Representative Tree
+            <h4 class="header-title">Representative Tree</h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
           <div class="wgst-panel-body">
             <div class="tree-controls">
@@ -276,6 +278,8 @@
         <section class="wgst-panel wgst-panel__collection-panel wgst-draggable" data-panel-name="collection">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Collection</h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize wgst-panel-control-button--active glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__close glyphicon glyphicon-remove"></span>
           </header>
           <article class="wgst-panel-body">
 
@@ -328,10 +332,43 @@
 
 
 
+        <!-- Collection tree -->
+        <div class="wgst-panel wgst-panel__collection-tree-panel wgst-panel--active wgst-draggable" data-panel-name="collectionTree">
+          <header class="wgst-panel-header wgst-draggable-handle">
+            <h4 class="header-title">Collection Tree</h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
+          </header>
+          <div class="wgst-panel-body">
+            <!--
+            <div class="tree-controls">
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-default tree-controls-select-all">Select all nodes</button>
+                <button type="button" class="btn btn-sm btn-default tree-controls-select-none">Deselect all nodes</button>
+              </div>
+            </div>
+            -->
+            <div class="phylocanvas"></div>
+          </div><!-- /.wgst-panel-body -->
+          <footer class="wgst-panel-footer wgst-draggable-handle">
+          </footer><!-- /.wgst-panel-footer -->
+        </div><!-- /.wgst-panel.tree-panel -->
+
+
+
+
+
+
+
+
+
+
         <!-- Assembly -->
         <section class="wgst-panel wgst-panel__assembly-panel wgst-draggable" data-panel-name="assembly">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Assembly: <small></small></h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
           <article class="wgst-panel-body">
 
@@ -374,6 +411,8 @@
         <section class="wgst-panel wgst-panel__assembly-upload-progress-panel wgst-draggable" data-panel-name="assemblyUploadProgress">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Processing <small></small> assemblies</h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize wgst-panel-control-button--active glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__close glyphicon glyphicon-remove"></span>
           </header>
           <article class="wgst-panel-body">
 
@@ -388,7 +427,7 @@
             <table class="table-striped assembly-list-upload-progress">
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>Assembly</th>
                   <th>Progress</th>
                   <th>Uploaded</th>
                   <th>MLST</th>
@@ -399,28 +438,6 @@
               <tbody>
               </tbody>
             </table>
-
-            <!-- <div class="loading"></div> -->
-
-            <!--
-            <div class="collection-list-container">
-              <ul>
-                <li data-collection-id="">
-                  <div class="assembly-list-container">
-                    <ul>
-                      <li data-assembly-id="">
-                        <div class="progress progress-striped active">
-                          <div class="progress-bar"  role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                            <span class="sr-only">0% Complete</span>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            -->
 
           </article><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer wgst-draggable-handle">

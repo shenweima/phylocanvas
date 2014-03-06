@@ -805,6 +805,24 @@ h2, h4 {
             color: #000;
         }
     }
+    .wgst-panel-control-button {
+        position: absolute;
+        top: 13px;
+        color: #ccc;
+    }
+    .wgst-panel-control-button--active {
+        cursor: pointer;
+        color: #777;
+        &:hover {
+            color: #000;
+        }
+    }
+    .wgst-panel-control-button__close {
+        right: 13px;
+    }
+    .wgst-panel-control-button__minimize {
+        right: 39px; // 13 + 13 + 13
+    }
 }
 
 // Class element
@@ -1111,6 +1129,13 @@ h2, h4 {
     }
 }
 
+.wgst-panel__collection-tree-panel {
+    .phylocanvas {
+        width: 600px;
+        height: 400px;
+    }
+}
+
 // Object
 .wgst-panel__assembly-panel {
 
@@ -1229,6 +1254,9 @@ h2, h4 {
             border-right: 1px solid #ddd;
             &:last-of-type {
                 border-right: 0;
+            }
+            .glyphicon-record {
+                color: #ccc;
             }
         }
         .progress {

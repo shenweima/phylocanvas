@@ -89,6 +89,10 @@ $(function(){
             top: 80,
             left: 90
         },
+        collectionTree: {
+            top: 160,
+            left: 180  
+        },
         representativeTree: {
             top: 80,
             left: 90
@@ -111,9 +115,20 @@ $(function(){
         }
     };
 
+    WGST.upload = {};
+
+    // TO DO: Refactor it
+    WGST.collection = {};
+
+
+
+
+
+
     WGST.assemblyUploadProgress = {
         results: []
     };
+
     WGST.assemblyAnalysis = ['MLST_RESULT', 'PAARSNP_RESULT', 'FP_COMP'];
 
     // ============================================================
@@ -167,9 +182,11 @@ $(function(){
             var panel = $('[data-panel-name="' + panelName + '"');
 
             // Hide
-            panel.fadeOut('fast', function(){
-                panel.removeClass('wgst-panel--active');
-            });
+            // panel.fadeOut('fast', function(){
+            //     panel.removeClass('wgst-panel--active');
+            // });
+            panel.hide();
+            panel.removeClass('wgst-panel--active');
         };
 
         // Process multiple panels
@@ -189,7 +206,6 @@ $(function(){
 
         // Process single panel
         } else {
-
             closePanel(panelNames);
         }
 
@@ -470,6 +486,7 @@ $(function(){
         window.WGST.representativeTree.tree.treeType = 'rectangular';
         //window.WGST.representativeTree.tree.showLabels = false;
         window.WGST.representativeTree.tree.baseNodeSize = 0.5;
+        window.WGST.representativeTree.tree.setTextSize(24);
         window.WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
         window.WGST.representativeTree.tree.selectedColor = '#0059DE';
         window.WGST.representativeTree.tree.rightClickZoom = true;
@@ -516,6 +533,72 @@ $(function(){
             console.error(errorThrown);
             console.error(jqXHR);
         });
+    };
+
+    var renderCollectionTree = function(newickTreeData) {
+
+        var newickTreeData = newickTreeData.replace('[', '');
+        newickTreeData = newickTreeData.replace(']', '');                
+
+        console.log('[WGST] Rendering collection tree:');
+        console.log(newickTreeData);
+
+        // ==============================
+        // Load representative tree
+        // ==============================
+
+        // Init tree
+        window.WGST.collection.tree.parseNwk(newickTreeData);
+        window.WGST.collection.tree.treeType = 'rectangular';
+        //window.WGST.collectionTree.tree.showLabels = false;
+        window.WGST.collection.tree.baseNodeSize = 0.5;
+        window.WGST.collection.tree.setTextSize(24);
+        window.WGST.collection.tree.selectedNodeSizeIncrease = 0.5;
+        window.WGST.collection.tree.selectedColor = '#0059DE';
+        window.WGST.collection.tree.rightClickZoom = true;
+        //window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
+
+        // ==============================
+        // Load reference tree metadata
+        // ==============================
+
+/*        console.log('[WGST] Getting representative tree metadata');
+
+        $.ajax({
+            type: 'POST',
+            url: '/representative-tree-metadata/',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: {}
+        })
+        .done(function(data, textStatus, jqXHR) {
+            console.log('[WGST] Got representative tree metadata');
+            console.log(data.value);
+
+            // Create representative tree markers
+            var metadataCounter = data.value.metadata.length,
+                metadata = data.value.metadata,
+                accession,
+                marker;
+
+            for (; metadataCounter !== 0;) {
+                // Decrement counter
+                metadataCounter = metadataCounter - 1;
+
+                console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
+                console.log(metadata[metadataCounter]);
+
+                accession = metadata[metadataCounter].accession;
+
+                // Set representative tree metadata
+                window.WGST.representativeTree[accession] = metadata[metadataCounter];
+            } // for
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log('[WGST][ERROR] Failed to get representative tree metadata');
+            console.error(textStatus);
+            console.error(errorThrown);
+            console.error(jqXHR);
+        });*/
     };
 
     // Init map
@@ -2010,12 +2093,14 @@ $(function(){
             }
         })
         .done(function(data, textStatus, jqXHR) {
-            console.log('[WGST] Got collection with id: ' + collectionId);
+            console.log('[WGST] Got ' + collectionId + ' collection: ');
             console.log(data);
 
-            var collectionAssemblyIdentifiers = data.assemblyIdentifiers;
-            console.log('[WGST] Collection ' + collectionId + ' length: ' + data.assemblyIdentifiers.length);
-            console.log('[WGST] Requesting assembly data for ids: ' + collectionAssemblyIdentifiers);
+            var collectionAssemblyIdentifiers = data.assemblyIds.assemblyIdentifiers,
+                collectionTree = data.tree.newickTree;
+
+            console.log('[WGST] Collection ' + collectionId + ' has ' + collectionAssemblyIdentifiers.length + ' assembly ids');
+            console.log('[WGST] Requesting assemblies with ids: ' + collectionAssemblyIdentifiers);
 
             // Get assemblies data
             $.ajax({
@@ -2176,6 +2261,16 @@ $(function(){
                     //closePanel('assemblyUploadMetadata');
                     //closePanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
 
+
+
+
+                    // Prepare Collection Tree
+                    $('.wgst-panel__collection-tree-panel .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+
+                    //AAA
+
+
+
                     closePanel('assemblyUploadProgress');
 
     /*                                    // Close Assembly Upload Navigator panel
@@ -2202,8 +2297,12 @@ $(function(){
 
                     //openPanel('representativeTree');
 
-                    openPanel(['representativeTree', 'collection'], function(){
-                        bringPanelToTop('collection');
+                    openPanel(['collection', 'collectionTree'], function(){
+                        bringPanelToTop('collectionTree');
+
+                    window.WGST.collection.tree = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+                    renderCollectionTree(collectionTree);
+
                     });
 
     /*                                    // Make Collection panel active
@@ -2268,7 +2367,8 @@ $(function(){
             STATUS_UPLOAD_OK = 'UPLOAD_OK',
             STATUS_MLST_RESULT = 'MLST_RESULT',
             STATUS_PAARSNP_RESULT = 'PAARSNP_RESULT',
-            STATUS_FP_COMP = 'FP_COMP';
+            STATUS_FP_COMP = 'FP_COMP',
+            STATUS_COLLECTION_TREE = 'COLLECTION_TREE';
 
         if (statusName === STATUS_UPLOAD_OK) {
             assemblyRow.find('.assembly-upload-uploaded').html(statusCompleteHtml);
@@ -2303,18 +2403,31 @@ $(function(){
             assemblyRow.find('.progress-bar').addClass('progress-bar-success');
 
             var assemblyName = assemblyRow.find('.assembly-upload-name').text();
-            assemblyRow.find('.assembly-upload-name').html('<a href="#" class="open-assembly-button" data-assembly-id="' + assemblyId + '">' + assemblyName + '</a>');
+            assemblyRow.find('.assembly-upload-name').html('<a href="#" class="open-assembly-button" data-assembly-id="' + assemblyId + '">' + assemblyName + '</a>');            
 
             // Update total number of processed assemblies
             $('.assemblies-upload-processed').text(parseInt($('.assemblies-upload-processed').text(), 10) + 1);
         } // if
 
+
+
         // Update overall progress bar
         var currentProgressValue = parseFloat($('.assemblies-upload-progress').find('.progress-bar').attr('aria-valuenow')),
             totalNumberOfAssemblies = parseInt($('.assemblies-upload-total').text(), 10),
             numberOfResultsPerAssembly = 4,
-            progressStepSize = 100 / (totalNumberOfAssemblies * numberOfResultsPerAssembly),
-            updatedProgressValue = currentProgressValue + progressStepSize;
+            progressStepSize = 0;
+        
+        // Collection tree will take 10% of overall progress
+        if (statusName === STATUS_COLLECTION_TREE) {
+            progressStepSize = 10;
+
+            console.debug('============> COLLECTION_TREE!!!');
+
+        } else {
+            progressStepSize = 90 / (totalNumberOfAssemblies * numberOfResultsPerAssembly);
+        }
+
+        var updatedProgressValue = currentProgressValue + progressStepSize;
 
         // console.debug('currentProgressValue: ' + currentProgressValue);
         // console.debug('totalNumberOfAssemblies: ' + totalNumberOfAssemblies);
@@ -2334,10 +2447,24 @@ $(function(){
         console.log('[WGST][Socket.io] Received assembly upload notification:');
         console.log(data);
 
+        var collectionId = data.collectionId,
+            assemblyId = data.assemblyId,
+            userAssemblyId = data.userAssemblyId,
+            result = data.result;
+
+        if (result === 'COLLECTION_TREE' && typeof WGST.upload[collectionId].tree !== 'undefined') {
+            return;
+        }
+
+        if (result === 'COLLECTION_TREE') {
+            console.debug('COLLECTION_TREE ready!');
+            WGST.upload[collectionId].tree = 'OK'; 
+        }
+
         // ------------------------------------------
         // Update view
         // ------------------------------------------
-        updateAssemblyUploadProgress(data.userAssemblyId, data.assemblyId, data.result);
+        updateAssemblyUploadProgress(userAssemblyId, assemblyId, result);
 
         //WGST.assemblyUploadProgress[data.collectionId][data.assemblyId].results.push(data.result);
         WGST.assemblyUploadProgress.results.push(data.collectionId + '__' + data.assemblyId + '__' + data.result);
@@ -2348,9 +2475,18 @@ $(function(){
         console.log('(assemblies.length * WGST.assemblyAnalysis.length): ' + (assemblies.length * WGST.assemblyAnalysis.length));
 
         if ((assemblies.length * WGST.assemblyAnalysis.length) === WGST.assemblyUploadProgress.results.length) {
-            setTimeout(getCollection(data.collectionId), 2000);
+
+            //-----------------------------------------
+            // Get collection tree
+            //-----------------------------------------
+
+            console.debug('Ready to get collection!');
+
+            setTimeout(function(){ getCollection(data.collectionId); }, 1000);
             //getCollection(data.collectionId);
-        }
+
+        } // if
+
     });
 
     var endAssemblyUploadProgressBar = function(collectionId) {
@@ -2546,10 +2682,10 @@ $(function(){
                               + '</div>'
                             + '</div>'
                         + '</td>'
-                        + '<td class="assembly-upload-result assembly-upload-uploaded"></td>'
-                        + '<td class="assembly-upload-result assembly-upload-result-mlst"></td>'
-                        + '<td class="assembly-upload-result assembly-upload-result-fp-comp"></td>'
-                        + '<td class="assembly-upload-result assembly-upload-result-paarsnp"></td>'
+                        + '<td class="assembly-upload-result assembly-upload-uploaded"><span class="glyphicon glyphicon-record"></span></td>'
+                        + '<td class="assembly-upload-result assembly-upload-result-mlst"><span class="glyphicon glyphicon-record"></span></td>'
+                        + '<td class="assembly-upload-result assembly-upload-result-fp-comp"><span class="glyphicon glyphicon-record"></span></td>'
+                        + '<td class="assembly-upload-result assembly-upload-result-paarsnp"><span class="glyphicon glyphicon-record"></span></td>'
                     + '</tr>';
 
                 $('.assembly-list-upload-progress tbody').append(assemblyUploadProgressHtml);
@@ -2576,6 +2712,9 @@ $(function(){
 
                     var collectionIdResponse = JSON.parse(data),
                         collectionId = collectionIdResponse.uuid;
+
+                    // Store upload status for this collection id
+                    WGST.upload[collectionId] = {};
 
                     console.log('[WGST] Collection id: ' + collectionId);
                     console.log('[WGST] Collection response: ');
@@ -3013,6 +3152,23 @@ $(function(){
 
         e.preventDefault();
     };
+
+    // ============================================================
+    // Panel control buttons
+    // ============================================================
+
+    $('body').on('click', '.wgst-panel-control-button__close', function(){
+
+        // Check if panel control button is active
+        if ($(this).hasClass('wgst-panel-control-button--active')) {
+
+            var panel = $(this).closest('.wgst-panel');
+
+            closePanel(panel.attr('data-panel-name'));
+
+        } // if
+    });
+
 });
 
 // TO DO:

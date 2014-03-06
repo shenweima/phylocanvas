@@ -86,7 +86,11 @@ exports.add = function(req, res) {
 };
 
 exports.get = function(req, res) {
-	console.log('[WGST] Getting collection with collection id: ' + req.body.collectionId);
+
+	var collectionId = req.body.collectionId,
+		collection = {};
+
+	console.log('[WGST] Getting collection ' + collectionId);
 
 	// Get requested collection from db
 	var couchbase = require('couchbase');
@@ -96,15 +100,42 @@ exports.get = function(req, res) {
 		password: '.oneir66'
 	}, function(err) {
 		if (err) throw err;
-		db.get('COLLECTION_LIST_' + req.body.collectionId, function(err, results) {
+
+		db.get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
 			if (err) throw err;
 
-			console.log('[WGST] Returning collection with assembly ids');
-			console.log(results);
+			var assemblyIds = assemblyIdsData.value;
+
+			console.log('[WGST] Returning collection ' + collectionId + ' with assembly ids:');
+			console.log(assemblyIds);
 
 			// Return result data
-			res.json(results.value);
+			//res.json(results.value);
+
+			collection.assemblyIds = assemblyIds;
+
+			// Get collection tree
+			db.get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+
+				console.log('COLLECTION_TREE_' + collectionId);
+
+				if (err) throw err;
+
+				var collectionTree = collectionTreeData.value;
+
+				console.log('[WGST] Returning collection tree for collection id ' + collectionId + ':');
+				console.log(collectionTree);
+
+				collection.tree = collectionTree;
+
+				// Return result data
+				//res.json(results.value);
+				res.json(collection);
+			});		
+
+
 		});
+
 	});
 
 	//res.json({});

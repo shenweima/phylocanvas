@@ -102,7 +102,8 @@ exports.add = function(req, res) {
 
 						var readyResults = [];
 
-						queue.bind(exchange, "*.ASSEMBLY." + assemblyId);
+						queue.bind(exchange, "*.ASSEMBLY." + assemblyId); // binding routing key
+						queue.bind(exchange, "COLLECTION_TREE.COLLECTION." + collectionId);
 
 						// Subscribe to response message
 						queue.subscribe(function(message, headers, deliveryInfo){
@@ -154,12 +155,24 @@ exports.add = function(req, res) {
 
 								readyResults.push('PAARSNP_RESULT');
 
+							} else if (parsedMessage.taskType === 'COLLECTION_TREE') {
+								socket.emit("assemblyUploadNotification", {
+									collectionId: collectionId,
+									assemblyId: messageAssemblyId,
+									userAssemblyId: messageUserAssemblyId,
+									status: "COLLECTION_TREE ready",
+									result: "COLLECTION_TREE"
+								});
+
+								readyResults.push('COLLECTION_TREE');
+
 							} // else if
+
 
 							console.log('[LOGGING][IMPORTANT] readyResults.length: ' + readyResults.length);
 
 							// Destroy queue after all results were received
-							if (readyResults.length === 3) {
+							if (readyResults.length === 4) {
 								//queue.destroy();
 								//notificationExchange.destroy();
 								notificationConnection.end();
