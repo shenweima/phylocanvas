@@ -537,15 +537,15 @@ $(function(){
 
     var renderCollectionTree = function(newickTreeData) {
 
-        var newickTreeData = newickTreeData.replace('[', '');
-        newickTreeData = newickTreeData.replace(']', '');                
+        //var newickTreeData = newickTreeData.replace('[', '');
+        //newickTreeData = newickTreeData.replace(']', '');                
 
         console.log('[WGST] Rendering collection tree:');
         console.log(newickTreeData);
 
-        // ==============================
-        // Load representative tree
-        // ==============================
+
+
+
 
         // Init tree
         window.WGST.collection.tree.parseNwk(newickTreeData);
@@ -2097,7 +2097,10 @@ $(function(){
             console.log(data);
 
             var collectionAssemblyIdentifiers = data.assemblyIds.assemblyIdentifiers,
-                collectionTree = data.tree.newickTree;
+                collectionTree = data.tree.newickTree,
+                assemblyIdsMap = data.idMap;
+
+            console.log(assemblyIdsMap);
 
             console.log('[WGST] Collection ' + collectionId + ' has ' + collectionAssemblyIdentifiers.length + ' assembly ids');
             console.log('[WGST] Requesting assemblies with ids: ' + collectionAssemblyIdentifiers);
@@ -2156,6 +2159,11 @@ $(function(){
                         console.log(data[assemblyId]);
                         //console.log('Top score: ' + getAssemblyTopScore(data[assemblyId].value.scores));
                        
+                        // -------------------------------------------------------
+                        // Replace internal assembly id with user assembly id in collection tree newick string
+                        // -------------------------------------------------------
+                        collectionTree.replace(assemblyId, data[assemblyId]['ASSEMBLY_METADATA'].assemblyUserId);
+
                         // Get top score for this assembly
                         assemblyTopScore = getAssemblyTopScore(data[assemblyId]['FP_COMP'].scores);
 
@@ -2299,9 +2307,14 @@ $(function(){
 
                     openPanel(['collection', 'collectionTree'], function(){
                         bringPanelToTop('collectionTree');
+        
+                        // -------------------------------------------------------
+                        // Replace internal assembly id with user assembly id
+                        // -------------------------------------------------------
 
-                    window.WGST.collection.tree = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
-                    renderCollectionTree(collectionTree);
+
+                        window.WGST.collection.tree = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+                        renderCollectionTree(collectionTree);
 
                     });
 
@@ -2380,36 +2393,47 @@ $(function(){
             assemblyRow.find('.assembly-upload-result-fp-comp').html(statusCompleteHtml);
         }
 
-        //console.log('aria-valuenow: ' + assemblyRow.find('.progress-bar').attr('aria-valuenow'));
-        //console.log('css width: ' + assemblyRow.find('.progress-bar').css('width'));
+        // ------------------------------------------
+        // Update individual assembly progress
+        // ------------------------------------------
 
-        var ariaValueNowAttr = parseInt(assemblyRow.find('.progress-bar').attr('aria-valuenow'), 10);
+        // Refactor later!
+        if (statusName !== STATUS_COLLECTION_TREE) {
 
-        // Update assembly upload progress bar value
-        assemblyRow.find('.progress-bar')
-                        .css('width', (ariaValueNowAttr + 25) + '%')
-                        .attr('aria-valuenow', (ariaValueNowAttr + 25));
+            //console.log('aria-valuenow: ' + assemblyRow.find('.progress-bar').attr('aria-valuenow'));
+            //console.log('css width: ' + assemblyRow.find('.progress-bar').css('width'));
 
-        // If assembly processing has started then show percentage value
-        if (assemblyRow.find('.progress-bar').attr('aria-valuenow') > 0) {
-            assemblyRow.find('.progress-bar').text(assemblyRow.find('.progress-bar').attr('aria-valuenow') + '%');
-        }
+            var ariaValueNowAttr = parseInt(assemblyRow.find('.progress-bar').attr('aria-valuenow'), 10);
 
-        // When progress bar reached 100%...
-        if (assemblyRow.find('.progress-bar').attr('aria-valuenow') === '100') {
-            // Remove stripes from progress bar
-            assemblyRow.find('.progress').removeClass('active').removeClass('progress-striped');
-            // Change progress bar color to green
-            assemblyRow.find('.progress-bar').addClass('progress-bar-success');
+            // Update assembly upload progress bar value
+            assemblyRow.find('.progress-bar')
+                            .css('width', (ariaValueNowAttr + 25) + '%')
+                            .attr('aria-valuenow', (ariaValueNowAttr + 25));
 
-            var assemblyName = assemblyRow.find('.assembly-upload-name').text();
-            assemblyRow.find('.assembly-upload-name').html('<a href="#" class="open-assembly-button" data-assembly-id="' + assemblyId + '">' + assemblyName + '</a>');            
+            // If assembly processing has started then show percentage value
+            if (assemblyRow.find('.progress-bar').attr('aria-valuenow') > 0) {
+                assemblyRow.find('.progress-bar').text(assemblyRow.find('.progress-bar').attr('aria-valuenow') + '%');
+            }
 
-            // Update total number of processed assemblies
-            $('.assemblies-upload-processed').text(parseInt($('.assemblies-upload-processed').text(), 10) + 1);
+            // When progress bar reached 100%...
+            if (assemblyRow.find('.progress-bar').attr('aria-valuenow') === '100') {
+                // Remove stripes from progress bar
+                assemblyRow.find('.progress').removeClass('active').removeClass('progress-striped');
+                // Change progress bar color to green
+                assemblyRow.find('.progress-bar').addClass('progress-bar-success');
+
+                var assemblyName = assemblyRow.find('.assembly-upload-name').text();
+                assemblyRow.find('.assembly-upload-name').html('<a href="#" class="open-assembly-button" data-assembly-id="' + assemblyId + '">' + assemblyName + '</a>');            
+
+                // Update total number of processed assemblies
+                $('.assemblies-upload-processed').text(parseInt($('.assemblies-upload-processed').text(), 10) + 1);
+            } // if
+        
         } // if
 
-
+        // ------------------------------------------
+        // Update collection progress
+        // ------------------------------------------
 
         // Update overall progress bar
         var currentProgressValue = parseFloat($('.assemblies-upload-progress').find('.progress-bar').attr('aria-valuenow')),
