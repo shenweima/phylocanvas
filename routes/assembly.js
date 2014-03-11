@@ -32,10 +32,44 @@ var rabbitMQConnectionOptions = {
 		autoDelete: true
 	};
 
+var uuid = require('node-uuid'),
+		amqp = require('amqp');
+
+// Create RabbitMQ connection
+var notificationConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
+
+
+notificationConnection.on('error', function(error) {
+    console.error("[WGST][ERROR] Notification connection: " + error);
+});
+
+var notificationExchange = undefined;
+
+notificationConnection.on("ready", function(){
+	console.log('[WGST] Notification connection is ready');
+
+	notificationConnection.exchange('notifications-ex',
+		{
+			type: 'topic',
+			passive: true,
+			durable: false,
+			confirm: false,
+			autoDelete: false,
+			noDeclare: false,
+			confirm: false
+		}, function(readyNotificationExchange) {
+
+			notificationExchange = readyNotificationExchange;
+
+			console.log('[WGST] Notification exchange "' + notificationExchange.name + '" is open');
+		});
+
+});
+
 exports.add = function(req, res) {
 
-	var uuid = require('node-uuid'),
-		amqp = require('amqp'),
+	var /*uuid = require('node-uuid'),
+		amqp = require('amqp'),*/
 		collectionId = req.body.collectionId;
 
 	// TO DO: Validate request
@@ -71,27 +105,28 @@ exports.add = function(req, res) {
 	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId; //uuid.v4();
 
 	// Create RabbitMQ connection
-	var notificationConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
+	//var notificationConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
-	notificationConnection.on('error', function(error) {
-	    console.error("[WGST][ERROR] Notification connection: " + error);
-	});
+	// notificationConnection.on('error', function(error) {
+	//     console.error("[WGST][ERROR] Notification connection: " + error);
+	// });
 
-	notificationConnection.on("ready", function(){
-		console.log('[WGST] Notification connection is ready');
+	// notificationConnection.on("ready", function(){
+	// 	console.log('[WGST] Notification connection is ready');
 
 		// Create exchange
-		var notificationExchange = notificationConnection.exchange('notifications-ex',
-			{
-				type: 'topic',
-				passive: true,
-				durable: false,
-				confirm: false,
-				autoDelete: false,
-				noDeclare: false,
-				confirm: false
-			}, function(exchange) {
-				console.log('[WGST] Notification exchange "' + exchange.name + '" is open');
+		//var notificationExchange = notificationConnection.exchange('notifications-ex',
+		// notificationConnection.exchange('notifications-ex',
+		// 	{
+		// 		type: 'topic',
+		// 		passive: true,
+		// 		durable: false,
+		// 		confirm: false,
+		// 		autoDelete: false,
+		// 		noDeclare: false,
+		// 		confirm: false
+		// 	}, function(notificationExchange) {
+		// 		console.log('[WGST] Notification exchange "' + exchange.name + '" is open');
 
 				// Create queue
 				var notificationQueue = notificationConnection.queue(notificationQueueId, 
@@ -102,8 +137,8 @@ exports.add = function(req, res) {
 
 						var readyResults = [];
 
-						queue.bind(exchange, "*.ASSEMBLY." + assemblyId); // binding routing key
-						queue.bind(exchange, "COLLECTION_TREE.COLLECTION." + collectionId);
+						queue.bind(notificationExchange, "*.ASSEMBLY." + assemblyId); // binding routing key
+						queue.bind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
 
 						// Subscribe to response message
 						queue.subscribe(function(message, headers, deliveryInfo){
@@ -173,6 +208,9 @@ exports.add = function(req, res) {
 
 							// Destroy queue after all results were received
 							if (readyResults.length === 4) {
+
+								queue.unbind(notificationExchange, "*.ASSEMBLY." + assemblyId);
+								queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
 								//queue.destroy();
 								//notificationExchange.destroy();
 								notificationConnection.end();
@@ -191,6 +229,67 @@ exports.add = function(req, res) {
 
 						uploadConnection.on("ready", function(){
 							console.log('[WGST] Upload connection is ready');
+
+
+
+
+
+
+
+									// -------------------------------------
+									// CouchBase Insert Metadata
+									// -------------------------------------
+
+									console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+									console.log(req.body);
+									console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+
+
+									// Insert assembly metadata into db
+									var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
+										metadata = {
+											assemblyId: assemblyId,
+											assemblyUserId: req.body.name,
+											geographicLocation: {
+												type: 'Point',
+												coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
+											}
+										};
+
+										console.log('[WGST] Coordinates: ' + req.body.metadata.location.latitude + ', ' + req.body.metadata.location.longitude);
+
+									var couchbase = require('couchbase');
+									var db = new couchbase.Connection({
+										host: 'http://129.31.26.151:8091/pools',
+										bucket: 'test_wgst',
+										password: '.oneir66'
+									}, function(error) {
+										if (error) {
+											console.error('[WGST][ERROR] ' + error);
+											return;
+										}
+
+										console.log('[WGST] Inserting metadata with key: ' + metadataKey);
+
+										db.set(metadataKey, metadata, function(err, result) {
+											if (err) {
+												console.error('[WGST][ERROR] ' + err);
+												return;
+											}
+
+											console.log('[WGST] Inserted metadata:');
+											console.log(result);
+										});
+									});
+
+
+
+
+
+
+
+
+
 
 							var uploadQueueId = 'ART_ASSEMBLY_UPLOAD_' + assemblyId; //+ uuid.v4();
 
@@ -233,12 +332,30 @@ exports.add = function(req, res) {
 									return; // return undefined?
 								}
 
+								console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 								console.log('[WGST] Message was published to upload exchange');
+								console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 
 								// Return result data
 /*								res.json({
 									assemblyId: assemblyId
 								});*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 							});
 
@@ -269,46 +386,46 @@ exports.add = function(req, res) {
 									//uploadExchange.destroy();
 									uploadConnection.end();
 
-									// -------------------------------------
-									// CouchBase Insert Metadata
-									// -------------------------------------
+									// // -------------------------------------
+									// // CouchBase Insert Metadata
+									// // -------------------------------------
 
-									// Insert assembly metadata into db
-									var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
-										metadata = {
-											assemblyId: parsedMessage.assemblyId,
-											assemblyUserId: assembly['userAssemblyId'],
-											geographicLocation: {
-												type: 'Point',
-												coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
-											}
-										};
+									// // Insert assembly metadata into db
+									// var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
+									// 	metadata = {
+									// 		assemblyId: parsedMessage.assemblyId,
+									// 		assemblyUserId: assembly['userAssemblyId'],
+									// 		geographicLocation: {
+									// 			type: 'Point',
+									// 			coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
+									// 		}
+									// 	};
 
-										console.log('[WGST] Coordinates: ' + req.body.metadata.location.latitude + ', ' + req.body.metadata.location.longitude);
+									// 	console.log('[WGST] Coordinates: ' + req.body.metadata.location.latitude + ', ' + req.body.metadata.location.longitude);
 
-									var couchbase = require('couchbase');
-									var db = new couchbase.Connection({
-										host: 'http://129.31.26.151:8091/pools',
-										bucket: 'test_wgst',
-										password: '.oneir66'
-									}, function(err) {
-										if (err) {
-											console.error('[WGST][ERROR] ' + error);
-											return;
-										}
+									// var couchbase = require('couchbase');
+									// var db = new couchbase.Connection({
+									// 	host: 'http://129.31.26.151:8091/pools',
+									// 	bucket: 'test_wgst',
+									// 	password: '.oneir66'
+									// }, function(error) {
+									// 	if (error) {
+									// 		console.error('[WGST][ERROR] ' + error);
+									// 		return;
+									// 	}
 
-										console.log('[WGST] Inserting metadata with key: ' + metadataKey);
+									// 	console.log('[WGST] Inserting metadata with key: ' + metadataKey);
 
-										db.set(metadataKey, metadata, function(err, result) {
-											if (err) {
-												console.error('[WGST][ERROR] ' + err);
-												return;
-											}
+									// 	db.set(metadataKey, metadata, function(err, result) {
+									// 		if (err) {
+									// 			console.error('[WGST][ERROR] ' + err);
+									// 			return;
+									// 		}
 
-											console.log('[WGST] Inserted metadata:');
-											console.log(result);
-										});
-									});
+									// 		console.log('[WGST] Inserted metadata:');
+									// 		console.log(result);
+									// 	});
+									// });
 
 									// Return result data
 									//res.json(parsedMessage);
@@ -316,8 +433,8 @@ exports.add = function(req, res) {
 								});
 						});
 					});
-			});
-	});
+			//});
+	//});
 };
 
 // Return fingerprint data
