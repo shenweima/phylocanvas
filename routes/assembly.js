@@ -1,28 +1,3 @@
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
-if ( !Date.prototype.toISOString ) {
-  ( function() {
-    
-    function pad(number) {
-      if ( number < 10 ) {
-        return '0' + number;
-      }
-      return number;
-    }
- 
-    Date.prototype.toISOString = function() {
-      return this.getUTCFullYear() +
-        '-' + pad( this.getUTCMonth() + 1 ) +
-        '-' + pad( this.getUTCDate() ) +
-        'T' + pad( this.getUTCHours() ) +
-        ':' + pad( this.getUTCMinutes() ) +
-        ':' + pad( this.getUTCSeconds() ) +
-        '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice( 2, 5 ) +
-        'Z';
-    };
-  
-  }() );
-}
-
 var rabbitMQConnectionOptions = {
 		host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
 		port: 5672
@@ -32,8 +7,7 @@ var rabbitMQConnectionOptions = {
 		autoDelete: true
 	};
 
-var //uuid = require('node-uuid'),
-		amqp = require('amqp');
+var amqp = require('amqp');
 
 // Create RabbitMQ connection
 var notificationConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
@@ -65,89 +39,44 @@ notificationConnection.on("ready", function(){
 
 });
 
-		var couchbase = require('couchbase');
-		var db = new couchbase.Connection({
-			host: 'http://129.31.26.151:8091/pools',
-			bucket: 'test_wgst',
-			password: '.oneir66'
-		}, function(error) {
-			if (error) {
-				console.error('[WGST][ERROR] ' + error);
-				return;
-			}
+var couchbase = require('couchbase');
+var db = new couchbase.Connection({
+	host: 'http://129.31.26.151:8091/pools',
+	bucket: 'test_wgst',
+	password: '.oneir66'
+}, function(error) {
+	if (error) {
+		console.error('[WGST][ERROR] ' + error);
+		return;
+	}
 
-			console.log('[WGST][Couchbase] Successfuly opened Couchbase connection');
-		});
+	console.log('[WGST][Couchbase] Successfuly opened Couchbase connection');
+});
 
 exports.add = function(req, res) {
+	console.log('[WGST] Added assembly to collection');
 
-	var /*uuid = require('node-uuid'),
-		amqp = require('amqp'),*/
-		collectionId = req.body.collectionId,
+	var collectionId = req.body.collectionId,
 		socketRoomId = req.body.socketRoomId,
 		userAssemblyId = req.body.name,
 		assemblyId = req.body.assemblyId;
 
 	// TO DO: Validate request
 
-	// Generate assembly id first and then listen to Notification queue
-	//var assemblyId = uuid.v4();
-
-	//console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
-	//console.log('Generated assembly id: ' + assemblyId);
-	//console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
-
-	// Return result data
+	// Send response
 	res.json({
 		assemblyId: assemblyId
 	});
 
-	// socket.emit("assemblyUploadNotification", {
-	// 	collectionId: collectionId,
-	// 	assemblyId: assemblyId,
-	// 	status: "Uploaded",
-	// 	result: "UPLOAD_OK"
-	// });
-
 	// -------------------------------------
 	// RabbitMQ Notifications
 	// -------------------------------------
-
 	var uploadQueue,
 		uploadExchange,
 		uploadConnection;
 
 	// Generate queue id
-	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId; //uuid.v4();
-
-
-
-	console.log('******** req.body 1 **********');
-	console.dir(req.body.metadata);
-
-	// Create RabbitMQ connection
-	//var notificationConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
-
-	// notificationConnection.on('error', function(error) {
-	//     console.error("[WGST][ERROR] Notification connection: " + error);
-	// });
-
-	// notificationConnection.on("ready", function(){
-	// 	console.log('[WGST] Notification connection is ready');
-
-		// Create exchange
-		//var notificationExchange = notificationConnection.exchange('notifications-ex',
-		// notificationConnection.exchange('notifications-ex',
-		// 	{
-		// 		type: 'topic',
-		// 		passive: true,
-		// 		durable: false,
-		// 		confirm: false,
-		// 		autoDelete: false,
-		// 		noDeclare: false,
-		// 		confirm: false
-		// 	}, function(notificationExchange) {
-		// 		console.log('[WGST] Notification exchange "' + exchange.name + '" is open');
+	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId;
 
 				// Create queue
 				var notificationQueue = notificationConnection.queue(notificationQueueId, 
@@ -168,8 +97,6 @@ exports.add = function(req, res) {
 							var buffer = new Buffer(message.data),
 								bufferJSON = buffer.toString(),
 								parsedMessage = JSON.parse(bufferJSON);
-
-							console.log(parsedMessage);
 
 							var messageAssemblyId = parsedMessage.assemblyId,
 								messageUserAssemblyId = parsedMessage.userAssemblyId;
@@ -260,12 +187,6 @@ exports.add = function(req, res) {
 							console.log('[WGST] Upload connection is ready');
 
 
-
-
-
-	//console.log('******** req.body 2 **********');
-	//console.dir(req.body.metadata);
-
 									// -------------------------------------
 									// CouchBase Insert Metadata
 									// -------------------------------------
@@ -334,7 +255,6 @@ exports.add = function(req, res) {
 									console.log('[WGST] Upload exchange "' + exchange.name + '" is open');
 								});
 
-							//console.log('[WGST] Assembly file content: ' + req.body.assembly.substr(0, 50) + '...');
 							console.log('[WGST] User assembly id: ' + req.body.name);
 							console.log('[WGST] Collection id: ' + collectionId);
 
@@ -357,47 +277,11 @@ exports.add = function(req, res) {
 								replyTo: uploadQueueId
 							}, function(err){
 								if (err) {
-									console.log('[WGST][ERROR] Error when trying to publish to upload exchange');
-									return; // return undefined?
+									console.error('[WGST][ERROR] Error when trying to publish to upload exchange');
+									return;
 								}
 
-								console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 								console.log('[WGST] Message was published to upload exchange');
-								console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-
-								// Return result data
-/*								res.json({
-									assemblyId: assemblyId
-								});*/
-
-
-
-
-/*	io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
-		collectionId: collectionId,
-		assemblyId: messageAssemblyId,
-		userAssemblyId: messageUserAssemblyId,
-		status: "MLST_RESULT ready",
-		result: "MLST_RESULT",
-		socketRoomId: socketRoomId
-
-		collectionId: collectionId,
-		assemblyId: assemblyId,
-		status: "Uploaded",
-		result: "UPLOAD_OK"
-	});*/
-
-
-
-
-
-
-
-
-
-
-
-
 							});
 
 							uploadQueue = uploadConnection
@@ -426,56 +310,9 @@ exports.add = function(req, res) {
 									//uploadQueue.destroy();
 									//uploadExchange.destroy();
 									uploadConnection.end();
-
-									// // -------------------------------------
-									// // CouchBase Insert Metadata
-									// // -------------------------------------
-
-									// // Insert assembly metadata into db
-									// var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
-									// 	metadata = {
-									// 		assemblyId: parsedMessage.assemblyId,
-									// 		assemblyUserId: assembly['userAssemblyId'],
-									// 		geographicLocation: {
-									// 			type: 'Point',
-									// 			coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
-									// 		}
-									// 	};
-
-									// 	console.log('[WGST] Coordinates: ' + req.body.metadata.location.latitude + ', ' + req.body.metadata.location.longitude);
-
-									// var couchbase = require('couchbase');
-									// var db = new couchbase.Connection({
-									// 	host: 'http://129.31.26.151:8091/pools',
-									// 	bucket: 'test_wgst',
-									// 	password: '.oneir66'
-									// }, function(error) {
-									// 	if (error) {
-									// 		console.error('[WGST][ERROR] ' + error);
-									// 		return;
-									// 	}
-
-									// 	console.log('[WGST] Inserting metadata with key: ' + metadataKey);
-
-									// 	db.set(metadataKey, metadata, function(err, result) {
-									// 		if (err) {
-									// 			console.error('[WGST][ERROR] ' + err);
-									// 			return;
-									// 		}
-
-									// 		console.log('[WGST] Inserted metadata:');
-									// 		console.log(result);
-									// 	});
-									// });
-
-									// Return result data
-									//res.json(parsedMessage);
-
 								});
 						});
 					});
-			//});
-	//});
 };
 
 // Return fingerprint data
