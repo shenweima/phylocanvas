@@ -32,12 +32,11 @@ var rabbitMQConnectionOptions = {
 		autoDelete: true
 	};
 
-var uuid = require('node-uuid'),
+var //uuid = require('node-uuid'),
 		amqp = require('amqp');
 
 // Create RabbitMQ connection
 var notificationConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
-
 
 notificationConnection.on('error', function(error) {
     console.error("[WGST][ERROR] Notification connection: " + error);
@@ -66,20 +65,37 @@ notificationConnection.on("ready", function(){
 
 });
 
+		var couchbase = require('couchbase');
+		var db = new couchbase.Connection({
+			host: 'http://129.31.26.151:8091/pools',
+			bucket: 'test_wgst',
+			password: '.oneir66'
+		}, function(error) {
+			if (error) {
+				console.error('[WGST][ERROR] ' + error);
+				return;
+			}
+
+			console.log('[WGST][Couchbase] Successfuly opened Couchbase connection');
+		});
+
 exports.add = function(req, res) {
 
 	var /*uuid = require('node-uuid'),
 		amqp = require('amqp'),*/
-		collectionId = req.body.collectionId;
+		collectionId = req.body.collectionId,
+		socketRoomId = req.body.socketRoomId,
+		userAssemblyId = req.body.name,
+		assemblyId = req.body.assemblyId;
 
 	// TO DO: Validate request
 
 	// Generate assembly id first and then listen to Notification queue
-	var assemblyId = uuid.v4();
+	//var assemblyId = uuid.v4();
 
-	console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
-	console.log('Generated assembly id: ' + assemblyId);
-	console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+	//console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+	//console.log('Generated assembly id: ' + assemblyId);
+	//console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
 
 	// Return result data
 	res.json({
@@ -103,6 +119,11 @@ exports.add = function(req, res) {
 
 	// Generate queue id
 	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId; //uuid.v4();
+
+
+
+	console.log('******** req.body 1 **********');
+	console.dir(req.body.metadata);
 
 	// Create RabbitMQ connection
 	//var notificationConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
@@ -158,45 +179,53 @@ exports.add = function(req, res) {
 
 							// Check task type
 							if (parsedMessage.taskType === 'FP_COMP') {
-								socket.emit("assemblyUploadNotification", {
+								console.log('[WGST] Emitting message for socketRoomId: ' + socketRoomId);
+								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
 									userAssemblyId: messageUserAssemblyId,
 									status: "FP_COMP ready",
-									result: "FP_COMP"
+									result: "FP_COMP",
+									socketRoomId: socketRoomId
 								});
 
 								readyResults.push('FP_COMP');
 
 							} else if (parsedMessage.taskType === 'MLST_RESULT') {
-								socket.emit("assemblyUploadNotification", {
+								console.log('[WGST] Emitting message for socketRoomId: ' + socketRoomId);
+								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
 									userAssemblyId: messageUserAssemblyId,
 									status: "MLST_RESULT ready",
-									result: "MLST_RESULT"
+									result: "MLST_RESULT",
+									socketRoomId: socketRoomId
 								});
 
 								readyResults.push('MLST_RESULT');
 
 							} else if (parsedMessage.taskType === 'PAARSNP_RESULT') {
-								socket.emit("assemblyUploadNotification", {
+								console.log('[WGST] Emitting message for socketRoomId: ' + socketRoomId);
+								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
 									userAssemblyId: messageUserAssemblyId,
 									status: "PAARSNP_RESULT ready",
-									result: "PAARSNP_RESULT"
+									result: "PAARSNP_RESULT",
+									socketRoomId: socketRoomId
 								});
 
 								readyResults.push('PAARSNP_RESULT');
 
 							} else if (parsedMessage.taskType === 'COLLECTION_TREE') {
-								socket.emit("assemblyUploadNotification", {
+								console.log('[WGST] Emitting message for socketRoomId: ' + socketRoomId);
+								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
 									userAssemblyId: messageUserAssemblyId,
 									status: "COLLECTION_TREE ready",
-									result: "COLLECTION_TREE"
+									result: "COLLECTION_TREE",
+									socketRoomId: socketRoomId
 								});
 
 								readyResults.push('COLLECTION_TREE');
@@ -213,7 +242,7 @@ exports.add = function(req, res) {
 								queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
 								//queue.destroy();
 								//notificationExchange.destroy();
-								notificationConnection.end();
+								//notificationConnection.end();
 							} // if
 						});
 
@@ -234,16 +263,16 @@ exports.add = function(req, res) {
 
 
 
-
+	//console.log('******** req.body 2 **********');
+	//console.dir(req.body.metadata);
 
 									// -------------------------------------
 									// CouchBase Insert Metadata
 									// -------------------------------------
 
-									console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-									console.log(req.body);
-									console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-
+									//console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+									//console.log(req.body);
+									//console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 
 									// Insert assembly metadata into db
 									var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
@@ -258,16 +287,16 @@ exports.add = function(req, res) {
 
 										console.log('[WGST] Coordinates: ' + req.body.metadata.location.latitude + ', ' + req.body.metadata.location.longitude);
 
-									var couchbase = require('couchbase');
-									var db = new couchbase.Connection({
-										host: 'http://129.31.26.151:8091/pools',
-										bucket: 'test_wgst',
-										password: '.oneir66'
-									}, function(error) {
-										if (error) {
-											console.error('[WGST][ERROR] ' + error);
-											return;
-										}
+									// var couchbase = require('couchbase');
+									// var db = new couchbase.Connection({
+									// 	host: 'http://129.31.26.151:8091/pools',
+									// 	bucket: 'test_wgst',
+									// 	password: '.oneir66'
+									// }, function(error) {
+									// 	if (error) {
+									// 		console.error('[WGST][ERROR] ' + error);
+									// 		return;
+									// 	}
 
 										console.log('[WGST] Inserting metadata with key: ' + metadataKey);
 
@@ -280,7 +309,7 @@ exports.add = function(req, res) {
 											console.log('[WGST] Inserted metadata:');
 											console.log(result);
 										});
-									});
+									// });
 
 
 
@@ -344,7 +373,19 @@ exports.add = function(req, res) {
 
 
 
+/*	io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+		collectionId: collectionId,
+		assemblyId: messageAssemblyId,
+		userAssemblyId: messageUserAssemblyId,
+		status: "MLST_RESULT ready",
+		result: "MLST_RESULT",
+		socketRoomId: socketRoomId
 
+		collectionId: collectionId,
+		assemblyId: assemblyId,
+		status: "Uploaded",
+		result: "UPLOAD_OK"
+	});*/
 
 
 

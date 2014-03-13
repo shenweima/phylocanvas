@@ -14,6 +14,7 @@ var express = require('express'),
 	passport = require('passport'),
 	LocalStrategy = require('passport-local').Strategy,
 	socketio = require('socket.io');
+	uuid = require('node-uuid');
 
 var app = express();
 
@@ -80,27 +81,48 @@ var server = http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
+//======================================================
 // Socket.io
-var socketio = require('socket.io'),
-	io = socketio.listen(server);
+//======================================================
+
+// Init
+var socketio = require('socket.io');
 
 // Global variable on purpose - will store socket connection and will be shared with routes
 socket = undefined;
+io = socketio.listen(server);
 
 io.sockets.on('connection', function (socketConnection) {
 	console.log('[WGST][Socket.io] Connnected');
 
-	socket = socketConnection;
+	//console.log('socketConnection.handshake:'); 
+	//console.log(socketConnection.handshake);
 
-	socketConnection.on('disconnect', function () {
+	//socketConnection.join(socketConnection.handshake.sessionID);
+
+	socketConnection.on('disconnect', function() {
 		console.log('[WGST][Socket.io] Disconnnected');
 	});
 
-	socketConnection.emit("pong", { hello: "world" });
+	socketConnection.on('getRoomId', function() {
+		console.log('[WGST][Socket.io] Received request for room id');
 
-	socketConnection.on('ping', function (data) {
-		console.log('[WGST][Socket.io] Received ping');
+		// Generate new room id
+		var roomId = uuid.v4();
 
-		socketConnection.emit("pong", { say: "It works!" });
+		// Join room
+		socketConnection.join(roomId);
+
+		console.log('[WGST][Socket.io] Emitting message with room id: ' + roomId);
+
+		// Let client know their room id
+		socketConnection.emit("roomId", roomId);
+
+		// setTimeout(function(){
+		// 	io.sockets.in(roomId).emit('test', 'Just for you! Proof: ' + uuid.v4());
+		// }, 10000);
+
 	});
+
+	socket = socketConnection;
 });

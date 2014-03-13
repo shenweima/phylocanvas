@@ -70,6 +70,10 @@ if (!Object.keys) {
   }());
 }
 
+// ============================================================
+// App
+// ============================================================
+
 $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
@@ -162,12 +166,10 @@ $(function(){
                 panelName = panelNames[panelNameCounter];
 
                 openPanel(panelName);
-
             } // for
 
         // Process single panel
         } else {
-
             openPanel(panelNames);
         }
 
@@ -201,7 +203,6 @@ $(function(){
                 panelName = panelNames[panelNameCounter];
 
                 closePanel(panelName);
-
             } // for
 
         // Process single panel
@@ -293,7 +294,8 @@ $(function(){
     // Init app
     // ============================================================    
 
-    var socket = io.connect('http://127.0.0.1');
+    var socket = io.connect('http://127.0.0.1'),
+        socketRoomId;
 
     // Init
     (function(){
@@ -381,9 +383,27 @@ $(function(){
         });
         
         // Ping server
-        socket.emit('ping', { my: 'data' });
+        //socket.emit('ping', { my: 'data' });
+
+
+
+        // Setup socket room
+
+        socket.on('roomId', function(roomId) {
+            console.log('[WGST][Socket.IO] Received room id: ' + roomId);
+
+            // Set room id for this client
+            socketRoomId = roomId;
+        });
+
+        // Socket get room id
+        socket.emit('getRoomId');
 
     })();
+
+    socket.on('test', function(data){
+        console.log('Received test message: ' + data);
+    });
 
     var loadRequestedAssembly = function(requestedAssembly) {
         console.log('[WGST] Loading requested assembly');
@@ -869,7 +889,8 @@ $(function(){
         // Store fasta file and metadata
         fastaFilesAndMetadata[file.name] = {
             // Cut FASTA file extension from the file name
-            name: file.name.substr(0, file.name.lastIndexOf('.')),
+            //name: file.name.substr(0, file.name.lastIndexOf('.')),
+            name: file.name,
             assembly: e.target.result,
             metadata: {}
         };
@@ -2162,16 +2183,7 @@ $(function(){
                         // -------------------------------------------------------
                         // Replace internal assembly id with user assembly id in collection tree newick string
                         // -------------------------------------------------------
-                        console.debug('Collection tree before:');
-                        console.debug(collectionTree);
-
-                        console.debug('assemblyId: ' + assemblyId);
-                        console.debug('assemblyUserId: ' + data[assemblyId]['ASSEMBLY_METADATA'].assemblyUserId);
-
                         collectionTree = collectionTree.replace(assemblyId, data[assemblyId]['ASSEMBLY_METADATA'].assemblyUserId);
-
-                        console.debug('Collection tree after:');
-                        console.debug(collectionTree);
 
                         // Get top score for this assembly
                         assemblyTopScore = getAssemblyTopScore(data[assemblyId]['FP_COMP'].scores);
@@ -2372,16 +2384,9 @@ $(function(){
     var updateAssemblyUploadProgress = function(userAssemblyId, assemblyId, statusName) {
 
         updateAssemblyUploadProgressCounter = updateAssemblyUploadProgressCounter + 1;
-        console.debug(updateAssemblyUploadProgressCounter);
 
         // Get user assembly id
-        var assemblyId = assemblyId.replace('.fa', '');
-
-        console.log('---------------------------------');
-        console.debug('assemblyId: ' + assemblyId);
-        console.debug('userAssemblyId: ' + userAssemblyId);
-        console.debug('statusName: ' + statusName);
-        console.log('---------------------------------');
+        //var assemblyId = assemblyId;//.replace('.fa', '');
 
         // ------------------------------------------
         // Create assembly row HTML
@@ -2457,27 +2462,16 @@ $(function(){
             numberOfResultsPerAssembly = 4,
             progressStepSize = 0;
 
-        console.debug("$('.assemblies-upload-progress').find('.progress-bar').attr('aria-valuenow'): " + $('.assemblies-upload-progress').find('.progress-bar').attr('aria-valuenow'));
-        console.debug('currentProgressValue: ' + currentProgressValue);
-        console.debug('totalNumberOfAssemblies: ' + totalNumberOfAssemblies);
-
         // Collection tree will take 10% of overall progress
         if (statusName === STATUS_COLLECTION_TREE) {
             progressStepSize = 10;
 
-            console.debug('============> COLLECTION_TREE!!!');
-
         } else {
-
-            console.debug('Step size: ' + (90 / (totalNumberOfAssemblies * numberOfResultsPerAssembly)));
 
             progressStepSize = 90 / (totalNumberOfAssemblies * numberOfResultsPerAssembly);
         }
 
         var updatedProgressValue = (currentProgressValue + progressStepSize).toFixed(2);
-
-        console.debug('progressStepSize: ' + progressStepSize);
-        console.debug('updatedProgressValue: ' + updatedProgressValue);
 
         // console.debug('currentProgressValue: ' + currentProgressValue);
         // console.debug('totalNumberOfAssemblies: ' + totalNumberOfAssemblies);
@@ -2502,14 +2496,14 @@ $(function(){
             userAssemblyId = data.userAssemblyId,
             result = data.result;
 
-        if (result === 'COLLECTION_TREE' && typeof WGST.upload[collectionId].tree !== 'undefined') {
-            return;
-        }
+        // if (result === 'COLLECTION_TREE' && typeof WGST.upload[collectionId].tree !== 'undefined') {
+        //     return;
+        // }
 
-        if (result === 'COLLECTION_TREE') {
-            console.debug('COLLECTION_TREE ready!');
-            WGST.upload[collectionId].tree = 'OK'; 
-        }
+        // if (result === 'COLLECTION_TREE') {
+        //     console.debug('COLLECTION_TREE ready!');
+        //     WGST.upload[collectionId].tree = 'OK'; 
+        // }
 
         // ------------------------------------------
         // Update view
@@ -2519,18 +2513,26 @@ $(function(){
         //WGST.assemblyUploadProgress[data.collectionId][data.assemblyId].results.push(data.result);
         WGST.assemblyUploadProgress.results.push(data.collectionId + '__' + data.assemblyId + '__' + data.result);
 
-        var assemblies = Object.keys(WGST.assemblyUploadProgress[data.collectionId]);
+        // console.log('#####################################');
+        // console.debug(WGST.assemblyUploadProgress);
+        // console.debug('Collection id: ' + data.collectionId);
+        // console.log('#####################################');
+
+        //var assemblies = Object.keys(WGST.assemblyUploadProgress[data.collectionId]);
+        var assemblies = Object.keys(fastaFilesAndMetadata);
+
+        console.log('assemblies:');
+        console.log(assemblies);
+
 
         console.log('WGST.assemblyUploadProgress.results.length: ' + WGST.assemblyUploadProgress.results.length);
         console.log('(assemblies.length * WGST.assemblyAnalysis.length): ' + (assemblies.length * WGST.assemblyAnalysis.length));
 
-        if ((assemblies.length * WGST.assemblyAnalysis.length) === WGST.assemblyUploadProgress.results.length) {
+        if ((assemblies.length * WGST.assemblyAnalysis.length + 1) === WGST.assemblyUploadProgress.results.length) {
 
             //-----------------------------------------
             // Get collection tree
             //-----------------------------------------
-
-            console.debug('Ready to get collection!');
 
             setTimeout(function(){
                 gotCollection = true;
@@ -2686,8 +2688,10 @@ $(function(){
         return function(data, textStatus, jqXHR) {
             console.log('[WGST] Successfully sent FASTA file object to the server and received response message:');
             console.log(data);
+            console.log(fastaFile);
 
-            updateAssemblyUploadProgress(fastaFile.replace('.fa', ''), data.assemblyId, 'UPLOAD_OK');
+            updateAssemblyUploadProgress(fastaFilesAndMetadata[fastaFile].name, data.assemblyId, 'UPLOAD_OK');
+            // AAA
 
             // AAA
 
@@ -2699,8 +2703,6 @@ $(function(){
             fastaFilesAndMetadata[fastaFile].uploaded = true;
 
             updateAssemblyUploadProgressBar(collectionId);
-
-            console.debug('///////// collectionId: ' + collectionId);
 
             WGST.assemblyUploadProgress[collectionId][data.assemblyId] = {
                 results: []
@@ -2715,17 +2717,13 @@ $(function(){
 
     var uploadAssembly = function(collectionId, userAssemblyId) {
 
-        console.debug('@@@@@@@@@@@@@@@@@@@@@@@>numberOfFilesProcessing: ' + numberOfFilesProcessing);
-
-        //var savedAssemblyUserId = assemblyUserId;
-
-        console.debug('Called uploadAssembly!');
-        console.debug('savedAssemblyUserId: ' + userAssemblyId);
-        console.debug('collectionId: ' + collectionId);
-
         if (numberOfFilesProcessing < 5) {
 
             numberOfFilesProcessing = numberOfFilesProcessing + 1;
+
+            // Set socket room id
+            fastaFilesAndMetadata[userAssemblyId].socketRoomId = socketRoomId;
+            fastaFilesAndMetadata[userAssemblyId].assemblyId = userAssemblyId;
 
             // Post assembly
             $.ajax({
@@ -2797,7 +2795,7 @@ $(function(){
                 // AAA
 
                 var assemblyUploadProgressHtml = 
-                    '<tr data-assembly-id="' + fastaFile.replace('.fa','') + '">'
+                    '<tr data-assembly-id="' + fastaFile + '">'
                         + '<td class="assembly-upload-name">' + fastaFile + '</td>'
                         + '<td class="assembly-upload-progress">'
                             + '<div class="progress progress-striped active">'
@@ -2831,15 +2829,17 @@ $(function(){
                     type: 'POST',
                     url: '/collection/add/',
                     datatype: 'json', // http://stackoverflow.com/a/9155217
-                    data: {}
+                    data: {
+                        userAssemblyIds: Object.keys(fastaFilesAndMetadata)
+                    }
                 })
                 .done(function(data, textStatus, jqXHR) {
 
                     //setTimeout(function(){
 
-
                         var collectionIdResponse = JSON.parse(data),
-                            collectionId = collectionIdResponse.uuid;
+                            collectionId = collectionIdResponse.uuid,
+                            generatedAssemblyIds = collectionIdResponse.idMap;
 
                         // setTimeout(function(){
                         //     if (! gotCollection) {
@@ -2850,14 +2850,25 @@ $(function(){
                         // Store upload status for this collection id
                         WGST.upload[collectionId] = {};
 
-                        console.log('[WGST] Collection id: ' + collectionId);
-                        console.log('[WGST] Collection response: ');
-                        console.log(collectionIdResponse);
-
                         // Store ids of assemblies you're uploading
                         WGST.assemblyUploadProgress[collectionId] = [];
 
                         var fastaFileCounter = 0;
+
+                        // Replace user assembly id (fasta file name) with assembly ids generated on server side
+
+                        var fastaFilesAndMetadataWithUpdatedIds = {};
+
+                        $.each(fastaFilesAndMetadata, function(key, value){
+                            console.log(key);
+                            var serverGenaratedAssemblyId = generatedAssemblyIds[key];
+                            console.log(serverGenaratedAssemblyId);
+
+                            fastaFilesAndMetadataWithUpdatedIds[serverGenaratedAssemblyId] = fastaFilesAndMetadata[key];
+
+                        });
+
+                        fastaFilesAndMetadata = fastaFilesAndMetadataWithUpdatedIds;
 
                         // Post each FASTA file separately
                         for (var fastaFile in fastaFilesAndMetadata) {
@@ -2870,11 +2881,6 @@ $(function(){
                                 (function(){
 
                                     var savedCollectionId = collectionId;
-
-                                    console.debug('===> fastaFile: ' + fastaFile);
-                                    console.debug('===> savedCollectionId: ' + savedCollectionId);
-
-                                    // AAA
 
             /*                        var assemblyUploadProgressHtml = 
                                         '<tr data-assembly-id="' + fastaFile.replace('.fa','') + '">'
@@ -2897,7 +2903,13 @@ $(function(){
                                     // Add collection id to each FASTA file object
                                     fastaFilesAndMetadata[fastaFile].collectionId = savedCollectionId;
 
-                                    var autocompleteInput = $('li[data-name="' + fastaFile + '"] .assembly-sample-location-input');
+                                    var autocompleteInput = $('li[data-name="' + fastaFilesAndMetadata[fastaFile].name + '"] .assembly-sample-location-input');
+
+                                    // Set server generated assembly id
+                                    //autocompleteInput.attr('data-assembly-id', fastaFile);
+
+                                    console.log('<<<<<>>>>>> Track:');
+                                    console.log('fastaFile: ' + fastaFile);
 
                                     // Add metadata to each FASTA file object
                                     fastaFilesAndMetadata[fastaFile].metadata = {
@@ -2912,8 +2924,6 @@ $(function(){
                                     console.log(fastaFilesAndMetadata[fastaFile].metadata);
 
                                     (function() {
-
-                                            console.debug('^^^^^^^^^^^^^^> ' + fastaFile);
 
                                             uploadAssembly(collectionId, fastaFile);
 

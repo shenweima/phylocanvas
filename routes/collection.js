@@ -1,8 +1,14 @@
+var getCollectionId = function() {
+	// Do something
+};
+
 exports.add = function(req, res) {
+	console.log("[WGST] Received request for collection id");
+	console.log('User assembly ids:');
+	console.log(req.body.userAssemblyIds);
 
-	console.error("[WGST] Received request for collection id");
-
-	var uuid = require('node-uuid');
+	var uuid = require('node-uuid'),
+		userAssemblyIds = req.body.userAssemblyIds;
 
 	// TODO: Validate request
 
@@ -18,7 +24,7 @@ exports.add = function(req, res) {
 		});
 
 	connection.on('error', function(error) {
-	    console.error("[WGST][ERROR] Ignoring error: " + error);
+	    console.error('[WGST][ERROR] Ignoring error: ' + error);
 	});
 
 	connection.on("ready", function(){
@@ -39,7 +45,8 @@ exports.add = function(req, res) {
 
 		// Prepare object to publish
 		var collectionRequest = {
-			taskId: "wgst"
+			taskId: 'new',
+			userAssemblyIds: userAssemblyIds
 		};
 
 		// Publish message
