@@ -498,6 +498,15 @@
                 // Store requested assembly
                 window.WGST.requestedAssembly = <%- requestedAssemblyObject %>;
               <% } %>
+
+              window.WGST.app = window.WGST.app || {};
+              window.WGST.app.config = undefined;
+
+              // If user requested individual assembly, e.g.: /assembly/FINGERPRINT_COMPARISON_154273030677208533352573798127987081488
+              <% if (typeof appConfig !== 'undefined') { %>
+                // Store requested assembly
+                window.WGST.app.config = <%- appConfig %>;
+              <% } %>
             })();
           });
         </script>

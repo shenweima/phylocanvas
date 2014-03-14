@@ -1,9 +1,23 @@
 require('longjohn');
 
-/**
- * Module dependencies.
- */
+//======================================================
+// Read config file
+//======================================================
+console.log('Reading app config file');
 
+var fs = require('fs'),
+	file = __dirname + '/config.json';
+
+var appConfigData = fs.readFileSync(file, 'utf8');
+
+// Global var on purpose
+appConfig = JSON.parse(appConfigData);
+
+console.dir(appConfig);
+
+//======================================================
+// Module dependencies.
+//======================================================
 var express = require('express'),
 	routes = require('./routes'),
 	user = require('./routes/user'),
@@ -19,7 +33,7 @@ var express = require('express'),
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 80);
+app.set('port', process.env.PORT || appConfig.server.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.favicon());
@@ -95,11 +109,6 @@ io = socketio.listen(server);
 io.sockets.on('connection', function (socketConnection) {
 	console.log('[WGST][Socket.io] Connnected');
 
-	//console.log('socketConnection.handshake:'); 
-	//console.log(socketConnection.handshake);
-
-	//socketConnection.join(socketConnection.handshake.sessionID);
-
 	socketConnection.on('disconnect', function() {
 		console.log('[WGST][Socket.io] Disconnnected');
 	});
@@ -117,11 +126,6 @@ io.sockets.on('connection', function (socketConnection) {
 
 		// Let client know their room id
 		socketConnection.emit("roomId", roomId);
-
-		// setTimeout(function(){
-		// 	io.sockets.in(roomId).emit('test', 'Just for you! Proof: ' + uuid.v4());
-		// }, 10000);
-
 	});
 
 	socket = socketConnection;

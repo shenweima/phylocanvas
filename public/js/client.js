@@ -247,8 +247,11 @@ $(function(){
     // ============================================================
     // Init app
     // ============================================================    
+    console.log('[WGST] Reading app config:');
+    console.dir(window.WGST.app.config);
 
-    var socket = io.connect('http://127.0.0.1'),
+    //var socket = io.connect('http://127.0.0.1'),
+    var socket = io.connect(window.WGST.app.config.socketAddress),
         socketRoomId;
 
     // Init
@@ -479,8 +482,8 @@ $(function(){
                 // Decrement counter
                 metadataCounter = metadataCounter - 1;
 
-                console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
-                console.log(metadata[metadataCounter]);
+                //console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
+                //console.log(metadata[metadataCounter]);
 
                 accession = metadata[metadataCounter].accession;
 
@@ -2493,7 +2496,7 @@ $(function(){
         ASSEMBLY_UPLOAD_TIMER = 8000;
 
     var uploadAssembly = function(collectionId, assemblyId) {
-        console.log('[WGST] Getting ready to upload ' + assemblyId + ' assembly');
+        console.log('[WGST] Uploading ' + assemblyId + ' assembly');
 
         // Upload assembly only if you are within parallel assembly upload limit
         if (numberOfFilesProcessing < PARALLEL_UPLOAD_ASSEMBLY_LIMIT) {

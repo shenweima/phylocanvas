@@ -730,7 +730,6 @@ exports.apiGetAssemblies = function(req, res) {
 
 // Return resistance profile
 exports.getResistanceProfile = function(req, res) {
-
 	getResistanceProfile(function(error, resistanceProfile){
 
 		if (error) throw error;
@@ -739,61 +738,6 @@ exports.getResistanceProfile = function(req, res) {
 			resistanceProfile: resistanceProfile
 		});
 	});
-
-	/*
-	console.log('[WGST] Getting resistance profile for assembly ids: ' + req.body.assemblyIds);
-
-	// Get requested assembly from db
-	var couchbase = require('couchbase');
-	var db = new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
-		bucket: 'test_wgst',
-		password: '.oneir66'
-	}, function(err) {
-		if (err) throw err;
-
-		// Prepend PAARSNP_RESULT_ to each assembly id
-		var resistanceProfileAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
-			return 'PAARSNP_RESULT_' + assemblyId;
-		});
-
-		console.log('[WGST] Querying keys: ');
-		console.log(resistanceProfileAssemblyIds);
-
-		db.getMulti(resistanceProfileAssemblyIds, {}, function(err, results) {
-			console.log('[WGST] Got resistance profile data: ');
-			console.log(results);
-
-			if (err) throw err;
-
-			var resistanceProfilesAndAntibiotics = {
-				antibiotics: '',
-				resistanceProfiles: results
-			};
-
-			var db2 = new couchbase.Connection({
-				host: 'http://129.31.26.151:8091/pools',
-				bucket: 'test_wgst_resources',
-				password: '.oneir66'
-			}, function(err) {
-				if (err) throw err;
-
-				// Get list of antibiotics
-				db2.get('ANTIMICROBIALS_ALL', function(err, result) {
-					console.log('[WGST] Got list of antibiotics: ');
-					console.log(result);
-
-					if (err) throw err;
-
-					resistanceProfilesAndAntibiotics.antibiotics = result.value;
-
-					res.json(resistanceProfilesAndAntibiotics);
-				});
-
-			});
-		});
-	});
-	*/
 };
 
 var getResistanceProfile = function(callback) {
@@ -858,28 +802,6 @@ var getResistanceProfile = function(callback) {
 
 // Return list of all antibiotics grouped by class name
 exports.getAllAntibiotics = function(req, res) {
-	/*
-	var couchbase = require('couchbase');
-	var db = new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
-		bucket: 'test_wgst_resources',
-		password: '.oneir66'
-	}, function(err) {
-		if (err) throw err;
-
-		// Get list of antibiotics
-		db.get('ANTIMICROBIALS_ALL', function(err, result) {
-			console.log('[WGST] Got list of all antibiotics: ');
-			console.log(result);
-
-			if (err) throw err;
-
-			res.json(result.value);
-		});
-
-	});
-	*/
-
 	getAllAntibiotics(function(error, antibiotics){
 		if (error) throw error;
 
