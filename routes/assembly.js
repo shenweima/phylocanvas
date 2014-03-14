@@ -68,6 +68,16 @@ exports.add = function(req, res) {
 		assemblyId: assemblyId
 	});
 
+	console.log('[WGST] Emitting UPLOAD_OK message for socketRoomId: ' + socketRoomId);
+	io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+		collectionId: collectionId,
+		assemblyId: assemblyId,
+		userAssemblyId: userAssemblyId,
+		status: "UPLOAD_OK ready",
+		result: "UPLOAD_OK",
+		socketRoomId: socketRoomId
+	});
+
 	// -------------------------------------
 	// RabbitMQ Notifications
 	// -------------------------------------
@@ -106,7 +116,7 @@ exports.add = function(req, res) {
 
 							// Check task type
 							if (parsedMessage.taskType === 'FP_COMP') {
-								console.log('[WGST] Emitting message for socketRoomId: ' + socketRoomId);
+								console.log('[WGST] Emitting FP_COMP message for socketRoomId: ' + socketRoomId);
 								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
@@ -119,7 +129,7 @@ exports.add = function(req, res) {
 								readyResults.push('FP_COMP');
 
 							} else if (parsedMessage.taskType === 'MLST_RESULT') {
-								console.log('[WGST] Emitting message for socketRoomId: ' + socketRoomId);
+								console.log('[WGST] Emitting MLST_RESULT message for socketRoomId: ' + socketRoomId);
 								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
@@ -132,7 +142,7 @@ exports.add = function(req, res) {
 								readyResults.push('MLST_RESULT');
 
 							} else if (parsedMessage.taskType === 'PAARSNP_RESULT') {
-								console.log('[WGST] Emitting message for socketRoomId: ' + socketRoomId);
+								console.log('[WGST] Emitting PAARSNP_RESULT message for socketRoomId: ' + socketRoomId);
 								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
@@ -145,7 +155,7 @@ exports.add = function(req, res) {
 								readyResults.push('PAARSNP_RESULT');
 
 							} else if (parsedMessage.taskType === 'COLLECTION_TREE') {
-								console.log('[WGST] Emitting message for socketRoomId: ' + socketRoomId);
+								console.log('[WGST] Emitting COLLECTION_TREE message for socketRoomId: ' + socketRoomId);
 								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 									collectionId: collectionId,
 									assemblyId: messageAssemblyId,
@@ -229,6 +239,17 @@ exports.add = function(req, res) {
 
 											console.log('[WGST] Inserted metadata:');
 											console.log(result);
+
+											console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
+											io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+												collectionId: collectionId,
+												assemblyId: assemblyId,
+												userAssemblyId: userAssemblyId,
+												status: "METADATA_OK ready",
+												result: "METADATA_OK",
+												socketRoomId: socketRoomId
+											});
+
 										});
 									// });
 
@@ -296,7 +317,7 @@ exports.add = function(req, res) {
 									console.log('[WGST] Upload queue "' + queue.name + '" is open');
 								}) // Subscribe to response message
 								.subscribe(function(message, headers, deliveryInfo){
-									console.log('[WGST] Preparing metadata object');
+									console.log('[WGST] Preparing metadata object');									
 
 									var buffer = new Buffer(message.data),
 										bufferJSON = buffer.toString(),
