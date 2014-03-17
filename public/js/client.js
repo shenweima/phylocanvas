@@ -2338,6 +2338,11 @@ $(function(){
 
         // When all results were processed - get collection
         if (totalNumberOfCollectionAnalysisResults === WGST.upload.collection[collectionId].notifications.all.length) {
+
+            $('.assemblies-upload-progress').find('.progress').removeClass('active');
+            $('.assemblies-upload-progress').find('.progress').removeClass('progress-striped');
+            $('.assemblies-upload-progress').find('.progress-bar').addClass('progress-bar-success');
+
             setTimeout(function(){
                 getCollection(collectionId); 
             }, 1000);
