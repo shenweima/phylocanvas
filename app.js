@@ -64,8 +64,9 @@ app.get('/users', user.list);
 app.get('/users/name/:name', user.name);
 
 // Collection routes
-app.post('/collection/', collection.get);
+app.post('/collection/', collection.apiGetCollection);
 app.post('/collection/add', collection.add);
+app.get('/collection/:id', collection.get);
 
 // Assembly routes
 app.get('/assembly/:id', assembly.get);

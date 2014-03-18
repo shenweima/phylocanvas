@@ -495,18 +495,26 @@
 
               // WGST namespace
               window.WGST = window.WGST || {};
-              window.WGST.requestedAssembly = undefined;
 
-              // If user requested individual assembly, e.g.: /assembly/FINGERPRINT_COMPARISON_154273030677208533352573798127987081488
-              <% if (typeof requestedAssemblyObject !== 'undefined') { %>
-                // Store requested assembly
-                window.WGST.requestedAssembly = <%- requestedAssemblyObject %>;
+              // window.WGST.requestedAssembly = undefined;
+
+              // // If user requested individual assembly, e.g.: /assembly/FINGERPRINT_COMPARISON_154273030677208533352573798127987081488
+              // <% if (typeof requestedAssemblyObject !== 'undefined') { %>
+              //   // Store requested assembly id
+              //   window.WGST.requestedAssembly = <%- requestedAssemblyObject %>;
+              // <% } %>
+
+              window.WGST.requestedCollectionId = undefined;
+
+              // If user requested collection, e.g.: /assembly/FINGERPRINT_COMPARISON_154273030677208533352573798127987081488
+              <% if (typeof requestedCollectionId !== 'undefined') { %>
+                // Store requested collection id
+                window.WGST.requestedCollectionId = '<%- requestedCollectionId %>';
               <% } %>
 
               window.WGST.app = window.WGST.app || {};
               window.WGST.app.config = undefined;
 
-              // If user requested individual assembly, e.g.: /assembly/FINGERPRINT_COMPARISON_154273030677208533352573798127987081488
               <% if (typeof appConfig !== 'undefined') { %>
                 // Store requested assembly
                 window.WGST.app.config = <%- appConfig %>;

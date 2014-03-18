@@ -352,62 +352,268 @@ $(function(){
         socket.emit('getRoomId');
     })();
 
-    var loadRequestedAssembly = function(requestedAssembly) {
-        console.log('[WGST] Loading requested assembly');
+    // var loadRequestedAssembly = function(requestedAssembly) {
+    //     console.log('[WGST] Loading requested assembly');
 
-        // Sort data by score
-        // http://stackoverflow.com/a/15322129
-        var sortableScores = [],
-            score;
+    //     // Sort data by score
+    //     // http://stackoverflow.com/a/15322129
+    //     var sortableScores = [],
+    //         score;
 
-        // First create the array of keys/values so that we can sort it
-        for (score in requestedAssembly.scores) {
-            if (requestedAssembly.scores.hasOwnProperty(score)) {
-                sortableScores.push({ 
-                    'referenceId': requestedAssembly.scores[score].referenceId,
-                    'score': requestedAssembly.scores[score].score
-                });
+    //     // First create the array of keys/values so that we can sort it
+    //     for (score in requestedAssembly.scores) {
+    //         if (requestedAssembly.scores.hasOwnProperty(score)) {
+    //             sortableScores.push({ 
+    //                 'referenceId': requestedAssembly.scores[score].referenceId,
+    //                 'score': requestedAssembly.scores[score].score
+    //             });
+    //         }
+    //     }
+
+    //     // Sort scores
+    //     sortableScores = sortableScores.sort(function(a,b){
+    //         return b.score - a.score; // Descending sort (Z-A)
+    //     });
+
+    //     // Create assembly data table
+    //     var sortableScoreCounter = 0;
+    //     for (; sortableScoreCounter < sortableScores.length; sortableScoreCounter++ ) {
+    //         $('.assembly-data-table tbody').append(
+    //             // This is not verbose enough
+    //             ((sortableScoreCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
+    //                 + '<td>'
+    //                     + sortableScores[sortableScoreCounter].referenceId
+    //                 + '</td>'
+    //                 + '<td>'
+    //                     + sortableScores[sortableScoreCounter].score
+    //                 + '</td>'
+    //                 + '<td>'
+    //                     // Convert score values into percentages where the highest number is 100%
+    //                     + Math.floor(sortableScores[sortableScoreCounter].score * 100 / requestedAssembly.fingerprintSize) + '%'
+    //                 + '</td>'
+    //             + '<tr/>'
+    //         );
+    //     }
+
+    //     // Set assembly panel header text
+    //     $('.assembly-panel .wgst-panel-header .assembly-id').text(requestedAssembly.assemblyId);
+
+    //     // Set assembly upload datetime in footer
+    //     //$('.assembly-upload-datetime').text(moment(requestedAssembly.timestamp, "YYYYMMDD_HHmmss").fromNow());
+
+    //     // Show assembly data
+    //     $('.assembly-panel').show();
+    // };
+
+    // // If user provided assembly id in url then load requested assembly
+    // if (typeof window.WGST.requestedAssembly !== 'undefined') {
+    //     loadRequestedAssembly(window.WGST.requestedAssembly);
+    // }
+
+    var getCollection = function(collectionId) {
+        console.log('[WGST] Getting ' + collectionId + ' collection');
+
+        // Init collection
+        window.WGST.collection[collectionId] = {
+            tree: {
+                data: {}
             }
-        }
+        };
 
-        // Sort scores
-        sortableScores = sortableScores.sort(function(a,b){
-            return b.score - a.score; // Descending sort (Z-A)
+        // Get collection that you just created/modified
+        $.ajax({
+            type: 'POST',
+            url: '/collection/',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: {
+                collectionId: collectionId
+            }
+        })
+        .done(function(data, textStatus, jqXHR) {
+            console.log('[WGST] Got ' + collectionId + ' collection: ');
+            console.dir(data);
+
+            window.WGST.collection[collectionId].tree.data = data.tree.data;
+            window.WGST.collection[collectionId].assemblies = data.assemblies;
+
+            var assemblies = window.WGST.collection[collectionId].assemblies;
+
+            console.log('[WGST] Collection ' + collectionId + ' has ' + Object.keys(assemblies).length + ' assemblies');
+            
+            console.log('[WGST] Getting list of antibiotics');
+
+            // Get list of all antibiotics
+            $.ajax({
+                type: 'GET',
+                url: '/api/all-antibiotics',
+                datatype: 'json', // http://stackoverflow.com/a/9155217
+                data: {}
+            })
+            .done(function(antibiotics, textStatus, jqXHR) {
+                console.log('[WGST] Got list of all antibiotics:');
+                console.log(antibiotics);
+
+                // TO DO: Refactor: Rename data to assemblies
+                //data = assemblies;
+
+                //var assemblies = window.WGST.collection[collectionId].assemblies;
+
+                var assemblyId,
+                    assemblyIds = Object.keys(assemblies),
+                    assemblyCounter = 0,
+                    // Get the last property (assembly) of the object
+                    lastAssemblyId = assemblyIds[assemblyIds.length - 1],
+                    lastAssembly = assemblies[lastAssemblyId]['FP_COMP'],
+                    assemblyTopScore,
+                    selectNodesWithIds = '';
+
+                // Set assembly created date
+                // Format to readable string so that user could read exact time on mouse over
+                $('.assembly-created-datetime').attr('title', moment(lastAssembly.timestamp, "YYYYMMDD_HHmmss").format('YYYY-MM-DD HH:mm:ss'));
+                // Convert to time ago
+                $('.timeago').timeago();
+
+                // Parse each assembly object
+                for (assemblyId in assemblies) {
+
+                    console.log('[WGST] Parsing ' + assemblyId + ' assembly:');
+                    console.log(assemblies[assemblyId]);
+                   
+                    // --------------------------------------------------------------------------------
+                    // Replace assembly id with user assembly id in collection tree newick string
+                    // --------------------------------------------------------------------------------
+                    window.WGST.collection[collectionId].tree.data = window.WGST.collection[collectionId].tree.data.replace(assemblyId, assemblies[assemblyId]['ASSEMBLY_METADATA'].assemblyUserId);
+
+                    // Get top score for this assembly
+                    assemblyTopScore = getAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
+
+                    console.log('[WGST] Top score reference id: ' + assemblyTopScore.referenceId);
+
+                    var assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[0],
+                        assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[1];
+
+                    var assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile,
+                        assemblyResistanceProfileHtml = '';
+
+                    /*
+
+                    TO DO: Try changing .antibiotic span elements to div and see if that will introduce hover right border bug,
+                    when Bootstrap Tooltip is activated.
+
+                    */
+
+                    // Parse each antibiotic group
+                    for (var antibioticGroupName in antibiotics) {
+
+                        var antibioticGroupHtml = '<div class="antibiotic-group" data-antibiotic-group-name="' + antibioticGroupName + '">';
+
+                        // Parse each antibiotic
+                        for (var antibioticName in antibiotics[antibioticGroupName]) {
+
+                            var antibioticHtml = '';
+
+                            // Antibiotic found in Resistance Profile for this assembly
+                            if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
+                                
+                                if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
+
+                                    var assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
+
+                                    if (assemblyAntibioticResistanceState === 'RESISTANT') {
+                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-fail" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                    } else if (assemblyAntibioticResistanceState === 'SENSITIVE') {
+                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-success" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                    } else {
+                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                    }
+
+                                } else {
+                                    antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                }
+
+                            } else {
+                                antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                            }
+
+                            antibioticGroupHtml = antibioticGroupHtml + antibioticHtml;
+
+                        } // for
+
+                        antibioticGroupHtml = antibioticGroupHtml + '</div>';
+
+                        assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
+
+                    } // for
+
+                    // Append to only first tbody tag (currently there more than one)
+                    $('.assemblies-summary-table tbody').eq(0).append(
+                        // This is not verbose enough
+                        ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
+                        //'<tr>'
+                            + '<td class="show-on-tree-radio-button">'
+                                + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
+                            + '</td>'
+                            + '<td class="show-on-map-checkbox">'
+                                + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
+                            + '</td>'
+                            + '<td>' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
+                            + '<td>' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</td>'
+                            + '<td>'
+                                // Resistance profile
+                                +'<div class="assembly-resistance-profile-container">'
+                                    + assemblyResistanceProfileHtml
+                                + '</div>'
+
+                            + '</td>'
+                        + '</tr>'
+                    );
+
+                    // Increment counter
+                    assemblyCounter = assemblyCounter + 1;
+                } // for
+
+                $('.antibiotic[data-toggle="tooltip"]').tooltip();
+
+                // TO DO: Create table with results for each assembly in this collection
+                // TO DO: Highlight parent node on the reference tree
+                // TO DO: Create markers for each assembly in this collection?
+
+                // Prepare Collection Tree
+                $('.wgst-panel__collection-tree-panel .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+
+                closePanel('assemblyUploadProgress');
+
+                // Reset assembly upload panel
+                // TO DO: Refactor?
+                resetAssemlyUploadPanel();
+
+                // openPanel(['collection', 'collectionTree'], function(){
+                //     bringPanelToTop('collectionTree');
+
+                //     // Render collection tree
+                //     renderCollectionTree(collectionTree, collectionId);
+                // });
+
+                openPanel(['collection', 'collectionTree'], function(){
+                    // Init collection tree
+                    window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+
+                    // Render collection tree
+                    renderCollectionTree(collectionId);
+                });
+            });
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log('[WGST][ERROR] Failed to get collection id');
+            console.error(textStatus);
+            console.error(errorThrown);
+            console.error(jqXHR);
         });
-
-        // Create assembly data table
-        var sortableScoreCounter = 0;
-        for (; sortableScoreCounter < sortableScores.length; sortableScoreCounter++ ) {
-            $('.assembly-data-table tbody').append(
-                // This is not verbose enough
-                ((sortableScoreCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
-                    + '<td>'
-                        + sortableScores[sortableScoreCounter].referenceId
-                    + '</td>'
-                    + '<td>'
-                        + sortableScores[sortableScoreCounter].score
-                    + '</td>'
-                    + '<td>'
-                        // Convert score values into percentages where the highest number is 100%
-                        + Math.floor(sortableScores[sortableScoreCounter].score * 100 / requestedAssembly.fingerprintSize) + '%'
-                    + '</td>'
-                + '<tr/>'
-            );
-        }
-
-        // Set assembly panel header text
-        $('.assembly-panel .wgst-panel-header .assembly-id').text(requestedAssembly.assemblyId);
-
-        // Set assembly upload datetime in footer
-        //$('.assembly-upload-datetime').text(moment(requestedAssembly.timestamp, "YYYYMMDD_HHmmss").fromNow());
-
-        // Show assembly data
-        $('.assembly-panel').show();
     };
 
-    // If user provided assembly id in url then load requested assembly
-    if (typeof window.WGST.requestedAssembly !== 'undefined') {
-        loadRequestedAssembly(window.WGST.requestedAssembly);
+    // If user provided collection id in url then load requested collection
+    if (typeof window.WGST.requestedCollectionId !== 'undefined') {
+        getCollection(window.WGST.requestedCollectionId);
     }
 
     // WGST namespace
@@ -2040,394 +2246,6 @@ $(function(){
         });
 
         return sortedScores[0];
-    };
-
-    var getCollection = function(collectionId) {
-        console.log('[WGST] Getting ' + collectionId + ' collection');
-
-        // Init collection
-        window.WGST.collection[collectionId] = {
-            tree: {
-                data: {},
-                metadata: {}
-            }
-        };
-
-        // Get collection that you just created/modified
-        $.ajax({
-            type: 'POST',
-            url: '/collection/',
-            datatype: 'json', // http://stackoverflow.com/a/9155217
-            data: {
-                collectionId: collectionId
-            }
-        })
-        .done(function(data, textStatus, jqXHR) {
-            console.log('[WGST] Got ' + collectionId + ' collection: ');
-            console.dir(data);
-
-            window.WGST.collection[collectionId].tree.data = data.tree.data;
-            window.WGST.collection[collectionId].assemblies = data.assemblies;
-
-            var assemblies = window.WGST.collection[collectionId].assemblies;
-
-            console.log('[WGST] Collection ' + collectionId + ' has ' + Object.keys(assemblies).length + ' assemblies');
-            
-            console.log('[WGST] Getting list of antibiotics');
-
-            // Get list of all antibiotics
-            $.ajax({
-                type: 'GET',
-                url: '/api/all-antibiotics',
-                datatype: 'json', // http://stackoverflow.com/a/9155217
-                data: {}
-            })
-            .done(function(antibiotics, textStatus, jqXHR) {
-                console.log('[WGST] Got list of all antibiotics:');
-                console.log(antibiotics);
-
-                // TO DO: Refactor: Rename data to assemblies
-                //data = assemblies;
-
-                //var assemblies = window.WGST.collection[collectionId].assemblies;
-
-                var assemblyId,
-                    assemblyIds = Object.keys(assemblies),
-                    assemblyCounter = 0,
-                    // Get the last property (assembly) of the object
-                    lastAssemblyId = assemblyIds[assemblyIds.length - 1],
-                    lastAssembly = assemblies[lastAssemblyId]['FP_COMP'],
-                    assemblyTopScore,
-                    selectNodesWithIds = '';
-
-                // Set assembly created date
-                // Format to readable string so that user could read exact time on mouse over
-                $('.assembly-created-datetime').attr('title', moment(lastAssembly.timestamp, "YYYYMMDD_HHmmss").format('YYYY-MM-DD HH:mm:ss'));
-                // Convert to time ago
-                $('.timeago').timeago();
-
-                // Parse each assembly object
-                for (assemblyId in assemblies) {
-
-                    console.log('[WGST] Parsing ' + assemblyId + ' assembly:');
-                    console.log(assemblies[assemblyId]);
-                   
-                    // --------------------------------------------------------------------------------
-                    // Replace assembly id with user assembly id in collection tree newick string
-                    // --------------------------------------------------------------------------------
-                    window.WGST.collection[collectionId].tree.data = window.WGST.collection[collectionId].tree.data.replace(assemblyId, assemblies[assemblyId]['ASSEMBLY_METADATA'].assemblyUserId);
-
-                    // Get top score for this assembly
-                    assemblyTopScore = getAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
-
-                    console.log('[WGST] Top score reference id: ' + assemblyTopScore.referenceId);
-
-                    var assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[0],
-                        assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[1];
-
-                    var assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile,
-                        assemblyResistanceProfileHtml = '';
-
-                    /*
-
-                    TO DO: Try changing .antibiotic span elements to div and see if that will introduce hover right border bug,
-                    when Bootstrap Tooltip is activated.
-
-                    */
-
-                    // Parse each antibiotic group
-                    for (var antibioticGroupName in antibiotics) {
-
-                        var antibioticGroupHtml = '<div class="antibiotic-group" data-antibiotic-group-name="' + antibioticGroupName + '">';
-
-                        // Parse each antibiotic
-                        for (var antibioticName in antibiotics[antibioticGroupName]) {
-
-                            var antibioticHtml = '';
-
-                            // Antibiotic found in Resistance Profile for this assembly
-                            if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
-                                
-                                if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
-
-                                    var assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
-
-                                    if (assemblyAntibioticResistanceState === 'RESISTANT') {
-                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-fail" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                                    } else if (assemblyAntibioticResistanceState === 'SENSITIVE') {
-                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-success" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                                    } else {
-                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                                    }
-
-                                } else {
-                                    antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                                }
-
-                            } else {
-                                antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                            }
-
-                            antibioticGroupHtml = antibioticGroupHtml + antibioticHtml;
-
-                        } // for
-
-                        antibioticGroupHtml = antibioticGroupHtml + '</div>';
-
-                        assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
-
-                    } // for
-
-                    // Append to only first tbody tag (currently there more than one)
-                    $('.assemblies-summary-table tbody').eq(0).append(
-                        // This is not verbose enough
-                        ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
-                        //'<tr>'
-                            + '<td class="show-on-tree-radio-button">'
-                                + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
-                            + '</td>'
-                            + '<td class="show-on-map-checkbox">'
-                                + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                            + '</td>'
-                            + '<td>' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
-                            + '<td>' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</td>'
-                            + '<td>'
-                                // Resistance profile
-                                +'<div class="assembly-resistance-profile-container">'
-                                    + assemblyResistanceProfileHtml
-                                + '</div>'
-
-                            + '</td>'
-                        + '</tr>'
-                    );
-
-                    // Increment counter
-                    assemblyCounter = assemblyCounter + 1;
-                } // for
-
-                $('.antibiotic[data-toggle="tooltip"]').tooltip();
-
-                // TO DO: Create table with results for each assembly in this collection
-                // TO DO: Highlight parent node on the reference tree
-                // TO DO: Create markers for each assembly in this collection?
-
-                // Prepare Collection Tree
-                $('.wgst-panel__collection-tree-panel .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
-
-                closePanel('assemblyUploadProgress');
-
-                // Reset assembly upload panel
-                // TO DO: Refactor?
-                resetAssemlyUploadPanel();
-
-                // openPanel(['collection', 'collectionTree'], function(){
-                //     bringPanelToTop('collectionTree');
-
-                //     // Render collection tree
-                //     renderCollectionTree(collectionTree, collectionId);
-                // });
-
-                openPanel(['collection', 'collectionTree'], function(){
-                    // Init collection tree
-                    window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
-
-                    // Render collection tree
-                    renderCollectionTree(collectionId);
-                });
-            });
-
-
-
-
-
-
-
-
-            // // Get assemblies data
-            // $.ajax({
-            //     type: 'POST',
-            //     url: '/api/assemblies',
-            //     datatype: 'json', // http://stackoverflow.com/a/9155217
-            //     data: {
-            //         assemblyIds: collectionAssemblyIdentifiers
-            //     }
-            // })
-            // .done(function(assemblies, textStatus, jqXHR) {
-            //     console.log('[WGST] Received assemblies:');
-            //     console.log(assemblies);
-
-                // // Get list of all antibiotics
-                // $.ajax({
-                //     type: 'GET',
-                //     url: '/api/all-antibiotics',
-                //     datatype: 'json', // http://stackoverflow.com/a/9155217
-                //     data: {}
-                // })
-                // .done(function(antibiotics, textStatus, jqXHR) {
-                //     console.log('[WGST] Got list of all antibiotics:');
-                //     console.log(antibiotics);
-
-                //     // TO DO: Refactor: Rename data to assemblies
-                //     data = assemblies;
-
-                //     var assemblyId,
-                //         assemblyIds = Object.keys(assemblies),
-                //         assemblyCounter = 0,
-                //         // Get the last property (assembly) of the object
-                //         lastAssemblyId = assemblyIds[assemblyIds.length - 1],
-                //         lastAssembly = assemblies[lastAssemblyId]['FP_COMP'],
-                //         assemblyTopScore,
-                //         selectNodesWithIds = '';
-
-                //     // Set assembly created date
-                //     // Format to readable string so that user could read exact time on mouse over
-                //     $('.assembly-created-datetime').attr('title', moment(lastAssembly.timestamp, "YYYYMMDD_HHmmss").format('YYYY-MM-DD HH:mm:ss'));
-                //     // Convert to time ago
-                //     $('.timeago').timeago();
-
-                //     // Parse each assembly object
-                //     for (assemblyId in assemblies) {
-
-                //         console.log('[WGST] Parsing ' + assemblyId + ' assembly:');
-                //         console.log(assemblies[assemblyId]);
-                       
-                //         // --------------------------------------------------------------------------------
-                //         // Replace assembly id with user assembly id in collection tree newick string
-                //         // --------------------------------------------------------------------------------
-                //         window.WGST.collection[collectionId].tree.data = window.WGST.collection[collectionId].tree.data.replace(assemblyId, assemblies[assemblyId]['ASSEMBLY_METADATA'].assemblyUserId);
-
-                //         // Get top score for this assembly
-                //         assemblyTopScore = getAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
-
-                //         console.log('[WGST] Top score reference id: ' + assemblyTopScore.referenceId);
-
-                //         var assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[0],
-                //             assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[1];
-
-                //         var assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile,
-                //             assemblyResistanceProfileHtml = '';
-
-                //         /*
-
-                //         TO DO: Try changing .antibiotic span elements to div and see if that will introduce hover right border bug,
-                //         when Bootstrap Tooltip is activated.
-
-                //         */
-
-                //         // Parse each antibiotic group
-                //         for (var antibioticGroupName in antibiotics) {
-
-                //             var antibioticGroupHtml = '<div class="antibiotic-group" data-antibiotic-group-name="' + antibioticGroupName + '">';
-
-                //             // Parse each antibiotic
-                //             for (var antibioticName in antibiotics[antibioticGroupName]) {
-
-                //                 var antibioticHtml = '';
-
-                //                 // Antibiotic found in Resistance Profile for this assembly
-                //                 if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
-                                    
-                //                     if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
-
-                //                         var assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
-
-                //                         if (assemblyAntibioticResistanceState === 'RESISTANT') {
-                //                             antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-fail" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                //                         } else if (assemblyAntibioticResistanceState === 'SENSITIVE') {
-                //                             antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-success" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                //                         } else {
-                //                             antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                //                         }
-
-                //                     } else {
-                //                         antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                //                     }
-
-                //                 } else {
-                //                     antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                //                 }
-
-                //                 antibioticGroupHtml = antibioticGroupHtml + antibioticHtml;
-
-                //             } // for
-
-                //             antibioticGroupHtml = antibioticGroupHtml + '</div>';
-
-                //             assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
-
-                //         } // for
-
-                //         // Append to only first tbody tag (currently there more than one)
-                //         $('.assemblies-summary-table tbody').eq(0).append(
-                //             // This is not verbose enough
-                //             ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
-                //             //'<tr>'
-                //                 + '<td class="show-on-tree-radio-button">'
-                //                     + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
-                //                 + '</td>'
-                //                 + '<td class="show-on-map-checkbox">'
-                //                     + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                //                 + '</td>'
-                //                 + '<td>' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
-                //                 + '<td>' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</td>'
-                //                 + '<td>'
-                //                     // Resistance profile
-                //                     +'<div class="assembly-resistance-profile-container">'
-                //                         + assemblyResistanceProfileHtml
-                //                     + '</div>'
-
-                //                 + '</td>'
-                //             + '</tr>'
-                //         );
-
-                //         // Increment counter
-                //         assemblyCounter = assemblyCounter + 1;
-                //     } // for
-
-                //     $('.antibiotic[data-toggle="tooltip"]').tooltip();
-
-                //     // TO DO: Create table with results for each assembly in this collection
-                //     // TO DO: Highlight parent node on the reference tree
-                //     // TO DO: Create markers for each assembly in this collection?
-
-                //     // Prepare Collection Tree
-                //     $('.wgst-panel__collection-tree-panel .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
-
-                //     closePanel('assemblyUploadProgress');
-
-                //     // Reset assembly upload panel
-                //     // TO DO: Refactor?
-                //     resetAssemlyUploadPanel();
-
-                //     // openPanel(['collection', 'collectionTree'], function(){
-                //     //     bringPanelToTop('collectionTree');
-
-                //     //     // Render collection tree
-                //     //     renderCollectionTree(collectionTree, collectionId);
-                //     // });
-
-                //     openPanel(['collection', 'collectionTree'], function(){
-                //         // Init collection tree
-                //         window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
-
-                //         // Render collection tree
-                //         renderCollectionTree(collectionId);
-                //     });
-                // });
-            // })
-            // .fail(function(jqXHR, textStatus, errorThrown) {
-            //     console.log('[WGST][ERROR] Failed to get assembly data');
-            //     console.error(textStatus);
-            //     console.error(errorThrown);
-            //     console.error(jqXHR);
-            // });
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.log('[WGST][ERROR] Failed to get collection id');
-            console.error(textStatus);
-            console.error(errorThrown);
-            console.error(jqXHR);
-        });
     };
 
     var updateAssemblyUploadProgress = function(collectionId, userAssemblyId, assemblyId, result) {};

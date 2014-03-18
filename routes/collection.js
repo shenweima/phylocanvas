@@ -119,8 +119,8 @@ var getAssemblies = function(assemblyIds, callback) {
 	console.dir(assemblyIds);
 
 	couchbaseDatabaseConnection.getMulti(assemblyIds, {}, function(err, results) {
-		console.log('[WGST] Got assemblies data: ');
-		console.dir(results);
+		console.log('[WGST] Got assemblies data');
+		//console.dir(results);
 
 		if (err) throw err;
 
@@ -151,11 +151,51 @@ var getAssemblies = function(assemblyIds, callback) {
 		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA and PAARSNP_RESULT data: ');
 		console.log(assemblies);
 
-		callback(assemblies);
+		callback(null, assemblies);
 	});
 };
 
-exports.get = function(req, res) {
+var getCollection = function(collectionId, callback) {
+
+	var collectionId = req.body.collectionId,
+		collection = {};
+
+	console.log('[WGST] Getting collection ' + collectionId);
+
+	// Get list of assemblies
+	couchbaseDatabaseConnection.get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
+		if (err) throw err;
+
+		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
+
+		console.log('[WGST] Got collection ' + collectionId + ' with assembly ids:');
+		console.log(assemblyIds);
+
+		getAssemblies(assemblyIds, function(error, assemblies){
+			if (error) throw error;
+
+			collection.assemblies = assemblies;
+
+			// Get collection tree data
+			couchbaseDatabaseConnection.get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+				if (err) throw err;
+
+				var collectionTreeData = collectionTreeData.value.newickTree;
+
+				console.log('[WGST] Got collection tree data for collection id ' + collectionId + ':');
+				console.log(collectionTreeData);
+
+				collection.tree = {
+					data: collectionTreeData
+				};
+
+				callback(null, collection);
+			});
+		});
+	});
+};
+
+exports.apiGetCollection = function(req, res) {
 
 	var collectionId = req.body.collectionId,
 		collection = {};
@@ -173,7 +213,8 @@ exports.get = function(req, res) {
 
 		//collection.assemblyIds = assemblyIds;
 
-		getAssemblies(assemblyIds, function(assemblies){
+		getAssemblies(assemblyIds, function(error, assemblies){
+			if (error) throw error;
 
 			collection.assemblies = assemblies;
 
@@ -213,5 +254,16 @@ exports.get = function(req, res) {
 				res.json(collection);
 			});
 		});
+	});
+};
+
+exports.get = function(req, res) {
+	var collectionId = req.params.id;
+
+	console.log('[WGST] Requested collection id: ' + collectionId);
+
+	res.render('index', {
+		appConfig: JSON.stringify(appConfig.client),
+		requestedCollectionId: collectionId
 	});
 };
