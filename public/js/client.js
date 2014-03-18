@@ -259,6 +259,7 @@ $(function(){
         // Init jQuery UI draggable interaction
         $('.wgst-draggable').draggable({
             handle: ".wgst-draggable-handle",
+            containment: "window",
             stop: function(event, ui) {
                 // Store current panel position
                 var panelName = ui.helper.attr('data-panel-name');
@@ -498,7 +499,7 @@ $(function(){
         });
     };
 
-    var renderCollectionTree = function(newickTreeData) {
+    var renderCollectionTree = function(newickTreeData, collectionId) {
         console.log('[WGST] Rendering collection tree');
 
         // ==============================
@@ -511,8 +512,10 @@ $(function(){
         window.WGST.collection.tree.setTextSize(24);
         window.WGST.collection.tree.selectedNodeSizeIncrease = 0.5;
         window.WGST.collection.tree.selectedColor = '#0059DE';
-        window.WGST.collection.tree.rightClickZoom = true;
+        window.WGST.collection.tree.rightClickZoom = false;
         //window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
+
+        //window.WGST.collection.tree.redrawOriginalTree();
 
         // ==============================
         // Load reference tree metadata
@@ -2186,12 +2189,21 @@ $(function(){
                     // TO DO: Refactor?
                     resetAssemlyUploadPanel();
 
+                    // openPanel(['collection', 'collectionTree'], function(){
+                    //     bringPanelToTop('collectionTree');
+
+                    //     // Render collection tree
+                    //     renderCollectionTree(collectionTree, collectionId);
+                    // });
+
+
+
                     openPanel(['collection', 'collectionTree'], function(){
-                        bringPanelToTop('collectionTree');
 
                         window.WGST.collection.tree = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+
                         // Render collection tree
-                        renderCollectionTree(collectionTree);
+                        renderCollectionTree(collectionTree, collectionId);
                     });
 
                     $('.antibiotic[data-toggle="tooltip"]').tooltip();
@@ -2783,13 +2795,29 @@ $(function(){
         e.preventDefault();
     });
 
+    $('.wgst-panel__collection-panel .collection-controls-show-tree').on('click', function(){
+        openPanel('collectionTree', function(){
+            bringPanelToTop('collectionTree');
+        });
+    });
+
     var openAssemblyPanel = function(assemblyId) {
+
+        // ============================================================
+        // Open panel
+        // ============================================================
+
+        // Show animated loading circle
+        $('.wgst-panel__assembly-panel .wgst-panel-loading').show();
+
+        // Bring panel to top
+        bringPanelToTop('assembly');
+        // Open panel
+        openPanel('assembly');
 
         // ============================================================
         // Get assembly data
         // ============================================================
-
-        //var assemblyId = $(this).attr('data-assembly-id');
 
         // Get assembly data
         $.ajax({
@@ -2890,7 +2918,7 @@ $(function(){
                 } // if
             } // for
 
-            $('.wgst-panel__assembly-panel .assembly-detail__resistance-profile .assembly-detail-content').append($(assemblyResistanceProfileHtml));
+            $('.wgst-panel__assembly-panel .assembly-detail__resistance-profile .assembly-detail-content').html($(assemblyResistanceProfileHtml));
 
             // ============================================================
             // Prepare MLST
@@ -2925,7 +2953,7 @@ $(function(){
             assemblyMlstHtml = assemblyMlstHtml.replace('{{locusIds}}', locusDataHtml);
             assemblyMlstHtml = assemblyMlstHtml.replace('{{alleleIds}}', alleleDataHtml);
 
-            $('.wgst-panel__assembly-panel .assembly-detail__mlst .assembly-detail-content').append($(assemblyMlstHtml));
+            $('.wgst-panel__assembly-panel .assembly-detail__mlst .assembly-detail-content').html($(assemblyMlstHtml));
 
             // ============================================================
             // Prepare nearest representative
@@ -2960,21 +2988,6 @@ $(function(){
                 return assemblyScores[assemblyScoreReferenceId1] - assemblyScores[assemblyScoreReferenceId2];
             });
 
-            console.log('sortedAssemblyScores:');
-            console.log(sortedAssemblyScores);
-
-            /*
-            assemblyScores = [assemblyScores].sort(function(obj1, obj2){
-                var scoreOne = obj1.score.toFixed(2) + ' = ' + Math.round(obj1.score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize'];
-                var scoreTwo = obj2.score.toFixed(2) + ' = ' + Math.round(obj2.score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize'];
-
-                return scoreTwo - scoreOne;
-            });
-
-            console.log(assemblyScores);
-            assemblyScores = assemblyScores[0];
-            */
-
             var assemblyScoreCounter = sortedAssemblyScores.length;
             for (; assemblyScoreCounter !== 0;) {
                 assemblyScoreCounter = assemblyScoreCounter - 1;
@@ -2992,36 +3005,13 @@ $(function(){
                 console.log(scoreData.score);
 
             } // for
-            
-            /*
-            for (var assemblyScore in assemblyScores) {
-                if (assemblyScores.hasOwnProperty(assemblyScore)) {
-
-                    var scoreText = assemblyScores[assemblyScore].score.toFixed(2) + ' = ' + Math.round(assemblyScores[assemblyScore].score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize'];
-
-                    assemblyScoresDataHtml = assemblyScoresDataHtml 
-                        + '<tr>' 
-                            + '<td>' + assemblyScores[assemblyScore].referenceId + '</td>'
-                            + '<td>' + scoreText + '</td>'
-                        + '</tr>';
-                }
-            } // for
-            */
 
             assemblyScoresHtml = assemblyScoresHtml.replace('{{assemblyScoresDataHtml}}', assemblyScoresDataHtml);
 
-            //var score = assemblyTopScore.score.toFixed(2) + ' = ' + Math.round(assemblyTopScore.score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize']
-
             $('.wgst-panel__assembly-panel .assembly-detail__score .assembly-detail-content').html(assemblyScoresHtml);
 
-            // ============================================================
-            // Open panel
-            // ============================================================
-
-            // Bring panel to top
-            bringPanelToTop('assembly');
-            // Open panel
-            openPanel('assembly');
+            // Hide animated loading circle
+            $('.wgst-panel__assembly-panel .wgst-panel-loading').hide();
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log('[WGST][ERROR] Failed to get assembly data');
