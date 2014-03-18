@@ -24,7 +24,7 @@ exports.add = function(req, res) {
 		});
 
 	connection.on('error', function(error) {
-	    console.error('[WGST][ERROR] Ignoring error: ' + error);
+	    console.error('✗ [WGST][ERROR] Ignoring error: ' + error);
 	});
 
 	connection.on("ready", function(){
@@ -58,7 +58,7 @@ exports.add = function(req, res) {
 			replyTo: queueId
 		}, function(err){
 			if (err) {
-				console.log('[WGST][ERROR] Error in trying to publish');
+				console.log('✗ [WGST][ERROR] Error in trying to publish');
 				return; // return undefined?
 			}
 
@@ -92,6 +92,69 @@ exports.add = function(req, res) {
 	});
 };
 
+var getAssemblies = function(assemblyIds, callback) {
+	console.log('[WGST] Getting assemblies with ids: ' + assemblyIds);
+
+	// Prepend FP_COMP_ to each assembly id
+	var scoresAssemblyIds = assemblyIds.map(function(assemblyId){
+		return 'FP_COMP_' + assemblyId;
+	});
+
+	// Prepend ASSEMBLY_METADATA_ to each assembly id
+	var metadataAssemblyIds = assemblyIds.map(function(assemblyId){
+		return 'ASSEMBLY_METADATA_' + assemblyId;
+	});
+
+	// Prepend PAARSNP_RESULT_ to each assembly id
+	var resistanceProfileAssemblyIds = assemblyIds.map(function(assemblyId){
+		return 'PAARSNP_RESULT_' + assemblyId;
+	});
+
+	// Merge all assembly ids
+	assemblyIds = scoresAssemblyIds
+						.concat(metadataAssemblyIds)
+						.concat(resistanceProfileAssemblyIds);
+
+	console.log('[WGST] Querying keys: ');
+	console.dir(assemblyIds);
+
+	couchbaseDatabaseConnection.getMulti(assemblyIds, {}, function(err, results) {
+		console.log('[WGST] Got assemblies data: ');
+		console.dir(results);
+
+		if (err) throw err;
+
+		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
+		var assemblies = {},
+			assemblyId,
+			cleanAssemblyId;
+
+		for (assemblyId in results) {
+            // Parsing assembly scores
+            if (assemblyId.indexOf('FP_COMP_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
+            // Parsing assembly metadata
+            } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
+            // Parsing assembly resistance profile
+            } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
+			}
+		}
+
+		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA and PAARSNP_RESULT data: ');
+		console.log(assemblies);
+
+		callback(assemblies);
+	});
+};
+
 exports.get = function(req, res) {
 
 	var collectionId = req.body.collectionId,
@@ -99,51 +162,56 @@ exports.get = function(req, res) {
 
 	console.log('[WGST] Getting collection ' + collectionId);
 
-	// Get requested collection from db
-	var couchbase = require('couchbase');
-	var db = new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
-		bucket: 'test_wgst',
-		password: '.oneir66'
-	}, function(err) {
+	// Get list of assemblies
+	couchbaseDatabaseConnection.get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
 		if (err) throw err;
 
-		db.get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
-			if (err) throw err;
+		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
 
-			var assemblyIds = assemblyIdsData.value;
+		console.log('[WGST] Got collection ' + collectionId + ' with assembly ids:');
+		console.log(assemblyIds);
 
-			console.log('[WGST] Returning collection ' + collectionId + ' with assembly ids:');
-			console.log(assemblyIds);
+		//collection.assemblyIds = assemblyIds;
 
-			// Return result data
-			//res.json(results.value);
+		getAssemblies(assemblyIds, function(assemblies){
 
-			collection.assemblyIds = assemblyIds;
+			collection.assemblies = assemblies;
 
-			// Get collection tree
-			db.get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
-
-				console.log('COLLECTION_TREE_' + collectionId);
+			// Get collection tree data
+			couchbaseDatabaseConnection.get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
 
 				if (err) throw err;
 
-				var collectionTree = collectionTreeData.value;
+				var collectionTreeData = collectionTreeData.value.newickTree;
 
-				console.log('[WGST] Returning collection tree for collection id ' + collectionId + ':');
-				console.log(collectionTree);
+				console.log('[WGST] Got collection tree data for collection id ' + collectionId + ':');
+				console.log(collectionTreeData);
 
-				collection.tree = collectionTree;
+				// Get collection tree metadata
+				// couchbaseDatabaseConnection.get('COLLECTION_TREE_METADATA_' + collectionId, function(err, collectionTreeData) {
 
-				// Return result data
-				//res.json(results.value);
+				// 	if (err) throw err;
+
+				// 	var collectionTreeData = collectionTreeData.value.newickTree;
+
+				// 	console.log('[WGST] Got collection tree data for collection id ' + collectionId + ':');
+				// 	console.log(collectionTreeData);
+
+					
+
+				// 	collection.tree = {
+				// 		data: collectionTreeData
+				// 	};
+
+				// 	res.json(collection);
+				// });
+
+				collection.tree = {
+					data: collectionTreeData
+				};
+
 				res.json(collection);
-			});		
-
-
+			});
 		});
-
 	});
-
-	//res.json({});
 };

@@ -3,7 +3,7 @@ require('longjohn');
 //======================================================
 // Read config file
 //======================================================
-console.log('Reading app config file');
+console.log('✔ [WGST] Reading app config file');
 
 var fs = require('fs'),
 	file = __dirname + '/config.json';
@@ -92,14 +92,13 @@ app.get('/dev/canvas', require('./routes/dev').canvas);
 //app.post('/signin', user.signIn);
 
 var server = http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+  console.log('✔ [WGST] Express server listening on port ' + app.get('port'));
 });
 
 //======================================================
 // Socket.io
 //======================================================
 
-// Init
 var socketio = require('socket.io');
 
 // Global variable on purpose - will store socket connection and will be shared with routes
@@ -107,7 +106,7 @@ socket = undefined;
 io = socketio.listen(server);
 
 io.sockets.on('connection', function (socketConnection) {
-	console.log('[WGST][Socket.io] Connnected');
+	console.log('✔ [WGST][Socket.io] Connnected');
 
 	socketConnection.on('disconnect', function() {
 		console.log('[WGST][Socket.io] Disconnnected');
@@ -129,4 +128,24 @@ io.sockets.on('connection', function (socketConnection) {
 	});
 
 	socket = socketConnection;
+});
+
+//======================================================
+// Couchbase
+//======================================================
+
+var couchbase = require('couchbase');
+
+// Global variable on purpose - will store socket connection and will be shared with routes
+couchbaseDatabaseConnection = new couchbase.Connection({
+	host: 'http://129.31.26.151:8091/pools',
+	bucket: 'test_wgst',
+	password: '.oneir66'
+}, function(error) {
+	if (error) {
+		console.error('✗ [WGST][Couchbase][ERROR] ' + error);
+		return;
+	}
+
+	console.log('✔ [WGST][Couchbase] Successfuly opened Couchbase connection to "test_wgst" bucket');
 });

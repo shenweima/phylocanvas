@@ -13,13 +13,13 @@ var amqp = require('amqp');
 var notificationConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
 notificationConnection.on('error', function(error) {
-    console.error("[WGST][ERROR] Notification connection: " + error);
+    console.error("✗ [WGST][RabbitMQ][ERROR] Notification connection: " + error);
 });
 
 var notificationExchange = undefined;
 
 notificationConnection.on("ready", function(){
-	console.log('[WGST] Notification connection is ready');
+	console.log('✔ [WGST][RabbitMQ] Notification connection is ready');
 
 	notificationConnection.exchange('notifications-ex',
 		{
@@ -34,32 +34,19 @@ notificationConnection.on("ready", function(){
 
 			notificationExchange = readyNotificationExchange;
 
-			console.log('[WGST] Notification exchange "' + notificationExchange.name + '" is open');
+			console.log('✔ [WGST][RabbitMQ] Notification exchange "' + notificationExchange.name + '" is open');
 		});
 
 });
 
-var couchbase = require('couchbase');
-var db = new couchbase.Connection({
-	host: 'http://129.31.26.151:8091/pools',
-	bucket: 'test_wgst',
-	password: '.oneir66'
-}, function(error) {
-	if (error) {
-		console.error('[WGST][ERROR] ' + error);
-		return;
-	}
-
-	console.log('[WGST][Couchbase] Successfuly opened Couchbase connection');
-});
-
 exports.add = function(req, res) {
-	console.log('[WGST] Added assembly to collection');
 
 	var collectionId = req.body.collectionId,
 		socketRoomId = req.body.socketRoomId,
 		userAssemblyId = req.body.name,
 		assemblyId = req.body.assemblyId;
+
+	console.log('[WGST] Adding assembly ' + assemblyId + ' to collection ' + collectionId);
 
 	// TO DO: Validate request
 
@@ -88,252 +75,221 @@ exports.add = function(req, res) {
 	// Generate queue id
 	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId;
 
-				// Create queue
-				var notificationQueue = notificationConnection.queue(notificationQueueId, 
-					{
-						exclusive: true
-					}, function(queue){
-						console.log('[WGST] Notification queue "' + queue.name + '" is open');
+	// Create queue
+	var notificationQueue = notificationConnection.queue(notificationQueueId, 
+		{
+			exclusive: true
+		}, function(queue){
+			console.log('[WGST] Notification queue "' + queue.name + '" is open');
 
-						var readyResults = [];
+			var readyResults = [];
 
-						queue.bind(notificationExchange, "*.ASSEMBLY." + assemblyId); // binding routing key
-						queue.bind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
+			queue.bind(notificationExchange, "*.ASSEMBLY." + assemblyId); // binding routing key
+			queue.bind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
 
-						// Subscribe to response message
-						queue.subscribe(function(message, headers, deliveryInfo){
-							console.log('[WGST] Received RabbitMQ notification message:');
+			// Subscribe to response message
+			queue.subscribe(function(message, headers, deliveryInfo){
+				console.log('[WGST] Received RabbitMQ notification message:');
+
+				var buffer = new Buffer(message.data),
+					bufferJSON = buffer.toString(),
+					parsedMessage = JSON.parse(bufferJSON);
+
+				var messageAssemblyId = parsedMessage.assemblyId,
+					messageUserAssemblyId = parsedMessage.userAssemblyId;
+
+				console.log('[WGST] Message assembly id: ' + messageAssemblyId);
+				console.log('[WGST] Message user assembly id: ' + messageUserAssemblyId);
+
+				// Check task type
+				if (parsedMessage.taskType === 'FP_COMP') {
+					console.log('[WGST] Emitting FP_COMP message for socketRoomId: ' + socketRoomId);
+					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+						collectionId: collectionId,
+						assemblyId: messageAssemblyId,
+						userAssemblyId: messageUserAssemblyId,
+						status: "FP_COMP ready",
+						result: "FP_COMP",
+						socketRoomId: socketRoomId
+					});
+
+					readyResults.push('FP_COMP');
+
+				} else if (parsedMessage.taskType === 'MLST_RESULT') {
+					console.log('[WGST] Emitting MLST_RESULT message for socketRoomId: ' + socketRoomId);
+					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+						collectionId: collectionId,
+						assemblyId: messageAssemblyId,
+						userAssemblyId: messageUserAssemblyId,
+						status: "MLST_RESULT ready",
+						result: "MLST_RESULT",
+						socketRoomId: socketRoomId
+					});
+
+					readyResults.push('MLST_RESULT');
+
+				} else if (parsedMessage.taskType === 'PAARSNP_RESULT') {
+					console.log('[WGST] Emitting PAARSNP_RESULT message for socketRoomId: ' + socketRoomId);
+					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+						collectionId: collectionId,
+						assemblyId: messageAssemblyId,
+						userAssemblyId: messageUserAssemblyId,
+						status: "PAARSNP_RESULT ready",
+						result: "PAARSNP_RESULT",
+						socketRoomId: socketRoomId
+					});
+
+					readyResults.push('PAARSNP_RESULT');
+
+				} else if (parsedMessage.taskType === 'COLLECTION_TREE') {
+					console.log('[WGST] Emitting COLLECTION_TREE message for socketRoomId: ' + socketRoomId);
+					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+						collectionId: collectionId,
+						assemblyId: messageAssemblyId,
+						userAssemblyId: messageUserAssemblyId,
+						status: "COLLECTION_TREE ready",
+						result: "COLLECTION_TREE",
+						socketRoomId: socketRoomId
+					});
+
+					readyResults.push('COLLECTION_TREE');
+
+				} // else if
+
+
+				console.log('[LOGGING][IMPORTANT] readyResults.length: ' + readyResults.length);
+
+				// Destroy queue after all results were received
+				if (readyResults.length === 4) {
+
+					queue.unbind(notificationExchange, "*.ASSEMBLY." + assemblyId);
+					queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
+					//queue.destroy();
+					//notificationExchange.destroy();
+					//notificationConnection.end();
+				} // if
+			});
+
+			// -------------------------------------
+			// RabbitMQ Upload
+			// -------------------------------------
+
+			uploadConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
+
+			uploadConnection.on('error', function(error) {
+			    console.error("✗ [WGST][ERROR] Upload connection: " + error);
+			});
+
+			uploadConnection.on("ready", function(){
+				console.log('✔ [WGST][RabbitMQ] Upload connection is ready');
+
+				// -----------------------------------------------------------
+				// Insert assembly metadata into Couchbase
+				// -----------------------------------------------------------
+
+				var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
+					metadata = {
+						assemblyId: assemblyId,
+						assemblyUserId: req.body.name,
+						geographicLocation: {
+							type: 'Point',
+							coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
+						}
+					};
+
+					console.log('[WGST] Inserting metadata with key: ' + metadataKey);
+
+					couchbaseDatabaseConnection.set(metadataKey, metadata, function(err, result) {
+						if (err) {
+							console.error('✗ [WGST][ERROR] ' + err);
+							return;
+						}
+
+						console.log('[WGST] Inserted metadata:');
+						console.dir(result);
+
+						console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
+						io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+							collectionId: collectionId,
+							assemblyId: assemblyId,
+							userAssemblyId: userAssemblyId,
+							status: "METADATA_OK ready",
+							result: "METADATA_OK",
+							socketRoomId: socketRoomId
+						});
+					});
+
+					// -----------------------------------------------------------
+					// Upload assembly
+					// -----------------------------------------------------------
+
+					var uploadQueueId = 'ART_ASSEMBLY_UPLOAD_' + assemblyId;
+
+					uploadExchange = uploadConnection.exchange('wgst-ex', {
+							type: 'direct',
+							passive: true,
+							durable: false,
+							confirm: false,
+							autoDelete: false,
+							noDeclare: false,
+							confirm: false
+						}, function(exchange) {
+							console.log('✔ [WGST][RabbitMQ] Upload exchange "' + exchange.name + '" is open');
+						});
+
+					// Prepare object to publish
+					var assembly = {
+						"speciesId" : "1280",
+						"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
+						"assemblyId": assemblyId,
+						"userAssemblyId" : userAssemblyId,
+						"taskId" : "Experiment_1",
+						"collectionId": collectionId
+					};
+
+					console.log('[WGST] Uploading assembly ' + assemblyId + ' to collection ' + collectionId);
+
+					// Publish message
+					uploadExchange.publish('upload', assembly, { 
+						mandatory: true,
+						contentType: 'application/json',
+						deliveryMode: 1,
+						correlationId: 'Art', // Generate UUID?
+						replyTo: uploadQueueId
+					}, function(err){
+						if (err) {
+							console.error('✗ [WGST][ERROR] Error when trying to publish to upload exchange');
+							return;
+						}
+
+						console.log('[WGST] Message was published to upload exchange');
+					});
+
+					uploadQueue = uploadConnection
+						.queue(uploadQueueId, {
+							passive: false,
+							durable: false,
+							exclusive: true,
+							autoDelete: true,
+							noDeclare: false,
+							closeChannelOnUnsubscribe: false
+						}, function(queue){
+							console.log('[WGST] Upload queue "' + queue.name + '" is open');
+						}) // Subscribe to response message
+						.subscribe(function(message, headers, deliveryInfo){
+							console.log('[WGST] Preparing metadata object');									
 
 							var buffer = new Buffer(message.data),
 								bufferJSON = buffer.toString(),
 								parsedMessage = JSON.parse(bufferJSON);
 
-							var messageAssemblyId = parsedMessage.assemblyId,
-								messageUserAssemblyId = parsedMessage.userAssemblyId;
+							console.log('[WGST] Received message from upload queue:');
+							console.dir(parsedMessage);
 
-							console.log('[WGST] Message assembly id: ' + messageAssemblyId);
-							console.log('[WGST] Message user assembly id: ' + messageUserAssemblyId);
-
-							// Check task type
-							if (parsedMessage.taskType === 'FP_COMP') {
-								console.log('[WGST] Emitting FP_COMP message for socketRoomId: ' + socketRoomId);
-								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
-									collectionId: collectionId,
-									assemblyId: messageAssemblyId,
-									userAssemblyId: messageUserAssemblyId,
-									status: "FP_COMP ready",
-									result: "FP_COMP",
-									socketRoomId: socketRoomId
-								});
-
-								readyResults.push('FP_COMP');
-
-							} else if (parsedMessage.taskType === 'MLST_RESULT') {
-								console.log('[WGST] Emitting MLST_RESULT message for socketRoomId: ' + socketRoomId);
-								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
-									collectionId: collectionId,
-									assemblyId: messageAssemblyId,
-									userAssemblyId: messageUserAssemblyId,
-									status: "MLST_RESULT ready",
-									result: "MLST_RESULT",
-									socketRoomId: socketRoomId
-								});
-
-								readyResults.push('MLST_RESULT');
-
-							} else if (parsedMessage.taskType === 'PAARSNP_RESULT') {
-								console.log('[WGST] Emitting PAARSNP_RESULT message for socketRoomId: ' + socketRoomId);
-								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
-									collectionId: collectionId,
-									assemblyId: messageAssemblyId,
-									userAssemblyId: messageUserAssemblyId,
-									status: "PAARSNP_RESULT ready",
-									result: "PAARSNP_RESULT",
-									socketRoomId: socketRoomId
-								});
-
-								readyResults.push('PAARSNP_RESULT');
-
-							} else if (parsedMessage.taskType === 'COLLECTION_TREE') {
-								console.log('[WGST] Emitting COLLECTION_TREE message for socketRoomId: ' + socketRoomId);
-								io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
-									collectionId: collectionId,
-									assemblyId: messageAssemblyId,
-									userAssemblyId: messageUserAssemblyId,
-									status: "COLLECTION_TREE ready",
-									result: "COLLECTION_TREE",
-									socketRoomId: socketRoomId
-								});
-
-								readyResults.push('COLLECTION_TREE');
-
-							} // else if
-
-
-							console.log('[LOGGING][IMPORTANT] readyResults.length: ' + readyResults.length);
-
-							// Destroy queue after all results were received
-							if (readyResults.length === 4) {
-
-								queue.unbind(notificationExchange, "*.ASSEMBLY." + assemblyId);
-								queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
-								//queue.destroy();
-								//notificationExchange.destroy();
-								//notificationConnection.end();
-							} // if
+							uploadConnection.end();
 						});
-
-						// -------------------------------------
-						// RabbitMQ Upload
-						// -------------------------------------
-
-						uploadConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
-
-						uploadConnection.on('error', function(error) {
-						    console.error("[WGST][ERROR] Upload connection: " + error);
-						});
-
-						uploadConnection.on("ready", function(){
-							console.log('[WGST] Upload connection is ready');
-
-
-									// -------------------------------------
-									// CouchBase Insert Metadata
-									// -------------------------------------
-
-									//console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-									//console.log(req.body);
-									//console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-
-									// Insert assembly metadata into db
-									var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
-										metadata = {
-											assemblyId: assemblyId,
-											assemblyUserId: req.body.name,
-											geographicLocation: {
-												type: 'Point',
-												coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
-											}
-										};
-
-										console.log('[WGST] Coordinates: ' + req.body.metadata.location.latitude + ', ' + req.body.metadata.location.longitude);
-
-									// var couchbase = require('couchbase');
-									// var db = new couchbase.Connection({
-									// 	host: 'http://129.31.26.151:8091/pools',
-									// 	bucket: 'test_wgst',
-									// 	password: '.oneir66'
-									// }, function(error) {
-									// 	if (error) {
-									// 		console.error('[WGST][ERROR] ' + error);
-									// 		return;
-									// 	}
-
-										console.log('[WGST] Inserting metadata with key: ' + metadataKey);
-
-										db.set(metadataKey, metadata, function(err, result) {
-											if (err) {
-												console.error('[WGST][ERROR] ' + err);
-												return;
-											}
-
-											console.log('[WGST] Inserted metadata:');
-											console.log(result);
-
-											console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
-											io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
-												collectionId: collectionId,
-												assemblyId: assemblyId,
-												userAssemblyId: userAssemblyId,
-												status: "METADATA_OK ready",
-												result: "METADATA_OK",
-												socketRoomId: socketRoomId
-											});
-
-										});
-									// });
-
-
-
-
-
-
-
-
-
-
-							var uploadQueueId = 'ART_ASSEMBLY_UPLOAD_' + assemblyId; //+ uuid.v4();
-
-							uploadExchange = uploadConnection.exchange('wgst-ex', {
-									type: 'direct',
-									passive: true,
-									durable: false,
-									confirm: false,
-									autoDelete: false,
-									noDeclare: false,
-									confirm: false
-								}, function(exchange) {
-									console.log('[WGST] Upload exchange "' + exchange.name + '" is open');
-								});
-
-							console.log('[WGST] User assembly id: ' + req.body.name);
-							console.log('[WGST] Collection id: ' + collectionId);
-
-							// Prepare object to publish
-							var assembly = {
-								"speciesId" : "1280",
-								"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
-								"assemblyId": assemblyId,
-								"userAssemblyId" : req.body.name,
-								"taskId" : "Experiment_1",
-								"collectionId": req.body.collectionId
-							};
-
-							// Publish message
-							uploadExchange.publish('upload', assembly, { 
-								mandatory: true,
-								contentType: 'application/json',
-								deliveryMode: 1,
-								correlationId: 'Art', // Generate UUID?
-								replyTo: uploadQueueId
-							}, function(err){
-								if (err) {
-									console.error('[WGST][ERROR] Error when trying to publish to upload exchange');
-									return;
-								}
-
-								console.log('[WGST] Message was published to upload exchange');
-							});
-
-							uploadQueue = uploadConnection
-								.queue(uploadQueueId, {
-									passive: false,
-									durable: false,
-									exclusive: true,
-									autoDelete: true,
-									noDeclare: false,
-									closeChannelOnUnsubscribe: false
-								}, function(queue){
-									console.log('[WGST] Upload queue "' + queue.name + '" is open');
-								}) // Subscribe to response message
-								.subscribe(function(message, headers, deliveryInfo){
-									console.log('[WGST] Preparing metadata object');									
-
-									var buffer = new Buffer(message.data),
-										bufferJSON = buffer.toString(),
-										parsedMessage = JSON.parse(bufferJSON);
-
-									console.log('[WGST] Received message from upload queue:');
-									console.log(parsedMessage);
-
-									//var assemblyId = parsedMessage.assemblyId;
-
-									//uploadQueue.destroy();
-									//uploadExchange.destroy();
-									uploadConnection.end();
-								});
-						});
-					});
+			});
+		});
 };
 
 // Return fingerprint data
@@ -529,119 +485,105 @@ exports.get = function(req, res) {
 };
 
 exports.apiGetAssembly = function(req, res) {
-	console.log('[WGST] Getting assembly with id: ' + req.body.assemblyId);
 
-	var requestedAssemblyId = req.body.assemblyId;
+	var assemblyId = req.body.assemblyId;
 
-	// Get requested assembly from db
-	var couchbase = require('couchbase');
-	var db = new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
-		bucket: 'test_wgst',
-		password: '.oneir66'
-	}, function(err) {
+	console.log('[WGST] Getting assembly with id: ' + assemblyId);
+
+	// Prepare query keys
+	var scoresQueryKey = 'FP_COMP_' + assemblyId,
+		metadataQueryKey = 'ASSEMBLY_METADATA_' + assemblyId,
+		resistanceProfileQueryKey = 'PAARSNP_RESULT_' + assemblyId,
+		mlstQueryKey = 'MLST_RESULT_' + assemblyId;
+
+	var queryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey];
+
+	console.log('[WGST] Query keys: ');
+	console.log(queryKeys);
+
+	couchbaseDatabaseConnection.getMulti(queryKeys, {}, function(err, results) {
+		console.log('[WGST] Got assemblies data');
+
 		if (err) throw err;
 
-		// Prepare query keys
-		var scoresQueryKey = 'FP_COMP_' + requestedAssemblyId,
-			metadataQueryKey = 'ASSEMBLY_METADATA_' + requestedAssemblyId,
-			resistanceProfileQueryKey = 'PAARSNP_RESULT_' + requestedAssemblyId,
-			mlstQueryKey = 'MLST_RESULT_' + requestedAssemblyId;
+		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
+		var assemblies = {},
+			assemblyId,
+			cleanAssemblyId,
+			mlstAllelesQueryKeys = [];
 
-		var queryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey];
+		for (assemblyId in results) {
+            // Parsing assembly scores
+            if (assemblyId.indexOf('FP_COMP_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
+            // Parsing assembly metadata
+            } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
+            // Parsing assembly resistance profile
+            } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
+            // Parsing MLST
+            } else if (assemblyId.indexOf('MLST_RESULT_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('MLST_RESULT_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['MLST_RESULT'] = results[assemblyId].value;
+			} // if
+		} // for
 
-		console.log('[WGST] Query keys: ');
-		console.log(queryKeys);
+		console.log('[WGST] Assembly with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data: ');
+		console.dir(assemblies);
+		
+		// Extract all MLST alleles query keys
+		var alleles = assemblies[cleanAssemblyId]['MLST_RESULT'].alleles;
 
-		db.getMulti(queryKeys, {}, function(err, results) {
-			console.log('[WGST] Got assemblies data: ');
-			console.log(results);
+		for (allele in alleles) {
+			if (alleles.hasOwnProperty(allele)) {
+				mlstAllelesQueryKeys.push(alleles[allele]);
+			}
+		}
 
-			if (err) throw err;
+		// Get MLST alleles data
+		getMlstAlleles(mlstAllelesQueryKeys, function(error, mlstAlleles){
+			if (error) {
+				throw error;
+			}
 
-			// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
-			var assemblies = {},
-				assemblyId,
-				cleanAssemblyId,
-				mlstAllelesQueryKeys = [];
+			var mlstAlleleAssemblyId,
+				mlstAlleleValue,
+				alleleId,
+				locusId;
 
-			for (assemblyId in results) {
-                // Parsing assembly scores
-                if (assemblyId.indexOf('FP_COMP_') !== -1) {
-                	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
-                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-					assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
-                // Parsing assembly metadata
-                } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
-                	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
-                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-					assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
-                // Parsing assembly resistance profile
-                } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
-                	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
-                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-					assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
-                // Parsing MLST
-                } else if (assemblyId.indexOf('MLST_RESULT_') !== -1) {
-                	cleanAssemblyId = assemblyId.replace('MLST_RESULT_','');
-                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-					assemblies[cleanAssemblyId]['MLST_RESULT'] = results[assemblyId].value;
+			// Parse mlst alleles data
+			for (var mlstAllele in mlstAlleles) {
+				console.log('[WGST] Parsing MLST allele data: ' + mlstAllele);
+
+				if (mlstAlleles.hasOwnProperty(mlstAllele)) {
+
+					// Get value object from query result object
+					mlstAlleleValue = mlstAlleles[mlstAllele].value;
+					// Get locus id from value object
+					locusId = mlstAlleleValue.locusId;
+					// Add allele value object to assembly object
+					assemblies[assemblyId].MLST_RESULT.alleles[locusId] = mlstAlleleValue;
+
 				} // if
 			} // for
 
-			console.log('[WGST] Assembly with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data: ');
-			console.log(assemblies);
-
-
-
-
-			
-			// Extract all MLST alleles query keys
-			var alleles = assemblies[cleanAssemblyId]['MLST_RESULT'].alleles;
-
-			for (allele in alleles) {
-				if (alleles.hasOwnProperty(allele)) {
-					mlstAllelesQueryKeys.push(alleles[allele]);
-				}
-			}
-
-			// Get MLST alleles data
-			getMlstAlleles(mlstAllelesQueryKeys, function(error, mlstAlleles){
+			// Get list of all antibiotics
+			getAllAntibiotics(function(error, antibiotics){
 				if (error) {
 					throw error;
 				}
 
-				var mlstAlleleAssemblyId,
-					mlstAlleleValue,
-					alleleId,
-					locusId;
-
-				// Parse mlst alleles data
-				for (var mlstAllele in mlstAlleles) {
-					console.log('[WGST] Parsing MLST allele data: ' + mlstAllele);
-
-					if (mlstAlleles.hasOwnProperty(mlstAllele)) {
-
-						// Get value object from query result object
-						mlstAlleleValue = mlstAlleles[mlstAllele].value;
-						// Get locus id from value object
-						locusId = mlstAlleleValue.locusId;
-						// Add allele value object to assembly object
-						assemblies[requestedAssemblyId].MLST_RESULT.alleles[locusId] = mlstAlleleValue;
-
-					} // if
-				} // for
-
-				// Get list of all antibiotics
-				getAllAntibiotics(function(error, antibiotics){
-					if (error) {
-						throw error;
-					}
-
-					res.json({
-						assemblies: assemblies,
-						antibiotics: antibiotics
-					});
+				res.json({
+					assemblies: assemblies,
+					antibiotics: antibiotics
 				});
 			});
 		});
@@ -843,14 +785,17 @@ var getAllAntibiotics = function(callback) {
 
 		// Get list of antibiotics
 		db.get('ANTIMICROBIALS_ALL', function(err, result) {
+
+			var antibiotics = result.value.antibiotics;
+
 			console.log('[WGST] Got list of all antibiotics: ');
-			console.log(result);
+			console.log(antibiotics);
 
 			if (err) {
 				callback(err, result);
 			}
 
-			callback(null, result.value.antibiotics);
+			callback(null, antibiotics);
 		});
 	});
 };
