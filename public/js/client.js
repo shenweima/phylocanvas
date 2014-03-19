@@ -594,6 +594,10 @@ $(function(){
                 //     renderCollectionTree(collectionTree, collectionId);
                 // });
 
+                // TO DO: Refactor
+                // Set collection id to collectionTree panel
+                $('.wgst-panel__collection-tree-panel').attr('data-collection-id', collectionId);
+
                 openPanel(['collection', 'collectionTree'], function(){
                     // Init collection tree
                     window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
@@ -706,6 +710,20 @@ $(function(){
         });
     };
 
+    $('.tree-controls-show-labels').on('click', function(){
+        // Get collection id
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+
+        window.WGST.collection[collectionId].tree.canvas.displayLabels();
+    });
+
+    $('.tree-controls-hide-labels').on('click', function(){
+        // Get collection id
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+
+        window.WGST.collection[collectionId].tree.canvas.hideLabels();
+    });
+
     var renderCollectionTree = function(collectionId) {
         console.log('[WGST] Rendering ' + collectionId + ' collection tree');
 
@@ -714,7 +732,7 @@ $(function(){
         // ==============================
         window.WGST.collection[collectionId].tree.canvas.parseNwk(window.WGST.collection[collectionId].tree.data);
         window.WGST.collection[collectionId].tree.canvas.treeType = 'rectangular';
-        //window.WGST.collectionTree.tree.showLabels = false;
+        window.WGST.collection[collectionId].tree.canvas.showLabels = false;
         window.WGST.collection[collectionId].tree.canvas.baseNodeSize = 0.5;
         window.WGST.collection[collectionId].tree.canvas.setTextSize(24);
         window.WGST.collection[collectionId].tree.canvas.selectedNodeSizeIncrease = 0.5;
@@ -929,6 +947,11 @@ $(function(){
         totalContigsSum = 0;
 
     var parseFastaFile = function(e, fileCounter, file, droppedFiles) {
+
+        // Init assembly upload metadata
+        window.WGST.upload.assembly[file.name] = {
+            metadata: {}
+        };
 
             // Array of contigs
         var contigs = [],
@@ -1557,13 +1580,17 @@ $(function(){
             google.maps.event.addListener(WGST.geo.metadataSearchBox[fileName], 'places_changed', function() {
 
                 // Get the place details from the autocomplete object.
-                var places = window.WGST.geo.metadataSearchBox[fileName].getPlaces();
+                var places = window.WGST.geo.metadataSearchBox[fileName].getPlaces(),
+                    place = places[0],
+                    latitude = place.geometry.location.lat(),
+                    longitude = place.geometry.location.lng(),
+                    formattedAddress = place.formatted_address;
 
                 console.log('[WGST] Google Places API first SearchBox place:');
-                console.log(places[0].formatted_address);
+                console.log(formattedAddress);
 
                 // Set first place to as input's value
-                $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-location-input').val(places[0].formatted_address);
+                $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-location-input').val(formattedAddress);
 
                 // Set map center to selected address
                 WGST.geo.map.setCenter(places[0].geometry.location);
@@ -1589,10 +1616,19 @@ $(function(){
                 });
                 */
 
-                // Remember latitude
-                autocompleteInput.attr('data-latitude', places[0].geometry.location.lat());
-                // Remember longitude
-                autocompleteInput.attr('data-longitude', places[0].geometry.location.lng());
+                window.WGST.upload.assembly[fileName] = window.WGST.upload.assembly[fileName] || {};
+                window.WGST.upload.assembly[fileName].metadata = window.WGST.upload.assembly[fileName].metadata || {};
+                window.WGST.upload.assembly[fileName].metadata.location = {
+                    latitude: latitude,
+                    longitude: longitude,
+                    formatted_address: formattedAddress,
+                    // https://developers.google.com/maps/documentation/geocoding/#Types
+                    type: place.types[0]
+                };
+
+                // Store provided metadata
+                //autocompleteInput.attr('data-latitude', places[0].geometry.location.lat());
+                //autocompleteInput.attr('data-longitude', places[0].geometry.location.lng());
             });
         }(file.name));
     
@@ -2257,11 +2293,6 @@ $(function(){
         var assemblyRow = $('.assembly-list-upload-progress tr[data-assembly-id="' + userAssemblyId + '"] '),
             assemblyRowProgressBar = assemblyRow.find('.progress-bar'),
             statusCompleteHtml = '<span class="glyphicon glyphicon-ok"></span>';
-            // STATUS_UPLOAD_OK = 'UPLOAD_OK',
-            // STATUS_MLST_RESULT = 'MLST_RESULT',
-            // STATUS_PAARSNP_RESULT = 'PAARSNP_RESULT',
-            // STATUS_FP_COMP = 'FP_COMP',
-            // STATUS_COLLECTION_TREE = 'COLLECTION_TREE';
 
         if (result === WGST.assembly.analysis.UPLOAD_OK) {
             assemblyRow.find('.assembly-upload-uploaded').html(statusCompleteHtml);
@@ -2644,15 +2675,9 @@ $(function(){
                 })
                 .done(function(data, textStatus, jqXHR) {
 
-                    var collectionIdResponse = JSON.parse(data),
-                        collectionId = collectionIdResponse.uuid,
-                        generatedAssemblyIds = collectionIdResponse.idMap;
-
-                    // Store upload status for this collection id
-                    WGST.upload[collectionId] = {};
-
-                    // Store ids of assemblies you're uploading
-                    //WGST.assemblyUploadProgress[collectionId] = [];
+                    var collectionIdData = JSON.parse(data),
+                        collectionId = collectionIdData.uuid,
+                        userAssemblyIdToAssemblyIdMap = collectionIdData.idMap;
 
                     WGST.upload.collection[collectionId] = {};
                     WGST.upload.collection[collectionId].notifications = {};
@@ -2663,9 +2688,9 @@ $(function(){
 
                     // Replace user assembly id (fasta file name) with assembly id generated on server side
                     var fastaFilesAndMetadataWithUpdatedIds = {};
-                    $.each(fastaFilesAndMetadata, function(key, value){
-                        var serverGenaratedAssemblyId = generatedAssemblyIds[key];
-                        fastaFilesAndMetadataWithUpdatedIds[serverGenaratedAssemblyId] = fastaFilesAndMetadata[key];
+                    $.each(fastaFilesAndMetadata, function(userAssemblyId){
+                        var assemblyId = userAssemblyIdToAssemblyIdMap[userAssemblyId];
+                        fastaFilesAndMetadataWithUpdatedIds[assemblyId] = fastaFilesAndMetadata[userAssemblyId];
                     });
 
                     fastaFilesAndMetadata = fastaFilesAndMetadataWithUpdatedIds;
@@ -2677,34 +2702,34 @@ $(function(){
                             // Increment counter
                             fastaFileCounter = fastaFileCounter + 1;
 
-                            //(function(){
+                            var savedCollectionId = collectionId;
 
-                                var savedCollectionId = collectionId;
+                            // Add collection id to each FASTA file object
+                            fastaFilesAndMetadata[assemblyId].collectionId = savedCollectionId;
 
-                                // Add collection id to each FASTA file object
-                                fastaFilesAndMetadata[assemblyId].collectionId = savedCollectionId;
+                            var autocompleteInput = $('li[data-name="' + fastaFilesAndMetadata[assemblyId].name + '"] .assembly-sample-location-input');
 
-                                var autocompleteInput = $('li[data-name="' + fastaFilesAndMetadata[assemblyId].name + '"] .assembly-sample-location-input');
+                            var fileName = fastaFilesAndMetadata[assemblyId].name;
 
-                                // Add metadata to each FASTA file object
-                                fastaFilesAndMetadata[assemblyId].metadata = {
-                                    location: {
-                                        // TO DO: Change 'data-name' to 'data-file-name'
-                                        latitude: autocompleteInput.attr('data-latitude'),
-                                        longitude: autocompleteInput.attr('data-longitude')
-                                    }
-                                };
+                            console.debug(fileName);
+                            console.dir(window.WGST.upload);
 
-                                console.log('[WGST] Metadata for ' + assemblyId + ': ');
-                                console.log(fastaFilesAndMetadata[assemblyId].metadata);
+                            // Add metadata to each FASTA file object
+                            fastaFilesAndMetadata[assemblyId].metadata = {
+                                location: {
+                                    // TO DO: Change 'data-name' to 'data-file-name'
+                                    latitude: window.WGST.upload.assembly[fileName].metadata.location.latitude, //autocompleteInput.attr('data-latitude'),
+                                    longitude: window.WGST.upload.assembly[fileName].metadata.location.longitude //autocompleteInput.attr('data-longitude')
+                                }
+                            };
 
-                                (function() {
+                            console.log('[WGST] Metadata for ' + assemblyId + ': ');
+                            console.log(fastaFilesAndMetadata[assemblyId].metadata);
 
-                                    uploadAssembly(collectionId, assemblyId);
-
-                                })();
-
-                            //})();
+                            // Create closure to save collectionId and assemblyId
+                            (function() {
+                                uploadAssembly(collectionId, assemblyId);
+                            })();
 
                         } // if
                     } // for
@@ -2775,6 +2800,14 @@ $(function(){
 
     $('.wgst-panel__assembly-upload-metadata').on('click', '.apply-to-all-assemblies-button', function(){
 
+        // Copy the same metadata to all assemblies
+        var sourceFileName = $(this).closest('.assembly-item').attr('data-name'),
+            sourceMetadata = window.WGST.upload.assembly[sourceFileName].metadata;
+
+        $.each(window.WGST.upload.assembly, function(destinationFileName, destinationMetadata){
+            window.WGST.upload.assembly[destinationFileName].metadata = sourceMetadata;
+        });
+
         // Get metadata from selected assembly
         var metadataElementTimestamp = $(this).closest('.assembly-metadata').find('.assembly-sample-datetime-input'),
             metadataElementLocation = $(this).closest('.assembly-metadata').find('.assembly-sample-location-input');
@@ -2783,9 +2816,9 @@ $(function(){
         $('.assembly-metadata').find('.assembly-sample-datetime-input').val(metadataElementTimestamp.val());
         $('.assembly-metadata').find('.assembly-sample-location-input').val(metadataElementLocation.val());
 
-        // Set data
-        $('.assembly-metadata').find('.assembly-sample-location-input').attr('data-latitude', metadataElementLocation.attr('data-latitude'));
-        $('.assembly-metadata').find('.assembly-sample-location-input').attr('data-longitude', metadataElementLocation.attr('data-longitude'));
+        // // Set data
+        // $('.assembly-metadata').find('.assembly-sample-location-input').attr('data-latitude', metadataElementLocation.attr('data-latitude'));
+        // $('.assembly-metadata').find('.assembly-sample-location-input').attr('data-longitude', metadataElementLocation.attr('data-longitude'));
 
         // Show metadata
         $('.assembly-metadata-block').show();

@@ -339,7 +339,7 @@
 
 
         <!-- Collection tree -->
-        <div class="wgst-panel wgst-panel__collection-tree-panel wgst-panel--active wgst-draggable" data-panel-name="collectionTree">
+        <div class="wgst-panel wgst-panel__collection-tree-panel wgst-panel--active wgst-draggable" data-panel-name="collectionTree" data-collection-id="">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Collection Tree</h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
@@ -350,6 +350,10 @@
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-default tree-controls-select-all">Select all nodes</button>
                 <button type="button" class="btn btn-sm btn-default tree-controls-select-none">Deselect all nodes</button>
+              </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-default tree-controls-show-labels">Show labels</button>
+                <button type="button" class="btn btn-sm btn-default tree-controls-hide-labels">Hide labels</button>
               </div>
             </div>
             <div class="phylocanvas"></div>
