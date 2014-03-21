@@ -320,67 +320,82 @@ exports.get = function(req, res) {
 
 exports.apiGetAssembly = function(req, res) {
 
-	var assemblyId = req.body.assemblyId;
+	var requestedAssemblyId = req.body.assemblyId;
 
-	console.log('[WGST] Getting assembly with id: ' + assemblyId);
+	console.log('[WGST] Getting assembly with id: ' + requestedAssemblyId);
 
 	// Prepare query keys
-	var scoresQueryKey = 'FP_COMP_' + assemblyId,
-		metadataQueryKey = 'ASSEMBLY_METADATA_' + assemblyId,
-		resistanceProfileQueryKey = 'PAARSNP_RESULT_' + assemblyId,
-		mlstQueryKey = 'MLST_RESULT_' + assemblyId;
+	var scoresQueryKey = 'FP_COMP_' + requestedAssemblyId,
+		metadataQueryKey = 'ASSEMBLY_METADATA_' + requestedAssemblyId,
+		resistanceProfileQueryKey = 'PAARSNP_RESULT_' + requestedAssemblyId,
+		mlstQueryKey = 'MLST_RESULT_' + requestedAssemblyId;
 
-	var queryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey];
+	var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey];
 
-	console.log('[WGST] Query keys: ');
-	console.log(queryKeys);
+	console.log('[WGST] Assembly query keys: ');
+	console.dir(assemblyQueryKeys);
 
-	couchbaseDatabaseConnection.getMulti(queryKeys, {}, function(err, results) {
-		console.log('[WGST] Got assemblies data');
+	couchbaseDatabaseConnection.getMulti(assemblyQueryKeys, {}, function(err, assemblyData) {
+		console.log('[WGST] Got assembly data');
+		console.dir(assemblyData);
 
 		if (err) throw err;
 
 		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
-		var assemblies = {},
+		var //assemblies = {},
+			assembly = {},
 			assemblyId,
+			assemblyIdKey,
 			cleanAssemblyId,
 			mlstAllelesQueryKeys = [];
 
-		for (assemblyId in results) {
+		for (assemblyKey in assemblyData) {
             // Parsing assembly scores
-            if (assemblyId.indexOf('FP_COMP_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
+            if (assemblyKey.indexOf('FP_COMP_') !== -1) {
+            	assemblyId = assemblyKey.replace('FP_COMP_','');
+            	//assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assembly['FP_COMP'] = assemblyData[assemblyKey].value;
             // Parsing assembly metadata
-            } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
+            } else if (assemblyKey.indexOf('ASSEMBLY_METADATA_') !== -1) {
+            	assemblyId = assemblyKey.replace('ASSEMBLY_METADATA_','');
+            	//assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assembly['ASSEMBLY_METADATA'] = assemblyData[assemblyKey].value;
             // Parsing assembly resistance profile
-            } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
+            } else if (assemblyKey.indexOf('PAARSNP_RESULT_') !== -1) {
+            	assemblyId = assemblyKey.replace('PAARSNP_RESULT_','');
+            	//assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assembly['PAARSNP_RESULT'] = assemblyData[assemblyKey].value;
             // Parsing MLST
-            } else if (assemblyId.indexOf('MLST_RESULT_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('MLST_RESULT_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['MLST_RESULT'] = results[assemblyId].value;
+            } else if (assemblyKey.indexOf('MLST_RESULT_') !== -1) {
+            	assemblyId = assemblyKey.replace('MLST_RESULT_','');
+            	//assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assembly['MLST_RESULT'] = assemblyData[assemblyKey].value;
 			} // if
 		} // for
 
 		console.log('[WGST] Assembly with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data: ');
-		console.dir(assemblies);
+		console.dir(assembly);
 		
 		// Extract all MLST alleles query keys
-		var alleles = assemblies[cleanAssemblyId]['MLST_RESULT'].alleles;
+		//var alleles = assemblies[cleanAssemblyId]['MLST_RESULT'].alleles;
+		var alleles = assembly['MLST_RESULT'].alleles,
+			alleleQueryKey;
+
+		console.log('>>> alleles:');
+		console.dir(alleles);
 
 		for (allele in alleles) {
 			if (alleles.hasOwnProperty(allele)) {
-				mlstAllelesQueryKeys.push(alleles[allele]);
+				alleleQueryKey = alleles[allele];
+				// Allele can be 'null'. If that happens - replace it with 'None' and don't add it to query keys array
+				if (alleleQueryKey !== null) {
+					mlstAllelesQueryKeys.push(alleleQueryKey);
+				}
 			}
 		}
+
+		console.log('>>> mlstAllelesQueryKeys:');
+		console.dir(mlstAllelesQueryKeys);
 
 		// Get MLST alleles data
 		getMlstAlleles(mlstAllelesQueryKeys, function(error, mlstAlleles){
@@ -388,26 +403,33 @@ exports.apiGetAssembly = function(req, res) {
 				throw error;
 			}
 
-			var mlstAlleleAssemblyId,
-				mlstAlleleValue,
-				alleleId,
+			var mlstAlleleValue,
+				mlstAllele,
 				locusId;
 
-			// Parse mlst alleles data
-			for (var mlstAllele in mlstAlleles) {
-				console.log('[WGST] Parsing MLST allele data: ' + mlstAllele);
+			console.log('>>> assemblyId: ' + assemblyId);
 
-				if (mlstAlleles.hasOwnProperty(mlstAllele)) {
+			// Check if any MLST alleles data returned
+			if (Object.keys(mlstAlleles).length > 0) {
+				// Parse MLST alleles data
+				for (mlstAllele in mlstAlleles) {
+					if (mlstAlleles.hasOwnProperty(mlstAllele)) {
 
-					// Get value object from query result object
-					mlstAlleleValue = mlstAlleles[mlstAllele].value;
-					// Get locus id from value object
-					locusId = mlstAlleleValue.locusId;
-					// Add allele value object to assembly object
-					assemblies[assemblyId].MLST_RESULT.alleles[locusId] = mlstAlleleValue;
+						console.log('[WGST] Parsing MLST allele data:');
+						console.dir(mlstAllele);
 
-				} // if
-			} // for
+						// Get value object from query result object
+						mlstAlleleValue = mlstAlleles[mlstAllele].value;
+						// Get locus id from value object
+						locusId = mlstAlleleValue.locusId;
+						// Add allele value object to assembly object
+						assembly.MLST_RESULT.alleles[locusId] = mlstAlleleValue;
+					} // if
+				} // for				
+			} // if
+
+			console.log('>>> assembly.MLST_RESULT.alleles:');
+			console.dir(assembly.MLST_RESULT.alleles);
 
 			// Get list of all antibiotics
 			getAllAntibiotics(function(error, antibiotics){
@@ -416,7 +438,7 @@ exports.apiGetAssembly = function(req, res) {
 				}
 
 				res.json({
-					assemblies: assemblies,
+					assembly: assembly,
 					antibiotics: antibiotics
 				});
 			});
@@ -425,7 +447,12 @@ exports.apiGetAssembly = function(req, res) {
 };
 
 var getMlstAlleles = function(queryKeys, callback) {
-	console.log('[WGST] Getting MLST alleles data.');
+	console.log('[WGST] Getting MLST alleles data');
+
+	if (queryKeys.length === 0) {
+		callback(null, {});
+		return;
+	}
 
 	var couchbase = require('couchbase');
 	var db = new couchbase.Connection({
@@ -435,7 +462,9 @@ var getMlstAlleles = function(queryKeys, callback) {
 	}, function(err) {
 		if (err) throw err;
 
-		// Get list of antibiotics
+		console.log('>>> queryKeys:');
+		console.dir(queryKeys);
+
 		db.getMulti(queryKeys, {}, function(err, result) {
 			console.log('[WGST] Got MLST alleles data: ');
 			console.log(result);
@@ -623,7 +652,7 @@ var getAllAntibiotics = function(callback) {
 			var antibiotics = result.value.antibiotics;
 
 			console.log('[WGST] Got list of all antibiotics: ');
-			console.log(antibiotics);
+			//console.dir(antibiotics);
 
 			if (err) {
 				callback(err, result);

@@ -259,7 +259,7 @@ $(function(){
         // Init jQuery UI draggable interaction
         $('.wgst-draggable').draggable({
             handle: ".wgst-draggable-handle",
-            containment: "window",
+            //containment: "window",
             stop: function(event, ui) {
                 // Store current panel position
                 var panelName = ui.helper.attr('data-panel-name');
@@ -2887,13 +2887,13 @@ $(function(){
         })
         .done(function(data, textStatus, jqXHR) {
             console.log('[WGST] Received data for assembly id: ' + assemblyId);
-            console.log(data);
+            console.dir(data);
 
             // ============================================================
             // Prepare assembly panel
             // ============================================================
 
-            var assembly = data.assemblies[assemblyId],
+            var assembly = data.assembly,
                 assemblyPanel = $('.wgst-panel__assembly-panel');
 
             // Set assembly name
@@ -2982,6 +2982,8 @@ $(function(){
             // ============================================================
 
             var assemblyAlleles = assembly.MLST_RESULT.alleles,
+                assemblyAllele,
+                assemblyAlleleName,
                 assemblyMlstHtml =
                 '<table>'
                     + '<tbody>'
@@ -2998,12 +3000,19 @@ $(function(){
                 locusDataHtml = '',
                 alleleDataHtml = '';
 
-            for (var assemblyAllele in assemblyAlleles) {
-                if (assemblyAlleles.hasOwnProperty(assemblyAllele)) {
+            console.debug('assemblyAlleles:');
+            console.dir(assemblyAlleles);
 
-                    locusDataHtml = locusDataHtml + '<td>' + assemblyAlleles[assemblyAllele].locusId + '</td>'
-                    alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAllele].alleleId + '</td>';
-
+            for (assemblyAlleleName in assemblyAlleles) {
+                if (assemblyAlleles.hasOwnProperty(assemblyAlleleName)) {
+                    assemblyAllele = assemblyAlleles[assemblyAlleleName];
+                    if (assemblyAllele === null) {
+                        locusDataHtml = locusDataHtml + '<td>' + 'None' + '</td>';
+                        alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleleName + '</td>';
+                    } else {
+                        locusDataHtml = locusDataHtml + '<td>' + assemblyAlleles[assemblyAlleleName].locusId + '</td>';
+                        alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAlleleName].alleleId + '</td>';
+                    }
                 } // if
             } // for
 
