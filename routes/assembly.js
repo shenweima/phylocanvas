@@ -199,7 +199,7 @@ exports.add = function(req, res) {
 
 					console.log('[WGST] Inserting metadata with key: ' + metadataKey);
 
-					couchbaseDatabaseConnection.set(metadataKey, metadata, function(err, result) {
+					couchbaseDatabaseConnections[testWgstBucket].set(metadataKey, metadata, function(err, result) {
 						if (err) {
 							console.error('✗ [WGST][ERROR] ' + err);
 							return;
@@ -335,7 +335,7 @@ exports.apiGetAssembly = function(req, res) {
 	console.log('[WGST] Assembly query keys: ');
 	console.dir(assemblyQueryKeys);
 
-	couchbaseDatabaseConnection.getMulti(assemblyQueryKeys, {}, function(err, assemblyData) {
+	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyQueryKeys, {}, function(err, assemblyData) {
 		console.log('[WGST] Got assembly data');
 		console.dir(assemblyData);
 
@@ -636,18 +636,21 @@ exports.getAllAntibiotics = function(req, res) {
 };
 
 var getAllAntibiotics = function(callback) {
-	console.log('[WGST] Getting list of all antibiotics.');
+	console.log('[WGST] Getting list of all antibiotics');
 
-	var couchbase = require('couchbase');
-	var db = new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
-		bucket: 'test_wgst_resources',
-		password: '.oneir66'
-	}, function(err) {
-		if (err) throw err;
+
+
+
+	// var couchbase = require('couchbase');
+	// var db = new couchbase.Connection({
+	// 	host: 'http://129.31.26.151:8091/pools',
+	// 	bucket: 'test_wgst_resources',
+	// 	password: '.oneir66'
+	// }, function(err) {
+	// 	if (err) throw err;
 
 		// Get list of antibiotics
-		db.get('ANTIMICROBIALS_ALL', function(err, result) {
+		couchbaseDatabaseConnections[testWgstResourcesBucket].get('ANTIMICROBIALS_ALL', function(err, result) {
 
 			var antibiotics = result.value.antibiotics;
 
@@ -660,5 +663,5 @@ var getAllAntibiotics = function(callback) {
 
 			callback(null, antibiotics);
 		});
-	});
+	// });
 };

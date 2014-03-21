@@ -138,15 +138,50 @@ io.sockets.on('connection', function (socketConnection) {
 var couchbase = require('couchbase');
 
 // Global variable on purpose - will store socket connection and will be shared with routes
-couchbaseDatabaseConnection = new couchbase.Connection({
-	host: 'http://129.31.26.151:8091/pools',
-	bucket: 'test_wgst',
-	password: '.oneir66'
-}, function(error) {
-	if (error) {
-		console.error('✗ [WGST][Couchbase][ERROR] ' + error);
-		return;
-	}
+couchbaseDatabaseConnections = {},
+testWgstBucket = 'test_wgst',
+testWgstResourcesBucket = 'test_wgst_resources';
 
-	console.log('✔ [WGST][Couchbase] Successfuly opened Couchbase connection to "test_wgst" bucket');
-});
+var createCouchbaseConnection = function(bucketName) {
+	return new couchbase.Connection({
+		host: 'http://129.31.26.151:8091/pools',
+		bucket: bucketName,
+		password: '.oneir66'
+	}, function(error) {
+		if (error) {
+			console.error('✗ [WGST][Couchbase][ERROR] ' + error);
+			return;
+		}
+
+		console.log('✔ [WGST][Couchbase] Successfuly opened Couchbase connection to "' + bucketName + '" bucket');
+	});
+};
+
+couchbaseDatabaseConnections[testWgstBucket] = createCouchbaseConnection(testWgstBucket);
+couchbaseDatabaseConnections[testWgstResourcesBucket] = createCouchbaseConnection(testWgstResourcesBucket);
+
+// couchbaseDatabaseConnections[testWgstBucket] = new couchbase.Connection({
+// 	host: 'http://129.31.26.151:8091/pools',
+// 	bucket: testWgstBucket,
+// 	password: '.oneir66'
+// }, function(error) {
+// 	if (error) {
+// 		console.error('✗ [WGST][Couchbase][ERROR] ' + error);
+// 		return;
+// 	}
+
+// 	console.log('✔ [WGST][Couchbase] Successfuly opened Couchbase connection to "' + testWgstBucket + '" bucket');
+// });
+
+// couchbaseDatabaseConnections[testWgstResourcesBucket] = new couchbase.Connection({
+// 	host: 'http://129.31.26.151:8091/pools',
+// 	bucket: testWgstResourcesBucket,
+// 	password: '.oneir66'
+// }, function(error) {
+// 	if (error) {
+// 		console.error('✗ [WGST][Couchbase][ERROR] ' + error);
+// 		return;
+// 	}
+
+// 	console.log('✔ [WGST][Couchbase] Successfuly opened Couchbase connection to "' + testWgstResourcesBucket + '" bucket');
+// });

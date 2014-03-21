@@ -118,7 +118,7 @@ var getAssemblies = function(assemblyIds, callback) {
 	console.log('[WGST] Querying keys: ');
 	console.dir(assemblyIds);
 
-	couchbaseDatabaseConnection.getMulti(assemblyIds, {}, function(err, results) {
+	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIds, {}, function(err, results) {
 		console.log('[WGST] Got assemblies data');
 		//console.dir(results);
 
@@ -163,7 +163,7 @@ var getCollection = function(collectionId, callback) {
 	console.log('[WGST] Getting collection ' + collectionId);
 
 	// Get list of assemblies
-	couchbaseDatabaseConnection.get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
+	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
 		if (err) throw err;
 
 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
@@ -177,7 +177,7 @@ var getCollection = function(collectionId, callback) {
 			collection.assemblies = assemblies;
 
 			// Get collection tree data
-			couchbaseDatabaseConnection.get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+			couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
 				if (err) throw err;
 
 				var collectionTreeData = collectionTreeData.value.newickTree;
@@ -203,7 +203,7 @@ exports.apiGetCollection = function(req, res) {
 	console.log('[WGST] Getting collection ' + collectionId);
 
 	// Get list of assemblies
-	couchbaseDatabaseConnection.get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
+	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
 		if (err) throw err;
 
 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
@@ -219,7 +219,7 @@ exports.apiGetCollection = function(req, res) {
 			collection.assemblies = assemblies;
 
 			// Get collection tree data
-			couchbaseDatabaseConnection.get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+			couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
 
 				if (err) throw err;
 
