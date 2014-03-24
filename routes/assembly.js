@@ -89,7 +89,7 @@ exports.add = function(req, res) {
 
 			// Subscribe to response message
 			queue.subscribe(function(message, headers, deliveryInfo){
-				console.log('[WGST] Received RabbitMQ notification message:');
+				console.log('[WGST][RabbitMQ] Received notification message');
 
 				var buffer = new Buffer(message.data),
 					bufferJSON = buffer.toString(),
@@ -103,7 +103,7 @@ exports.add = function(req, res) {
 
 				// Check task type
 				if (parsedMessage.taskType === 'FP_COMP') {
-					console.log('[WGST] Emitting FP_COMP message for socketRoomId: ' + socketRoomId);
+					console.log('[WGST][Socket.io] Emitting FP_COMP message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
 						assemblyId: messageAssemblyId,
@@ -116,7 +116,7 @@ exports.add = function(req, res) {
 					readyResults.push('FP_COMP');
 
 				} else if (parsedMessage.taskType === 'MLST_RESULT') {
-					console.log('[WGST] Emitting MLST_RESULT message for socketRoomId: ' + socketRoomId);
+					console.log('[WGST][Socket.io] Emitting MLST_RESULT message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
 						assemblyId: messageAssemblyId,
@@ -129,7 +129,7 @@ exports.add = function(req, res) {
 					readyResults.push('MLST_RESULT');
 
 				} else if (parsedMessage.taskType === 'PAARSNP_RESULT') {
-					console.log('[WGST] Emitting PAARSNP_RESULT message for socketRoomId: ' + socketRoomId);
+					console.log('[WGST][Socket.io] Emitting PAARSNP_RESULT message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
 						assemblyId: messageAssemblyId,
@@ -142,7 +142,7 @@ exports.add = function(req, res) {
 					readyResults.push('PAARSNP_RESULT');
 
 				} else if (parsedMessage.taskType === 'COLLECTION_TREE') {
-					console.log('[WGST] Emitting COLLECTION_TREE message for socketRoomId: ' + socketRoomId);
+					console.log('[WGST][Socket.io] Emitting COLLECTION_TREE message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
 						assemblyId: messageAssemblyId,
@@ -156,12 +156,8 @@ exports.add = function(req, res) {
 
 				} // else if
 
-
-				console.log('[LOGGING][IMPORTANT] readyResults.length: ' + readyResults.length);
-
-				// Destroy queue after all results were received
+				// Unbind queue after all results were received
 				if (readyResults.length === 4) {
-
 					queue.unbind(notificationExchange, "*.ASSEMBLY." + assemblyId);
 					queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
 					//queue.destroy();
@@ -177,7 +173,7 @@ exports.add = function(req, res) {
 			uploadConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
 			uploadConnection.on('error', function(error) {
-			    console.error("✗ [WGST][ERROR] Upload connection: " + error);
+			    console.error('✗ [WGST][ERROR] Upload connection: ' + error);
 			});
 
 			uploadConnection.on("ready", function(){

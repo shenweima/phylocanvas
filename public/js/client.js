@@ -1,76 +1,4 @@
 // ============================================================
-// Polyfills
-// ============================================================    
-
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
-if (!Array.prototype.filter) {
-  Array.prototype.filter = function (fn, context) {
-    var i,
-        value,
-        result = [],
-        length;
-
-        if (!this || typeof fn !== 'function' || (fn instanceof RegExp)) {
-          throw new TypeError();
-        }
-
-        length = this.length;
-
-        for (i = 0; i < length; i++) {
-          if (this.hasOwnProperty(i)) {
-            value = this[i];
-            if (fn.call(context, value, i, this)) {
-              result.push(value);
-            }
-          }
-        }
-    return result;
-  };
-}
-
-// From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
-if (!Object.keys) {
-  Object.keys = (function () {
-    'use strict';
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-        hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
-        dontEnums = [
-          'toString',
-          'toLocaleString',
-          'valueOf',
-          'hasOwnProperty',
-          'isPrototypeOf',
-          'propertyIsEnumerable',
-          'constructor'
-        ],
-        dontEnumsLength = dontEnums.length;
-
-    return function (obj) {
-      if (typeof obj !== 'object' && (typeof obj !== 'function' || obj === null)) {
-        throw new TypeError('Object.keys called on non-object');
-      }
-
-      var result = [], prop, i;
-
-      for (prop in obj) {
-        if (hasOwnProperty.call(obj, prop)) {
-          result.push(prop);
-        }
-      }
-
-      if (hasDontEnumBug) {
-        for (i = 0; i < dontEnumsLength; i++) {
-          if (hasOwnProperty.call(obj, dontEnums[i])) {
-            result.push(dontEnums[i]);
-          }
-        }
-      }
-      return result;
-    };
-  }());
-}
-
-// ============================================================
 // App
 // ============================================================
 
@@ -139,6 +67,9 @@ $(function(){
         collection: {},
         assembly: {}
     };
+
+    WGST.settings = WGST.settings || {};
+    WGST.settings.representativeCollectionId = '59b792aa-b892-4106-b1dd-2e9e78abefc4';
 
     // ============================================================
     // Manage panels
@@ -334,10 +265,10 @@ $(function(){
         $('.graph-toggle-button').trigger('click');
 
         // Open socket.io connection
-        socket.on('pong', function(data) {
-            console.log('[WGST][Socket.IO] Received pong:');
-            console.log(data);
-        });
+        // socket.on('pong', function(data) {
+        //     console.log('[WGST][Socket.IO] Received pong:');
+        //     console.log(data);
+        // });
         
         // Set socket room id
         socket.on('roomId', function(roomId) {
@@ -430,7 +361,7 @@ $(function(){
             }
         })
         .done(function(data, textStatus, jqXHR) {
-            console.log('[WGST] Got ' + collectionId + ' collection: ');
+            console.log('[WGST] Got collection ' + collectionId + ':');
             console.dir(data);
 
             window.WGST.collection[collectionId].tree.data = data.tree.data;
@@ -450,13 +381,7 @@ $(function(){
                 data: {}
             })
             .done(function(antibiotics, textStatus, jqXHR) {
-                console.log('[WGST] Got list of all antibiotics:');
-                console.log(antibiotics);
-
-                // TO DO: Refactor: Rename data to assemblies
-                //data = assemblies;
-
-                //var assemblies = window.WGST.collection[collectionId].assemblies;
+                console.log('[WGST] Got list of all antibiotics');
 
                 var assemblyId,
                     assemblyIds = Object.keys(assemblies),
@@ -482,7 +407,10 @@ $(function(){
                     // --------------------------------------------------------------------------------
                     // Replace assembly id with user assembly id in collection tree newick string
                     // --------------------------------------------------------------------------------
-                    window.WGST.collection[collectionId].tree.data = window.WGST.collection[collectionId].tree.data.replace(assemblyId, assemblies[assemblyId]['ASSEMBLY_METADATA'].assemblyUserId);
+                    //window.WGST.collection[collectionId].tree.data = window.WGST.collection[collectionId].tree.data.replace(assemblyId, assemblies[assemblyId]['ASSEMBLY_METADATA'].assemblyUserId);
+
+                    console.debug("assemblies[assemblyId]['FP_COMP'].scores:");
+                    console.dir(assemblies[assemblyId]['FP_COMP'].scores);
 
                     // Get top score for this assembly
                     assemblyTopScore = getAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
@@ -597,6 +525,8 @@ $(function(){
                 // TO DO: Refactor
                 // Set collection id to collectionTree panel
                 $('.wgst-panel__collection-tree-panel').attr('data-collection-id', collectionId);
+                // Set collection id to collection panel
+                $('.wgst-panel__collection-panel').attr('data-collection-id', collectionId);
 
                 openPanel(['collection', 'collectionTree'], function(){
                     // Init collection tree
@@ -652,63 +582,63 @@ $(function(){
         }
     };
 
-    var loadRepresentativeTree = function() {
-        console.log('[WGST] Getting representative tree');
+    // var loadRepresentativeTree = function() {
+    //     console.log('[WGST] Getting representative tree');
 
-        // ==============================
-        // Load representative tree
-        // ==============================
-        window.WGST.representativeTree.tree.load('/data/reference_tree.nwk');
-        window.WGST.representativeTree.tree.treeType = 'rectangular';
-        //window.WGST.representativeTree.tree.showLabels = false;
-        window.WGST.representativeTree.tree.baseNodeSize = 0.5;
-        window.WGST.representativeTree.tree.setTextSize(24);
-        window.WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
-        window.WGST.representativeTree.tree.selectedColor = '#0059DE';
-        window.WGST.representativeTree.tree.rightClickZoom = true;
-        window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
+    //     // ==============================
+    //     // Load representative tree
+    //     // ==============================
+    //     window.WGST.representativeTree.tree.load('/data/reference_tree.nwk');
+    //     window.WGST.representativeTree.tree.treeType = 'rectangular';
+    //     //window.WGST.representativeTree.tree.showLabels = false;
+    //     window.WGST.representativeTree.tree.baseNodeSize = 0.5;
+    //     window.WGST.representativeTree.tree.setTextSize(24);
+    //     window.WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
+    //     window.WGST.representativeTree.tree.selectedColor = '#0059DE';
+    //     window.WGST.representativeTree.tree.rightClickZoom = true;
+    //     window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
 
-        // ==============================
-        // Load reference tree metadata
-        // ==============================
-        console.log('[WGST] Getting representative tree metadata');
+    //     // ==============================
+    //     // Load reference tree metadata
+    //     // ==============================
+    //     console.log('[WGST] Getting representative tree metadata');
 
-        $.ajax({
-            type: 'POST',
-            url: '/representative-tree-metadata/',
-            datatype: 'json', // http://stackoverflow.com/a/9155217
-            data: {}
-        })
-        .done(function(data, textStatus, jqXHR) {
-            console.log('[WGST] Got representative tree metadata');
-            console.dir(data.value);
+    //     $.ajax({
+    //         type: 'POST',
+    //         url: '/representative-tree-metadata/',
+    //         datatype: 'json', // http://stackoverflow.com/a/9155217
+    //         data: {}
+    //     })
+    //     .done(function(data, textStatus, jqXHR) {
+    //         console.log('[WGST] Got representative tree metadata');
+    //         console.dir(data.value);
 
-            // Create representative tree markers
-            var metadataCounter = data.value.metadata.length,
-                metadata = data.value.metadata,
-                accession,
-                marker;
+    //         // Create representative tree markers
+    //         var metadataCounter = data.value.metadata.length,
+    //             metadata = data.value.metadata,
+    //             accession,
+    //             marker;
 
-            for (; metadataCounter !== 0;) {
-                // Decrement counter
-                metadataCounter = metadataCounter - 1;
+    //         for (; metadataCounter !== 0;) {
+    //             // Decrement counter
+    //             metadataCounter = metadataCounter - 1;
 
-                //console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
-                //console.log(metadata[metadataCounter]);
+    //             //console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
+    //             //console.log(metadata[metadataCounter]);
 
-                accession = metadata[metadataCounter].accession;
+    //             accession = metadata[metadataCounter].accession;
 
-                // Set representative tree metadata
-                window.WGST.representativeTree[accession] = metadata[metadataCounter];
-            } // for
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.log('[WGST][ERROR] Failed to get representative tree metadata');
-            console.error(textStatus);
-            console.error(errorThrown);
-            console.error(jqXHR);
-        });
-    };
+    //             // Set representative tree metadata
+    //             window.WGST.representativeTree[accession] = metadata[metadataCounter];
+    //         } // for
+    //     })
+    //     .fail(function(jqXHR, textStatus, errorThrown) {
+    //         console.log('[WGST][ERROR] Failed to get representative tree metadata');
+    //         console.error(textStatus);
+    //         console.error(errorThrown);
+    //         console.error(jqXHR);
+    //     });
+    // };
 
     $('.tree-controls-show-labels').on('click', function(){
         // Get collection id
@@ -727,20 +657,35 @@ $(function(){
     var renderCollectionTree = function(collectionId) {
         console.log('[WGST] Rendering ' + collectionId + ' collection tree');
 
+        var tree = window.WGST.collection[collectionId].tree.canvas,
+            assemblies = window.WGST.collection[collectionId].assemblies,
+            assemblyId;
+
         // ==============================
         // Render collection tree
         // ==============================
-        window.WGST.collection[collectionId].tree.canvas.parseNwk(window.WGST.collection[collectionId].tree.data);
-        window.WGST.collection[collectionId].tree.canvas.treeType = 'rectangular';
-        window.WGST.collection[collectionId].tree.canvas.showLabels = false;
-        window.WGST.collection[collectionId].tree.canvas.baseNodeSize = 0.5;
-        window.WGST.collection[collectionId].tree.canvas.setTextSize(24);
-        window.WGST.collection[collectionId].tree.canvas.selectedNodeSizeIncrease = 0.5;
-        window.WGST.collection[collectionId].tree.canvas.selectedColor = '#0059DE';
-        window.WGST.collection[collectionId].tree.canvas.rightClickZoom = true;
+        tree.parseNwk(window.WGST.collection[collectionId].tree.data);
+        tree.treeType = 'rectangular';
+        tree.showLabels = false;
+        tree.baseNodeSize = 0.5;
+        tree.setTextSize(24);
+        tree.selectedNodeSizeIncrease = 0.5;
+        tree.selectedColor = '#0059DE';
+        tree.rightClickZoom = true;
         //window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
 
-        //window.WGST.collection.tree.redrawOriginalTree();
+        // Set user assembly id as node label
+        for (assemblyId in assemblies) {
+            if (assemblies.hasOwnProperty(assemblyId)) {
+                // Set label only to leaf nodes, filtering out the root node
+                if (tree.branches[assemblyId].leaf) {
+                    tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.assemblyUserId;                    
+                }
+            }
+        }
+
+        //console.debug('window.WGST.collection[collectionId]:');
+        //console.dir(window.WGST.collection[collectionId]);
 
         // ==============================
         // Prepare metadata
@@ -821,31 +766,42 @@ $(function(){
     google.maps.event.addListenerOnce(WGST.geo.map, 'idle', function() {
 
         // Open representative tree panel
-        openPanel('representativeTree', function(){
+        // openPanel('representativeTree', function(){
 
-            // Init representative tree container
-            WGST.representativeTree = {
-                tree: new PhyloCanvas.Tree(document.getElementById('phylocanvas')),
-                metadata: {}
-            };
+        //     // Init representative tree container
+        //     WGST.representativeTree = {
+        //         tree: new PhyloCanvas.Tree(document.getElementById('phylocanvas')),
+        //         metadata: {}
+        //     };
 
-            // Load representative tree
-            loadRepresentativeTree();
-        });
+        //     // Load representative tree
+        //     loadRepresentativeTree();
+        // });
+
     });
 
-    $('.tree-controls-select-none').on('click', function(){
+    $('.tree-controls-select-none').on('click', function() {
+
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            collectionTree = window.WGST.collection[collectionId].tree.canvas;
+
         // This is a workaround
         // TO DO: Refactor using official API
-        window.WGST.representativeTree.tree.selectNodes('');
+        collectionTree.selectNodes('');
 
         showRepresentativeTreeNodesOnMap('');
     });
 
-    $('.tree-controls-select-all').on('click', function(){
+    $('.tree-controls-select-all').on('click', function() {
+
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            collectionTree = window.WGST.collection[collectionId].tree.canvas;
         
+        console.debug(window.WGST.collection[collectionId]);
+        console.debug(collectionTree);
+
         // Create a list of all nodes in the tree
-        var allNodes = WGST.representativeTree.tree.leaves,
+        var allNodes = collectionTree.leaves,
             nodeCounter = allNodes.length,
             nodeIds = '';
 
@@ -861,11 +817,81 @@ $(function(){
 
         // This is a workaround
         // TO DO: Refactor using official API
-        window.WGST.representativeTree.tree.root.setSelected(true, true);
-        window.WGST.representativeTree.tree.draw();
+        collectionTree.root.setSelected(true, true);
+        collectionTree.draw();
 
-        showRepresentativeTreeNodesOnMap(nodeIds);
+        //showRepresentativeTreeNodesOnMap(nodeIds);
     });
+
+    var showCollectionTreeNodesOnMap = function(collectionId, selectedAssemblyIds) {
+
+        window.WGST.collection[collectionId].geo = window.WGST.collection[collectionId].geo || {};
+
+        var collectionTree = window.WGST.collection[collectionId].tree.canvas,
+            existingMarkers = window.WGST.collection[collectionId].geo.markers,
+            existingMarker;
+
+        // Remove existing markers
+        for (existingMarker in existingMarkers) {
+            if (existingMarkers.hasOwnProperty(existingMarker)) {
+                existingMarkers[existingMarker].setMap(null);
+            }
+        }
+        existingMarkers = {};
+
+        // Reset marker bounds
+        window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
+
+        if (typeof selectedAssemblyIds === 'string' && selectedAssemblyIds.length > 0) {
+            console.log('[WGST] Selected assembly ids: ' + selectedAssemblyIds);
+
+            // Create collection tree markers
+            var selectedNodeIds = nodeIds.split(','),
+                nodeCounter = selectedNodeIds.length,
+                accession,
+                metadata;
+
+            // For each node create representative tree marker
+            for (; nodeCounter !== 0;) {
+                // Decrement counter
+                nodeCounter = nodeCounter - 1;
+
+                accession = selectedNodeIds[nodeCounter];
+
+                metadata = window.WGST.collection[collectionId].assemblies[accession];
+
+                // Check if both latitude and longitude provided
+                if (metadata.latitude && metadata.longitude) {
+
+                    console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
+                    console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
+
+                    var marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
+                        map: window.WGST.geo.map,
+                        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                        // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
+                        // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+                        optimized: true
+                    });
+                    // Set marker
+                    window.WGST.geo.markers.representativeTree[accession] = marker;
+                    // Extend markerBounds with each metadata marker
+                    window.WGST.geo.markerBounds.extend(marker.getPosition());
+                }
+            } // for
+
+            // Pan to marker bounds
+            window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
+            // Set the map to fit marker bounds
+            window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
+        } else { // No nodes were selected
+            console.log('[WGST] No selected nodes');
+            // Show Europe
+            window.WGST.geo.map.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
+            window.WGST.geo.map.setZoom(5);
+        }
+    };
 
     var showRepresentativeTreeNodesOnMap = function(nodeIds) {
 
@@ -2510,28 +2536,33 @@ $(function(){
     });
 
     // User wants to select representative tree branch
-    $(".wgst-panel__collection-panel .assemblies-summary-table").on('change', 'input[type="radio"]', function(e) {
+    $('.wgst-panel__collection-panel .assemblies-summary-table').on('change', 'input[type="radio"]', function(e) {
 
         //======================================================
         // Tree
         //======================================================
 
         // Store node ids to highlight in a string
-        var checkedAssemblyNodesString = '';
+        var checkedAssemblyNodesString = '',
+            collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
 
-        // Get node id of each node that use selected via checked checkbox 
+        // Get node id of each node that user selected via checked checkbox 
         $('.wgst-panel__collection-panel .assemblies-summary-table input[type="radio"]:checked').each(function(){
             // Concat assembly ids to string
             // Use this string to highlight nodes on tree
             if (checkedAssemblyNodesString.length > 0) {
-                checkedAssemblyNodesString = checkedAssemblyNodesString + ',' + $(this).attr('data-reference-id');
+                checkedAssemblyNodesString = checkedAssemblyNodesString + ',' + $(this).attr('data-assembly-id');
             } else {
-                checkedAssemblyNodesString = $(this).attr('data-reference-id');
+                checkedAssemblyNodesString = $(this).attr('data-assembly-id');
             }
         });
 
+        console.debug('checkedAssemblyNodesString: ' + checkedAssemblyNodesString);
+        console.dir(window.WGST.collection[collectionId].tree.canvas);
+
         // Highlight assembly with the highest score on the representative tree
-        window.WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
+        window.WGST.collection[collectionId].tree.canvas.selectNodes(checkedAssemblyNodesString);
+        //window.WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
     });
 
     $('.assemblies-upload-cancel-button').on('click', function() {
@@ -3089,19 +3120,22 @@ $(function(){
         e.preventDefault();
     };
 
+    $('.show-representative-collection button').on('click', function(){
+        // Get representative collection
+        getCollection(WGST.settings.representativeCollectionId);
+    });
+
     // ============================================================
     // Panel control buttons
     // ============================================================
 
     $('body').on('click', '.wgst-panel-control-button__close', function(){
-
         // Check if panel control button is active
         if ($(this).hasClass('wgst-panel-control-button--active')) {
+            var panel = $(this).closest('.wgst-panel'),
+                panelName = panel.attr('data-panel-name');
 
-            var panel = $(this).closest('.wgst-panel');
-
-            closePanel(panel.attr('data-panel-name'));
-
+            closePanel(panelName);
         } // if
     });
 

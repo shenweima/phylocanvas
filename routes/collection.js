@@ -93,7 +93,8 @@ exports.add = function(req, res) {
 };
 
 var getAssemblies = function(assemblyIds, callback) {
-	console.log('[WGST] Getting assemblies with ids: ' + assemblyIds);
+	console.log('[WGST] Getting assemblies with ids:');
+	console.dir(assemblyIds);
 
 	// Prepend FP_COMP_ to each assembly id
 	var scoresAssemblyIds = assemblyIds.map(function(assemblyId){
@@ -115,41 +116,40 @@ var getAssemblies = function(assemblyIds, callback) {
 						.concat(metadataAssemblyIds)
 						.concat(resistanceProfileAssemblyIds);
 
-	console.log('[WGST] Querying keys: ');
+	console.log('[WGST] Querying keys:');
 	console.dir(assemblyIds);
 
-	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIds, {}, function(err, results) {
+	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIds, {}, function(err, assembliesData) {
 		console.log('[WGST] Got assemblies data');
-		//console.dir(results);
 
 		if (err) throw err;
 
 		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
 		var assemblies = {},
 			assemblyId,
-			cleanAssemblyId;
+			assemblyKey;
 
-		for (assemblyId in results) {
+		for (assemblyKey in assembliesData) {
             // Parsing assembly scores
-            if (assemblyId.indexOf('FP_COMP_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
+            if (assemblyKey.indexOf('FP_COMP_') !== -1) {
+            	assemblyId = assemblyKey.replace('FP_COMP_','');
+            	assemblies[assemblyId] = assemblies[assemblyId] || {};
+				assemblies[assemblyId]['FP_COMP'] = assembliesData[assemblyKey].value;
             // Parsing assembly metadata
-            } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
+            } else if (assemblyKey.indexOf('ASSEMBLY_METADATA_') !== -1) {
+            	assemblyId = assemblyKey.replace('ASSEMBLY_METADATA_','');
+            	assemblies[assemblyId] = assemblies[assemblyId] || {};
+				assemblies[assemblyId]['ASSEMBLY_METADATA'] = assembliesData[assemblyKey].value;
             // Parsing assembly resistance profile
-            } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
+            } else if (assemblyKey.indexOf('PAARSNP_RESULT_') !== -1) {
+            	assemblyId = assemblyKey.replace('PAARSNP_RESULT_','');
+            	assemblies[assemblyId] = assemblies[assemblyId] || {};
+				assemblies[assemblyId]['PAARSNP_RESULT'] = assembliesData[assemblyKey].value;
 			}
-		}
+		} // for
 
-		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA and PAARSNP_RESULT data: ');
-		console.log(assemblies);
+		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA and PAARSNP_RESULT data:');
+		console.dir(assemblies);
 
 		callback(null, assemblies);
 	});
