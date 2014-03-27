@@ -109,7 +109,7 @@
 
 
         <!-- Representative tree -->
-        <div class="wgst-panel wgst-panel__representative-tree-panel wgst-panel--active wgst-draggable" data-panel-name="representativeTree">
+        <div class="wgst-panel wgst-panel__representative-tree wgst-panel--active wgst-draggable" data-panel-name="representativeTree">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Representative Tree</h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
@@ -280,7 +280,7 @@
 
 
         <!-- Collection -->
-        <section class="wgst-panel wgst-panel__collection-panel wgst-draggable" data-panel-name="collection" data-collection-id="">
+        <section class="wgst-panel wgst-panel__collection wgst-draggable" data-panel-name="collection" data-collection-id="">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Collection</h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize wgst-panel-control-button--active glyphicon glyphicon-minus"></span>
@@ -344,7 +344,7 @@
 
 
         <!-- Collection tree -->
-        <div class="wgst-panel wgst-panel__collection-tree-panel wgst-panel--active wgst-draggable" data-panel-name="collectionTree" data-collection-id="">
+        <div class="wgst-panel wgst-panel__collection-tree wgst-panel--active wgst-draggable" data-panel-name="collectionTree" data-collection-id="">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Collection Tree</h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
@@ -377,7 +377,7 @@
 
 
         <!-- Assembly -->
-        <section class="wgst-panel wgst-panel__assembly-panel wgst-draggable" data-panel-name="assembly">
+        <section class="wgst-panel wgst-panel__assembly wgst-draggable" data-panel-name="assembly">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Assembly: <small></small></h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
@@ -419,7 +419,7 @@
 
 
         <!-- Assembly Upload Progress -->
-        <section class="wgst-panel wgst-panel__assembly-upload-progress-panel wgst-draggable" data-panel-name="assemblyUploadProgress">
+        <section class="wgst-panel wgst-panel__assembly-upload-progress wgst-draggable" data-panel-name="assemblyUploadProgress">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Processing <small></small> assemblies</h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize wgst-panel-control-button--active glyphicon glyphicon-minus"></span>
@@ -440,10 +440,10 @@
                 <tr>
                   <th>Assembly</th>
                   <th>Progress</th>
-                  <th>Uploaded</th>
-                  <th>MLST</th>
-                  <th>FP_COMP</th>
-                  <th>PAARSNP_RESULT</th>
+                  <th class="assembly-processing-result-header">Uploaded</th>
+                  <th class="assembly-processing-result-header">MLST</th>
+                  <th class="assembly-processing-result-header">FP</th>
+                  <th class="assembly-processing-result-header">PAARSNP</th>
                 </tr>
               </thead>
               <tbody>
@@ -521,12 +521,9 @@
                 window.WGST.requestedCollectionId = '<%- requestedCollectionId %>';
               <% } %>
 
-              window.WGST.app = window.WGST.app || {};
-              window.WGST.app.config = undefined;
-
               <% if (typeof appConfig !== 'undefined') { %>
                 // Store requested assembly
-                window.WGST.app.config = <%- appConfig %>;
+                window.WGST.config = <%- appConfig %>;
               <% } %>
             })();
           });

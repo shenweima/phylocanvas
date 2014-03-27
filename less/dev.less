@@ -839,7 +839,7 @@ h2, h4 {
     overflow: hidden;
 }
 
-.wgst-panel__representative-tree-panel {
+.wgst-panel__representative-tree {
 
     // Position
     top: 80px;
@@ -997,7 +997,7 @@ h2, h4 {
 }
 
 // Object
-.wgst-panel__collection-panel {
+.wgst-panel__collection {
 
     // Position
     //top: 86px;
@@ -1138,7 +1138,7 @@ h2, h4 {
     }
 }
 
-.wgst-panel__collection-tree-panel {
+.wgst-panel__collection-tree {
     .phylocanvas {
         width: 600px;
         height: 400px;
@@ -1157,7 +1157,7 @@ h2, h4 {
 }
 
 // Object
-.wgst-panel__assembly-panel {
+.wgst-panel__assembly {
 
     .wgst-panel-loading {
         width: 560px;
@@ -1236,7 +1236,7 @@ h2, h4 {
     }
 }
 
-.wgst-panel__assembly-upload-progress-panel {
+.wgst-panel__assembly-upload-progress {
     .assemblies-upload-progress {
         padding: 10px;
         border-bottom: 1px solid #eee;
@@ -1271,6 +1271,9 @@ h2, h4 {
             margin: 0;
             padding: 0;*/
         }
+        .assembly-processing-result-header {
+            text-align: center;
+        }
         .assembly-upload-progress {
             padding: 0;
         }
@@ -1280,8 +1283,12 @@ h2, h4 {
             &:last-of-type {
                 border-right: 0;
             }
-            .glyphicon-record {
-                color: #ccc;
+            .glyphicon {
+                margin-left: 15px;
+                margin-right: 15px;
+                &.glyphicon-record {
+                    color: #ccc;
+                }
             }
         }
         .progress {

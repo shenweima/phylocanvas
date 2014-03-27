@@ -46,7 +46,8 @@ exports.add = function(req, res) {
 		// Prepare object to publish
 		var collectionRequest = {
 			taskId: 'new',
-			userAssemblyIds: userAssemblyIds
+			inputData: userAssemblyIds
+			//userAssemblyIds: userAssemblyIds
 		};
 
 		// Publish message
@@ -209,10 +210,9 @@ exports.apiGetCollection = function(req, res) {
 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
 
 		console.log('[WGST] Got collection ' + collectionId + ' with assembly ids:');
-		console.log(assemblyIds);
+		console.dir(assemblyIds);
 
-		//collection.assemblyIds = assemblyIds;
-
+		// Get assemblies
 		getAssemblies(assemblyIds, function(error, assemblies){
 			if (error) throw error;
 
@@ -220,38 +220,26 @@ exports.apiGetCollection = function(req, res) {
 
 			// Get collection tree data
 			couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
-
 				if (err) throw err;
 
 				var collectionTreeData = collectionTreeData.value.newickTree;
 
-				console.log('[WGST] Got collection tree data for collection id ' + collectionId + ':');
-				console.log(collectionTreeData);
-
-				// Get collection tree metadata
-				// couchbaseDatabaseConnection.get('COLLECTION_TREE_METADATA_' + collectionId, function(err, collectionTreeData) {
-
-				// 	if (err) throw err;
-
-				// 	var collectionTreeData = collectionTreeData.value.newickTree;
-
-				// 	console.log('[WGST] Got collection tree data for collection id ' + collectionId + ':');
-				// 	console.log(collectionTreeData);
-
-					
-
-				// 	collection.tree = {
-				// 		data: collectionTreeData
-				// 	};
-
-				// 	res.json(collection);
-				// });
+				console.log('[WGST] Got collection tree data for ' + collectionId + ' collection:');
+				console.dir(collectionTreeData);
 
 				collection.tree = {
 					data: collectionTreeData
 				};
 
-				res.json(collection);
+				// Get antibiotics
+				require('./assembly').getAllAntibiotics(function(error, antibiotics){
+					if (error) throw error;
+
+					res.json({
+						collection: collection,
+						antibiotics: antibiotics
+					});
+				});
 			});
 		});
 	});

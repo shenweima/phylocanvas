@@ -95,6 +95,8 @@ exports.add = function(req, res) {
 					bufferJSON = buffer.toString(),
 					parsedMessage = JSON.parse(bufferJSON);
 
+				console.dir(parsedMessage);
+
 				var messageAssemblyId = parsedMessage.assemblyId,
 					messageUserAssemblyId = parsedMessage.userAssemblyId;
 
@@ -102,8 +104,8 @@ exports.add = function(req, res) {
 				console.log('[WGST] Message user assembly id: ' + messageUserAssemblyId);
 
 				// Check task type
-				if (parsedMessage.taskType === 'FP_COMP') {
-					console.log('[WGST][Socket.io] Emitting FP_COMP message for socketRoomId: ' + socketRoomId);
+				if (parsedMessage.taskType === 'FP') {
+					console.log('[WGST][Socket.io] Emitting FP message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
 						assemblyId: messageAssemblyId,
@@ -115,26 +117,26 @@ exports.add = function(req, res) {
 
 					readyResults.push('FP_COMP');
 
-				} else if (parsedMessage.taskType === 'MLST_RESULT') {
-					console.log('[WGST][Socket.io] Emitting MLST_RESULT message for socketRoomId: ' + socketRoomId);
+				} else if (parsedMessage.taskType === 'MLST') {
+					console.log('[WGST][Socket.io] Emitting MLST message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
 						assemblyId: messageAssemblyId,
 						userAssemblyId: messageUserAssemblyId,
-						status: "MLST_RESULT ready",
+						status: "MLST ready",
 						result: "MLST_RESULT",
 						socketRoomId: socketRoomId
 					});
 
 					readyResults.push('MLST_RESULT');
 
-				} else if (parsedMessage.taskType === 'PAARSNP_RESULT') {
-					console.log('[WGST][Socket.io] Emitting PAARSNP_RESULT message for socketRoomId: ' + socketRoomId);
+				} else if (parsedMessage.taskType === 'PAARSNP') {
+					console.log('[WGST][Socket.io] Emitting PAARSNP message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
 						assemblyId: messageAssemblyId,
 						userAssemblyId: messageUserAssemblyId,
-						status: "PAARSNP_RESULT ready",
+						status: "PAARSNP ready",
 						result: "PAARSNP_RESULT",
 						socketRoomId: socketRoomId
 					});
@@ -184,13 +186,19 @@ exports.add = function(req, res) {
 				// -----------------------------------------------------------
 
 				var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
+					// metadata = {
+					// 	assemblyId: assemblyId,
+					// 	assemblyUserId: req.body.name,
+					// 	geographicLocation: {
+					// 		type: 'Point',
+					// 		coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
+					// 	}
+					// };
+					assemblyMetadata = req.body.metadata,
 					metadata = {
 						assemblyId: assemblyId,
 						assemblyUserId: req.body.name,
-						geographicLocation: {
-							type: 'Point',
-							coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
-						}
+						geographic: assemblyMetadata.geographic
 					};
 
 					console.log('[WGST] Inserting metadata with key: ' + metadataKey);
@@ -428,7 +436,7 @@ exports.apiGetAssembly = function(req, res) {
 			console.dir(assembly.MLST_RESULT.alleles);
 
 			// Get list of all antibiotics
-			getAllAntibiotics(function(error, antibiotics){
+			exports.getAllAntibiotics(function(error, antibiotics){
 				if (error) {
 					throw error;
 				}
@@ -623,41 +631,27 @@ var getResistanceProfile = function(callback) {
 };
 
 // Return list of all antibiotics grouped by class name
-exports.getAllAntibiotics = function(req, res) {
-	getAllAntibiotics(function(error, antibiotics){
+exports.apiGetAllAntibiotics = function(req, res) {
+	exports.getAllAntibiotics(function(error, antibiotics){
 		if (error) throw error;
 
 		res.json(antibiotics);
 	});
 };
 
-var getAllAntibiotics = function(callback) {
+exports.getAllAntibiotics = function(callback) {
 	console.log('[WGST] Getting list of all antibiotics');
 
+	// Get list of all antibiotics
+	couchbaseDatabaseConnections[testWgstResourcesBucket].get('ANTIMICROBIALS_ALL', function(error, result) {
+		if (error) {
+			callback(error, result);
+		}
 
+		var antibiotics = result.value.antibiotics;
 
+		console.log('[WGST] Got list of all antibiotics');
 
-	// var couchbase = require('couchbase');
-	// var db = new couchbase.Connection({
-	// 	host: 'http://129.31.26.151:8091/pools',
-	// 	bucket: 'test_wgst_resources',
-	// 	password: '.oneir66'
-	// }, function(err) {
-	// 	if (err) throw err;
-
-		// Get list of antibiotics
-		couchbaseDatabaseConnections[testWgstResourcesBucket].get('ANTIMICROBIALS_ALL', function(err, result) {
-
-			var antibiotics = result.value.antibiotics;
-
-			console.log('[WGST] Got list of all antibiotics: ');
-			//console.dir(antibiotics);
-
-			if (err) {
-				callback(err, result);
-			}
-
-			callback(null, antibiotics);
-		});
-	// });
+		callback(null, antibiotics);
+	});
 };

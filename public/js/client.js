@@ -71,6 +71,39 @@ $(function(){
     WGST.settings = WGST.settings || {};
     WGST.settings.representativeCollectionId = '59b792aa-b892-4106-b1dd-2e9e78abefc4';
 
+    WGST.socket = {
+        connection: io.connect(WGST.config.socketAddress),
+        roomId: ''
+    };
+
+    WGST.geo = {
+        map: {
+            canvas: {},
+            options: {
+                zoom: 5,
+                center: new google.maps.LatLng(48.6908333333, 9.14055555556), // new google.maps.LatLng(51.511214, -0.119824),
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                minZoom: 2,
+                maxZoom: 6
+            },
+            markers: {
+                assembly: {},
+                metadata: {},
+                representativeTree: []
+            },
+            markerBounds: new google.maps.LatLngBounds(),
+            init: function() {
+                WGST.geo.map.canvas = new google.maps.Map(document.getElementById('map'), WGST.geo.map.options);
+                WGST.geo.map.markers.metadata = new google.maps.Marker({
+                    position: new google.maps.LatLng(51.511214, -0.119824),
+                    map: WGST.geo.map.canvas,
+                    visible: false
+                });
+            }
+        },
+        placeSearchBox: {} // Store Google SearchBox object for each dropped file
+    };
+
     // ============================================================
     // Manage panels
     // ============================================================    
@@ -178,11 +211,7 @@ $(function(){
     // Init app
     // ============================================================    
     console.log('[WGST] Reading app config:');
-    console.dir(window.WGST.app.config);
-
-    //var socket = io.connect('http://127.0.0.1'),
-    var socket = io.connect(window.WGST.app.config.socketAddress),
-        socketRoomId;
+    console.dir(window.WGST.config);
 
     // Init
     (function(){
@@ -210,11 +239,6 @@ $(function(){
                 $('.selected-assembly-counter').text(ui.value);
             }
         });
-
-        // Init jQuery UI accordion widget
-/*        $('.assembly-details').accordion({
-            header: '> div > h4'
-        });*/
 
         // Popover
         $('.add-data button').popover({
@@ -263,24 +287,18 @@ $(function(){
 
         // Show graph
         $('.graph-toggle-button').trigger('click');
-
-        // Open socket.io connection
-        // socket.on('pong', function(data) {
-        //     console.log('[WGST][Socket.IO] Received pong:');
-        //     console.log(data);
-        // });
         
         // Set socket room id
-        socket.on('roomId', function(roomId) {
-            console.log('[WGST][Socket.IO] Received room id: ' + roomId);
+        WGST.socket.connection.on('roomId', function(roomId) {
+            console.log('[WGST][Socket.io] Received room id: ' + roomId);
             console.log('[WGST] Socket.io ready');
 
             // Set room id for this client
-            socketRoomId = roomId;
+            window.WGST.socket.roomId = roomId;
         });
 
         // Get socket room id
-        socket.emit('getRoomId');
+        WGST.socket.connection.emit('getRoomId');
     })();
 
     // var loadRequestedAssembly = function(requestedAssembly) {
@@ -341,17 +359,133 @@ $(function(){
     //     loadRequestedAssembly(window.WGST.requestedAssembly);
     // }
 
+    var createAssemblyResistanceProfilePreviewHtml = function(assemblyResistanceProfile, antibiotics) {
+
+        var assemblyResistanceProfileHtml = '',
+            antibioticGroup,
+            antibioticGroupName,
+            antibioticGroupHtml,
+            antibioticName,
+            // Store single antibiotic HTML string
+            antibioticHtml,
+            // Store all antibiotic HTML strings
+            antibioticsHtml,
+            antibioticResistanceState;
+
+        /*
+
+        TO DO: Try changing .antibiotic span elements to div and see if that will introduce hover right border bug,
+        when Bootstrap Tooltip is activated.
+
+        TO DO: Refactor. Use $.map()
+
+        */
+
+        // Parse each antibiotic group
+        for (antibioticGroupName in antibiotics) {
+            if (antibiotics.hasOwnProperty(antibioticGroupName)) {
+                antibioticGroup = antibiotics[antibioticGroupName];
+                antibioticGroupHtml = '<div class="antibiotic-group" data-antibiotic-group-name="' + antibioticGroupName + '">{{antibioticsHtml}}</div>';
+                antibioticsHtml = '';
+                // Parse each antibiotic
+                for (antibioticName in antibioticGroup) {
+                    if (antibioticGroup.hasOwnProperty(antibioticName)) {
+                        // Store single antibiotic HTML string
+                        antibioticHtml = '';
+                        // Antibiotic found in Resistance Profile for this assembly
+                        if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
+                            if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
+                                antibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
+                                if (antibioticResistanceState === 'RESISTANT') {
+                                    antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-fail" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                } else if (antibioticResistanceState === 'SENSITIVE') {
+                                    antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-success" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                } else {
+                                    antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                }
+                            } else {
+                                antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                            }
+                        } else {
+                            antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                        }
+                        // Concatenate all antibiotic HTML strings into a single string
+                        antibioticsHtml = antibioticsHtml + antibioticHtml;
+                    } // if
+                } // for
+                antibioticGroupHtml = antibioticGroupHtml.replace(/{{antibioticsHtml}}/g, antibioticsHtml);
+                assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
+            } // if
+        } // for
+
+        return assemblyResistanceProfileHtml;
+    };
+
+    var renderAssemblyAnalysisList = function(assemblies, antibiotics) {
+
+        var assemblyId,
+            assemblyResistanceProfile,
+            assemblyResistanceProfileHtml,
+            assemblyTopScore,
+            assemblyLatitude,
+            assemblyLongitude,
+            assemblyCounter = 0;
+
+        // Parse each assembly object
+        for (assemblyId in assemblies) {
+            if (assemblies.hasOwnProperty(assemblyId)) {
+                console.log('[WGST] Parsing assembly ' + assemblyId);
+               
+                // Create assembly resistance profile preview html
+                assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile;
+                assemblyResistanceProfileHtml = createAssemblyResistanceProfilePreviewHtml(assemblyResistanceProfile, antibiotics);
+
+                // Calculate assembly top score
+                assemblyTopScore = calculateAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
+
+                // Get assembly latitude and longitudeß
+                assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.latitude;
+                assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.longitude;
+
+                // Append to only first tbody tag (currently there more than one)
+                $('.assemblies-summary-table tbody').eq(0).append(
+                    // TO DO: This is not verbose enough
+                    ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
+                        + '<td class="show-on-tree-radio-button">'
+                            + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
+                        + '</td>'
+                        + '<td class="show-on-map-checkbox">'
+                            + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
+                        + '</td>'
+                        + '<td>' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
+                        + '<td>' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</td>'
+                        + '<td>'
+                            // Resistance profile
+                            +'<div class="assembly-resistance-profile-container">'
+                                + assemblyResistanceProfileHtml
+                            + '</div>'
+                        + '</td>'
+                    + '</tr>'
+                );
+                assemblyCounter = assemblyCounter + 1;
+            } // if
+        } // for
+
+        $('.antibiotic[data-toggle="tooltip"]').tooltip();
+    };
+
     var getCollection = function(collectionId) {
         console.log('[WGST] Getting ' + collectionId + ' collection');
 
-        // Init collection
+        // Init collection object
         window.WGST.collection[collectionId] = {
+            assemblies: {},
             tree: {
                 data: {}
             }
         };
 
-        // Get collection that you just created/modified
+        // Get collection data
         $.ajax({
             type: 'POST',
             url: '/collection/',
@@ -361,180 +495,47 @@ $(function(){
             }
         })
         .done(function(data, textStatus, jqXHR) {
-            console.log('[WGST] Got collection ' + collectionId + ':');
-            console.dir(data);
+            console.log('[WGST] Got collection ' + collectionId + ' data');
 
-            window.WGST.collection[collectionId].tree.data = data.tree.data;
-            window.WGST.collection[collectionId].assemblies = data.assemblies;
+            window.WGST.collection[collectionId].tree.data = data.collection.tree.data;
+            window.WGST.collection[collectionId].assemblies = data.collection.assemblies;
 
-            var assemblies = window.WGST.collection[collectionId].assemblies;
+            var assemblies = window.WGST.collection[collectionId].assemblies,
+                antibiotics = data.antibiotics;
+            
+            renderAssemblyAnalysisList(assemblies, antibiotics);
 
             console.log('[WGST] Collection ' + collectionId + ' has ' + Object.keys(assemblies).length + ' assemblies');
-            
-            console.log('[WGST] Getting list of antibiotics');
 
-            // Get list of all antibiotics
-            $.ajax({
-                type: 'GET',
-                url: '/api/all-antibiotics',
-                datatype: 'json', // http://stackoverflow.com/a/9155217
-                data: {}
-            })
-            .done(function(antibiotics, textStatus, jqXHR) {
-                console.log('[WGST] Got list of all antibiotics');
+            // Set collection creation timestamp
+            var assemblyIds = Object.keys(assemblies),
+                lastAssemblyId = assemblyIds[assemblyIds.length - 1],
+                lastAssemblyTimestamp = assemblies[lastAssemblyId]['FP_COMP'].timestamp;
+            // Format to readable string so that user could read detailed timestamp on mouse over
+            $('.assembly-created-datetime').attr('title', moment(lastAssemblyTimestamp, "YYYYMMDD_HHmmss").format('YYYY-MM-DD HH:mm:ss'));
+            // Convert to time ago string
+            $('.timeago').timeago();
 
-                var assemblyId,
-                    assemblyIds = Object.keys(assemblies),
-                    assemblyCounter = 0,
-                    // Get the last property (assembly) of the object
-                    lastAssemblyId = assemblyIds[assemblyIds.length - 1],
-                    lastAssembly = assemblies[lastAssemblyId]['FP_COMP'],
-                    assemblyTopScore,
-                    selectNodesWithIds = '';
+            // TO DO: Create table with results for each assembly in this collection
+            // TO DO: Highlight parent node on the reference tree
+            // TO DO: Create markers for each assembly in this collection?
 
-                // Set assembly created date
-                // Format to readable string so that user could read exact time on mouse over
-                $('.assembly-created-datetime').attr('title', moment(lastAssembly.timestamp, "YYYYMMDD_HHmmss").format('YYYY-MM-DD HH:mm:ss'));
-                // Convert to time ago
-                $('.timeago').timeago();
+            closePanel('assemblyUploadProgress', function(){
+                resetAssemlyUploadPanel();                
+            });
 
-                // Parse each assembly object
-                for (assemblyId in assemblies) {
+            // Set collection id to collectionTree panel
+            $('.wgst-panel__collection-tree').attr('data-collection-id', collectionId);
+            // Set collection id to collection panel
+            $('.wgst-panel__collection').attr('data-collection-id', collectionId);
 
-                    console.log('[WGST] Parsing ' + assemblyId + ' assembly:');
-                    console.log(assemblies[assemblyId]);
-                   
-                    // --------------------------------------------------------------------------------
-                    // Replace assembly id with user assembly id in collection tree newick string
-                    // --------------------------------------------------------------------------------
-                    //window.WGST.collection[collectionId].tree.data = window.WGST.collection[collectionId].tree.data.replace(assemblyId, assemblies[assemblyId]['ASSEMBLY_METADATA'].assemblyUserId);
-
-                    console.debug("assemblies[assemblyId]['FP_COMP'].scores:");
-                    console.dir(assemblies[assemblyId]['FP_COMP'].scores);
-
-                    // Get top score for this assembly
-                    assemblyTopScore = getAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
-
-                    console.log('[WGST] Top score reference id: ' + assemblyTopScore.referenceId);
-
-                    var assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[0],
-                        assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographicLocation.coordinates[1];
-
-                    var assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile,
-                        assemblyResistanceProfileHtml = '';
-
-                    /*
-
-                    TO DO: Try changing .antibiotic span elements to div and see if that will introduce hover right border bug,
-                    when Bootstrap Tooltip is activated.
-
-                    */
-
-                    // Parse each antibiotic group
-                    for (var antibioticGroupName in antibiotics) {
-
-                        var antibioticGroupHtml = '<div class="antibiotic-group" data-antibiotic-group-name="' + antibioticGroupName + '">';
-
-                        // Parse each antibiotic
-                        for (var antibioticName in antibiotics[antibioticGroupName]) {
-
-                            var antibioticHtml = '';
-
-                            // Antibiotic found in Resistance Profile for this assembly
-                            if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
-                                
-                                if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
-
-                                    var assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
-
-                                    if (assemblyAntibioticResistanceState === 'RESISTANT') {
-                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-fail" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                                    } else if (assemblyAntibioticResistanceState === 'SENSITIVE') {
-                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-success" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                                    } else {
-                                        antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                                    }
-
-                                } else {
-                                    antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                                }
-
-                            } else {
-                                antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                            }
-
-                            antibioticGroupHtml = antibioticGroupHtml + antibioticHtml;
-
-                        } // for
-
-                        antibioticGroupHtml = antibioticGroupHtml + '</div>';
-
-                        assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
-
-                    } // for
-
-                    // Append to only first tbody tag (currently there more than one)
-                    $('.assemblies-summary-table tbody').eq(0).append(
-                        // This is not verbose enough
-                        ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
-                        //'<tr>'
-                            + '<td class="show-on-tree-radio-button">'
-                                + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
-                            + '</td>'
-                            + '<td class="show-on-map-checkbox">'
-                                + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                            + '</td>'
-                            + '<td>' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
-                            + '<td>' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</td>'
-                            + '<td>'
-                                // Resistance profile
-                                +'<div class="assembly-resistance-profile-container">'
-                                    + assemblyResistanceProfileHtml
-                                + '</div>'
-
-                            + '</td>'
-                        + '</tr>'
-                    );
-
-                    // Increment counter
-                    assemblyCounter = assemblyCounter + 1;
-                } // for
-
-                $('.antibiotic[data-toggle="tooltip"]').tooltip();
-
-                // TO DO: Create table with results for each assembly in this collection
-                // TO DO: Highlight parent node on the reference tree
-                // TO DO: Create markers for each assembly in this collection?
-
+            openPanel(['collection', 'collectionTree'], function(){
                 // Prepare Collection Tree
-                $('.wgst-panel__collection-tree-panel .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
-
-                closePanel('assemblyUploadProgress');
-
-                // Reset assembly upload panel
-                // TO DO: Refactor?
-                resetAssemlyUploadPanel();
-
-                // openPanel(['collection', 'collectionTree'], function(){
-                //     bringPanelToTop('collectionTree');
-
-                //     // Render collection tree
-                //     renderCollectionTree(collectionTree, collectionId);
-                // });
-
-                // TO DO: Refactor
-                // Set collection id to collectionTree panel
-                $('.wgst-panel__collection-tree-panel').attr('data-collection-id', collectionId);
-                // Set collection id to collection panel
-                $('.wgst-panel__collection-panel').attr('data-collection-id', collectionId);
-
-                openPanel(['collection', 'collectionTree'], function(){
-                    // Init collection tree
-                    window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
-
-                    // Render collection tree
-                    renderCollectionTree(collectionId);
-                });
+                $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+                // Init collection tree
+                window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+                // Render collection tree
+                renderCollectionTree(collectionId);
             });
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
@@ -550,37 +551,34 @@ $(function(){
         getCollection(window.WGST.requestedCollectionId);
     }
 
-    // WGST namespace
-    //var WGST = window.WGST || {};
-
-    // Map
-    WGST.geo = {
-        map: {},
-        mapOptions: {
-            zoom: 5,
-            center: new google.maps.LatLng(48.6908333333, 9.14055555556), // new google.maps.LatLng(51.511214, -0.119824),
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            minZoom: 2,
-            maxZoom: 6
-        },
-        markers: {
-            assembly: {},
-            metadata: {},
-            representativeTree: []
-        },
-        markerBounds: new google.maps.LatLngBounds(),
-        //geocoder: new google.maps.Geocoder(),
-        //metadataAutocomplete: {}, // Store Google Autocomplete object for each dropped file
-        metadataSearchBox: {}, // Store Google Autocomplete object for each dropped file
-        init: function() {
-            this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions);
-            this.markers.metadata = new google.maps.Marker({
-                position: new google.maps.LatLng(51.511214, -0.119824),
-                map: WGST.geo.map,
-                visible: false
-            });
-        }
-    };
+    // // Map
+    // WGST.geo = {
+    //     map: {},
+    //     mapOptions: {
+    //         zoom: 5,
+    //         center: new google.maps.LatLng(48.6908333333, 9.14055555556), // new google.maps.LatLng(51.511214, -0.119824),
+    //         mapTypeId: google.maps.MapTypeId.ROADMAP,
+    //         minZoom: 2,
+    //         maxZoom: 6
+    //     },
+    //     markers: {
+    //         assembly: {},
+    //         metadata: {},
+    //         representativeTree: []
+    //     },
+    //     markerBounds: new google.maps.LatLngBounds(),
+    //     //geocoder: new google.maps.Geocoder(),
+    //     //metadataAutocomplete: {}, // Store Google Autocomplete object for each dropped file
+    //     metadataSearchBox: {}, // Store Google Autocomplete object for each dropped file
+    //     init: function() {
+    //         this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions);
+    //         this.markers.metadata = new google.maps.Marker({
+    //             position: new google.maps.LatLng(51.511214, -0.119824),
+    //             map: WGST.geo.map,
+    //             visible: false
+    //         });
+    //     }
+    // };
 
     // var loadRepresentativeTree = function() {
     //     console.log('[WGST] Getting representative tree');
@@ -760,10 +758,10 @@ $(function(){
     };
 
     // Init map
-    WGST.geo.init();
+    WGST.geo.map.init();
 
     // Handle Google Maps ready
-    google.maps.event.addListenerOnce(WGST.geo.map, 'idle', function() {
+    google.maps.event.addListenerOnce(WGST.geo.map.canvas, 'idle', function() {
 
         // Open representative tree panel
         // openPanel('representativeTree', function(){
@@ -783,181 +781,243 @@ $(function(){
     $('.tree-controls-select-none').on('click', function() {
 
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
-            collectionTree = window.WGST.collection[collectionId].tree.canvas;
+            tree = window.WGST.collection[collectionId].tree.canvas;
 
         // This is a workaround
         // TO DO: Refactor using official API
-        collectionTree.selectNodes('');
+        tree.selectNodes('');
 
-        showRepresentativeTreeNodesOnMap('');
+        //showRepresentativeTreeNodesOnMap('');
     });
 
     $('.tree-controls-select-all').on('click', function() {
 
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
-            collectionTree = window.WGST.collection[collectionId].tree.canvas;
+            tree = window.WGST.collection[collectionId].tree.canvas;
         
-        console.debug(window.WGST.collection[collectionId]);
-        console.debug(collectionTree);
+        //console.debug(window.WGST.collection[collectionId]);
+        //console.debug(tree);
 
-        // Create a list of all nodes in the tree
-        var allNodes = collectionTree.leaves,
-            nodeCounter = allNodes.length,
-            nodeIds = '';
+        // Get all assembly ids in this tree
 
-        for (; nodeCounter !== 0;) {
-            nodeCounter = nodeCounter - 1;
+        var leaves = tree.leaves,
+            leafCounter = leaves.length,
+            assemblyIds = [],
+            assemblyId;
 
-            if (nodeIds.length > 0) {
-                nodeIds = nodeIds + ',' + allNodes[nodeCounter].id;
-            } else {
-                nodeIds = allNodes[nodeCounter].id;
-            }
+        // Concatenate all assembly ids into one string
+        for (; leafCounter !== 0;) {
+            leafCounter = leafCounter - 1;
+
+            assemblyId = leaves[leafCounter].id;
+            assemblyIds.push(assemblyId);
+
+            // if (assemblyIds.length > 0) {
+            //     assemblyIds = assemblyIds + ',' + leaves[leafCounter].id;
+            // } else {
+            //     assemblyIds = leaves[leafCounter].id;
+            // }
         }
 
         // This is a workaround
         // TO DO: Refactor using official API
-        collectionTree.root.setSelected(true, true);
-        collectionTree.draw();
+        tree.root.setSelected(true, true);
+        tree.draw();
 
         //showRepresentativeTreeNodesOnMap(nodeIds);
+
+        showCollectionMetadataOnMap(collectionId, assemblyIds);
     });
 
-    var showCollectionTreeNodesOnMap = function(collectionId, selectedAssemblyIds) {
+    var showCollectionMetadataOnMap = function(collectionId, assemblyIds) {
 
         window.WGST.collection[collectionId].geo = window.WGST.collection[collectionId].geo || {};
 
         var collectionTree = window.WGST.collection[collectionId].tree.canvas,
             existingMarkers = window.WGST.collection[collectionId].geo.markers,
-            existingMarker;
+            existingMarkerCounter = existingMarkers.length;
 
         // Remove existing markers
-        for (existingMarker in existingMarkers) {
-            if (existingMarkers.hasOwnProperty(existingMarker)) {
-                existingMarkers[existingMarker].setMap(null);
-            }
+        for (; existingMarkerCounter !== 0;) {
+            existingMarkerCounter = existingMarkerCounter - 1;
+            // Remove marker
+            existingMarkers[existingMarkerCounter].setMap(null);
         }
-        existingMarkers = {};
+        window.WGST.collection[collectionId].geo.markers = [];
 
         // Reset marker bounds
-        window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
+        window.WGST.geo.map.markerBounds = new google.maps.LatLngBounds();
 
-        if (typeof selectedAssemblyIds === 'string' && selectedAssemblyIds.length > 0) {
-            console.log('[WGST] Selected assembly ids: ' + selectedAssemblyIds);
+        // Create new markers
+        if (assemblyIds.length > 0) {
+            console.log('[WGST] Selected assembly ids:' );
+            console.dir(assemblyIds);
 
-            // Create collection tree markers
-            var selectedNodeIds = nodeIds.split(','),
-                nodeCounter = selectedNodeIds.length,
-                accession,
-                metadata;
+            var assemblyCounter = assemblyIds.length,
+                assemblyId,
+                assemblyMetadata,
+                latitude,
+                longitude;
 
-            // For each node create representative tree marker
-            for (; nodeCounter !== 0;) {
-                // Decrement counter
-                nodeCounter = nodeCounter - 1;
+            // For each assembly create marker
+            for (; assemblyCounter !== 0;) {
+                assemblyCounter = assemblyCounter - 1;
 
-                accession = selectedNodeIds[nodeCounter];
+                assemblyId = assemblyIds[assemblyCounter];
+                assemblyMetadata = window.WGST.collection[collectionId].assemblies[assemblyId]['ASSEMBLY_METADATA'];
+                latitude = assemblyMetadata.geographic.position.latitude;
+                longitude = assemblyMetadata.geographic.position.longitude;
 
-                metadata = window.WGST.collection[collectionId].assemblies[accession];
-
-                // Check if both latitude and longitude provided
-                if (metadata.latitude && metadata.longitude) {
-
-                    console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
-                    console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
+                //Check if both latitude and longitude provided
+                if (latitude && longitude) {
+                    console.log("[WGST] Marker's latitude: " + latitude);
+                    console.log("[WGST] Marker's longitude: " + longitude);
 
                     var marker = new google.maps.Marker({
-                        position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
-                        map: window.WGST.geo.map,
+                        position: new google.maps.LatLng(latitude, longitude),
+                        map: window.WGST.geo.map.canvas,
                         icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
                         // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
                         // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
                         optimized: true
                     });
-                    // Set marker
-                    window.WGST.geo.markers.representativeTree[accession] = marker;
-                    // Extend markerBounds with each metadata marker
-                    window.WGST.geo.markerBounds.extend(marker.getPosition());
-                }
-            } // for
 
-            // Pan to marker bounds
-            window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
-            // Set the map to fit marker bounds
-            window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
-        } else { // No nodes were selected
-            console.log('[WGST] No selected nodes');
+                    // Set marker
+                    //window.WGST.geo.markers.representativeTree[accession] = marker;
+                    window.WGST.collection[collectionId].assemblies[assemblyId].geo = window.WGST.collection[collectionId].assemblies[assemblyId].geo || {};
+                    window.WGST.collection[collectionId].assemblies[assemblyId].geo.marker = marker;
+
+                    // Store list of assembly ids with markers
+                    window.WGST.collection[collectionId].geo.markers.push(assemblyIds);
+                    
+                    // Extend markerBounds with each metadata marker
+                    window.WGST.geo.map.markerBounds.extend(marker.getPosition());
+                } // if
+            } // for
+        } else { // No assemblies were selected
+            console.log('[WGST] No selected assemblies');
             // Show Europe
-            window.WGST.geo.map.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
-            window.WGST.geo.map.setZoom(5);
+            window.WGST.geo.map.canvas.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
+            window.WGST.geo.map.canvas.setZoom(5);
         }
+
+        // if (typeof assemblyIds === 'string' && assemblyIds.length > 0) {
+        //     console.log('[WGST] Selected assembly ids: ' );
+        //     console.dir(assemblyIds);
+
+        //     // Create collection tree markers
+        //     var selectedNodeIds = nodeIds.split(','),
+        //         nodeCounter = selectedNodeIds.length,
+        //         accession,
+        //         metadata;
+
+        //     // For each node create representative tree marker
+        //     for (; nodeCounter !== 0;) {
+        //         // Decrement counter
+        //         nodeCounter = nodeCounter - 1;
+
+        //         accession = selectedNodeIds[nodeCounter];
+
+        //         metadata = window.WGST.collection[collectionId].assemblies[accession];
+
+        //         // Check if both latitude and longitude provided
+        //         if (metadata.latitude && metadata.longitude) {
+
+        //             console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
+        //             console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
+
+        //             var marker = new google.maps.Marker({
+        //                 position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
+        //                 map: window.WGST.geo.map,
+        //                 icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        //                 // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
+        //                 // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+        //                 optimized: true
+        //             });
+        //             // Set marker
+        //             window.WGST.geo.markers.representativeTree[accession] = marker;
+        //             // Extend markerBounds with each metadata marker
+        //             window.WGST.geo.markerBounds.extend(marker.getPosition());
+        //         }
+        //     } // for
+
+        //     // Pan to marker bounds
+        //     window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
+        //     // Set the map to fit marker bounds
+        //     window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
+        // } else { // No nodes were selected
+        //     console.log('[WGST] No selected nodes');
+        //     // Show Europe
+        //     window.WGST.geo.map.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
+        //     window.WGST.geo.map.setZoom(5);
+        // }
     };
 
-    var showRepresentativeTreeNodesOnMap = function(nodeIds) {
+    // var showRepresentativeTreeNodesOnMap = function(nodeIds) {
 
-        var existingMarkers = window.WGST.geo.markers.representativeTree,
-            existingMarker;
+    //     var existingMarkers = window.WGST.geo.markers.representativeTree,
+    //         existingMarker;
 
-        // Remove existing markers
-        for (existingMarker in existingMarkers) {
-            if (existingMarkers.hasOwnProperty(existingMarker)) {
-                existingMarkers[existingMarker].setMap(null);
-            }
-        }
+    //     // Remove existing markers
+    //     for (existingMarker in existingMarkers) {
+    //         if (existingMarkers.hasOwnProperty(existingMarker)) {
+    //             existingMarkers[existingMarker].setMap(null);
+    //         }
+    //     }
 
-        // Reset marker bounds
-        window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
+    //     // Reset marker bounds
+    //     window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
 
-        if (typeof nodeIds === 'string' && nodeIds.length > 0) {
-            console.log('[WGST] Selected representative tree nodes: ' + nodeIds);
+    //     if (typeof nodeIds === 'string' && nodeIds.length > 0) {
+    //         console.log('[WGST] Selected representative tree nodes: ' + nodeIds);
 
-            // Create representative tree markers
-            var selectedNodeIds = nodeIds.split(','),
-                nodeCounter = selectedNodeIds.length,
-                accession,
-                metadata;
+    //         // Create representative tree markers
+    //         var selectedNodeIds = nodeIds.split(','),
+    //             nodeCounter = selectedNodeIds.length,
+    //             accession,
+    //             metadata;
 
-            // For each node create representative tree marker
-            for (; nodeCounter !== 0;) {
-                // Decrement counter
-                nodeCounter = nodeCounter - 1;
+    //         // For each node create representative tree marker
+    //         for (; nodeCounter !== 0;) {
+    //             // Decrement counter
+    //             nodeCounter = nodeCounter - 1;
 
-                accession = selectedNodeIds[nodeCounter];
+    //             accession = selectedNodeIds[nodeCounter];
 
-                metadata = window.WGST.representativeTree[accession];
+    //             metadata = window.WGST.representativeTree[accession];
 
-                // Check if both latitude and longitude provided
-                if (metadata.latitude && metadata.longitude) {
+    //             // Check if both latitude and longitude provided
+    //             if (metadata.latitude && metadata.longitude) {
 
-                    console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
-                    console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
+    //                 console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
+    //                 console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
 
-                    var marker = new google.maps.Marker({
-                        position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
-                        map: window.WGST.geo.map,
-                        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                        // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
-                        // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
-                        optimized: true
-                    });
-                    // Set marker
-                    window.WGST.geo.markers.representativeTree[accession] = marker;
-                    // Extend markerBounds with each metadata marker
-                    window.WGST.geo.markerBounds.extend(marker.getPosition());
-                }
-            } // for
+    //                 var marker = new google.maps.Marker({
+    //                     position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
+    //                     map: window.WGST.geo.map,
+    //                     icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+    //                     // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
+    //                     // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+    //                     optimized: true
+    //                 });
+    //                 // Set marker
+    //                 window.WGST.geo.markers.representativeTree[accession] = marker;
+    //                 // Extend markerBounds with each metadata marker
+    //                 window.WGST.geo.markerBounds.extend(marker.getPosition());
+    //             }
+    //         } // for
 
-            // Pan to marker bounds
-            window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
-            // Set the map to fit marker bounds
-            window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
-        } else { // No nodes were selected
-            console.log('[WGST] No selected nodes');
-            // Show Europe
-            window.WGST.geo.map.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
-            window.WGST.geo.map.setZoom(5);
-        }
-    };
+    //         // Pan to marker bounds
+    //         window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
+    //         // Set the map to fit marker bounds
+    //         window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
+    //     } else { // No nodes were selected
+    //         console.log('[WGST] No selected nodes');
+    //         // Show Europe
+    //         window.WGST.geo.map.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
+    //         window.WGST.geo.map.setZoom(5);
+    //     }
+    // };
 
         // Array of objects that store content of FASTA file and user-provided metadata
     var fastaFilesAndMetadata = {},
@@ -1003,6 +1063,9 @@ $(function(){
         contigs = e.target.result.trim().split('>').filter(function(element){
             return (element.length > 0);
         });
+
+        // Start counting assemblies from 1, not 0
+        fileCounter = fileCounter + 1;
 
         assemblies[fileCounter] = {
             'name': file.name,
@@ -1597,16 +1660,16 @@ $(function(){
             //WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
             // [0] returns native DOM element: http://learn.jquery.com/using-jquery-core/faq/how-do-i-pull-a-native-dom-element-from-a-jquery-object/
             //WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(autocompleteInput[0]);
-            WGST.geo.metadataSearchBox[fileName] = new google.maps.places.SearchBox(autocompleteInput[0]);
+            WGST.geo.placeSearchBox[fileName] = new google.maps.places.SearchBox(autocompleteInput[0]);
 
             // When the user selects an address from the dropdown,
             // get geo coordinates
             // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
             // TO DO: Remove this event listener after metadata was sent
-            google.maps.event.addListener(WGST.geo.metadataSearchBox[fileName], 'places_changed', function() {
+            google.maps.event.addListener(WGST.geo.placeSearchBox[fileName], 'places_changed', function() {
 
                 // Get the place details from the autocomplete object.
-                var places = window.WGST.geo.metadataSearchBox[fileName].getPlaces(),
+                var places = window.WGST.geo.placeSearchBox[fileName].getPlaces(),
                     place = places[0],
                     latitude = place.geometry.location.lat(),
                     longitude = place.geometry.location.lng(),
@@ -1619,13 +1682,13 @@ $(function(){
                 $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-location-input').val(formattedAddress);
 
                 // Set map center to selected address
-                WGST.geo.map.setCenter(places[0].geometry.location);
+                WGST.geo.map.canvas.setCenter(places[0].geometry.location);
                 // Set map
-                WGST.geo.markers.metadata.setMap(WGST.geo.map);
+                WGST.geo.map.markers.metadata.setMap(WGST.geo.map.canvas);
                 // Set metadata marker's position to selected address
-                WGST.geo.markers.metadata.setPosition(places[0].geometry.location);
+                WGST.geo.map.markers.metadata.setPosition(places[0].geometry.location);
                 // Show metadata marker
-                WGST.geo.markers.metadata.setVisible(true);
+                WGST.geo.map.markers.metadata.setVisible(true);
 
                 // Geocode address
                 /*
@@ -1644,10 +1707,12 @@ $(function(){
 
                 window.WGST.upload.assembly[fileName] = window.WGST.upload.assembly[fileName] || {};
                 window.WGST.upload.assembly[fileName].metadata = window.WGST.upload.assembly[fileName].metadata || {};
-                window.WGST.upload.assembly[fileName].metadata.location = {
-                    latitude: latitude,
-                    longitude: longitude,
-                    formatted_address: formattedAddress,
+                window.WGST.upload.assembly[fileName].metadata.geographic = {
+                    address: formattedAddress,
+                    position: {
+                        latitude: latitude,
+                        longitude: longitude
+                    },
                     // https://developers.google.com/maps/documentation/geocoding/#Types
                     type: place.types[0]
                 };
@@ -1858,34 +1923,38 @@ $(function(){
 
     };
 
-    var handleDragOver = function(evt) {
-        evt.stopPropagation();
-        evt.preventDefault();
-        evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy
+    var handleDragOver = function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy
     };
 
     // FASTA file name regex
     var fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.contig)$/i;
 
-    var handleFileDrop = function(evt) {
-        evt.stopPropagation();
-        evt.preventDefault();
+    var handleFileDrop = function(event) {
+        event.stopPropagation();
+        event.preventDefault();
 
-        closePanel('representativeTree', function() {
-            // Open assembly upload navigator panel, analytics panel and metadata panel
-            openPanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
-        });
+        // closePanel('representativeTree', function() {
+        //     // Open assembly upload navigator panel, analytics panel and metadata panel
+        //     openPanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
+        // });
+
+        openPanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
 
         // Set the highest z index for this panel
         $('.assembly-upload-panel').trigger('mousedown');
 
             // FileList object
             // https://developer.mozilla.org/en-US/docs/Web/API/FileList
-        var droppedFiles = evt.dataTransfer.files,
+        var droppedFiles = event.dataTransfer.files,
             // A single file from FileList object
             file = droppedFiles[0],
+            // File name is used for initial user assembly id
+            fileName = file.name,
             // Count files
-            fileCounter = 0,
+            //fileCounter = 0,
             // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
             fileReader = new FileReader();
             
@@ -1894,7 +1963,7 @@ $(function(){
             // Hide average number of contigs per assembly
             $('.upload-multiple-assemblies-label').hide();
             // Set file name of dropped file
-            $('.upload-single-assembly-file-name').text(file.name);
+            $('.upload-single-assembly-file-name').text(fileName);
             // Show single assembly upload label
             $('.upload-single-assembly-label').show();
         } else {
@@ -1913,7 +1982,7 @@ $(function(){
         $('.assembly-list-slider').slider("option", "max", droppedFiles.length);
 
         // Set file name
-        $('.assembly-file-name').text(file.name);
+        $('.assembly-file-name').text(fileName);
 
         // If there is more than 1 file dropped then show assembly navigator
         if (droppedFiles.length > 1) {
@@ -1923,37 +1992,86 @@ $(function(){
             $('.ui-slider-handle').focus();
         }
 
-        // Process each file/assembly (1 file === 1 assembly)
-        for (fileCounter = 0; fileCounter < droppedFiles.length; fileCounter++) {
+        $.each(droppedFiles, function(fileCounter, file){
             // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
-            file = droppedFiles.item(fileCounter);  
+            //file = droppedFiles.item(fileCounter);
+
             // Validate file name   
             if (file.name.match(fastaFileNameRegex)) {
-                // Create new file reader
-                fileReader = new FileReader();
-                // Create new scope to save fileCounter variable with it's current value
-                // http://stackoverflow.com/a/2568989
-                (function(savedFileCounter, currentFile) {
-                    // Start counting files from 1, not 0
-                    savedFileCounter = savedFileCounter + 1;
-                    // A handler for the load event. This event is triggered each time the reading operation is successfully completed
-                    fileReader.onload = function(event){
-                        // Once file is loaded, parse it
-                        parseFastaFile(event, savedFileCounter, currentFile, droppedFiles);
-                    };
-                    /* Alternative code:
+                // Create closure (new scope) to save fileCounter, file variable with it's current value
+                (function(){
+                    var fileReader = new FileReader();
+
                     fileReader.addEventListener('load', function(event){
-                        parseFastaFile(event, savedFileCounter, currentFile, files);
+                        parseFastaFile(event, fileCounter, file, droppedFiles);
                     });
-                    */
-                })(fileCounter, file);
-                // Read file as a text
-                fileReader.readAsText(file);
+
+                    // Read file as text
+                    fileReader.readAsText(file);
+                })();
             // Invalid file name
             } else {
                 console.log("[WGST] File not supported");
             }
-        } // for
+        });
+
+        // // Process each file/assembly (1 file === 1 assembly)
+        // for (var fileCounter = 0; fileCounter < droppedFiles.length; fileCounter++) {
+
+        //     (function() {
+        //     // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
+        //     file = droppedFiles.item(fileCounter);
+
+        //     //console.debug(file.name);
+
+        //     // Validate file name   
+        //     if (file.name.match(fastaFileNameRegex)) {
+
+        //         //console.debug(fileName);
+
+        //         // Create new scope to save fileCounter variable with it's current value
+        //         // http://stackoverflow.com/a/2568989
+        //         // (function(savedFileCounter, currentFile) {
+        //         //     // Start counting files from 1, not 0
+        //         //     savedFileCounter = savedFileCounter + 1;
+        //         //     // A handler for the load event. This event is triggered each time the reading operation is successfully completed
+        //         //     fileReader.onload = function(event){
+        //         //         // Once file is loaded, parse it
+        //         //         parseFastaFile(event, savedFileCounter, currentFile, droppedFiles);
+        //         //     };
+        //         //     /* Alternative code:
+        //         //     fileReader.addEventListener('load', function(event){
+        //         //         parseFastaFile(event, savedFileCounter, currentFile, files);
+        //         //     });
+        //         //     */
+        //         // })(fileCounter, file);
+
+        //         // Create new file reader
+        //         fileReader = new FileReader();
+
+        //         //(function() {
+        //             // Start counting files from 1, not 0
+        //             fileCounter = fileCounter + 1;
+        //             // A handler for the load event. This event is triggered each time the reading operation is successfully completed
+        //             // fileReader.onload = function(event){
+        //             //     // Once file is loaded, parse it
+        //             //     parseFastaFile(event, fileCounter, file, droppedFiles);
+        //             // };
+        //             // Alternative code:
+        //             fileReader.addEventListener('load', function(event){
+        //                 parseFastaFile(event, fileCounter, file, droppedFiles);
+        //             });
+                    
+        //         //})();
+
+        //         // Read file as text
+        //         fileReader.readAsText(file);
+        //     // Invalid file name
+        //     } else {
+        //         console.log("[WGST] File not supported");
+        //     }
+        //     })();
+        // } // for
 
         // Update total number of assemblies to upload
         $('.assembly-upload-total-number').text(droppedFiles.length);
@@ -2286,7 +2404,7 @@ $(function(){
     //     }
     // };
 
-    var getAssemblyTopScore = function(assemblyScores) {
+    var calculateAssemblyTopScore = function(assemblyScores) {
         // Sort data by score
         // http://stackoverflow.com/a/15322129
         var sortedScores = [],
@@ -2402,7 +2520,7 @@ $(function(){
     };
 
     // Listen to notifications
-    socket.on('assemblyUploadNotification', function(data) {
+    WGST.socket.connection.on('assemblyUploadNotification', function(data) {
 
         var collectionId = data.collectionId,
             assemblyId = data.assemblyId,
@@ -2493,7 +2611,7 @@ $(function(){
     */
 
     // User wants to show assembly on map
-    $('.wgst-panel__collection-panel .assemblies-summary-table').on('change', 'input[type="checkbox"]', function(e) {
+    $('.wgst-panel__collection .assemblies-summary-table').on('change', 'input[type="checkbox"]', function(e) {
 
         //======================================================
         // Map
@@ -2506,9 +2624,9 @@ $(function(){
             console.log('[WGST] Creating marker for assembly id: ' + checkedAssemblyId);
 
             // Create marker
-            window.WGST.geo.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
+            window.WGST.geo.map.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
                 position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
-                map: window.WGST.geo.map,
+                map: window.WGST.geo.map.canvas,
                 icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
                 optimized: true // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
             });
@@ -2521,22 +2639,22 @@ $(function(){
             console.log('[WGST] Removing marker for assembly id: ' + checkedAssemblyId);
 
             // Remove marker
-            window.WGST.geo.markers.assembly[checkedAssemblyId].setMap(null);
+            window.WGST.geo.map.markers.assembly[checkedAssemblyId].setMap(null);
 
             // Remove node highlighing
             $(this).closest('tr').removeClass("row-highlighted");
         }
 
         // Extend markerBounds with each metadata marker
-        window.WGST.geo.markerBounds.extend(window.WGST.geo.markers.assembly[checkedAssemblyId].getPosition());
+        window.WGST.geo.map.markerBounds.extend(window.WGST.geo.map.markers.assembly[checkedAssemblyId].getPosition());
         // Pan to marker bounds
-        window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
+        window.WGST.geo.map.canvas.panToBounds(window.WGST.geo.map.markerBounds);
         // Set the map to fit marker bounds
-        window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
+        window.WGST.geo.map.canvas.fitBounds(window.WGST.geo.map.markerBounds);
     });
 
     // User wants to select representative tree branch
-    $('.wgst-panel__collection-panel .assemblies-summary-table').on('change', 'input[type="radio"]', function(e) {
+    $('.wgst-panel__collection .assemblies-summary-table').on('change', 'input[type="radio"]', function(e) {
 
         //======================================================
         // Tree
@@ -2547,7 +2665,7 @@ $(function(){
             collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
 
         // Get node id of each node that user selected via checked checkbox 
-        $('.wgst-panel__collection-panel .assemblies-summary-table input[type="radio"]:checked').each(function(){
+        $('.wgst-panel__collection .assemblies-summary-table input[type="radio"]:checked').each(function(){
             // Concat assembly ids to string
             // Use this string to highlight nodes on tree
             if (checkedAssemblyNodesString.length > 0) {
@@ -2584,7 +2702,7 @@ $(function(){
         // Update percentage value
         $('.adding-metadata-progress-container .progress-percentage').text('0%');
         // Remove metadata marker
-        window.WGST.geo.markers.metadata.setMap(null);
+        window.WGST.geo.map.markers.metadata.setMap(null);
     });
 
     // var assemblyUploadDoneHandler = function(collectionId, assemblyId) {
@@ -2614,7 +2732,7 @@ $(function(){
             // Increment number of assembly upload counter
             numberOfFilesProcessing = numberOfFilesProcessing + 1;
             // Set socket room id
-            fastaFilesAndMetadata[assemblyId].socketRoomId = socketRoomId;
+            fastaFilesAndMetadata[assemblyId].socketRoomId = window.WGST.socket.roomId;
             // Set assembly id
             fastaFilesAndMetadata[assemblyId].assemblyId = assemblyId;
             // Post assembly
@@ -2650,7 +2768,7 @@ $(function(){
         $(this).attr('disabled','disabled');
 
         // Remove metadata marker
-        window.WGST.geo.markers.metadata.setMap(null);
+        window.WGST.geo.map.markers.metadata.setMap(null);
 
         // Close panels
         closePanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
@@ -2687,8 +2805,8 @@ $(function(){
 
         // Set number of assemblies
         var numberOfAssemblies = Object.keys(fastaFilesAndMetadata).length;
-        $('.wgst-panel__assembly-upload-progress-panel .header-title small').text(numberOfAssemblies);
-        $('.wgst-panel__assembly-upload-progress-panel .assemblies-upload-total').text(numberOfAssemblies);
+        $('.wgst-panel__assembly-upload-progress .header-title small').text(numberOfAssemblies);
+        $('.wgst-panel__assembly-upload-progress .assemblies-upload-total').text(numberOfAssemblies);
 
         // Open assembly upload progress panel
         openPanel('assemblyUploadProgress', function(){
@@ -2708,14 +2826,13 @@ $(function(){
 
                     var collectionIdData = JSON.parse(data),
                         collectionId = collectionIdData.uuid,
-                        userAssemblyIdToAssemblyIdMap = collectionIdData.idMap;
+                        userAssemblyIdToAssemblyIdMap = collectionIdData.idMap,
+                        assemblyId;
 
-                    WGST.upload.collection[collectionId] = {};
-                    WGST.upload.collection[collectionId].notifications = {};
-                    WGST.upload.collection[collectionId].notifications.all = [];
-                    WGST.upload.collection[collectionId].notifications.tree = false; // Have you received at least 1 COLLECTION_TREE notification
-
-                    var fastaFileCounter = 0;
+                    window.WGST.upload.collection[collectionId] = {};
+                    window.WGST.upload.collection[collectionId].notifications = {};
+                    window.WGST.upload.collection[collectionId].notifications.all = [];
+                    window.WGST.upload.collection[collectionId].notifications.tree = false; // Have you received at least 1 COLLECTION_TREE notification
 
                     // Replace user assembly id (fasta file name) with assembly id generated on server side
                     var fastaFilesAndMetadataWithUpdatedIds = {};
@@ -2727,41 +2844,39 @@ $(function(){
                     fastaFilesAndMetadata = fastaFilesAndMetadataWithUpdatedIds;
 
                     // Post each FASTA file separately
-                    for (var assemblyId in fastaFilesAndMetadata) {
+                    for (assemblyId in fastaFilesAndMetadata) {
                         if (fastaFilesAndMetadata.hasOwnProperty(assemblyId)) {                                
 
-                            // Increment counter
-                            fastaFileCounter = fastaFileCounter + 1;
-
-                            var savedCollectionId = collectionId;
+                            //var savedCollectionId = collectionId,
+                            var userAssemblyId = fastaFilesAndMetadata[assemblyId].name;
 
                             // Add collection id to each FASTA file object
-                            fastaFilesAndMetadata[assemblyId].collectionId = savedCollectionId;
+                            //fastaFilesAndMetadata[assemblyId].collectionId = savedCollectionId;
+                            fastaFilesAndMetadata[assemblyId].collectionId = collectionId;
 
-                            var autocompleteInput = $('li[data-name="' + fastaFilesAndMetadata[assemblyId].name + '"] .assembly-sample-location-input');
+                            // TO DO: Change 'data-name' to 'data-file-name'
+                            var autocompleteInput = $('li[data-name="' + userAssemblyId + '"] .assembly-sample-location-input');
 
-                            var fileName = fastaFilesAndMetadata[assemblyId].name;
-
-                            console.debug(fileName);
+                            console.debug('userAssemblyId: ' + userAssemblyId);
                             console.dir(window.WGST.upload);
 
                             // Add metadata to each FASTA file object
                             fastaFilesAndMetadata[assemblyId].metadata = {
-                                location: {
-                                    // TO DO: Change 'data-name' to 'data-file-name'
-                                    latitude: window.WGST.upload.assembly[fileName].metadata.location.latitude, //autocompleteInput.attr('data-latitude'),
-                                    longitude: window.WGST.upload.assembly[fileName].metadata.location.longitude //autocompleteInput.attr('data-longitude')
+                                geographic: {
+                                    position: {
+                                        latitude: window.WGST.upload.assembly[userAssemblyId].metadata.geographic.position.latitude,
+                                        longitude: window.WGST.upload.assembly[userAssemblyId].metadata.geographic.position.longitude
+                                    }
                                 }
                             };
 
-                            console.log('[WGST] Metadata for ' + assemblyId + ': ');
-                            console.log(fastaFilesAndMetadata[assemblyId].metadata);
+                            console.log('[WGST] Metadata for ' + assemblyId + ':');
+                            console.debug(fastaFilesAndMetadata[assemblyId].metadata);
 
                             // Create closure to save collectionId and assemblyId
                             (function() {
                                 uploadAssembly(collectionId, assemblyId);
                             })();
-
                         } // if
                     } // for
                 })
@@ -2859,7 +2974,7 @@ $(function(){
     });
 
     // Open Assembly from Collection list
-    $('.wgst-panel__collection-panel, .wgst-panel__assembly-upload-progress-panel').on('click', '.open-assembly-button', function(e){
+    $('.wgst-panel__collection, .wgst-panel__assembly-upload-progress').on('click', '.open-assembly-button', function(e){
 
         var assemblyId = $(this).attr('data-assembly-id');
 
@@ -2872,7 +2987,7 @@ $(function(){
             closePanel('assembly', function(){
 
                 // Remove content
-                $('.wgst-panel__assembly-panel .assembly-details .assembly-detail-content').html('');
+                $('.wgst-panel__assembly .assembly-details .assembly-detail-content').html('');
 
                 openAssemblyPanel(assemblyId);
             });
@@ -2883,7 +2998,7 @@ $(function(){
         e.preventDefault();
     });
 
-    $('.wgst-panel__collection-panel .collection-controls-show-tree').on('click', function(){
+    $('.wgst-panel__collection .collection-controls-show-tree').on('click', function(){
         openPanel('collectionTree', function(){
             bringPanelToTop('collectionTree');
         });
@@ -2896,7 +3011,7 @@ $(function(){
         // ============================================================
 
         // Show animated loading circle
-        $('.wgst-panel__assembly-panel .wgst-panel-loading').show();
+        $('.wgst-panel__assembly .wgst-panel-loading').show();
 
         // Bring panel to top
         bringPanelToTop('assembly');
@@ -2925,7 +3040,7 @@ $(function(){
             // ============================================================
 
             var assembly = data.assembly,
-                assemblyPanel = $('.wgst-panel__assembly-panel');
+                assemblyPanel = $('.wgst-panel__assembly');
 
             // Set assembly name
             assemblyPanel.find('.header-title small').text(assembly.ASSEMBLY_METADATA.assemblyUserId);
@@ -3006,7 +3121,7 @@ $(function(){
                 } // if
             } // for
 
-            $('.wgst-panel__assembly-panel .assembly-detail__resistance-profile .assembly-detail-content').html($(assemblyResistanceProfileHtml));
+            $('.wgst-panel__assembly .assembly-detail__resistance-profile .assembly-detail-content').html($(assemblyResistanceProfileHtml));
 
             // ============================================================
             // Prepare MLST
@@ -3050,16 +3165,16 @@ $(function(){
             assemblyMlstHtml = assemblyMlstHtml.replace('{{locusIds}}', locusDataHtml);
             assemblyMlstHtml = assemblyMlstHtml.replace('{{alleleIds}}', alleleDataHtml);
 
-            $('.wgst-panel__assembly-panel .assembly-detail__mlst .assembly-detail-content').html($(assemblyMlstHtml));
+            $('.wgst-panel__assembly .assembly-detail__mlst .assembly-detail-content').html($(assemblyMlstHtml));
 
             // ============================================================
             // Prepare nearest representative
             // ============================================================
 
             var assemblyScores = assembly['FP_COMP'].scores,
-                assemblyTopScore = getAssemblyTopScore(assemblyScores);
+                assemblyTopScore = calculateAssemblyTopScore(assemblyScores);
 
-            $('.wgst-panel__assembly-panel .assembly-detail__nearest-representative .assembly-detail-content').text(assemblyTopScore.referenceId);
+            $('.wgst-panel__assembly .assembly-detail__nearest-representative .assembly-detail-content').text(assemblyTopScore.referenceId);
 
             // ============================================================
             // Prepare scores
@@ -3105,10 +3220,10 @@ $(function(){
 
             assemblyScoresHtml = assemblyScoresHtml.replace('{{assemblyScoresDataHtml}}', assemblyScoresDataHtml);
 
-            $('.wgst-panel__assembly-panel .assembly-detail__score .assembly-detail-content').html(assemblyScoresHtml);
+            $('.wgst-panel__assembly .assembly-detail__score .assembly-detail-content').html(assemblyScoresHtml);
 
             // Hide animated loading circle
-            $('.wgst-panel__assembly-panel .wgst-panel-loading').hide();
+            $('.wgst-panel__assembly .wgst-panel-loading').hide();
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log('[WGST][ERROR] Failed to get assembly data');
@@ -3117,7 +3232,7 @@ $(function(){
             console.error(jqXHR);
         });
 
-        e.preventDefault();
+        //e.preventDefault();
     };
 
     $('.show-representative-collection button').on('click', function(){

@@ -80,7 +80,7 @@ app.post('/assembly/add', assembly.add);
 app.post('/api/assembly/resistance-profile', assembly.getResistanceProfile);
 
 // Data routes
-app.get('/api/all-antibiotics', assembly.getAllAntibiotics);
+app.get('/api/all-antibiotics', assembly.apiGetAllAntibiotics);
 
 // Test routes
 app.get('/dev/d3tree', require('./routes/dev').d3tree);
