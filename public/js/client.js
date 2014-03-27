@@ -301,66 +301,7 @@ $(function(){
         WGST.socket.connection.emit('getRoomId');
     })();
 
-    // var loadRequestedAssembly = function(requestedAssembly) {
-    //     console.log('[WGST] Loading requested assembly');
-
-    //     // Sort data by score
-    //     // http://stackoverflow.com/a/15322129
-    //     var sortableScores = [],
-    //         score;
-
-    //     // First create the array of keys/values so that we can sort it
-    //     for (score in requestedAssembly.scores) {
-    //         if (requestedAssembly.scores.hasOwnProperty(score)) {
-    //             sortableScores.push({ 
-    //                 'referenceId': requestedAssembly.scores[score].referenceId,
-    //                 'score': requestedAssembly.scores[score].score
-    //             });
-    //         }
-    //     }
-
-    //     // Sort scores
-    //     sortableScores = sortableScores.sort(function(a,b){
-    //         return b.score - a.score; // Descending sort (Z-A)
-    //     });
-
-    //     // Create assembly data table
-    //     var sortableScoreCounter = 0;
-    //     for (; sortableScoreCounter < sortableScores.length; sortableScoreCounter++ ) {
-    //         $('.assembly-data-table tbody').append(
-    //             // This is not verbose enough
-    //             ((sortableScoreCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
-    //                 + '<td>'
-    //                     + sortableScores[sortableScoreCounter].referenceId
-    //                 + '</td>'
-    //                 + '<td>'
-    //                     + sortableScores[sortableScoreCounter].score
-    //                 + '</td>'
-    //                 + '<td>'
-    //                     // Convert score values into percentages where the highest number is 100%
-    //                     + Math.floor(sortableScores[sortableScoreCounter].score * 100 / requestedAssembly.fingerprintSize) + '%'
-    //                 + '</td>'
-    //             + '<tr/>'
-    //         );
-    //     }
-
-    //     // Set assembly panel header text
-    //     $('.assembly-panel .wgst-panel-header .assembly-id').text(requestedAssembly.assemblyId);
-
-    //     // Set assembly upload datetime in footer
-    //     //$('.assembly-upload-datetime').text(moment(requestedAssembly.timestamp, "YYYYMMDD_HHmmss").fromNow());
-
-    //     // Show assembly data
-    //     $('.assembly-panel').show();
-    // };
-
-    // // If user provided assembly id in url then load requested assembly
-    // if (typeof window.WGST.requestedAssembly !== 'undefined') {
-    //     loadRequestedAssembly(window.WGST.requestedAssembly);
-    // }
-
     var createAssemblyResistanceProfilePreviewHtml = function(assemblyResistanceProfile, antibiotics) {
-
         var assemblyResistanceProfileHtml = '',
             antibioticGroup,
             antibioticGroupName,
@@ -475,7 +416,7 @@ $(function(){
     };
 
     var getCollection = function(collectionId) {
-        console.log('[WGST] Getting ' + collectionId + ' collection');
+        console.log('[WGST] Getting collection: ' + collectionId);
 
         // Init collection object
         window.WGST.collection[collectionId] = {
@@ -761,22 +702,22 @@ $(function(){
     WGST.geo.map.init();
 
     // Handle Google Maps ready
-    google.maps.event.addListenerOnce(WGST.geo.map.canvas, 'idle', function() {
+    // google.maps.event.addListenerOnce(WGST.geo.map.canvas, 'idle', function() {
 
-        // Open representative tree panel
-        // openPanel('representativeTree', function(){
+    //     // Open representative tree panel
+    //     // openPanel('representativeTree', function(){
 
-        //     // Init representative tree container
-        //     WGST.representativeTree = {
-        //         tree: new PhyloCanvas.Tree(document.getElementById('phylocanvas')),
-        //         metadata: {}
-        //     };
+    //     //     // Init representative tree container
+    //     //     WGST.representativeTree = {
+    //     //         tree: new PhyloCanvas.Tree(document.getElementById('phylocanvas')),
+    //     //         metadata: {}
+    //     //     };
 
-        //     // Load representative tree
-        //     loadRepresentativeTree();
-        // });
+    //     //     // Load representative tree
+    //     //     loadRepresentativeTree();
+    //     // });
 
-    });
+    // });
 
     $('.tree-controls-select-none').on('click', function() {
 

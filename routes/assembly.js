@@ -186,14 +186,6 @@ exports.add = function(req, res) {
 				// -----------------------------------------------------------
 
 				var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
-					// metadata = {
-					// 	assemblyId: assemblyId,
-					// 	assemblyUserId: req.body.name,
-					// 	geographicLocation: {
-					// 		type: 'Point',
-					// 		coordinates: [req.body.metadata.location.latitude, req.body.metadata.location.longitude]
-					// 	}
-					// };
 					assemblyMetadata = req.body.metadata,
 					metadata = {
 						assemblyId: assemblyId,
@@ -299,26 +291,14 @@ exports.add = function(req, res) {
 exports.get = function(req, res) {
 	console.log('[WGST] Requested assembly id: ' + req.params.id);
 
-	var assembly = {};
-
-	// Get requested assembly from db
-	var couchbase = require('couchbase');
-	var db = new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
-		bucket: 'test_wgst',
-		password: '.oneir66'
-	}, function(err) {
+	couchbaseDatabaseConnections[testWgstBucket].get(req.params.id, function(err, result) {
 		if (err) throw err;
-		db.get(req.params.id, function(err, result) {
-			if (err) throw err;
 
-			assembly = result.value;
+		var assembly = result.value;
 
-			console.log(result.value);
+		console.dir(assembly);
 
-			res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
-
-		});
+		res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
 	});
 };
 
@@ -346,8 +326,7 @@ exports.apiGetAssembly = function(req, res) {
 		if (err) throw err;
 
 		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
-		var //assemblies = {},
-			assembly = {},
+		var assembly = {},
 			assemblyId,
 			assemblyIdKey,
 			cleanAssemblyId,
@@ -458,109 +437,87 @@ var getMlstAlleles = function(queryKeys, callback) {
 		return;
 	}
 
-	var couchbase = require('couchbase');
-	var db = new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
-		bucket: 'test_wgst_resources',
-		password: '.oneir66'
-	}, function(err) {
-		if (err) throw err;
+	console.log('>>> queryKeys:');
+	console.dir(queryKeys);
 
-		console.log('>>> queryKeys:');
-		console.dir(queryKeys);
+	couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(queryKeys, {}, function(err, result) {
+		console.log('[WGST] Got MLST alleles data: ');
+		console.log(result);
 
-		db.getMulti(queryKeys, {}, function(err, result) {
-			console.log('[WGST] Got MLST alleles data: ');
-			console.log(result);
+		if (err) {
+			callback(err, result);
+		}
 
-			if (err) {
-				callback(err, result);
-			}
-
-			callback(null, result);
-		});
+		callback(null, result);
 	});
 };
 
-// Return fingerprint data
 exports.apiGetAssemblies = function(req, res) {
 	console.log('[WGST] Getting assemblies with ids: ' + req.body.assemblyIds);
 
-	//var assemblies = [];
+	// Prepend FP_COMP_ to each assembly id
+	var scoresAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
+		return 'FP_COMP_' + assemblyId;
+	});
 
-	// Get requested assembly from db
-	var couchbase = require('couchbase');
-	var db = new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
-		bucket: 'test_wgst',
-		password: '.oneir66'
-	}, function(err) {
+	// Prepend ASSEMBLY_METADATA_ to each assembly id
+	var metadataAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
+		return 'ASSEMBLY_METADATA_' + assemblyId;
+	});
+
+	// Prepend PAARSNP_RESULT_ to each assembly id
+	var resistanceProfileAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
+		return 'PAARSNP_RESULT_' + assemblyId;
+	});
+
+	// Merge all assembly ids
+	var assemblyIds = scoresAssemblyIds
+						.concat(metadataAssemblyIds)
+						.concat(resistanceProfileAssemblyIds);
+
+	console.log('[WGST] Querying keys: ');
+	console.log(assemblyIds);
+
+	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIds, {}, function(err, results) {
+		console.log('[WGST] Got assemblies data: ');
+		console.log(results);
+
 		if (err) throw err;
 
-		// Prepend FP_COMP_ to each assembly id
-		var scoresAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
-			return 'FP_COMP_' + assemblyId;
-		});
+		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
+		var assemblies = {},
+			assemblyId,
+			cleanAssemblyId;
 
-		// Prepend ASSEMBLY_METADATA_ to each assembly id
-		var metadataAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
-			return 'ASSEMBLY_METADATA_' + assemblyId;
-		});
-
-		// Prepend PAARSNP_RESULT_ to each assembly id
-		var resistanceProfileAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
-			return 'PAARSNP_RESULT_' + assemblyId;
-		});
-
-		// Merge all assembly ids
-		var assemblyIds = scoresAssemblyIds
-							.concat(metadataAssemblyIds)
-							.concat(resistanceProfileAssemblyIds);
-
-		console.log('[WGST] Querying keys: ');
-		console.log(assemblyIds);
-
-		db.getMulti(assemblyIds, {}, function(err, results) {
-			console.log('[WGST] Got assemblies data: ');
-			console.log(results);
-
-			if (err) throw err;
-
-			// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
-			var assemblies = {},
-				assemblyId,
-				cleanAssemblyId;
-
-			for (assemblyId in results) {
-                // Parsing assembly scores
-                if (assemblyId.indexOf('FP_COMP_') !== -1) {
-                	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
-                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-					assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
-                // Parsing assembly metadata
-                } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
-                	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
-                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-					assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
-                // Parsing assembly resistance profile
-                } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
-                	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
-                	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-					assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
-				}
+		for (assemblyId in results) {
+            // Parsing assembly scores
+            if (assemblyId.indexOf('FP_COMP_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
+            // Parsing assembly metadata
+            } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
+            // Parsing assembly resistance profile
+            } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
+            	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
+            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+				assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
 			}
+		}
 
-			console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA and PAARSNP_RESULT data: ');
-			console.log(assemblies);
+		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA and PAARSNP_RESULT data: ');
+		console.log(assemblies);
 
-			res.json(assemblies);
-		});
+		res.json(assemblies);
 	});
 };
 
 // Return resistance profile
-exports.getResistanceProfile = function(req, res) {
-	getResistanceProfile(function(error, resistanceProfile){
+exports.apiGetResistanceProfile = function(req, res) {
+	exports.getResistanceProfile(function(error, resistanceProfile){
 
 		if (error) throw error;
 
@@ -570,63 +527,26 @@ exports.getResistanceProfile = function(req, res) {
 	});
 };
 
-var getResistanceProfile = function(callback) {
+exports.getResistanceProfile = function(callback) {
 	console.log('[WGST] Getting resistance profile for assembly ids: ' + req.body.assemblyIds);
 
-	// Get requested assembly from db
-	var couchbase = require('couchbase');
-	var db = new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
-		bucket: 'test_wgst',
-		password: '.oneir66'
-	}, function(err) {
-		if (err) throw err;
+	// Prepend PAARSNP_RESULT_ to each assembly id
+	var resistanceProfileQueryKeys = req.body.assemblyIds.map(function(assemblyId){
+		return 'PAARSNP_RESULT_' + assemblyId;
+	});
 
-		// Prepend PAARSNP_RESULT_ to each assembly id
-		var resistanceProfileQueryKeys = req.body.assemblyIds.map(function(assemblyId){
-			return 'PAARSNP_RESULT_' + assemblyId;
-		});
+	console.log('[WGST] Query keys: ');
+	console.log(resistanceProfileQueryKeys);
 
-		console.log('[WGST] Query keys: ');
-		console.log(resistanceProfileQueryKeys);
+	couchbaseDatabaseConnections[testWgstBucket].getMulti(resistanceProfileQueryKeys, {}, function(error, results) {
+		console.log('[WGST] Got resistance profile data:');
+		console.dir(results);
 
-		db.getMulti(resistanceProfileQueryKeys, {}, function(error, results) {
-			console.log('[WGST] Got resistance profile data: ');
-			console.log(results);
+		if (error) {
+			callback(error, results);
+		}
 
-			if (error) {
-				callback(error, results);
-			}
-
-			callback(null, results);
-
-			/*
-			var resistanceProfilesAndAntibiotics = {
-				antibiotics: '',
-				resistanceProfiles: results
-			};
-
-			var db2 = new couchbase.Connection({
-				host: 'http://129.31.26.151:8091/pools',
-				bucket: 'test_wgst_resources',
-				password: '.oneir66'
-			}, function(err) {
-				if (err) throw err;
-
-				// Get list of antibiotics
-				db2.get('ANTIMICROBIALS_ALL', function(err, result) {
-					console.log('[WGST] Got list of antibiotics: ');
-					console.log(result);
-
-					if (err) throw err;
-
-					resistanceProfilesAndAntibiotics.antibiotics = result.value;
-
-					res.json(resistanceProfilesAndAntibiotics);
-				});
-
-			});*/
-		});
+		callback(null, results);
 	});
 };
 

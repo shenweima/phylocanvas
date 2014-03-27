@@ -77,7 +77,7 @@ app.post('/api/assemblies', assembly.apiGetAssemblies);
 
 app.post('/assembly/add', assembly.add);
 
-app.post('/api/assembly/resistance-profile', assembly.getResistanceProfile);
+app.post('/api/assembly/resistance-profile', assembly.apiGetResistanceProfile);
 
 // Data routes
 app.get('/api/all-antibiotics', assembly.apiGetAllAntibiotics);

@@ -13,7 +13,6 @@ exports.add = function(req, res) {
 	// TODO: Validate request
 
 	// Call RabbitMQ
-
 	var amqp = require('amqp'),
 		connection = amqp.createConnection({
 			host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
@@ -248,7 +247,7 @@ exports.apiGetCollection = function(req, res) {
 exports.get = function(req, res) {
 	var collectionId = req.params.id;
 
-	console.log('[WGST] Requested collection id: ' + collectionId);
+	console.log('[WGST] Requested ' + collectionId + ' collection');
 
 	res.render('index', {
 		appConfig: JSON.stringify(appConfig.client),
