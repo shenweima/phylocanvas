@@ -69,7 +69,7 @@ $(function(){
     };
 
     WGST.settings = WGST.settings || {};
-    WGST.settings.representativeCollectionId = '59b792aa-b892-4106-b1dd-2e9e78abefc4';
+    WGST.settings.representativeCollectionId = 'd550e9d7-00b4-4ef9-875b-bd8a2a336574';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
 
     WGST.socket = {
         connection: io.connect(WGST.config.socketAddress),
