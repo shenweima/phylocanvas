@@ -418,7 +418,7 @@ $(function(){
     var closeCollection = function(collectionId) {
         console.log('[WGST] Closing collection ' + collectionId);
 
-        closePanel('collection', function(){
+        closePanel(['collection', 'collectionTree'], function(){
             delete window.WGST.collection[collectionId];
         });
     };
@@ -3201,9 +3201,7 @@ $(function(){
             closePanel(panelName, function(){
                 if (panelName === 'collection') {
                     var collectionId = panel.attr('data-collection-id');
-                    closePanel('collectionTree', function(){
-                        closeCollection(collectionId);
-                    });
+                    closeCollection(collectionId);
                 }
             });
         } // if
