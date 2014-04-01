@@ -415,8 +415,16 @@ $(function(){
         $('.antibiotic[data-toggle="tooltip"]').tooltip();
     };
 
+    var closeCollection = function(collectionId) {
+        console.log('[WGST] Closing collection ' + collectionId);
+
+        closePanel('collection', function(){
+            delete window.WGST.collection[collectionId];
+        });
+    };
+
     var getCollection = function(collectionId) {
-        console.log('[WGST] Getting collection: ' + collectionId);
+        console.log('[WGST] Getting collection ' + collectionId);
 
         // Init collection object
         window.WGST.collection[collectionId] = {
@@ -3186,12 +3194,18 @@ $(function(){
     // ============================================================
 
     $('body').on('click', '.wgst-panel-control-button__close', function(){
-        // Check if panel control button is active
         if ($(this).hasClass('wgst-panel-control-button--active')) {
             var panel = $(this).closest('.wgst-panel'),
                 panelName = panel.attr('data-panel-name');
 
-            closePanel(panelName);
+            closePanel(panelName, function(){
+                if (panelName === 'collection') {
+                    var collectionId = panel.attr('data-collection-id');
+                    closePanel('collectionTree', function(){
+                        closeCollection(collectionId);
+                    });
+                }
+            });
         } // if
     });
 
