@@ -1012,7 +1012,7 @@ h2, h4 {
     }
 
     .collection-details {
-        max-height: 560px;
+        max-height: 400px;
         overflow: scroll;
         padding: 20px;
         .assembly-upload-datetime {
@@ -1061,7 +1061,7 @@ h2, h4 {
         }
         table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
             width: 900px;
-            max-height: 700px;
+            //max-height: 400px;
             overflow: scroll;
             margin-bottom: 0;
             colgroup {
@@ -1153,6 +1153,12 @@ h2, h4 {
         .btn-group {
             margin: 0 10px;
         }
+    }
+    .collection-tree-leaf-metadata {
+        z-index: 100;
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
     }
 }
 

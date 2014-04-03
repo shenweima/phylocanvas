@@ -111,7 +111,7 @@ $(function(){
     var openPanel = function(panelNames, callback) {
         // Overwrite function
         var openPanel = function(panelName) {
-            var panel = $('[data-panel-name="' + panelName + '"');
+            var panel = $('[data-panel-name="' + panelName + '"]');
 
             // Set position
             panel.css('top', WGST.panels[panelName].top);
@@ -150,7 +150,7 @@ $(function(){
     var closePanel = function(panelNames, callback) {
         // Overwrite function
         var closePanel = function(panelName) {
-            var panel = $('[data-panel-name="' + panelName + '"');
+            var panel = $('[data-panel-name="' + panelName + '"]');
 
             // Hide
             // panel.fadeOut('fast', function(){
@@ -194,11 +194,11 @@ $(function(){
             }
         });
 
-        $('[data-panel-name="' + panelName + '"').css('zIndex', zIndexHighest + 1);
+        $('[data-panel-name="' + panelName + '"]').css('zIndex', zIndexHighest + 1);
     };
 
     var isOpenedPanel = function(panelName) {
-        var panel = $('[data-panel-name="' + panelName + '"');
+        var panel = $('[data-panel-name="' + panelName + '"]');
 
         if (panel.hasClass('wgst-panel--active')) {
             return true;
@@ -391,7 +391,7 @@ $(function(){
                 // Append to only first tbody tag (currently there more than one)
                 $('.assemblies-summary-table tbody').eq(0).append(
                     // TO DO: This is not verbose enough
-                    ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe">' : '<tr>')
+                    ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<tr data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
                         + '<td class="show-on-tree-radio-button">'
                             + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
                         + '</td>'
@@ -601,6 +601,9 @@ $(function(){
         window.WGST.collection[collectionId].tree.canvas.hideLabels();
     });
 
+    // PhyloCanvas extention
+    var translateCanvasToElementCoordinateX = function(coordinateX) {};
+
     var renderCollectionTree = function(collectionId) {
         console.log('[WGST] Rendering ' + collectionId + ' collection tree');
 
@@ -614,7 +617,7 @@ $(function(){
         tree.parseNwk(window.WGST.collection[collectionId].tree.data);
         tree.treeType = 'rectangular';
         tree.showLabels = false;
-        tree.baseNodeSize = 0.5;
+        tree.baseNodeSize = 10;
         tree.setTextSize(24);
         tree.selectedNodeSizeIncrease = 0.5;
         tree.selectedColor = '#0059DE';
@@ -626,10 +629,29 @@ $(function(){
             if (assemblies.hasOwnProperty(assemblyId)) {
                 // Set label only to leaf nodes, filtering out the root node
                 if (tree.branches[assemblyId].leaf) {
-                    tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.assemblyUserId;                    
+                    tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.assemblyUserId;                 
                 }
             }
         }
+
+        // $.each(tree.leaves, function(leafCounter, leaf){
+        //     // console.log('leaf x: ' + leaf.centerx);
+        //     // console.log('leaf y: ' + leaf.centery);
+        //     // console.log('canvasTopLeft.left: ' + canvasTopLeft.left);
+        //     // console.log('canvasBottomRight.right: ' + canvasBottomRight.right);
+        //     // console.log('canvasTopLeft.top: ' + canvasTopLeft.top);
+        //     // console.log('canvasBottomRight.bottom: ' + canvasBottomRight.bottom);
+        //     // console.dir(leaf);
+
+        //     var leafIdHtml = $('<div class="collection-tree-leaf-metadata" data-assembly-id="' + leaf.id + '">' + leaf.id + '</div>');
+        //     leafIdHtml.css('position', 'absolute');
+        //     leafIdHtml.css('top', tree.reverseTranslateClickY(leaf.centery) - 10);
+        //     leafIdHtml.css('left', tree.reverseTranslateClickX(leaf.centerx) + 15);
+
+        //     $('.wgst-panel-body > .phylocanvas').append(leafIdHtml);
+
+        //     //AAA
+        // });
 
         //console.debug('window.WGST.collection[collectionId]:');
         //console.dir(window.WGST.collection[collectionId]);
@@ -3205,6 +3227,90 @@ $(function(){
                 }
             });
         } // if
+    });
+
+
+
+
+
+
+
+
+
+
+    $('body').on('mousewheel mousedown', 'canvas', function(){
+
+        var canvas = $(this),
+            canvasOffset = canvas.offset(),
+            collectionId = canvas.closest('.wgst-panel').attr('data-collection-id'),
+            tree = window.WGST.collection[collectionId].tree.canvas,
+            allLeaves = tree.leaves,
+            leavesWithinCanvasViewport = [],
+            canvasTopLeft = {
+                top: tree.translateClickY(canvasOffset.top),
+                left: tree.translateClickX(canvasOffset.left)
+            },
+            canvasBottomRight = {
+                bottom: tree.translateClickY(canvasOffset.top + canvas.height()),
+                right: tree.translateClickX(canvasOffset.left + canvas.width())
+            };
+
+        $.each(allLeaves, function(leafCounter, leaf){
+            // console.log('leaf x: ' + leaf.centerx);
+            // console.log('leaf y: ' + leaf.centery);
+            // console.log('canvasTopLeft.left: ' + canvasTopLeft.left);
+            // console.log('canvasBottomRight.right: ' + canvasBottomRight.right);
+            // console.log('canvasTopLeft.top: ' + canvasTopLeft.top);
+            // console.log('canvasBottomRight.bottom: ' + canvasBottomRight.bottom);
+            // console.dir(leaf);
+
+            // var leafIdHtml = $('<div>' + leaf.id + '</div>');
+            // leafIdHtml.css('position', 'absolute');
+            
+            // var leafHtml = $('.collection-tree-leaf-metadata[data-assembly-id="' + leaf.id + '"]');
+
+            // leafHtml.css('top', parseFloat(tree.reverseTranslateClickY(leaf.centery) - 10));
+            // leafHtml.css('left', parseFloat(tree.reverseTranslateClickX(leaf.centerx) + 15));
+
+            // canvas.after(leafIdHtml);
+
+
+            // Move html elements with metadata
+            //$('[data-assembly-id="' + leaf.id + '"]').css('top', tree.reverseTranslateClickY(leaf.centery) - 10);
+            //$('[data-assembly-id="' + leaf.id + '"]').css('left', tree.reverseTranslateClickX(leaf.centerx) + 15);
+
+            // var leafHtml = $('.collection-tree-leaf-metadata[data-assembly-id="' + leaf.id + '"]');
+
+            // var leafTop = tree.reverseTranslateClickY(leaf.centery) - 10,
+            //     leafLeft = tree.reverseTranslateClickX(leaf.centerx) + 15;
+
+            // console.debug('leafHtml.top: ' + leafHtml.offset().top);
+            // console.debug('leafHtml.top: ' + leafHtml.offset().top);
+
+            // $('.collection-tree-leaf-metadata').css('color', 'red');
+            // leafHtml.css('transform', 'translateX(' + parseFloat(leaf.centerx) + 'px)');
+            // //leafHtml.css('-moz-transform', 'translateX(' + parseFloat(tree.reverseTranslateClickX(leaf.centerx) + 15) + 'px)');
+            // leafHtml.css('transform', 'translateY(' + parseFloat(leaf.centery) + 'px)');
+            // //leafHtml.css('-moz-transform', 'translateY(' + tree.reverseTranslateClickX(leaf.centerx) + 15) + 'px)');
+
+            // //console.debug('translate(' + parseFloat(tree.reverseTranslateClickX(leaf.centerx) + 15) + 'px, ' + parseFloat(tree.reverseTranslateClickY(leaf.centery) - 10) + 'px)');
+
+            if (leaf.centerx >= canvasTopLeft.left 
+                && leaf.centerx <= canvasBottomRight.right
+                && leaf.centery >= canvasTopLeft.top
+                && leaf.centery <= canvasBottomRight.bottom) {
+
+                leavesWithinCanvasViewport.push(leaf.id);
+
+                $('.assemblies-summary-table tbody tr[data-assembly-id="' + leaf.id + '"]').show();
+            } else {
+                $('.assemblies-summary-table tbody tr[data-assembly-id="' + leaf.id + '"]').hide();
+            }
+        });
+
+        console.log('leavesWithinCanvasViewport:');
+        console.dir(leavesWithinCanvasViewport);
+
     });
 
 });
