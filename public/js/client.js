@@ -93,7 +93,7 @@ $(function(){
             },
             markerBounds: new google.maps.LatLngBounds(),
             init: function() {
-                WGST.geo.map.canvas = new google.maps.Map(document.getElementById('map'), WGST.geo.map.options);
+                WGST.geo.map.canvas = new google.maps.Map($('.map')[0], WGST.geo.map.options);
                 WGST.geo.map.markers.metadata = new google.maps.Marker({
                     position: new google.maps.LatLng(51.511214, -0.119824),
                     map: WGST.geo.map.canvas,
@@ -118,9 +118,9 @@ $(function(){
             panel.css('left', WGST.panels[panelName].left);
 
             // Show
-            panel.fadeIn('fast', function(){
-                panel.addClass('wgst-panel--active');
-            });
+            panel.css('visibility', 'hidden');
+            panel.fadeIn('fast');
+            panel.addClass('wgst-panel--active');
         };
 
         // Process multiple panels
@@ -150,12 +150,9 @@ $(function(){
     var closePanel = function(panelNames, callback) {
         // Overwrite function
         var closePanel = function(panelName) {
-            var panel = $('[data-panel-name="' + panelName + '"]');
+            var panel = $('[data-panel-name="' + panelName + '"]'),
+                panelBodyContent = panel.find('.wgst-panel-body-content');
 
-            // Hide
-            // panel.fadeOut('fast', function(){
-            //     panel.removeClass('wgst-panel--active');
-            // });
             panel.hide();
             panel.removeClass('wgst-panel--active');
         };
@@ -219,6 +216,8 @@ $(function(){
         // Init jQuery UI draggable interaction
         $('.wgst-draggable').draggable({
             handle: ".wgst-draggable-handle",
+            appendTo: 'body',
+            scroll: false,
             //containment: "window",
             stop: function(event, ui) {
                 // Store current panel position
@@ -426,6 +425,22 @@ $(function(){
     var getCollection = function(collectionId) {
         console.log('[WGST] Getting collection ' + collectionId);
 
+        // ----------------------------------------
+        // Init panels
+        // ----------------------------------------
+        // Set collection id to collectionTree panel
+        $('.wgst-panel__collection-tree').attr('data-collection-id', collectionId);
+        // Set collection id to collection panel
+        $('.wgst-panel__collection').attr('data-collection-id', collectionId);
+
+        openPanel('collection', function(){
+            startPanelLoadingIndicator('collection');
+            showPanel('collection');
+        });
+        openPanel('collectionTree', function(){
+            startPanelLoadingIndicator('collectionTree');
+        });
+
         // Init collection object
         window.WGST.collection[collectionId] = {
             assemblies: {},
@@ -449,11 +464,34 @@ $(function(){
             window.WGST.collection[collectionId].tree.data = data.collection.tree.data;
             window.WGST.collection[collectionId].assemblies = data.collection.assemblies;
 
-            var assemblies = window.WGST.collection[collectionId].assemblies,
-                antibiotics = data.antibiotics;
-            
-            renderAssemblyAnalysisList(assemblies, antibiotics);
+            // ----------------------------------------
+            // Render collection tree
+            // ----------------------------------------
+            $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+            // Init collection tree
+            window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+            // Render collection tree
+            renderCollectionTree(collectionId);
 
+            endPanelLoadingIndicator('collectionTree');
+
+            // ----------------------------------------
+            // Render assembly metadata list
+            // ----------------------------------------
+            var assemblies = window.WGST.collection[collectionId].assemblies,
+                antibiotics = data.antibiotics,
+                sortedAssemblies = [];
+
+            // Sort assemblies in order in which they are displayed on tree
+            $.each(window.WGST.collection[collectionId].tree.leavesOrder, function(leafCounter, leaf){
+                sortedAssemblies.push(assemblies[leaf.id]);
+            });
+
+            renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
+
+            // ----------------------------------------
+            // Prepare collection
+            // ----------------------------------------
             console.log('[WGST] Collection ' + collectionId + ' has ' + Object.keys(assemblies).length + ' assemblies');
 
             // Set collection creation timestamp
@@ -465,27 +503,26 @@ $(function(){
             // Convert to time ago string
             $('.timeago').timeago();
 
+            showPanel('collection');
+            endPanelLoadingIndicator('collection');
+
             // TO DO: Create table with results for each assembly in this collection
             // TO DO: Highlight parent node on the reference tree
             // TO DO: Create markers for each assembly in this collection?
 
-            closePanel('assemblyUploadProgress', function(){
-                resetAssemlyUploadPanel();                
-            });
+            // closePanel('assemblyUploadProgress', function(){
+            //     resetAssemlyUploadPanel();                
+            // });
 
-            // Set collection id to collectionTree panel
-            $('.wgst-panel__collection-tree').attr('data-collection-id', collectionId);
-            // Set collection id to collection panel
-            $('.wgst-panel__collection').attr('data-collection-id', collectionId);
-
-            openPanel(['collection', 'collectionTree'], function(){
-                // Prepare Collection Tree
-                $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
-                // Init collection tree
-                window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
-                // Render collection tree
-                renderCollectionTree(collectionId);
-            });
+            //AAA
+            // openPanel(['collection', 'collectionTree'], function(){
+            //     // Prepare Collection Tree
+            //     $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+            //     // Init collection tree
+            //     window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+            //     // Render collection tree
+            //     renderCollectionTree(collectionId);
+            // });
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log('[WGST][ERROR] Failed to get collection id');
@@ -611,9 +648,6 @@ $(function(){
             assemblies = window.WGST.collection[collectionId].assemblies,
             assemblyId;
 
-        // ==============================
-        // Render collection tree
-        // ==============================
         tree.parseNwk(window.WGST.collection[collectionId].tree.data);
         tree.treeType = 'rectangular';
         tree.showLabels = false;
@@ -633,6 +667,32 @@ $(function(){
                 }
             }
         }
+
+        // Get order of nodes
+        var leaves = tree.leaves;
+
+        console.log('Unsorted:');
+        console.dir(leaves);
+
+        leaves.sort(function(leafOne, leafTwo){
+            return leafOne.centery - leafTwo.centery;
+        });
+
+        window.WGST.collection[collectionId].tree.leavesOrder = leaves;
+
+        console.log('Sorted:');
+        console.dir(window.WGST.collection[collectionId].tree.leavesOrder);
+
+        // $.each(leaves, function(leafCounter, leaf){
+        //     window.WGST.collection[collectionId].tree.leavesOrder.push(leaf.id);
+        // });
+
+
+
+
+        
+
+        //AAA
 
         // $.each(tree.leaves, function(leafCounter, leaf){
         //     // console.log('leaf x: ' + leaf.centerx);
@@ -1913,6 +1973,7 @@ $(function(){
         // });
 
         openPanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
+        showPanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
 
         // Set the highest z index for this panel
         $('.assembly-upload-panel').trigger('mousedown');
@@ -2526,7 +2587,10 @@ $(function(){
             $('.assemblies-upload-progress').find('.progress-bar').addClass('progress-bar-success');
 
             setTimeout(function(){
-                getCollection(collectionId); 
+                closePanel('assemblyUploadProgress', function(){
+                    resetAssemlyUploadPanel();
+                    getCollection(collectionId);         
+                });
             }, 1000);
         } // if
     });
@@ -2781,6 +2845,8 @@ $(function(){
 
         // Open assembly upload progress panel
         openPanel('assemblyUploadProgress', function(){
+            showPanel('assemblyUploadProgress');
+
             console.log('[WGST] Getting collection id');
 
             setTimeout(function(){
@@ -2970,9 +3036,9 @@ $(function(){
     });
 
     $('.wgst-panel__collection .collection-controls-show-tree').on('click', function(){
-        openPanel('collectionTree', function(){
-            bringPanelToTop('collectionTree');
-        });
+        openPanel('collectionTree');
+        showPanel('collectionTree');
+        bringPanelToTop('collectionTree');
     });
 
     var openAssemblyPanel = function(assemblyId) {
@@ -2982,12 +3048,12 @@ $(function(){
         // ============================================================
 
         // Show animated loading circle
-        $('.wgst-panel__assembly .wgst-panel-loading').show();
+        //$('.wgst-panel__assembly .wgst-panel-loading').show();
 
-        // Bring panel to top
-        bringPanelToTop('assembly');
-        // Open panel
         openPanel('assembly');
+        bringPanelToTop('assembly');
+        startPanelLoadingIndicator('assembly');
+        showPanel('assembly');
 
         // ============================================================
         // Get assembly data
@@ -3240,7 +3306,7 @@ $(function(){
             canvasOffset = canvas.offset(),
             collectionId = canvas.closest('.wgst-panel').attr('data-collection-id'),
             tree = window.WGST.collection[collectionId].tree.canvas,
-            allLeaves = tree.leaves,
+            leaves = tree.leaves,
             leavesWithinCanvasViewport = [],
             canvasTopLeft = {
                 top: tree.translateClickY(canvasOffset.top),
@@ -3251,7 +3317,7 @@ $(function(){
                 right: tree.translateClickX(canvasOffset.left + canvas.width())
             };
 
-        $.each(allLeaves, function(leafCounter, leaf){
+        $.each(leaves, function(leafCounter, leaf){
             // console.log('leaf x: ' + leaf.centerx);
             // console.log('leaf y: ' + leaf.centery);
             // console.log('canvasTopLeft.left: ' + canvasTopLeft.left);
@@ -3309,6 +3375,10 @@ $(function(){
 
     };
 
+    // ============================================================
+    // Listen to Phylocanvas tree user manipulation
+    // ============================================================
+
     $('body').on('mousedown', 'canvas', function(){
         $('body').on('mousemove', 'canvas', function(){
             treeManipulationHandler(this);            
@@ -3321,6 +3391,89 @@ $(function(){
     $('body').on('mousewheel mousedown', 'canvas', function(){
         treeManipulationHandler(this);
     });
+
+    // ============================================================
+    // Panels
+    // ============================================================
+
+    var showPanel = function(panelNames) {
+        // Overwrite function
+        var showPanel = function(panelName) {
+            $('[data-panel-name="' + panelName + '"]').css('visibility', 'visible');
+        };
+
+        // Process multiple panels
+        if ($.isArray(panelNames)) {
+
+            var panelNameCounter = panelNames.length,
+                panelName;
+
+            for (;panelNameCounter !== 0;) {
+                panelNameCounter = panelNameCounter - 1;
+
+                panelName = panelNames[panelNameCounter];
+
+                showPanel(panelName);
+            } // for
+
+        // Process single panel
+        } else {
+            showPanel(panelNames);
+        }
+    };
+
+    var hidePanel = function(panelName) {
+        $('[data-panel-name="' + panelName + '"]').css('visibility', 'hidden');
+    };
+
+    var hidePanel = function(panelNames) {
+        // Overwrite function
+        var hidePanel = function(panelName) {
+            $('[data-panel-name="' + panelName + '"]').css('visibility', 'hidden');
+        };
+
+        // Process multiple panels
+        if ($.isArray(panelNames)) {
+
+            var panelNameCounter = panelNames.length,
+                panelName;
+
+            for (;panelNameCounter !== 0;) {
+                panelNameCounter = panelNameCounter - 1;
+
+                panelName = panelNames[panelNameCounter];
+
+                hidePanel(panelName);
+            } // for
+
+        // Process single panel
+        } else {
+            hidePanel(panelNames);
+        }
+    };
+
+    // ============================================================
+    // Loading panel
+    // ============================================================
+
+    var startPanelLoadingIndicator = function(panelName) {
+        // Hide body content
+        var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
+        //panelBodyContent.css('visibility', 'hidden');
+
+        // Show animated loading circle
+        var panelLoadingIndicator = $('[data-panel-name="' + panelName + '"] .wgst-panel-loading');
+        panelLoadingIndicator.show();
+    };
+
+    var endPanelLoadingIndicator = function(panelName) {
+        // Hide animated loading circle
+        var panelLoadingIndicator = $('[data-panel-name="' + panelName + '"] .wgst-panel-loading');
+        panelLoadingIndicator.hide();
+        // Show body content
+        var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
+        //panelBodyContent.css('visibility', 'visible');
+    };
 
 });
 

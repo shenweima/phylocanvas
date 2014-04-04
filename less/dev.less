@@ -1,9 +1,8 @@
-/*
-    All code in this file is experimental and should only be used for research and development purposes.
-*/
-
+// ============================
 // CSS Reset
 // http://www.cssreset.com/
+// ============================
+
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -40,70 +39,36 @@ time, mark, audio, video {
     user-select: none;  
 }
 
-/* 
-    jQuery UI Tabs widget 
-    http://jqueryui.com/tabs/#vertical
-*/
-/*
-.ui-tabs-vertical {
-    .ui-tabs-nav {
-        float: left;
-        width: 12em;
-        li {
-            clear: left;
-            width: 100%;
-            border-bottom-width: 1px !important;
-            border-right-width: 0 !important;
-            //margin: 0 -1px 0 0;
-            background-color: #f6f6f6;
-            border-bottom: 1px solid #e6e6e6;
-            border-right: 1px solid #e6e6e6;
-            a {
-                display: block;
-                padding: 10px 15px;
-                text-decoration: none;
-                color: #000;
-                font-weight: 300;
-                // Remove blue outline
-                outline: 0;
-                .glyphicon {
-                    float: right;
-                }
-            }
-            &.ui-tabs-active {
-                //padding-bottom: 0;
-                //padding-right: .1em;
-                border-right: 1px solid #e6e6e6;
-                background-color: #fff;
-            }
-        }
-    }
-    .ui-tabs-panel {
-        padding: 1em; float: right; width: 40em;
-    }
-}
-*/
+// ============================
+// General
+// ============================
 
 html, body {
     height: 100%;
     overflow: hidden;
 }
-body {
-    #map, #tree {
-        width: 100%;
-        height: 100%;
-    }
-    #map {}
-}
 
-// Util classes
+// ============================
+// Utils
+// ============================
+
 .hide-this {
     display: none;
 }
 
-/*
-    Main navigation
-*/
+// ============================
+// Map
+// ============================
+
+.map {
+    width: 100%;
+    height: 100%;
+}
+
+// ============================
+// Navigation
+// ============================
+
 .navigation {
     position: absolute;
     top: 28px;
@@ -129,9 +94,10 @@ body {
     }
 }
 
-/*
-    Draggable panel
-*/
+// ============================
+// Panels
+// ============================
+
 .wgst-panel.assembly-panel {
     top: 86px;
     .wgst-panel-header {
@@ -999,8 +965,9 @@ h2, h4 {
 // Object
 .wgst-panel__collection {
 
-    // Position
-    //top: 86px;
+    .wgst-panel-body {
+        height: 400px;
+    }
 
     .collection-controls {
         padding: 10px;
@@ -1139,6 +1106,11 @@ h2, h4 {
 }
 
 .wgst-panel__collection-tree {
+
+    .wgst-panel-body {
+        height: 450px;
+    }
+
     .phylocanvas {
         width: 600px;
         height: 400px;
@@ -1154,12 +1126,12 @@ h2, h4 {
             margin: 0 10px;
         }
     }
-    .collection-tree-leaf-metadata {
-        z-index: 100;
-        display: inline-block;
-        overflow: hidden;
-        white-space: nowrap;
-    }
+    // .collection-tree-leaf-metadata {
+    //     z-index: 100;
+    //     display: inline-block;
+    //     overflow: hidden;
+    //     white-space: nowrap;
+    // }
 }
 
 // Object
@@ -1307,11 +1279,11 @@ h2, h4 {
     }
 }
 
-/*
+// ============================
+// Animation loading circle
+// ============================
 
-Animated loading circle container
-
-*/
+// Container
 .wgst-panel-loading {
     position: relative;
     width: 100%;
@@ -1319,11 +1291,7 @@ Animated loading circle container
     background-color: #fff;
 }
 
-/*
-
-Animated loading circle
-
-*/
+// Animation
 .loading {
     width: 200px;
     height: 200px;

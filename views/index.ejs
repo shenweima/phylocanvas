@@ -31,9 +31,7 @@
         <link href='/css/dev.css' rel='stylesheet' type='text/css'>
     </head>
     <body>
-        <div id="map"></div>
-        <div id="tree"></div>
-        <div id="timeline"></div>
+        <div class="map"></div>
 
         <nav class="navigation">
           <div class="map-search">
@@ -287,49 +285,52 @@
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
           <article class="wgst-panel-body">
+            <div class="wgst-panel-loading"><div class="loading"></div></div>
+            <div class="wgst-panel-body-content">
 
-            <div class="collection-controls">
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-default collection-controls-show-tree">Show tree</button>
+              <div class="collection-controls">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-default collection-controls-show-tree">Show tree</button>
+                </div>
               </div>
-            </div>
 
-            <div class="collection-details">
+              <div class="collection-details">
 
-              <!--
-              <ul class="collection-properties">
-                <li class="collection-property collection-property-created-timestamp">
-                  <span class="glyphicon glyphicon-search"></span><span class="assembly-created-datetime timeago" title=""></span>
-                </li>
-              </ul>
-              -->
+                <!--
+                <ul class="collection-properties">
+                  <li class="collection-property collection-property-created-timestamp">
+                    <span class="glyphicon glyphicon-search"></span><span class="assembly-created-datetime timeago" title=""></span>
+                  </li>
+                </ul>
+                -->
 
-              <!--<h2>Assemblies:</h2>-->
-              <!-- Created <span class="assembly-created-datetime timeago" title=""></span>. -->
-              <table class="table assemblies-summary-table">
-                <colgroup>
-                  <col class="col-marker">
-                  <col class="col-highlight">
-                  <col class="col-target-fp">
-                  <col class="col-reference-id">
-                  <col class="col-score">
-                  <col class="col-resistance-profile">
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th><span class="glyphicon glyphicon-tree-conifer"></span></th>
-                    <th><span class="glyphicon glyphicon glyphicon-tag"></span></th>
-                    <th>Assembly</th>
-                    <th>Nearest Representative (Similarity)</th>
-                    <!-- <th>Similarity</th> -->
-                    <th>Predicted Resistance Profile</th>
-                  </tr>
-                </thead>
-                <tbody>
-                </tbody>
-              </table>
-            </div>       
+                <!--<h2>Assemblies:</h2>-->
+                <!-- Created <span class="assembly-created-datetime timeago" title=""></span>. -->
+                <table class="table assemblies-summary-table">
+                  <colgroup>
+                    <col class="col-marker">
+                    <col class="col-highlight">
+                    <col class="col-target-fp">
+                    <col class="col-reference-id">
+                    <col class="col-score">
+                    <col class="col-resistance-profile">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th><span class="glyphicon glyphicon-tree-conifer"></span></th>
+                      <th><span class="glyphicon glyphicon glyphicon-tag"></span></th>
+                      <th>Assembly</th>
+                      <th>Nearest Representative (Similarity)</th>
+                      <!-- <th>Similarity</th> -->
+                      <th>Predicted Resistance Profile</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
 
+            </div><!-- /.wgst-panel-body-content -->      
           </article><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer wgst-draggable-handle">
           </footer><!-- /.wgst-panel-footer -->
@@ -350,19 +351,24 @@
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
-          <div class="wgst-panel-body">
-            <div class="tree-controls">
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-default tree-controls-select-all">Select all nodes</button>
-                <button type="button" class="btn btn-sm btn-default tree-controls-select-none">Deselect all nodes</button>
+          <article class="wgst-panel-body">
+            <div class="wgst-panel-loading"><div class="loading"></div></div>
+            <div class="wgst-panel-body-content">
+              
+              <div class="tree-controls">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-default tree-controls-select-all">Select all nodes</button>
+                  <button type="button" class="btn btn-sm btn-default tree-controls-select-none">Deselect all nodes</button>
+                </div>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-default tree-controls-show-labels">Show labels</button>
+                  <button type="button" class="btn btn-sm btn-default tree-controls-hide-labels">Hide labels</button>
+                </div>
               </div>
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-default tree-controls-show-labels">Show labels</button>
-                <button type="button" class="btn btn-sm btn-default tree-controls-hide-labels">Hide labels</button>
-              </div>
-            </div>
-            <div class="phylocanvas"></div>
-          </div><!-- /.wgst-panel-body -->
+              <div class="phylocanvas"></div>
+
+            </div><!-- /.wgst-panel-body-content --> 
+          </article><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer wgst-draggable-handle">
           </footer><!-- /.wgst-panel-footer -->
         </div><!-- /.wgst-panel.tree-panel -->
