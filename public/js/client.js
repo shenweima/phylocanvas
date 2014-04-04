@@ -3234,13 +3234,9 @@ $(function(){
 
 
 
+    var treeManipulationHandler = function(canvasElement) {
 
-
-
-
-    $('body').on('mousewheel mousedown', 'canvas', function(){
-
-        var canvas = $(this),
+        var canvas = $(canvasElement),
             canvasOffset = canvas.offset(),
             collectionId = canvas.closest('.wgst-panel').attr('data-collection-id'),
             tree = window.WGST.collection[collectionId].tree.canvas,
@@ -3308,9 +3304,22 @@ $(function(){
             }
         });
 
-        console.log('leavesWithinCanvasViewport:');
-        console.dir(leavesWithinCanvasViewport);
+        //console.log('leavesWithinCanvasViewport:');
+        //console.dir(leavesWithinCanvasViewport);
 
+    };
+
+    $('body').on('mousedown', 'canvas', function(){
+        $('body').on('mousemove', 'canvas', function(){
+            treeManipulationHandler(this);            
+        });
+        $('body').on('mouseup', 'canvas', function(){
+            $('body').off('mousemove', 'canvas');
+        });
+    });
+
+    $('body').on('mousewheel mousedown', 'canvas', function(){
+        treeManipulationHandler(this);
     });
 
 });
