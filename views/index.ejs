@@ -281,6 +281,7 @@
         <section class="wgst-panel wgst-panel__collection wgst-draggable" data-panel-name="collection" data-collection-id="">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Collection</h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize wgst-panel-control-button--active glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
@@ -306,8 +307,36 @@
 
                 <!--<h2>Assemblies:</h2>-->
                 <!-- Created <span class="assembly-created-datetime timeago" title=""></span>. -->
+
+                <div class="collection-assembly-list-headers">
+                  <div class="assembly-list-header assembly-list-header-tree">Tree</div>
+                  <div class="assembly-list-header assembly-list-header-map">Map</div>
+                  <div class="assembly-list-header assembly-list-header-id">Assembly</div>
+                  <div class="assembly-list-header assembly-list-header-nearest-representative">Nearest Representative (Similarity)</div>
+                  <div class="assembly-list-header assembly-list-header-resistance-profile">Predicted Resistance Profile</div>
+                </div>
+
+                <div class="collection-assembly-list">
+                </div>
+
+<!-- 
+                <table class="table assemblies-summary-table-headers">
+                  <thead>
+                    <tr>
+                      <th class="assembly-list-header-tree"><span class="glyphicon glyphicon-tree-conifer"></span></th>
+                      <th class="assembly-list-header-map"><span class="glyphicon glyphicon glyphicon-tag"></span></th>
+                      <th class="assembly-list-header-id">Assembly</th>
+                      <th class="assembly-list-header-nearest-representative">Nearest Representative (Similarity)</th>
+                      <th class="assembly-list-header-resistance-profile">Predicted Resistance Profile</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table> -->
+
+<!-- 
                 <table class="table assemblies-summary-table">
-                  <colgroup>
+                   <colgroup>
                     <col class="col-marker">
                     <col class="col-highlight">
                     <col class="col-target-fp">
@@ -321,13 +350,13 @@
                       <th><span class="glyphicon glyphicon glyphicon-tag"></span></th>
                       <th>Assembly</th>
                       <th>Nearest Representative (Similarity)</th>
-                      <!-- <th>Similarity</th> -->
                       <th>Predicted Resistance Profile</th>
                     </tr>
                   </thead>
                   <tbody>
                   </tbody>
-                </table>
+                </table> -->
+
               </div>
 
             </div><!-- /.wgst-panel-body-content -->      
@@ -348,6 +377,7 @@
         <div class="wgst-panel wgst-panel__collection-tree wgst-panel--active wgst-draggable" data-panel-name="collectionTree" data-collection-id="">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Collection Tree</h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>

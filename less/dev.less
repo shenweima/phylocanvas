@@ -48,6 +48,15 @@ html, body {
     overflow: hidden;
 }
 
+a {
+    color: #000;
+    border-bottom: 1px dotted #2a6496;
+    &:hover {
+        color: #000;
+        text-decoration: none;
+    }
+}
+
 // ============================
 // Utils
 // ============================
@@ -783,11 +792,14 @@ h2, h4 {
             color: #000;
         }
     }
-    .wgst-panel-control-button__close {
-        right: 13px;
+    .wgst-panel-control-button__opacity {
+        right: 65px;
     }
     .wgst-panel-control-button__minimize {
         right: 39px; // 13 + 13 + 13
+    }
+    .wgst-panel-control-button__close {
+        right: 13px;
     }
 }
 
@@ -979,9 +991,74 @@ h2, h4 {
     }
 
     .collection-details {
-        max-height: 400px;
-        overflow: scroll;
         padding: 20px;
+
+        .collection-assembly-list-headers {
+            width: 900px;
+            border-bottom: 1px solid #ddd;
+            overflow: hidden;
+            padding: 10px 0;
+            margin-left: 2px;
+            .assembly-list-header {
+                float: left;
+                font-weight: 500;
+            }
+        }
+        .collection-assembly-list {
+            width: 900px;
+            height: 259px;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            float: left;
+            .assembly-list-item {
+                width: 100%;
+                float: left;
+                clear: both;
+                padding: 8px 0;
+                border-bottom: 1px solid #ddd;
+                margin-left: 2px;
+                color: #000;
+                &> div {
+                    clear: both;
+                    display: inline-block;
+                    vertical-align: middle;
+                }
+                &.row-stripe {
+                    background-color: #FAFAFA;
+                }
+                &:hover {
+                    //background-color: #FFF8F0;
+                    margin-left: 0;
+                    border-left: 2px solid #333;
+                    //border-right: 2px solid #333;
+                }
+                &.row-selected {
+                    background-color: #F0F7FF;
+                }
+            }
+        }
+
+
+        .assembly-list-header-tree {
+            width: 50px;
+            text-align: center;
+        }
+        .assembly-list-header-map {
+            width: 50px;
+            text-align: center;
+        }
+        .assembly-list-header-id {
+            width: 150px;
+            padding-left: 20px;
+        }
+        .assembly-list-header-nearest-representative {
+            width: 250px;
+        }
+        .assembly-list-header-resistance-profile {
+            width: 350px;
+        }
+
+
         .assembly-upload-datetime {
             font-weight: 400;
         }
@@ -1026,59 +1103,59 @@ h2, h4 {
                 }
             }
         }
-        table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
-            width: 900px;
-            //max-height: 400px;
-            overflow: scroll;
-            margin-bottom: 0;
-            colgroup {
-                .col-target-fp {
-                    width: auto;
-                }
-                .col-score, .col-score-percentage {
-                    width: 20%;
-                }
-            }
-            th {
-                border-bottom: 1px;
-                font-weight: 500;
-                font-size: 14px;
-                text-transform: uppercase;
-                &:nth-child(1), &:nth-child(2) {
-                    text-align: center;
-                }
-            }
-            td.show-on-map-checkbox {
-                padding: 6px 5px 5px 5px;
-                text-align: center;
-            }
-            td.show-on-tree-radio-button {
-                padding: 7px 5px 5px 5px;
-                text-align: center;
-            }
-            th, td {
-                padding-left: 12px;
-                padding-right: 12px;
-            }
-            tbody tr {
-                /*
+        // .collection-assembly-list, table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
+        //     width: 900px;
+        //     //max-height: 400px;
+        //     overflow: scroll;
+        //     margin-bottom: 0;
+            // colgroup {
+            //     .col-target-fp {
+            //         width: auto;
+            //     }
+            //     .col-score, .col-score-percentage {
+            //         width: 20%;
+            //     }
+            // }
+            // th {
+            //     border-bottom: 1px;
+            //     font-weight: 500;
+            //     font-size: 14px;
+            //     text-transform: uppercase;
+            //     &:nth-child(1), &:nth-child(2) {
+            //         text-align: center;
+            //     }
+            // }
+            // td.show-on-map-checkbox {
+            //     padding: 6px 5px 5px 5px;
+            //     text-align: center;
+            // }
+            // td.show-on-tree-radio-button {
+            //     padding: 7px 5px 5px 5px;
+            //     text-align: center;
+            // }
+            // th, td {
+            //     padding-left: 12px;
+            //     padding-right: 12px;
+            // }
+            // tbody tr {
+            //     /*
 
-                Order is important.
-                You want :hover to overwrite .row-stripe rule.
+            //     Order is important.
+            //     You want :hover to overwrite .row-stripe rule.
 
-                */
-                &.row-stripe {
-                    background-color: #FAFAFA;
-                }
-                &.row-highlighted {
-                    background-color: #F0F7FF;
-                }
-                &:hover {
-                    background-color: #FFF8F0;
+            //     */
+            //     &.row-stripe {
+            //         background-color: #FAFAFA;
+            //     }
+            //     &.row-selected {
+            //         background-color: #F0F7FF;
+            //     }
+            //     &:hover {
+            //         background-color: #FFF8F0;
 
-                }
-            }
-        }
+            //     }
+            // }
+        //}
         table.assembly-resistance-profile {
             margin: 0;
             th {

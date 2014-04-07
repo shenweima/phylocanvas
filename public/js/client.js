@@ -387,26 +387,47 @@ $(function(){
                 assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.latitude;
                 assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.longitude;
 
-                // Append to only first tbody tag (currently there more than one)
-                $('.assemblies-summary-table tbody').eq(0).append(
+
+                $('.collection-assembly-list').append(
                     // TO DO: This is not verbose enough
-                    ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<tr data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
-                        + '<td class="show-on-tree-radio-button">'
+                    ((assemblyCounter % 2 === 0) ? '<div class="row-stripe assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<div class="assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
+                        + '<div class="show-on-tree-radio-button assembly-list-header-tree">'
                             + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
-                        + '</td>'
-                        + '<td class="show-on-map-checkbox">'
+                        + '</div>'
+                        + '<div class="show-on-map-checkbox assembly-list-header-map">'
                             + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                        + '</td>'
-                        + '<td>' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
-                        + '<td>' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</td>'
-                        + '<td>'
+                        + '</div>'
+                        + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</div>'
+                        + '<div class="assembly-list-header-nearest-representative">' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
+                        + '<div class="assembly-list-header-resistance-profile">'
                             // Resistance profile
                             +'<div class="assembly-resistance-profile-container">'
                                 + assemblyResistanceProfileHtml
                             + '</div>'
-                        + '</td>'
-                    + '</tr>'
+                        + '</div>'
+                    + '</div>'
                 );
+
+                // // Append to only first tbody tag (currently there more than one)
+                // $('.assemblies-summary-table tbody').eq(0).append(
+                //     // TO DO: This is not verbose enough
+                //     ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<tr data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
+                //         + '<td class="show-on-tree-radio-button assembly-list-header-tree">'
+                //             + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
+                //         + '</td>'
+                //         + '<td class="show-on-map-checkbox assembly-list-header-map">'
+                //             + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
+                //         + '</td>'
+                //         + '<td class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
+                //         + '<td class="assembly-list-header-nearest-representative">' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</td>'
+                //         + '<td class="assembly-list-header-resistance-profile">'
+                //             // Resistance profile
+                //             +'<div class="assembly-resistance-profile-container">'
+                //                 + assemblyResistanceProfileHtml
+                //             + '</div>'
+                //         + '</td>'
+                //     + '</tr>'
+                // );
                 assemblyCounter = assemblyCounter + 1;
             } // if
         } // for
@@ -638,8 +659,16 @@ $(function(){
         window.WGST.collection[collectionId].tree.canvas.hideLabels();
     });
 
-    // PhyloCanvas extention
-    var translateCanvasToElementCoordinateX = function(coordinateX) {};
+    var selectTreeNodes = function(collectionId, selectedAssemblyIds) {
+        var assemblies = window.WGST.collection[collectionId].assemblies;
+        $.each(assemblies, function(assemblyId, assembly) {
+            if ($.inArray(assemblyId, selectedAssemblyIds.split(',')) !== -1) {
+                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').addClass('row-selected');
+            } else {
+                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').removeClass('row-selected');
+            }
+        });
+    };
 
     var renderCollectionTree = function(collectionId) {
         console.log('[WGST] Rendering ' + collectionId + ' collection tree');
@@ -651,12 +680,16 @@ $(function(){
         tree.parseNwk(window.WGST.collection[collectionId].tree.data);
         tree.treeType = 'rectangular';
         tree.showLabels = false;
-        tree.baseNodeSize = 10;
-        tree.setTextSize(24);
-        tree.selectedNodeSizeIncrease = 0.5;
+        tree.baseNodeSize = 2;
+        tree.setTextSize(20);
+        //tree.selectedNodeSizeIncrease = 0.5;
         tree.selectedColor = '#0059DE';
-        tree.rightClickZoom = true;
-        //window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
+        //tree.rightClickZoom = true;
+
+        window.WGST.collection[collectionId].tree.canvas.onselected = function(selectedNodeIds) {
+            console.log('collectionId: ' + collectionId);
+            selectTreeNodes(collectionId, selectedNodeIds);
+        };
 
         // Set user assembly id as node label
         for (assemblyId in assemblies) {
@@ -2646,7 +2679,7 @@ $(function(){
     */
 
     // User wants to show assembly on map
-    $('.wgst-panel__collection .assemblies-summary-table').on('change', 'input[type="checkbox"]', function(e) {
+    $('.wgst-panel__collection .collection-assembly-list').on('change', 'input[type="checkbox"]', function(e) {
 
         //======================================================
         // Map
@@ -3295,10 +3328,17 @@ $(function(){
         } // if
     });
 
-
-
-
-
+    $('body').on('click', '.wgst-panel-control-button__opacity', function(){
+        if ($(this).hasClass('wgst-panel-control-button--active')) {
+            // Toggle opacity
+            var panel = $(this).closest('.wgst-panel');
+            if (panel.css('opacity') !== '1') {
+                panel.css('opacity', '1');
+            } else {
+                panel.css('opacity', '0.85');
+            }
+        } // if
+    });
 
     var treeManipulationHandler = function(canvasElement) {
 
@@ -3364,9 +3404,9 @@ $(function(){
 
                 leavesWithinCanvasViewport.push(leaf.id);
 
-                $('.assemblies-summary-table tbody tr[data-assembly-id="' + leaf.id + '"]').show();
+                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + leaf.id + '"]').show();
             } else {
-                $('.assemblies-summary-table tbody tr[data-assembly-id="' + leaf.id + '"]').hide();
+                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + leaf.id + '"]').hide();
             }
         });
 
