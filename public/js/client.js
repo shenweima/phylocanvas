@@ -69,7 +69,7 @@ $(function(){
     };
 
     WGST.settings = WGST.settings || {};
-    WGST.settings.representativeCollectionId = 'd550e9d7-00b4-4ef9-875b-bd8a2a336574';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
+    WGST.settings.representativeCollectionId = '1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
 
     WGST.socket = {
         connection: io.connect(WGST.config.socketAddress),
@@ -436,6 +436,15 @@ $(function(){
         $('.antibiotic[data-toggle="tooltip"]').tooltip();
     };
 
+    // $('body').on('scroll', '.collection-assembly-list', function(){
+    //     console.log('Scrolling');
+    //     if ($('.collection-assembly-list')[0].scrollHeight > $('.collection-assembly-list').outerHeight()) {
+    //         $('.collection-assembly-list-more-assemblies').show();
+    //     } else {
+    //         $('.collection-assembly-list-more-assemblies').hide();
+    //     }
+    // });
+
     var closeCollection = function(collectionId) {
         console.log('[WGST] Closing collection ' + collectionId);
 
@@ -496,6 +505,7 @@ $(function(){
             renderCollectionTree(collectionId);
 
             endPanelLoadingIndicator('collectionTree');
+            //showPanelBodyContent('collectionTree');
 
             // ----------------------------------------
             // Render assembly metadata list
@@ -527,8 +537,16 @@ $(function(){
             // Convert to time ago string
             $('.timeago').timeago();
 
-            showPanel('collection');
+            // Scrolling hint
+            if ($('.collection-assembly-list .assembly-list-item:visible').length > 7) {
+                $('.collection-assembly-list-more-assemblies').show();
+            } else {
+                $('.collection-assembly-list-more-assemblies').hide();
+            }
+
+            //showPanel('collection');
             endPanelLoadingIndicator('collection');
+            showPanelBodyContent('collection');
 
             // TO DO: Create table with results for each assembly in this collection
             // TO DO: Highlight parent node on the reference tree
@@ -3186,6 +3204,7 @@ $(function(){
     $('.wgst-panel__collection .collection-controls-show-tree').on('click', function(){
         openPanel('collectionTree');
         showPanel('collectionTree');
+        showPanelBodyContent('collectionTree');
         bringPanelToTop('collectionTree');
     });
 
@@ -3523,11 +3542,14 @@ $(function(){
             } else {
                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + leaf.id + '"]').hide();
             }
+
+            // Scrolling hint
+            if ($('.collection-assembly-list .assembly-list-item:visible').length > 7) {
+                $('.collection-assembly-list-more-assemblies').show();
+            } else {
+                $('.collection-assembly-list-more-assemblies').hide();
+            }
         });
-
-        //console.log('leavesWithinCanvasViewport:');
-        //console.dir(leavesWithinCanvasViewport);
-
     };
 
     // ============================================================
@@ -3550,6 +3572,33 @@ $(function(){
     // ============================================================
     // Panels
     // ============================================================
+
+    var showPanelBodyContent = function(panelNames) {
+        // Overwrite function
+        var showPanelBodyContent = function(panelName) {
+            var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
+            panelBodyContent.css('visibility', 'visible');
+        };
+
+        // Process multiple panels
+        if ($.isArray(panelNames)) {
+
+            var panelNameCounter = panelNames.length,
+                panelName;
+
+            for (;panelNameCounter !== 0;) {
+                panelNameCounter = panelNameCounter - 1;
+
+                panelName = panelNames[panelNameCounter];
+
+                showPanelBodyContent(panelName);
+            } // for
+
+        // Process single panel
+        } else {
+            showPanelBodyContent(panelNames);
+        }
+    };
 
     var showPanel = function(panelNames) {
         // Overwrite function
@@ -3577,8 +3626,31 @@ $(function(){
         }
     };
 
-    var hidePanel = function(panelName) {
-        $('[data-panel-name="' + panelName + '"]').css('visibility', 'hidden');
+    var hidePanelBodyContent = function(panelNames) {
+        // Overwrite function
+        var hidePanelBodyContent = function(panelName) {
+            var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
+            panelBodyContent.css('visibility', 'hidden');
+        };
+
+        // Process multiple panels
+        if ($.isArray(panelNames)) {
+
+            var panelNameCounter = panelNames.length,
+                panelName;
+
+            for (;panelNameCounter !== 0;) {
+                panelNameCounter = panelNameCounter - 1;
+
+                panelName = panelNames[panelNameCounter];
+
+                hidePanelBodyContent(panelName);
+            } // for
+
+        // Process single panel
+        } else {
+            hidePanelBodyContent(panelNames);
+        }
     };
 
     var hidePanel = function(panelNames) {
@@ -3613,9 +3685,8 @@ $(function(){
 
     var startPanelLoadingIndicator = function(panelName) {
         // Hide body content
-        var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
-        //panelBodyContent.css('visibility', 'hidden');
-
+        // var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
+        // panelBodyContent.css('visibility', 'hidden');
         // Show animated loading circle
         var panelLoadingIndicator = $('[data-panel-name="' + panelName + '"] .wgst-panel-loading');
         panelLoadingIndicator.show();
@@ -3626,8 +3697,8 @@ $(function(){
         var panelLoadingIndicator = $('[data-panel-name="' + panelName + '"] .wgst-panel-loading');
         panelLoadingIndicator.hide();
         // Show body content
-        var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
-        //panelBodyContent.css('visibility', 'visible');
+        // var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
+        // panelBodyContent.css('visibility', 'visible');
     };
 
     $('.tree-controls-draw-subtree').on('click', function(){
