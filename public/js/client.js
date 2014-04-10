@@ -3546,11 +3546,29 @@ $(function(){
             // Scrolling hint
             if ($('.collection-assembly-list .assembly-list-item:visible').length > 7) {
                 $('.collection-assembly-list-more-assemblies').show();
+                $('.collection-assembly-list-all-assemblies').hide();
             } else {
                 $('.collection-assembly-list-more-assemblies').hide();
+                $('.collection-assembly-list-all-assemblies').show();
             }
         });
     };
+
+    $('.collection-assembly-list-view-all-assemblies').on('click', function(e){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+        // Redraw original tree and set original zoom
+        window.WGST.collection[collectionId].tree.canvas.redrawOriginalTree();
+        window.WGST.collection[collectionId].tree.canvas.setZoom(-0.05);
+        // Show all collection assemblies
+        $('.collection-assembly-list .assembly-list-item').show();
+        
+        // Hide filter message
+        $('.collection-assembly-list-all-assemblies').hide();
+        // Show scroll message
+        $('.collection-assembly-list-more-assemblies').show();
+
+        e.preventDefault();
+    });
 
     // ============================================================
     // Listen to Phylocanvas tree user manipulation
