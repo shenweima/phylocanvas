@@ -397,6 +397,7 @@ $(function(){
                         + '<div class="show-on-map-checkbox assembly-list-header-map">'
                             + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                         + '</div>'
+                        + '<div class="assembly-list-generation"></div>'
                         + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</div>'
                         + '<div class="assembly-list-header-nearest-representative">' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
                         + '<div class="assembly-list-header-resistance-profile">'
@@ -509,6 +510,8 @@ $(function(){
             });
 
             renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
+
+            renderCollectionFamily(collectionId);
 
             // ----------------------------------------
             // Prepare collection
@@ -661,12 +664,80 @@ $(function(){
 
     var selectTreeNodes = function(collectionId, selectedAssemblyIds) {
         var assemblies = window.WGST.collection[collectionId].assemblies;
+        // Uncheck all radio buttons
+        $('.collection-assembly-list .assembly-list-item [type="radio"]').prop('checked', false);
         $.each(assemblies, function(assemblyId, assembly) {
             if ($.inArray(assemblyId, selectedAssemblyIds.split(',')) !== -1) {
                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').addClass('row-selected');
             } else {
                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').removeClass('row-selected');
+                // Uncheck radio button
+                //$('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="radio"]').prop('checked', false);
             }
+        });
+        if (selectedAssemblyIds.split(',').length > 2) {
+            $('.tree-controls-draw-subtree').attr('data-selected-node', selectedAssemblyIds.split(',')[0]);
+        }
+    };
+
+    $('body').on('mouseenter', '.glyphicon-leaf', function(){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            assemblyId = $(this).closest('.assembly-list-item').attr('data-assembly-id'),
+            branch = window.WGST.collection[collectionId].tree.canvas.branches[assemblyId],
+            children = branch.parent.children;
+
+        $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
+
+        $.each(children, function(childCounter, child){
+            $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + child.id + '"] .glyphicon-leaf').css('color', 'blue');
+        });
+    });
+    $('body').on('mouseleave', '.glyphicon-leaf', function(){
+        $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
+    });
+
+    var renderCollectionFamily = function(collectionId) {
+        var tree = window.WGST.collection[collectionId].tree.canvas;
+
+
+        var branches = tree.branches;
+
+        console.debug('branches');
+        console.dir(branches);
+
+        $.each(branches, function(branchId, branch){
+
+
+
+
+
+            var childIds = branch.getChildIds();
+
+            console.debug('childIds:');
+            console.dir(childIds.split(','));
+
+            if (branch.leaf) {
+                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-generation').append(
+                    //'<div>&#169; OK</div>'
+                    '<span class="glyphicon glyphicon-leaf"></span>'
+                );
+            } else if (branchId === 'root') {
+                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-generation').append(
+                    //'<div>&#169; OK</div>'
+                    '<span class="glyphicon glyphicon-plus"></span>'
+                );
+            } else {
+                $.each(childIds.split(','), function(childIdCounter, childId){
+
+
+
+                    $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + childId + '"] .assembly-list-generation').append(
+                        //'<span>{</span>'
+                        '<span class="glyphicon glyphicon-tree-deciduous"></span>'
+                        );
+                });
+            }
+
         });
     };
 
@@ -687,7 +758,6 @@ $(function(){
         //tree.rightClickZoom = true;
 
         window.WGST.collection[collectionId].tree.canvas.onselected = function(selectedNodeIds) {
-            console.log('collectionId: ' + collectionId);
             selectTreeNodes(collectionId, selectedNodeIds);
         };
 
@@ -720,8 +790,28 @@ $(function(){
         //     window.WGST.collection[collectionId].tree.leavesOrder.push(leaf.id);
         // });
 
+//         var branches = tree.branches;
+
+// $('.collection-assembly-list .assembly-list-family').append('<p>OK</p>');
+// $('.collection-assembly-list .assembly-list-item').append('<p>OK</p>');
 
 
+//         $.each(branches, function(branchId, branch){
+
+// $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-family').append('OK');
+
+//             var childIds = branch.getChildIds();
+
+//             console.debug('childIds:');
+//             console.dir(childIds.split(','));
+
+//             $.each(childIds.split(','), function(childIdCounter, childId){
+//                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + childId + '"] .assembly-list-family').append(
+//                     //'<div>&#169; OK</div>'
+//                     '<span class="glyphicon glyphicon-minus"></span>'
+//                     );
+//             });
+//         });
 
         
 
@@ -960,6 +1050,7 @@ $(function(){
             } // for
         } else { // No assemblies were selected
             console.log('[WGST] No selected assemblies');
+
             // Show Europe
             window.WGST.geo.map.canvas.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
             window.WGST.geo.map.canvas.setZoom(5);
@@ -2722,33 +2813,57 @@ $(function(){
     });
 
     // User wants to select representative tree branch
-    $('.wgst-panel__collection .assemblies-summary-table').on('change', 'input[type="radio"]', function(e) {
+    $('.wgst-panel__collection .collection-assembly-list').on('change', 'input[type="radio"]', function(e) {
 
-        //======================================================
-        // Tree
-        //======================================================
-
-        // Store node ids to highlight in a string
-        var checkedAssemblyNodesString = '',
+        var selectedAssemblyId = $(this).attr('data-assembly-id'),
             collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
 
-        // Get node id of each node that user selected via checked checkbox 
-        $('.wgst-panel__collection .assemblies-summary-table input[type="radio"]:checked').each(function(){
-            // Concat assembly ids to string
-            // Use this string to highlight nodes on tree
-            if (checkedAssemblyNodesString.length > 0) {
-                checkedAssemblyNodesString = checkedAssemblyNodesString + ',' + $(this).attr('data-assembly-id');
-            } else {
-                checkedAssemblyNodesString = $(this).attr('data-assembly-id');
-            }
-        });
+        $('.collection-assembly-list .assembly-list-item.row-selected').removeClass('row-selected');
+        $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + selectedAssemblyId + '"]').addClass('row-selected');
 
-        console.debug('checkedAssemblyNodesString: ' + checkedAssemblyNodesString);
-        console.dir(window.WGST.collection[collectionId].tree.canvas);
+        window.WGST.collection[collectionId].tree.canvas.selectNodes(selectedAssemblyId);
 
-        // Highlight assembly with the highest score on the representative tree
-        window.WGST.collection[collectionId].tree.canvas.selectNodes(checkedAssemblyNodesString);
-        //window.WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
+        // var leaves = window.WGST.collection[collectionId].tree.canvas.leaves;
+        // console.dir(window.WGST.collection[collectionId].tree.canvas.leaves);
+
+        // var selectedLeaf = $.grep(leaves, function(leaf){ return leaf.id === selectedAssemblyId; });
+        // selectedLeaf[0].nodeShape = 'square';
+
+        //window.WGST.collection[collectionId].tree.canvas.leaves[selectedAssemblyId].nodeShape = 'rectangular';
+
+        // Show collection tree panel
+        openPanel('collectionTree');
+        showPanel('collectionTree');
+        bringPanelToTop('collectionTree');
+
+        //======================================================
+        // Tree - THIS IS FOR SELECTING MULTIPLE ASSEMBLIES
+        //======================================================
+
+        // // Store node ids to highlight in a string
+        // var checkedAssemblyNodesString = '',
+        //     collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+
+        // // Get node id of each node that user selected via checked checkbox 
+        // $('.wgst-panel__collection .collection-assembly-list input[type="radio"]:checked').each(function(){
+        //     // Concat assembly ids to string
+        //     // Use this string to highlight nodes on tree
+        //     if (checkedAssemblyNodesString.length > 0) {
+        //         checkedAssemblyNodesString = checkedAssemblyNodesString + ',' + $(this).attr('data-assembly-id');
+        //     } else {
+        //         checkedAssemblyNodesString = $(this).attr('data-assembly-id');
+        //     }
+        // });
+
+
+
+        // //console.debug('checkedAssemblyNodesString: ' + checkedAssemblyNodesString);
+        // //console.dir(window.WGST.collection[collectionId].tree.canvas);
+
+        // // Highlight assembly with the highest score on the representative tree
+
+        // window.WGST.collection[collectionId].tree.canvas.selectNodes(checkedAssemblyNodesString);
+        // //window.WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
     });
 
     $('.assemblies-upload-cancel-button').on('click', function() {
@@ -3514,6 +3629,16 @@ $(function(){
         var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
         //panelBodyContent.css('visibility', 'visible');
     };
+
+    $('.tree-controls-draw-subtree').on('click', function(){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            selectedNode = $(this).attr('data-selected-node');
+
+        console.log('collectionId: ' + collectionId);
+        console.log('selectedNode: ' + selectedNode);
+
+        window.WGST.collection[collectionId].tree.canvas.redrawFromBranch(selectedNode);
+    });
 
 });
 

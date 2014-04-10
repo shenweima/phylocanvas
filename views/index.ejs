@@ -311,8 +311,9 @@
                 <div class="collection-assembly-list-headers">
                   <div class="assembly-list-header assembly-list-header-tree">Tree</div>
                   <div class="assembly-list-header assembly-list-header-map">Map</div>
+                  <div class="assembly-list-header assembly-list-generation">Generation</div>
                   <div class="assembly-list-header assembly-list-header-id">Assembly</div>
-                  <div class="assembly-list-header assembly-list-header-nearest-representative">Nearest Representative (Similarity)</div>
+                  <div class="assembly-list-header assembly-list-header-nearest-representative">Nearest Representative</div>
                   <div class="assembly-list-header assembly-list-header-resistance-profile">Predicted Resistance Profile</div>
                 </div>
 
@@ -394,6 +395,12 @@
                   <button type="button" class="btn btn-sm btn-default tree-controls-show-labels">Show labels</button>
                   <button type="button" class="btn btn-sm btn-default tree-controls-hide-labels">Hide labels</button>
                 </div>
+                <!--
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-default tree-controls-draw-subtree">Draw subtree</button>
+                  <button type="button" class="btn btn-sm btn-default tree-controls-draw-full-tree">Draw full tree</button>
+                </div>
+                -->
               </div>
               <div class="phylocanvas"></div>
 
@@ -416,6 +423,7 @@
         <section class="wgst-panel wgst-panel__assembly wgst-draggable" data-panel-name="assembly">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Assembly: <small></small></h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>

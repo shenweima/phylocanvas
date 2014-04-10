@@ -23,11 +23,11 @@ exports.add = function(req, res) {
 		});
 
 	connection.on('error', function(error) {
-	    console.error('✗ [WGST][ERROR] Ignoring error: ' + error);
+	    console.error('✗ [WGST][RabbitMQ][ERROR] Ignoring error: ' + error);
 	});
 
 	connection.on("ready", function(){
-		console.log('[WGST] Connection is ready');
+		console.log('[WGST][RabbitMQ] Connection is ready');
 
 		var queueId = 'ART_CREATE_COLLECTION_' + uuid.v4(),
 			exchange = connection.exchange('wgst-ex', {
@@ -39,7 +39,7 @@ exports.add = function(req, res) {
 				noDeclare: false,
 				confirm: false
 			}, function(exchange) {
-				console.log('[WGST] Exchange "' + exchange.name + '" is open');
+				console.log('[WGST][RabbitMQ] Exchange "' + exchange.name + '" is open');
 			});
 
 		// Prepare object to publish
@@ -58,11 +58,11 @@ exports.add = function(req, res) {
 			replyTo: queueId
 		}, function(err){
 			if (err) {
-				console.log('✗ [WGST][ERROR] Error in trying to publish');
+				console.log('✗ [WGST][RabbitMQ][ERROR] Error in trying to publish');
 				return; // return undefined?
 			}
 
-			console.log('[WGST] Message was published');
+			console.log('[WGST][RabbitMQ] Message was published');
 		});
 
 		connection
@@ -74,12 +74,12 @@ exports.add = function(req, res) {
 				noDeclare: false,
 				closeChannelOnUnsubscribe: false
 			}, function(queue){
-				console.log('[WGST] Queue "' + queue.name + '" is open');
+				console.log('[WGST][RabbitMQ] Queue "' + queue.name + '" is open');
 
 			}) // Subscribe to response message
 			.subscribe(function(message, headers, deliveryInfo){
 			
-				console.log('[WGST] Received response');
+				console.log('[WGST][RabbitMQ] Received response');
 
 				var buffer = new Buffer(message.data);
 

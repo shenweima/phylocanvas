@@ -50,7 +50,7 @@ html, body {
 
 a {
     color: #000;
-    border-bottom: 1px dotted #2a6496;
+    border-bottom: 1px dotted #000; //#2a6496;
     &:hover {
         color: #000;
         text-decoration: none;
@@ -106,6 +106,14 @@ a {
 // ============================
 // Panels
 // ============================
+
+.wgst-panel {
+    .wgst-panel-body {
+        .wgst-panel-body-content {
+            overflow: hidden;
+        }
+    }
+}
 
 .wgst-panel.assembly-panel {
     top: 86px;
@@ -978,7 +986,8 @@ h2, h4 {
 .wgst-panel__collection {
 
     .wgst-panel-body {
-        height: 400px;
+        max-height: 400px;
+        padding-bottom: 20px;
     }
 
     .collection-controls {
@@ -992,7 +1001,6 @@ h2, h4 {
 
     .collection-details {
         padding: 20px;
-
         .collection-assembly-list-headers {
             width: 900px;
             border-bottom: 1px solid #ddd;
@@ -1006,10 +1014,11 @@ h2, h4 {
         }
         .collection-assembly-list {
             width: 900px;
-            height: 259px;
             overflow-x: hidden;
             overflow-y: scroll;
             float: left;
+            max-height: 259px;
+            min-height: 50px;
             .assembly-list-item {
                 width: 100%;
                 float: left;
@@ -1047,16 +1056,28 @@ h2, h4 {
             width: 50px;
             text-align: center;
         }
+        .assembly-list-generation {
+            width: 120px;
+            padding-left: 7px;
+            padding-right: 7px;
+        }
+        .assembly-list-item .assembly-list-generation {
+            font-size: 12px;
+        }
         .assembly-list-header-id {
             width: 150px;
-            padding-left: 20px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            margin-right: 8px;
         }
         .assembly-list-header-nearest-representative {
-            width: 250px;
+            width: 170px;
         }
         .assembly-list-header-resistance-profile {
             width: 350px;
         }
+
 
 
         .assembly-upload-datetime {
