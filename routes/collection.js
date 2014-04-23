@@ -30,7 +30,7 @@ exports.add = function(req, res) {
 		console.log('[WGST][RabbitMQ] Connection is ready');
 
 		var queueId = 'ART_CREATE_COLLECTION_' + uuid.v4(),
-			exchange = connection.exchange('wgst-ex', {
+			exchange = connection.exchange('grid-ex', {
 				type: 'direct',
 				passive: true,
 				durable: false,

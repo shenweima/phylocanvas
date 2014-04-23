@@ -2103,7 +2103,7 @@ $(function(){
     };
 
     // FASTA file name regex
-    var fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.contig)$/i;
+    var fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i;
 
     var handleFileDrop = function(event) {
         event.stopPropagation();
@@ -3561,7 +3561,7 @@ $(function(){
         window.WGST.collection[collectionId].tree.canvas.setZoom(-0.05);
         // Show all collection assemblies
         $('.collection-assembly-list .assembly-list-item').show();
-        
+
         // Hide filter message
         $('.collection-assembly-list-all-assemblies').hide();
         // Show scroll message
