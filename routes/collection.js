@@ -3,12 +3,38 @@ var getCollectionId = function() {
 };
 
 exports.add = function(req, res) {
-	console.log("[WGST] Received request for collection id");
-	console.log('User assembly ids:');
-	console.log(req.body.userAssemblyIds);
+	var collectionId = req.body.collectionId;
+
+	console.log('Adding collection! collectionId: ' + collectionId);
+
+	console.log('[WGST] ' + (collectionId.length > 0 ? 'Received request for collection id: ' + collectionId: 'Received request for new collection id'));
 
 	var uuid = require('node-uuid'),
-		userAssemblyIds = req.body.userAssemblyIds;
+		userAssemblyIds = req.body.userAssemblyIds,
+		isNewCollection = true;
+
+	// Create new collection id
+	if (collectionId.length === 0) {
+		console.log('New collection id');
+
+		// Prepare object to publish
+		var collectionRequest = {
+			taskId: 'new',
+			inputData: userAssemblyIds
+		};
+
+	// Reuse existing collection id and just get new user assembly id to assembly id mapping
+	}  else {
+		console.log('Reusing collection id');
+
+		// Prepare object to publish
+		var collectionRequest = {
+			taskId: collectionId,
+			inputData: userAssemblyIds
+		};
+
+		isNewCollection = false;		
+	}
 
 	// TODO: Validate request
 
@@ -42,13 +68,6 @@ exports.add = function(req, res) {
 				console.log('[WGST][RabbitMQ] Exchange "' + exchange.name + '" is open');
 			});
 
-		// Prepare object to publish
-		var collectionRequest = {
-			taskId: 'new',
-			inputData: userAssemblyIds
-			//userAssemblyIds: userAssemblyIds
-		};
-
 		// Publish message
 		exchange.publish('id-request', collectionRequest, { 
 			mandatory: true,
@@ -66,29 +85,83 @@ exports.add = function(req, res) {
 		});
 
 		connection
-			.queue(queueId, { // Create queue
-				passive: false,
-				durable: false,
-				exclusive: true,
-				autoDelete: true,
-				noDeclare: false,
-				closeChannelOnUnsubscribe: false
-			}, function(queue){
-				console.log('[WGST][RabbitMQ] Queue "' + queue.name + '" is open');
+		.queue(queueId, { // Create queue
+			passive: false,
+			durable: false,
+			exclusive: true,
+			autoDelete: true,
+			noDeclare: false,
+			closeChannelOnUnsubscribe: false
+		}, function(queue){
+			console.log('[WGST][RabbitMQ] Queue "' + queue.name + '" is open');
 
-			}) // Subscribe to response message
-			.subscribe(function(message, headers, deliveryInfo){
-			
-				console.log('[WGST][RabbitMQ] Received response');
+		}) // Subscribe to response message
+		.subscribe(function(message, headers, deliveryInfo){
+			console.log('[WGST][RabbitMQ] Received response');
 
-				var buffer = new Buffer(message.data);
+			var buffer = new Buffer(message.data),
+				data = JSON.parse(buffer.toString()),
+				collectionId = data.uuid,
+				userAssemblyIdToAssemblyIdMap = data.idMap;
 
-				// Return result data
-				res.json(buffer.toString());
+			if (isNewCollection) {
+				couchbaseDatabaseConnections[testWgstFrontBucket].set('collection_' + collectionId, userAssemblyIdToAssemblyIdMap, function(err, result) {
+					if (err) {
+						console.error('✗ [WGST][Couchbase][ERROR] ' + err);
+						return;
+					}
 
-				// End connection, however in reality it's being dropped before it's ended so listen for error too
-				connection.end();
-			});
+					console.log('[WGST][Couchbase] Inserted new collection:');
+					console.dir(result);
+
+					console.dir(userAssemblyIdToAssemblyIdMap);
+
+					// Return result data
+					res.json({
+						collectionId: collectionId,
+						userAssemblyIdToAssemblyIdMap: userAssemblyIdToAssemblyIdMap
+					});
+
+					// End connection, however in reality it's being dropped before it's ended so listen for error too
+					connection.end();
+				});
+			} else {
+				// Get list of assemblies
+				couchbaseDatabaseConnections[testWgstFrontBucket].get('collection_' + collectionId, function(err, existingUserAssemblyIdToAssemblyIdMap) {
+					if (err) throw err;
+
+					console.log('Does that look correct to you?');
+					console.dir(existingUserAssemblyIdToAssemblyIdMap);
+
+					// Merge exisinting user assembly id to assembly id map with a new one
+					var updatedUserAssemblyIdToAssemblyIdMap = existingUserAssemblyIdToAssemblyIdMap.value,
+						assemblyId;
+
+					for (assemblyId in userAssemblyIdToAssemblyIdMap) {
+						updatedUserAssemblyIdToAssemblyIdMap[assemblyId] = userAssemblyIdToAssemblyIdMap[assemblyId];
+					}
+
+					couchbaseDatabaseConnections[testWgstFrontBucket].set('collection_' + collectionId, updatedUserAssemblyIdToAssemblyIdMap, function(err, result) {
+						if (err) {
+							console.error('✗ [WGST][Couchbase][ERROR] ' + err);
+							return;
+						}
+
+						console.log('[WGST][Couchbase] Updated existing collection:');
+						console.dir(result);
+
+						// Return result data
+						res.json({
+							collectionId: collectionId,
+							userAssemblyIdToAssemblyIdMap: updatedUserAssemblyIdToAssemblyIdMap
+						});
+
+						// End connection, however in reality it's being dropped before it's ended so listen for error too
+						connection.end();
+					});
+				});
+			} // else
+		});
 	});
 };
 
@@ -111,16 +184,23 @@ var getAssemblies = function(assemblyIds, callback) {
 		return 'PAARSNP_RESULT_' + assemblyId;
 	});
 
+	// Prepend MLST_RESULT_ to each assembly id
+	var mlstAssemblyIds = assemblyIds.map(function(assemblyId){
+		return 'MLST_RESULT_' + assemblyId;
+	});
+
 	// Merge all assembly ids
 	assemblyIds = scoresAssemblyIds
 						.concat(metadataAssemblyIds)
-						.concat(resistanceProfileAssemblyIds);
+						.concat(resistanceProfileAssemblyIds)
+						.concat(mlstAssemblyIds);
 
 	console.log('[WGST] Querying keys:');
 	console.dir(assemblyIds);
 
 	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIds, {}, function(err, assembliesData) {
 		console.log('[WGST] Got assemblies data');
+		console.dir(assembliesData);
 
 		if (err) throw err;
 
@@ -145,11 +225,102 @@ var getAssemblies = function(assemblyIds, callback) {
             	assemblyId = assemblyKey.replace('PAARSNP_RESULT_','');
             	assemblies[assemblyId] = assemblies[assemblyId] || {};
 				assemblies[assemblyId]['PAARSNP_RESULT'] = assembliesData[assemblyKey].value;
-			}
+            // Parsing MLST
+            } else if (assemblyKey.indexOf('MLST_RESULT_') !== -1) {
+            	assemblyId = assemblyKey.replace('MLST_RESULT_','');
+            	assemblies[assemblyId] = assemblies[assemblyId] || {};
+				assemblies[assemblyId]['MLST_RESULT'] = assembliesData[assemblyKey].value;
+			} // if
 		} // for
 
-		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA and PAARSNP_RESULT data:');
+		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data:');
 		console.dir(assemblies);
+
+		//Get ST (Sequence Type) code
+		var assemblyStQueryKeys = {}, // Map assembly id to ST query key
+			stQueryKeys = [],
+			stQueryKey,
+			alleles,
+			alleleId;
+
+		for (assemblyId in assemblies) {
+			if (assemblies.hasOwnProperty(assemblyId)) {
+				alleles = assemblies[assemblyId]['MLST_RESULT'].alleles;
+				stQueryKey = 'ST_' + '1280';
+
+				console.log('alleles:');
+				console.dir(alleles);
+
+				for (allele in alleles) {
+					if (alleles.hasOwnProperty(allele)) {
+						alleleId = alleles[allele].alleleId;
+						stQueryKey = stQueryKey + '_' + alleleId;
+					}
+				}
+
+				stQueryKeys.push(stQueryKey);
+				assemblyStQueryKeys[assemblyId] = stQueryKey;
+			} // if
+		} // for
+
+		console.log('stQueryKeys:');
+		console.dir(stQueryKeys);
+
+		// couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(stQueryKeys, {}, function(err, stCodes){
+		// 	console.log('[WGST][Couchbase] Got Sequence Type codes');
+		// 	console.dir(stCodes);
+		// });
+
+
+
+
+
+		// 				// If allele id is NEW then don't query ST (Sequence Types) codes
+		// 				alleleId = alleles[allele].alleleId;
+		// 				if (alleleId !== 'NEW') {
+		// 					stQueryKey = stQueryKey + '_' + alleleId;
+
+
+		// 					// If no result > show NEW
+		// 				}
+
+
+
+
+		// 	// 'ST_' + species id + allele ids
+		// 	stQueryKey = 'ST_' + '1280';
+
+		// 	for (allele in alleles) {
+		// 		if (alleles.hasOwnProperty(allele)) {
+		// 			// If allele id is NEW then don't query ST (Sequence Types) codes
+		// 			alleleId = alleles[allele].alleleId;
+		// 			if (alleleId !== 'NEW') {
+		// 				stQueryKey = stQueryKey + '_' + alleleId;
+
+
+		// 				// If no result > show NEW
+		// 			}
+		// 		}
+		// 	}
+
+		// 	stQueryKeys.push(stQueryKey);
+
+
+		// 	stQueryKey = assemblies[assemblyId]['MLST_RESULT']
+
+
+
+			
+		// }
+
+		// var stQueryKeys = '';
+
+
+
+
+
+		// If NEW > don't query ST (Sequence Types) codes
+		// If no result > show NEW
 
 		callback(null, assemblies);
 	});
@@ -198,7 +369,10 @@ var getCollection = function(collectionId, callback) {
 exports.apiGetCollection = function(req, res) {
 
 	var collectionId = req.body.collectionId,
-		collection = {};
+		collection = {
+			assemblies: {},
+			tree: {}
+		};
 
 	console.log('[WGST] Getting collection ' + collectionId);
 
@@ -211,38 +385,134 @@ exports.apiGetCollection = function(req, res) {
 		console.log('[WGST] Got collection ' + collectionId + ' with assembly ids:');
 		console.dir(assemblyIds);
 
-		// Get assemblies
-		getAssemblies(assemblyIds, function(error, assemblies){
-			if (error) throw error;
+		var assemblyCounter = assemblyIds.length;
+		for (;assemblyCounter !== 0;) {
+			assemblyCounter = assemblyCounter - 1;
 
-			collection.assemblies = assemblies;
+			var assemblyId = assemblyIds[assemblyCounter];
 
-			// Get collection tree data
-			couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
-				if (err) throw err;
+			require('./assembly').getAssembly(assemblyId, function(error, assembly){
+				if (error) throw error;
 
-				var collectionTreeData = collectionTreeData.value.newickTree;
+				console.log('[WGST] Got assembly ' + assembly.ASSEMBLY_METADATA.assemblyId);
 
-				console.log('[WGST] Got collection tree data for ' + collectionId + ' collection:');
-				console.dir(collectionTreeData);
+				var assemblyId = assembly.ASSEMBLY_METADATA.assemblyId;
 
-				collection.tree = {
-					data: collectionTreeData
-				};
+				collection.assemblies[assemblyId] = assembly;
 
-				// Get antibiotics
-				require('./assembly').getAllAntibiotics(function(error, antibiotics){
-					if (error) throw error;
+				// If got all assemblies
+				if (Object.keys(collection.assemblies).length === assemblyIds.length) {
+					// Get collection tree data
+					couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+						if (err) throw err;
 
-					res.json({
-						collection: collection,
-						antibiotics: antibiotics
+						var collectionTreeData = collectionTreeData.value.newickTree;
+
+						console.log('[WGST] Got collection tree data for ' + collectionId + ' collection:');
+						console.dir(collectionTreeData);
+
+						collection.tree = collectionTreeData;
+
+						// Get antibiotics
+						require('./assembly').getAllAntibiotics(function(error, antibiotics){
+							if (error) throw error;
+
+							res.json({
+								collection: collection,
+								antibiotics: antibiotics
+							});
+						});
 					});
-				});
+				} // if
 			});
-		});
+		} // for
+
+		// // Get assemblies
+		// getAssemblies(assemblyIds, function(error, assemblies){
+		// 	if (error) throw error;
+
+		// 	collection.assemblies = assemblies;
+
+		// 	// Get collection tree data
+		// 	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+		// 		if (err) throw err;
+
+		// 		var collectionTreeData = collectionTreeData.value.newickTree;
+
+		// 		console.log('[WGST] Got collection tree data for ' + collectionId + ' collection:');
+		// 		console.dir(collectionTreeData);
+
+		// 		collection.tree = {
+		// 			data: collectionTreeData
+		// 		};
+
+		// 		// Get antibiotics
+		// 		require('./assembly').getAllAntibiotics(function(error, antibiotics){
+		// 			if (error) throw error;
+
+		// 			res.json({
+		// 				collection: collection,
+		// 				antibiotics: antibiotics
+		// 			});
+		// 		});
+		// 	});
+		// });
 	});
 };
+
+// exports.apiGetCollection = function(req, res) {
+
+// 	var collectionId = req.body.collectionId,
+// 		collection = {};
+
+// 	console.log('[WGST] Getting collection ' + collectionId);
+
+// 	// Get list of assemblies
+// 	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
+// 		if (err) throw err;
+
+// 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
+
+// 		console.log('[WGST] Got collection ' + collectionId + ' with assembly ids:');
+// 		console.dir(assemblyIds);
+
+// 		var assemblyCounter = assemblyIds.length;
+// 		for (;assemblyCounter !== 0;) {
+// 			exports.getAssembly();
+// 		} 
+
+// 		// Get assemblies
+// 		getAssemblies(assemblyIds, function(error, assemblies){
+// 			if (error) throw error;
+
+// 			collection.assemblies = assemblies;
+
+// 			// Get collection tree data
+// 			couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+// 				if (err) throw err;
+
+// 				var collectionTreeData = collectionTreeData.value.newickTree;
+
+// 				console.log('[WGST] Got collection tree data for ' + collectionId + ' collection:');
+// 				console.dir(collectionTreeData);
+
+// 				collection.tree = {
+// 					data: collectionTreeData
+// 				};
+
+// 				// Get antibiotics
+// 				require('./assembly').getAllAntibiotics(function(error, antibiotics){
+// 					if (error) throw error;
+
+// 					res.json({
+// 						collection: collection,
+// 						antibiotics: antibiotics
+// 					});
+// 				});
+// 			});
+// 		});
+// 	});
+// };
 
 exports.get = function(req, res) {
 	var collectionId = req.params.id;

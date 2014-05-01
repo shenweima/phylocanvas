@@ -80,7 +80,7 @@ exports.add = function(req, res) {
 		{
 			exclusive: true
 		}, function(queue){
-			console.log('[WGST] Notification queue "' + queue.name + '" is open');
+			console.log('[WGST][RabbitMQ] Notification queue "' + queue.name + '" is open');
 
 			var readyResults = [];
 
@@ -160,9 +160,9 @@ exports.add = function(req, res) {
 
 				// Unbind queue after all results were received
 				if (readyResults.length === 4) {
-					queue.unbind(notificationExchange, "*.ASSEMBLY." + assemblyId);
-					queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
-					//queue.destroy();
+					//queue.unbind(notificationExchange, "*.ASSEMBLY." + assemblyId);
+					//queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
+					queue.destroy();
 					//notificationExchange.destroy();
 					//notificationConnection.end();
 				} // if
@@ -175,7 +175,7 @@ exports.add = function(req, res) {
 			uploadConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
 			uploadConnection.on('error', function(error) {
-			    console.error('✗ [WGST][ERROR] Upload connection: ' + error);
+			    console.error('✗ [WGST][RabbitMQ][ERROR] Upload connection: ' + error);
 			});
 
 			uploadConnection.on("ready", function(){
@@ -193,15 +193,15 @@ exports.add = function(req, res) {
 						geographic: assemblyMetadata.geographic
 					};
 
-					console.log('[WGST] Inserting metadata with key: ' + metadataKey);
+					console.log('[WGST][Couchbase] Inserting metadata with key: ' + metadataKey);
 
 					couchbaseDatabaseConnections[testWgstBucket].set(metadataKey, metadata, function(err, result) {
 						if (err) {
-							console.error('✗ [WGST][ERROR] ' + err);
+							console.error('✗ [WGST][Couchbase][ERROR] ' + err);
 							return;
 						}
 
-						console.log('[WGST] Inserted metadata:');
+						console.log('[WGST][Couchbase] Inserted metadata:');
 						console.dir(result);
 
 						console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
@@ -243,7 +243,7 @@ exports.add = function(req, res) {
 						"collectionId": collectionId
 					};
 
-					console.log('[WGST] Uploading assembly ' + assemblyId + ' to collection ' + collectionId);
+					console.log('[WGST][RabbitMQ] Uploading assembly ' + assemblyId + ' to collection ' + collectionId);
 
 					// Publish message
 					uploadExchange.publish('upload', assembly, { 
@@ -254,11 +254,11 @@ exports.add = function(req, res) {
 						replyTo: uploadQueueId
 					}, function(err){
 						if (err) {
-							console.error('✗ [WGST][ERROR] Error when trying to publish to upload exchange');
+							console.error('✗ [WGST][RabbitMQ][ERROR] Error when trying to publish to upload exchange');
 							return;
 						}
 
-						console.log('[WGST] Message was published to upload exchange');
+						console.log('[WGST][RabbitMQ] Message was published to upload exchange');
 					});
 
 					uploadQueue = uploadConnection
@@ -270,16 +270,16 @@ exports.add = function(req, res) {
 							noDeclare: false,
 							closeChannelOnUnsubscribe: false
 						}, function(queue){
-							console.log('[WGST] Upload queue "' + queue.name + '" is open');
+							console.log('[WGST][RabbitMQ] Upload queue "' + queue.name + '" is open');
 						}) // Subscribe to response message
 						.subscribe(function(message, headers, deliveryInfo){
-							console.log('[WGST] Preparing metadata object');									
+							console.log('[WGST][RabbitMQ] Preparing metadata object');									
 
 							var buffer = new Buffer(message.data),
 								bufferJSON = buffer.toString(),
 								parsedMessage = JSON.parse(bufferJSON);
 
-							console.log('[WGST] Received message from upload queue:');
+							console.log('[WGST][RabbitMQ] Received message from upload queue:');
 							console.dir(parsedMessage);
 
 							uploadConnection.end();
@@ -302,70 +302,116 @@ exports.get = function(req, res) {
 	});
 };
 
-exports.apiGetAssembly = function(req, res) {
+exports.getSTType = function(alleles, callback) {
+	console.log('[WGST] Getting ST Type for alleles:');
+	console.dir(alleles);
 
-	var requestedAssemblyId = req.body.assemblyId;
+	// Prepare ST query key
+	// 'ST_' + species id + allele ids
+	var stQueryKey = 'ST_' + '1280',
+		//alleles = assembly.MLST_RESULT.alleles,
+		alleleId;
 
-	console.log('[WGST] Getting assembly with id: ' + requestedAssemblyId);
+	for (allele in alleles) {
+		if (alleles.hasOwnProperty(allele)) {
+			// If allele id is NEW or null, then don't query ST (Sequence Types) codes
+			if (alleles[allele] === null) {
+				callback(null, '');
+				return;
+			} else {
+				alleleId = alleles[allele].alleleId;
+				if (alleleId === 'NEW') {
+					callback(null, '');
+					return;
+				} else {
+					stQueryKey = stQueryKey + '_' + alleleId;
+				}			
+			}
+		}
+	} // for
+
+	console.log('stQueryKey:');
+	console.log(stQueryKey);
+
+	// Get ST code
+	couchbaseDatabaseConnections[testWgstResourcesBucket].get(stQueryKey, function(error, stData) {
+		if (error) {
+			if (error.code === 13) {
+				console.log('! [WGST][Warning] No such ST key found: ' + stQueryKey);
+				callback(null, 'New');
+				return;
+			} else {
+				callback(error, null);
+				return;
+			}
+		} // if
+
+		console.log('stData:');
+		console.dir(stData.value);
+
+		callback(null, stData.value.stType);
+	});
+};
+
+exports.getAssembly = function(assemblyId, callback) {
+	console.log('[WGST] Getting assembly ' + assemblyId);
 
 	// Prepare query keys
-	var scoresQueryKey = 'FP_COMP_' + requestedAssemblyId,
-		metadataQueryKey = 'ASSEMBLY_METADATA_' + requestedAssemblyId,
-		resistanceProfileQueryKey = 'PAARSNP_RESULT_' + requestedAssemblyId,
-		mlstQueryKey = 'MLST_RESULT_' + requestedAssemblyId;
+	var scoresQueryKey = 'FP_COMP_' + assemblyId,
+		metadataQueryKey = 'ASSEMBLY_METADATA_' + assemblyId,
+		resistanceProfileQueryKey = 'PAARSNP_RESULT_' + assemblyId,
+		mlstQueryKey = 'MLST_RESULT_' + assemblyId;
 
 	var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey];
 
 	console.log('[WGST] Assembly query keys: ');
 	console.dir(assemblyQueryKeys);
 
-	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyQueryKeys, {}, function(err, assemblyData) {
+	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyQueryKeys, {}, function(error, assemblyData) {
 		console.log('[WGST] Got assembly data');
 		console.dir(assemblyData);
 
-		if (err) throw err;
+		if (error) {
+			callback(error, assemblyData);
+			return;
+		}
 
 		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
-		var assembly = {},
-			assemblyId,
-			assemblyIdKey,
-			cleanAssemblyId,
-			mlstAllelesQueryKeys = [];
+		var assembly = {};
+			//assemblyId,
+			//assemblyIdKey,
+			//cleanAssemblyId,
 
 		for (assemblyKey in assemblyData) {
             // Parsing assembly scores
             if (assemblyKey.indexOf('FP_COMP_') !== -1) {
-            	assemblyId = assemblyKey.replace('FP_COMP_','');
-            	//assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+            	//assemblyId = assemblyKey.replace('FP_COMP_','');
 				assembly['FP_COMP'] = assemblyData[assemblyKey].value;
             // Parsing assembly metadata
             } else if (assemblyKey.indexOf('ASSEMBLY_METADATA_') !== -1) {
-            	assemblyId = assemblyKey.replace('ASSEMBLY_METADATA_','');
-            	//assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+            	//assemblyId = assemblyKey.replace('ASSEMBLY_METADATA_','');
 				assembly['ASSEMBLY_METADATA'] = assemblyData[assemblyKey].value;
             // Parsing assembly resistance profile
             } else if (assemblyKey.indexOf('PAARSNP_RESULT_') !== -1) {
-            	assemblyId = assemblyKey.replace('PAARSNP_RESULT_','');
-            	//assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+            	//assemblyId = assemblyKey.replace('PAARSNP_RESULT_','');
 				assembly['PAARSNP_RESULT'] = assemblyData[assemblyKey].value;
             // Parsing MLST
             } else if (assemblyKey.indexOf('MLST_RESULT_') !== -1) {
-            	assemblyId = assemblyKey.replace('MLST_RESULT_','');
-            	//assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+            	//assemblyId = assemblyKey.replace('MLST_RESULT_','');
 				assembly['MLST_RESULT'] = assemblyData[assemblyKey].value;
 			} // if
 		} // for
 
 		console.log('[WGST] Assembly with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data: ');
 		console.dir(assembly);
-		
-		// Extract all MLST alleles query keys
-		//var alleles = assemblies[cleanAssemblyId]['MLST_RESULT'].alleles;
-		var alleles = assembly['MLST_RESULT'].alleles,
-			alleleQueryKey;
 
-		console.log('>>> alleles:');
-		console.dir(alleles);
+		// Prepare allele query keys
+		var alleles = assembly['MLST_RESULT'].alleles,
+			alleleQueryKey,
+			mlstAllelesQueryKeys = [];
+
+		// console.log('>>> alleles:');
+		// console.dir(alleles);
 
 		for (allele in alleles) {
 			if (alleles.hasOwnProperty(allele)) {
@@ -377,30 +423,27 @@ exports.apiGetAssembly = function(req, res) {
 			}
 		}
 
-		console.log('>>> mlstAllelesQueryKeys:');
-		console.dir(mlstAllelesQueryKeys);
+		// console.log('>>> mlstAllelesQueryKeys:');
+		// console.dir(mlstAllelesQueryKeys);
 
 		// Get MLST alleles data
-		getMlstAlleles(mlstAllelesQueryKeys, function(error, mlstAlleles){
+		exports.getMlstAlleles(mlstAllelesQueryKeys, function(error, mlstAlleles){
 			if (error) {
-				throw error;
+				callback(error, mlstAlleles);
+				return;
 			}
 
 			var mlstAlleleValue,
 				mlstAllele,
 				locusId;
 
-			console.log('>>> assemblyId: ' + assemblyId);
+			// console.log('>>> assemblyId: ' + assemblyId);
 
 			// Check if any MLST alleles data returned
 			if (Object.keys(mlstAlleles).length > 0) {
 				// Parse MLST alleles data
 				for (mlstAllele in mlstAlleles) {
 					if (mlstAlleles.hasOwnProperty(mlstAllele)) {
-
-						console.log('[WGST] Parsing MLST allele data:');
-						console.dir(mlstAllele);
-
 						// Get value object from query result object
 						mlstAlleleValue = mlstAlleles[mlstAllele].value;
 						// Get locus id from value object
@@ -411,25 +454,46 @@ exports.apiGetAssembly = function(req, res) {
 				} // for				
 			} // if
 
-			console.log('>>> assembly.MLST_RESULT.alleles:');
-			console.dir(assembly.MLST_RESULT.alleles);
+			// console.log('>>> assembly.MLST_RESULT.alleles:');
+			// console.dir(assembly.MLST_RESULT.alleles);
 
-			// Get list of all antibiotics
-			exports.getAllAntibiotics(function(error, antibiotics){
+			exports.getSTType(assembly.MLST_RESULT.alleles, function(error, stType){
 				if (error) {
-					throw error;
+					callback(error, stType);
+					return;
 				}
 
-				res.json({
-					assembly: assembly,
-					antibiotics: antibiotics
-				});
+				assembly.MLST_RESULT.stType = stType;
+
+				callback(null, assembly);
 			});
 		});
 	});
 };
 
-var getMlstAlleles = function(queryKeys, callback) {
+exports.apiGetAssembly = function(req, res) {
+	var assemblyId = req.body.assemblyId;
+
+	exports.getAssembly(assemblyId, function(error, assembly){
+		if (error) {
+			throw error;
+		}
+
+		// Get list of all antibiotics
+		exports.getAllAntibiotics(function(error, antibiotics){
+			if (error) {
+				throw error;
+			}
+
+			res.json({
+				assembly: assembly,
+				antibiotics: antibiotics
+			});
+		});
+	});
+};
+
+exports.getMlstAlleles = function(queryKeys, callback) {
 	console.log('[WGST] Getting MLST alleles data');
 
 	if (queryKeys.length === 0) {
@@ -440,15 +504,16 @@ var getMlstAlleles = function(queryKeys, callback) {
 	console.log('>>> queryKeys:');
 	console.dir(queryKeys);
 
-	couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(queryKeys, {}, function(err, result) {
-		console.log('[WGST] Got MLST alleles data: ');
-		console.log(result);
+	couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(queryKeys, {}, function(error, mlstAllelesData) {
+		console.log('[WGST] Got MLST alleles data:');
+		console.dir(mlstAllelesData);
 
-		if (err) {
-			callback(err, result);
+		if (error) {
+			callback(error, mlstAllelesData);
+			return;
 		}
 
-		callback(null, result);
+		callback(null, mlstAllelesData);
 	});
 };
 
@@ -479,7 +544,7 @@ exports.apiGetAssemblies = function(req, res) {
 	console.log(assemblyIds);
 
 	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIds, {}, function(err, results) {
-		console.log('[WGST] Got assemblies data: ');
+		console.log('[WGST][Couchbase] Got assemblies data: ');
 		console.log(results);
 
 		if (err) throw err;
@@ -539,11 +604,12 @@ exports.getResistanceProfile = function(callback) {
 	console.log(resistanceProfileQueryKeys);
 
 	couchbaseDatabaseConnections[testWgstBucket].getMulti(resistanceProfileQueryKeys, {}, function(error, results) {
-		console.log('[WGST] Got resistance profile data:');
+		console.log('[WGST][Couchbase] Got resistance profile data:');
 		console.dir(results);
 
 		if (error) {
 			callback(error, results);
+			return;
 		}
 
 		callback(null, results);
@@ -566,6 +632,7 @@ exports.getAllAntibiotics = function(callback) {
 	couchbaseDatabaseConnections[testWgstResourcesBucket].get('ANTIMICROBIALS_ALL', function(error, result) {
 		if (error) {
 			callback(error, result);
+			return;
 		}
 
 		var antibiotics = result.value.antibiotics;

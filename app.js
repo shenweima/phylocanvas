@@ -138,15 +138,17 @@ io.sockets.on('connection', function (socketConnection) {
 var couchbase = require('couchbase');
 
 // Global variable on purpose - will store socket connection and will be shared with routes
-couchbaseDatabaseConnections = {},
-testWgstBucket = 'test_wgst',
+couchbaseDatabaseConnections = {};
+testWgstBucket = 'test_wgst';
 testWgstResourcesBucket = 'test_wgst_resources';
+testWgstFrontBucket = 'test_wgst_front';
 
 var createCouchbaseConnection = function(bucketName) {
 	return new couchbase.Connection({
 		host: 'http://129.31.26.151:8091/pools',
 		bucket: bucketName,
-		password: '.oneir66'
+		password: '.oneir66',
+		operationTimeout: 5000
 	}, function(error) {
 		if (error) {
 			console.error('✗ [WGST][Couchbase][ERROR] ' + error);
@@ -159,6 +161,7 @@ var createCouchbaseConnection = function(bucketName) {
 
 couchbaseDatabaseConnections[testWgstBucket] = createCouchbaseConnection(testWgstBucket);
 couchbaseDatabaseConnections[testWgstResourcesBucket] = createCouchbaseConnection(testWgstResourcesBucket);
+couchbaseDatabaseConnections[testWgstFrontBucket] = createCouchbaseConnection(testWgstFrontBucket);
 
 // couchbaseDatabaseConnections[testWgstBucket] = new couchbase.Connection({
 // 	host: 'http://129.31.26.151:8091/pools',
