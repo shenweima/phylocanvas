@@ -92,6 +92,7 @@ $(function(){
                 representativeTree: []
             },
             markerBounds: new google.maps.LatLngBounds(),
+            searchBoxBounds: new google.maps.LatLngBounds(),
             init: function() {
                 WGST.geo.map.canvas = new google.maps.Map($('.map')[0], WGST.geo.map.options);
                 WGST.geo.map.markers.metadata = new google.maps.Marker({
@@ -99,7 +100,12 @@ $(function(){
                     map: WGST.geo.map.canvas,
                     visible: false
                 });
-            }
+
+                // Bias the SearchBox results towards places that are within the bounds of the current map's viewport.
+                google.maps.event.addListener(WGST.geo.map.canvas, 'bounds_changed', function() {
+                    WGST.geo.map.searchBoxBounds = WGST.geo.map.canvas.getBounds();
+                });
+            } // init
         },
         placeSearchBox: {} // Store Google SearchBox object for each dropped file
     };
@@ -2171,18 +2177,27 @@ $(function(){
             //WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
             // [0] returns native DOM element: http://learn.jquery.com/using-jquery-core/faq/how-do-i-pull-a-native-dom-element-from-a-jquery-object/
             //WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(autocompleteInput[0]);
-            WGST.geo.placeSearchBox[fileName] = new google.maps.places.SearchBox(autocompleteInput[0]);
+            WGST.geo.placeSearchBox[fileName] = new google.maps.places.SearchBox(autocompleteInput[0], {
+                bounds: WGST.geo.map.searchBoxBounds
+            });
 
             // When the user selects an address from the dropdown,
             // get geo coordinates
             // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
             // TO DO: Remove this event listener after metadata was sent
+            // view-source:http://rawgit.com/klokan/8408394/raw/5ab795fb36c67ad73c215269f61c7648633ae53e/places-enter-first-item.html
             google.maps.event.addListener(WGST.geo.placeSearchBox[fileName], 'places_changed', function() {
 
                 // Get the place details from the autocomplete object.
                 var places = window.WGST.geo.placeSearchBox[fileName].getPlaces(),
-                    place = places[0],
-                    latitude = place.geometry.location.lat(),
+                    place = places[0];
+
+                if (typeof place.geometry === 'undefined') {
+                    return;
+                }
+
+                // If the place has a geometry, then present it on a map
+                var latitude = place.geometry.location.lat(),
                     longitude = place.geometry.location.lng(),
                     formattedAddress = place.formatted_address;
 
@@ -2190,31 +2205,17 @@ $(function(){
                 console.log(formattedAddress);
 
                 // Set first place to as input's value
-                $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-location-input').val(formattedAddress);
+                $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-location-input').val(formattedAddress).blur();
+
 
                 // Set map center to selected address
-                WGST.geo.map.canvas.setCenter(places[0].geometry.location);
+                WGST.geo.map.canvas.setCenter(place.geometry.location);
                 // Set map
                 WGST.geo.map.markers.metadata.setMap(WGST.geo.map.canvas);
                 // Set metadata marker's position to selected address
-                WGST.geo.map.markers.metadata.setPosition(places[0].geometry.location);
+                WGST.geo.map.markers.metadata.setPosition(place.geometry.location);
                 // Show metadata marker
                 WGST.geo.map.markers.metadata.setVisible(true);
-
-                // Geocode address
-                /*
-                WGST.geo.geocoder.geocode({ 'address': place.address_components[0] }, function(results, status) {
-                    if (status == google.maps.GeocoderStatus.OK) {
-                        map.setCenter(results[0].geometry.location);
-                        var marker = new google.maps.Marker({
-                            map: WGST.geo.map,
-                            position: results[0].geometry.location
-                        });
-                    } else {
-                        console.log('Geocode was not successful for the following reason: ' + status);
-                    }
-                });
-                */
 
                 window.WGST.upload.assembly[fileName] = window.WGST.upload.assembly[fileName] || {};
                 window.WGST.upload.assembly[fileName].metadata = window.WGST.upload.assembly[fileName].metadata || {};
@@ -2842,7 +2843,7 @@ $(function(){
             // Scroll to the next form block
             //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
             $(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
-        }
+        } // if
 
         // Increment metadata progress bar
         updateMetadataProgressBar();
