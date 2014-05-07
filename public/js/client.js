@@ -106,10 +106,6 @@ $(function(){
 
     // ============================================================
     // Panels
-    // ============================================================    
-
-    // ============================================================
-    // Panels
     // ============================================================
 
     var showPanelBodyContent = function(panelNames) {
@@ -359,8 +355,8 @@ $(function(){
     // ============================================================
     // Init app
     // ============================================================    
-    console.log('[WGST] Reading app config:');
-    console.dir(window.WGST.config);
+    console.log('[WGST] Reading app config');
+    //console.dir(window.WGST.config);
 
     // Init
     (function(){
@@ -442,7 +438,7 @@ $(function(){
         // Set socket room id
         WGST.socket.connection.on('roomId', function(roomId) {
             console.log('[WGST][Socket.io] Received room id: ' + roomId);
-            console.log('[WGST] Socket.io ready');
+            console.log('[WGST][Socket.io] Ready');
 
             // Set room id for this client
             window.WGST.socket.roomId = roomId;
@@ -3044,8 +3040,10 @@ $(function(){
         // Update view
         updateCollectionUploadProgress(collectionId, userAssemblyId, assemblyId, result);
 
-        console.debug('totalNumberOfCollectionAnalysisResults: ' + totalNumberOfCollectionAnalysisResults);
-        console.debug('WGST.upload.collection[collectionId].notifications.all.length: ' + WGST.upload.collection[collectionId].notifications.all.length);
+        console.debug('» Received ' + WGST.upload.collection[collectionId].notifications.all.length + ' out of ' + totalNumberOfCollectionAnalysisResults + ' assembly results' );
+
+        //console.debug('totalNumberOfCollectionAnalysisResults: ' + totalNumberOfCollectionAnalysisResults);
+        //console.debug('WGST.upload.collection[collectionId].notifications.all.length: ' + WGST.upload.collection[collectionId].notifications.all.length);
 
         // When all results were processed - get collection
         if (totalNumberOfCollectionAnalysisResults === WGST.upload.collection[collectionId].notifications.all.length) {
@@ -3057,6 +3055,8 @@ $(function(){
             setTimeout(function(){
                 closePanel('assemblyUploadProgress', function(){
                     resetAssemlyUpload();
+                    // Update address bar
+                    window.history.replaceState('Object', 'WGST Collection', '/collection/' + collectionId);
                     getCollection(collectionId);         
                 });
             }, 1000);
@@ -3134,6 +3134,11 @@ $(function(){
                 optimized: true // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
             });
 
+            // Open assembly on marker click
+            google.maps.event.addListener(window.WGST.geo.map.markers.assembly[checkedAssemblyId], 'click', function() {
+                openAssemblyPanel(checkedAssemblyId);
+            });
+
             // Highlight row
             $(this).closest('tr').addClass("row-highlighted");
 
@@ -3169,10 +3174,8 @@ $(function(){
 
         // var leaves = window.WGST.collection[collectionId].tree.canvas.leaves;
         // console.dir(window.WGST.collection[collectionId].tree.canvas.leaves);
-
         // var selectedLeaf = $.grep(leaves, function(leaf){ return leaf.id === selectedAssemblyId; });
         // selectedLeaf[0].nodeShape = 'square';
-
         //window.WGST.collection[collectionId].tree.canvas.leaves[selectedAssemblyId].nodeShape = 'rectangular';
 
         // Show collection tree panel
@@ -3252,10 +3255,10 @@ $(function(){
         ASSEMBLY_UPLOAD_TIMER = 2000;
 
     var uploadAssembly = function(collectionId, assemblyId) {
-        console.log('[WGST] Uploading ' + assemblyId + ' assembly');
-
         // Upload assembly only if you are within parallel assembly upload limit
         if (numberOfFilesProcessing < PARALLEL_UPLOAD_ASSEMBLY_LIMIT) {
+            console.log('[WGST] Uploading ' + assemblyId + ' assembly');
+
             // Increment number of assembly upload counter
             numberOfFilesProcessing = numberOfFilesProcessing + 1;
             // Set socket room id
@@ -3293,7 +3296,6 @@ $(function(){
 
         resetPanelAssemblyUploadMetadata();
         resetPanelAssemblyUploadProgress();
-        // AAA
 
         // Disable upload button
         //$(this).attr('disabled','disabled');
@@ -3786,9 +3788,6 @@ $(function(){
                             + '<td>' + scoreData.referenceId + '</td>'
                             + '<td>' + scoreText + '</td>'
                         + '</tr>';
-
-                console.log(scoreData.score);
-
             } // for
 
             assemblyScoresHtml = assemblyScoresHtml.replace('{{assemblyScoresDataHtml}}', assemblyScoresDataHtml);

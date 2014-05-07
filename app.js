@@ -148,7 +148,7 @@ var createCouchbaseConnection = function(bucketName) {
 		host: 'http://129.31.26.151:8091/pools',
 		bucket: bucketName,
 		password: '.oneir66',
-		operationTimeout: 5000
+		operationTimeout: 60000
 	}, function(error) {
 		if (error) {
 			console.error('✗ [WGST][Couchbase][ERROR] ' + error);

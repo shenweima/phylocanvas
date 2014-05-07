@@ -309,7 +309,6 @@ exports.getSTType = function(alleles, callback) {
 	// Prepare ST query key
 	// 'ST_' + species id + allele ids
 	var stQueryKey = 'ST_' + '1280',
-		//alleles = assembly.MLST_RESULT.alleles,
 		alleleId;
 
 	for (allele in alleles) {
@@ -330,9 +329,6 @@ exports.getSTType = function(alleles, callback) {
 		}
 	} // for
 
-	console.log('stQueryKey:');
-	console.log(stQueryKey);
-
 	// Get ST code
 	couchbaseDatabaseConnections[testWgstResourcesBucket].get(stQueryKey, function(error, stData) {
 		if (error) {
@@ -345,9 +341,6 @@ exports.getSTType = function(alleles, callback) {
 				return;
 			}
 		} // if
-
-		console.log('stData:');
-		console.dir(stData.value);
 
 		callback(null, stData.value.stType);
 	});
@@ -410,9 +403,6 @@ exports.getAssembly = function(assemblyId, callback) {
 			alleleQueryKey,
 			mlstAllelesQueryKeys = [];
 
-		// console.log('>>> alleles:');
-		// console.dir(alleles);
-
 		for (allele in alleles) {
 			if (alleles.hasOwnProperty(allele)) {
 				alleleQueryKey = alleles[allele];
@@ -422,9 +412,6 @@ exports.getAssembly = function(assemblyId, callback) {
 				}
 			}
 		}
-
-		// console.log('>>> mlstAllelesQueryKeys:');
-		// console.dir(mlstAllelesQueryKeys);
 
 		// Get MLST alleles data
 		exports.getMlstAlleles(mlstAllelesQueryKeys, function(error, mlstAlleles){
@@ -453,9 +440,6 @@ exports.getAssembly = function(assemblyId, callback) {
 					} // if
 				} // for				
 			} // if
-
-			// console.log('>>> assembly.MLST_RESULT.alleles:');
-			// console.dir(assembly.MLST_RESULT.alleles);
 
 			exports.getSTType(assembly.MLST_RESULT.alleles, function(error, stType){
 				if (error) {
@@ -500,9 +484,6 @@ exports.getMlstAlleles = function(queryKeys, callback) {
 		callback(null, {});
 		return;
 	}
-
-	console.log('>>> queryKeys:');
-	console.dir(queryKeys);
 
 	couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(queryKeys, {}, function(error, mlstAllelesData) {
 		console.log('[WGST] Got MLST alleles data:');
@@ -600,7 +581,7 @@ exports.getResistanceProfile = function(callback) {
 		return 'PAARSNP_RESULT_' + assemblyId;
 	});
 
-	console.log('[WGST] Query keys: ');
+	console.log('[WGST] Resistance profile query keys: ');
 	console.log(resistanceProfileQueryKeys);
 
 	couchbaseDatabaseConnections[testWgstBucket].getMulti(resistanceProfileQueryKeys, {}, function(error, results) {
@@ -618,7 +599,7 @@ exports.getResistanceProfile = function(callback) {
 
 // Return list of all antibiotics grouped by class name
 exports.apiGetAllAntibiotics = function(req, res) {
-	exports.getAllAntibiotics(function(error, antibiotics){
+	exports.getAllAntibiotics(function(error, antibiotics) {
 		if (error) throw error;
 
 		res.json(antibiotics);
@@ -637,7 +618,7 @@ exports.getAllAntibiotics = function(callback) {
 
 		var antibiotics = result.value.antibiotics;
 
-		console.log('[WGST] Got list of all antibiotics');
+		console.log('[WGST] Got the list of all antibiotics');
 
 		callback(null, antibiotics);
 	});
