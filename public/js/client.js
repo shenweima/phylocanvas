@@ -2205,8 +2205,7 @@ $(function(){
                 console.log(formattedAddress);
 
                 // Set first place to as input's value
-                $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-location-input').val(formattedAddress).blur();
-
+                $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-location-input').blur().val(formattedAddress);
 
                 // Set map center to selected address
                 WGST.geo.map.canvas.setCenter(place.geometry.location);
