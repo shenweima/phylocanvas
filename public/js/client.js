@@ -25,7 +25,7 @@ $(function(){
             top: 160,
             left: 180  
         },
-        representativeTree: {
+        representativeCollectionTree: {
             top: 80,
             left: 90
         },
@@ -60,6 +60,10 @@ $(function(){
     WGST.collection = {
         analysis: {
            COLLECTION_TREE: 'COLLECTION_TREE'
+        },
+        representative: {
+            tree: {},
+            metadata: {}
         }
     };
 
@@ -100,7 +104,6 @@ $(function(){
                     map: WGST.geo.map.canvas,
                     visible: false
                 });
-
                 // Bias the SearchBox results towards places that are within the bounds of the current map's viewport.
                 google.maps.event.addListener(WGST.geo.map.canvas, 'bounds_changed', function() {
                     WGST.geo.map.searchBoxBounds = WGST.geo.map.canvas.getBounds();
@@ -251,9 +254,6 @@ $(function(){
     $('.collection-view-horizontal-split').on('click', function(){
         var collectionTreePaper = $('.wgst-paper__collection-tree'),
             collectionMetadataPaper = $('.wgst-paper__collection-metadata');
-
-        // AAA
-
     });
 
     var isPanelOpened = function(panelName) {
@@ -359,6 +359,34 @@ $(function(){
     };
 
     // ============================================================
+    // Representative Collection Tree Metadata
+    // ============================================================
+
+    var getRepresentativeCollectionTreeMetadata = function(callback) {
+        console.log('[WGST] Getting representative collection tree metadata');
+        // Get representative collection metadata
+        $.ajax({
+            type: 'GET',
+            url: '/api/collection/representative/metadata',
+            datatype: 'json' // http://stackoverflow.com/a/9155217
+        })
+        .done(function(representativeCollectionMetadata, textStatus, jqXHR) {
+            console.log('[WGST] Got representative collection metadata');
+            //console.dir(representativeCollectionMetadata);
+
+            callback(null, representativeCollectionMetadata);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.error('✗ [WGST][Error] Failed to get representative collection metadata');
+            console.error(textStatus);
+            console.error(errorThrown);
+            console.error(jqXHR);
+
+            callback(textStatus, null);
+        });
+    };
+
+    // ============================================================
     // Init app
     // ============================================================    
     console.log('[WGST] Reading app config');
@@ -429,21 +457,12 @@ $(function(){
             }
         });
 
-        // Toggle map
-        $('.map-toggle-button').on('click', function(){
-            if ($(this).hasClass('active')) {
-                $('#map').hide();
-            } else {
-                $('#map').show();
-            }
-        });
-
         // Show graph
         $('.graph-toggle-button').trigger('click');
         
         // Set socket room id
         WGST.socket.connection.on('roomId', function(roomId) {
-            console.log('[WGST][Socket.io] Received room id: ' + roomId);
+            console.log('[WGST][Socket.io] Received room uuid');
             console.log('[WGST][Socket.io] Ready');
 
             // Set room id for this client
@@ -452,68 +471,24 @@ $(function(){
 
         // Get socket room id
         WGST.socket.connection.emit('getRoomId');
+
+        // Get representative collection tree metadata
+        getRepresentativeCollectionTreeMetadata(function(error, representativeCollectionTreeMatadata){
+            if (error) {
+                // Show notification
+                return;
+            }
+
+            WGST.collection.representative.metadata = representativeCollectionTreeMatadata;
+
+            openPanel('representativeCollectionTree', function(){
+                startPanelLoadingIndicator('representativeCollectionTree');
+
+                renderRepresentativeCollectionTree();
+            });
+        });
+
     })();
-
-    var createAssemblyResistanceProfilePreviewCsv = function(assemblyResistanceProfile, antibiotics) {
-        var assemblyResistanceProfileHtml = '',
-            antibioticGroup,
-            antibioticGroupName,
-            antibioticGroupHtml,
-            antibioticName,
-            // Store single antibiotic HTML string
-            antibioticHtml,
-            // Store all antibiotic HTML strings
-            antibioticsHtml,
-            antibioticResistanceState;
-
-        /*
-
-        TO DO: Try changing .antibiotic span elements to div and see if that will introduce hover right border bug,
-        when Bootstrap Tooltip is activated.
-
-        TO DO: Refactor. Use $.map()
-
-        */
-
-        // Parse each antibiotic group
-        for (antibioticGroupName in antibiotics) {
-            if (antibiotics.hasOwnProperty(antibioticGroupName)) {
-                antibioticGroup = antibiotics[antibioticGroupName];
-                antibioticGroupHtml = '<div class="antibiotic-group" data-antibiotic-group-name="' + antibioticGroupName + '">{{antibioticsHtml}}</div>';
-                antibioticsHtml = '';
-                // Parse each antibiotic
-                for (antibioticName in antibioticGroup) {
-                    if (antibioticGroup.hasOwnProperty(antibioticName)) {
-                        // Store single antibiotic HTML string
-                        antibioticHtml = '';
-                        // Antibiotic found in Resistance Profile for this assembly
-                        if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
-                            if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
-                                antibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
-                                if (antibioticResistanceState === 'RESISTANT') {
-                                    antibioticHtml = antibioticHtml + '1';
-                                } else if (antibioticResistanceState === 'SENSITIVE') {
-                                    antibioticHtml = antibioticHtml + '0';
-                                } else {
-                                    antibioticHtml = antibioticHtml + '?';
-                                }
-                            } else {
-                                antibioticHtml = antibioticHtml + 'X';
-                            }
-                        } else {
-                            antibioticHtml = antibioticHtml + 'X';
-                        }
-                        // Concatenate all antibiotic HTML strings into a single string
-                        antibioticsHtml = antibioticsHtml + antibioticHtml;
-                    } // if
-                } // for
-                antibioticGroupHtml = antibioticGroupHtml.replace(/{{antibioticsHtml}}/g, antibioticsHtml);
-                assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
-            } // if
-        } // for
-
-        return assemblyResistanceProfileHtml;
-    };
 
     var createAssemblyResistanceProfilePreviewHtml = function(assemblyResistanceProfile, antibiotics) {
         var assemblyResistanceProfileHtml = '',
@@ -576,118 +551,13 @@ $(function(){
         return assemblyResistanceProfileHtml;
     };
 
-    //var collectionReportHtml = '';
-    var assembliesResistanceProfileCsv = '';
-
-    var renderAssemblyAnalysisListCsv = function(assemblies, antibiotics) {
-
-        var assemblyId,
-            assemblyResistanceProfile,
-            assemblyResistanceProfileHtml,
-            assemblyResistanceProfileCsv,
-            assemblyTopScore,
-            assemblyLatitude,
-            assemblyLongitude,
-            assemblyCounter = 0;
-
-        // Parse each assembly object
-        for (assemblyId in assemblies) {
-            if (assemblies.hasOwnProperty(assemblyId)) {
-               
-                // Create assembly resistance profile preview html
-                assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile;
-                assemblyResistanceProfileHtml = createAssemblyResistanceProfilePreviewHtml(assemblyResistanceProfile, antibiotics);
-                assemblyResistanceProfileCsv = '\n' + assemblyId + ',' + createAssemblyResistanceProfilePreviewCsv(assemblyResistanceProfile, antibiotics);
-
-                // Calculate assembly top score
-                assemblyTopScore = calculateAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
-
-                // Get assembly latitude and longitudeß
-                assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.latitude;
-                assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.longitude;
-
-                /* Yes, this needs to be optimised: 1 DOM insertion instead of multiple */
-
-                $('.collection-assembly-list').append(
-                    // TO DO: This is not verbose enough
-                    ((assemblyCounter % 2 === 0) ? '<div class="row-stripe assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<div class="assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
-                        + '<div class="show-on-tree-radio-button assembly-list-header-tree">'
-                            + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
-                        + '</div>'
-                        + '<div class="show-on-map-checkbox assembly-list-header-map">'
-                            + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                        + '</div>'
-                        + '<div class="assembly-list-generation"></div>'
-                        + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</div>'
-                        + '<div class="assembly-list-header-nearest-representative">' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
-                        + '<div class="assembly-list-header-resistance-profile">'
-                            // Resistance profile
-                            +'<div class="assembly-resistance-profile-container">'
-                                + assemblyResistanceProfileHtml
-                            + '</div>'
-                        + '</div>'
-                    + '</div>'
-                );
-
-                $('.collection-assembly-list-full').append(
-                    // TO DO: This is not verbose enough
-                    ((assemblyCounter % 2 === 0) ? '<div class="row-stripe assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<div class="assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
-                        + '<div class="show-on-tree-radio-button assembly-list-header-tree">'
-                            + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
-                        + '</div>'
-                        + '<div class="show-on-map-checkbox assembly-list-header-map">'
-                            + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                        + '</div>'
-                        + '<div class="assembly-list-generation"></div>'
-                        + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</div>'
-                        + '<div class="assembly-list-header-nearest-representative">' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
-                        + '<div class="assembly-list-header-resistance-profile">'
-                            // Resistance profile
-                            +'<div class="assembly-resistance-profile-container">'
-                                + assemblyResistanceProfileHtml
-                            + '</div>'
-                        + '</div>'
-                    + '</div>'
-                );
-
-                // // Append to only first tbody tag (currently there more than one)
-                // $('.assemblies-summary-table tbody').eq(0).append(
-                //     // TO DO: This is not verbose enough
-                //     ((assemblyCounter % 2 === 0) ? '<tr class="row-stripe" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<tr data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
-                //         + '<td class="show-on-tree-radio-button assembly-list-header-tree">'
-                //             + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
-                //         + '</td>'
-                //         + '<td class="show-on-map-checkbox assembly-list-header-map">'
-                //             + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                //         + '</td>'
-                //         + '<td class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</td>'
-                //         + '<td class="assembly-list-header-nearest-representative">' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</td>'
-                //         + '<td class="assembly-list-header-resistance-profile">'
-                //             // Resistance profile
-                //             +'<div class="assembly-resistance-profile-container">'
-                //                 + assemblyResistanceProfileHtml
-                //             + '</div>'
-                //         + '</td>'
-                //     + '</tr>'
-                // );
-                assemblyCounter = assemblyCounter + 1;
-            } // if
-        } // for
-
-        //console.log('[WGST][DEV] Assembly resistance profile:');
-
-        //collectionReportHtml = $('.collection-assembly-list')[0];
-
-        $('.antibiotic[data-toggle="tooltip"]').tooltip();
-    };
-
-    var renderAssemblyAnalysisList = function(assemblies, antibiotics) {
+    var renderAssemblyAnalysisList = function(collectionId, antibiotics) {
         console.log('[WGST] Rendering assembly analysis list');
 
-        var assemblyId,
+        var assemblies = window.WGST.collection[collectionId].assemblies,
+            assemblyId,
             assemblyResistanceProfile,
             assemblyResistanceProfileHtml,
-            assemblyResistanceProfileCsv,
             assemblyTopScore,
             assemblyLatitude,
             assemblyLongitude,
@@ -704,10 +574,11 @@ $(function(){
                 // Create assembly resistance profile preview html
                 assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile;
                 assemblyResistanceProfileHtml = createAssemblyResistanceProfilePreviewHtml(assemblyResistanceProfile, antibiotics);
-                assemblyResistanceProfileCsv = '\n' + createAssemblyResistanceProfilePreviewCsv(assemblyResistanceProfile, antibiotics);
 
                 // Calculate assembly top score
                 assemblyTopScore = calculateAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
+
+                WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore = assemblyTopScore;
 
                 // Get assembly latitude and longitudeß
                 assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.latitude;
@@ -723,7 +594,7 @@ $(function(){
                         + '</div>'
                         //+ '<div class="assembly-list-generation"></div>'
                         + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</div>'
-                        + '<div class="assembly-list-header-nearest-representative">' + assemblyTopScore.referenceId + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
+                        + '<div class="assembly-list-header-nearest-representative">' + '<a href="#" class="show-on-representative-tree" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblyTopScore.referenceId + '</a>' + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
                         + '<div class="assembly-list-header-st-type">' + (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType) + '</div>'
                         + '<div class="assembly-list-header-resistance-profile">'
                             // Resistance profile
@@ -743,15 +614,6 @@ $(function(){
 
         $('.antibiotic[data-toggle="tooltip"]').tooltip();
     };
-
-    // $('body').on('scroll', '.collection-assembly-list', function(){
-    //     console.log('Scrolling');
-    //     if ($('.collection-assembly-list')[0].scrollHeight > $('.collection-assembly-list').outerHeight()) {
-    //         $('.collection-assembly-list-more-assemblies').show();
-    //     } else {
-    //         $('.collection-assembly-list-more-assemblies').hide();
-    //     }
-    // });
 
     var closeCollection = function(collectionId) {
         console.log('[WGST] Closing collection ' + collectionId);
@@ -833,7 +695,8 @@ $(function(){
                 sortedAssemblies.push(assemblies[leaf.id]);
             });
 
-            renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
+            //renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
+            renderAssemblyAnalysisList(collectionId, antibiotics);
 
             //renderCollectionFamily(collectionId);
 
@@ -897,35 +760,6 @@ $(function(){
     if (typeof window.WGST.requestedCollectionId !== 'undefined') {
         getCollection(window.WGST.requestedCollectionId);
     }
-
-    // // Map
-    // WGST.geo = {
-    //     map: {},
-    //     mapOptions: {
-    //         zoom: 5,
-    //         center: new google.maps.LatLng(48.6908333333, 9.14055555556), // new google.maps.LatLng(51.511214, -0.119824),
-    //         mapTypeId: google.maps.MapTypeId.ROADMAP,
-    //         minZoom: 2,
-    //         maxZoom: 6
-    //     },
-    //     markers: {
-    //         assembly: {},
-    //         metadata: {},
-    //         representativeTree: []
-    //     },
-    //     markerBounds: new google.maps.LatLngBounds(),
-    //     //geocoder: new google.maps.Geocoder(),
-    //     //metadataAutocomplete: {}, // Store Google Autocomplete object for each dropped file
-    //     metadataSearchBox: {}, // Store Google Autocomplete object for each dropped file
-    //     init: function() {
-    //         this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions);
-    //         this.markers.metadata = new google.maps.Marker({
-    //             position: new google.maps.LatLng(51.511214, -0.119824),
-    //             map: WGST.geo.map,
-    //             visible: false
-    //         });
-    //     }
-    // };
 
     // var loadRepresentativeTree = function() {
     //     console.log('[WGST] Getting representative tree');
@@ -1003,6 +837,7 @@ $(function(){
         var assemblies = window.WGST.collection[collectionId].assemblies;
         // Uncheck all radio buttons
         $('.collection-assembly-list .assembly-list-item [type="radio"]').prop('checked', false);
+        // Add/Remove row highlight
         $.each(assemblies, function(assemblyId, assembly) {
             if ($.inArray(assemblyId, selectedAssemblyIds.split(',')) !== -1) {
                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').addClass('row-selected');
@@ -1012,9 +847,14 @@ $(function(){
                 //$('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="radio"]').prop('checked', false);
             }
         });
-        if (selectedAssemblyIds.split(',').length > 2) {
-            $('.tree-controls-draw-subtree').attr('data-selected-node', selectedAssemblyIds.split(',')[0]);
+        // If only one assembly was selected then check radiobox
+        if (selectedAssemblyIds.split(',').length === 1) {
+            $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + selectedAssemblyIds + '"] [type="radio"]').prop('checked', true);
         }
+
+        // if (selectedAssemblyIds.split(',').length > 2) {
+        //     $('.tree-controls-draw-subtree').attr('data-selected-node', selectedAssemblyIds.split(',')[0]);
+        // }
     };
 
     $('body').on('mouseenter', '.glyphicon-leaf', function(){
@@ -1033,6 +873,7 @@ $(function(){
         $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
     });
 
+    // DEPRECATED
     var renderCollectionFamily = function(collectionId) {
         var tree = window.WGST.collection[collectionId].tree.canvas;
 
@@ -1089,7 +930,7 @@ $(function(){
         tree.parseNwk(window.WGST.collection[collectionId].tree.data);
         tree.treeType = 'rectangular';
         tree.showLabels = false;
-        tree.baseNodeSize = 2;
+        tree.baseNodeSize = 8;
         tree.setTextSize(20);
         //tree.selectedNodeSizeIncrease = 0.5;
         tree.selectedColor = '#0059DE';
@@ -1121,9 +962,6 @@ $(function(){
 
         window.WGST.collection[collectionId].tree.leavesOrder = leaves;
 
-        // console.log('Sorted:');
-        // console.dir(window.WGST.collection[collectionId].tree.leavesOrder);
-
         // ====================================================================================================================
         // For dev only
         // ====================================================================================================================
@@ -1141,167 +979,30 @@ $(function(){
         console.log('» Uncomment to see.');
         //console.dir(newickString);
 
-        //collectionReportHtml = collectionReportHtml + '<textarea name="textarea" rows="10" cols="50">' + newickString + '</textarea>';
-
         // ====================================================================================================================
-
-        // console.debug('The tree object:');
-        // console.dir(window.WGST.collection[collectionId].tree.data);
-
-        // $.each(leaves, function(leafCounter, leaf){
-        //     window.WGST.collection[collectionId].tree.leavesOrder.push(leaf.id);
-        // });
-
-//         var branches = tree.branches;
-
-// $('.collection-assembly-list .assembly-list-family').append('<p>OK</p>');
-// $('.collection-assembly-list .assembly-list-item').append('<p>OK</p>');
-
-
-//         $.each(branches, function(branchId, branch){
-
-// $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-family').append('OK');
-
-//             var childIds = branch.getChildIds();
-
-//             console.debug('childIds:');
-//             console.dir(childIds.split(','));
-
-//             $.each(childIds.split(','), function(childIdCounter, childId){
-//                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + childId + '"] .assembly-list-family').append(
-//                     //'<div>&#169; OK</div>'
-//                     '<span class="glyphicon glyphicon-minus"></span>'
-//                     );
-//             });
-//         });
-
-        
-
-        //AAA
-
-        // $.each(tree.leaves, function(leafCounter, leaf){
-        //     // console.log('leaf x: ' + leaf.centerx);
-        //     // console.log('leaf y: ' + leaf.centery);
-        //     // console.log('canvasTopLeft.left: ' + canvasTopLeft.left);
-        //     // console.log('canvasBottomRight.right: ' + canvasBottomRight.right);
-        //     // console.log('canvasTopLeft.top: ' + canvasTopLeft.top);
-        //     // console.log('canvasBottomRight.bottom: ' + canvasBottomRight.bottom);
-        //     // console.dir(leaf);
-
-        //     var leafIdHtml = $('<div class="collection-tree-leaf-metadata" data-assembly-id="' + leaf.id + '">' + leaf.id + '</div>');
-        //     leafIdHtml.css('position', 'absolute');
-        //     leafIdHtml.css('top', tree.reverseTranslateClickY(leaf.centery) - 10);
-        //     leafIdHtml.css('left', tree.reverseTranslateClickX(leaf.centerx) + 15);
-
-        //     $('.wgst-panel-body > .phylocanvas').append(leafIdHtml);
-
-        //     //AAA
-        // });
-
-        //console.debug('window.WGST.collection[collectionId]:');
-        //console.dir(window.WGST.collection[collectionId]);
-
-        // ==============================
-        // Prepare metadata
-        // ==============================
-
-        // Create representative tree markers
-        // var metadataCounter = window.WGST.collection[collectionId].tree.metadata.length,
-        //     metadata = window.WGST.collection[collectionId].tree.metadata,
-        //     accession,
-        //     marker;
-
-        // for (; metadataCounter !== 0;) {
-        //     // Decrement counter
-        //     metadataCounter = metadataCounter - 1;
-
-        //     console.log('[WGST] Collection tree metadata for ' + metadata[metadataCounter] + ':');
-        //     console.dir(metadata[metadataCounter]);
-
-        //     accession = metadata[metadataCounter].accession;
-
-        //     // Set collection tree metadata
-        //     window.WGST.collection[collectionId].tree.metadata[accession] = metadata[metadataCounter];
-        // } // for
-
-
-
-
-
-        // ==============================
-        // Load reference tree metadata
-        // ==============================
-
-        // console.log('[WGST] Getting ' + collectionId + ' collection tree metadata');
-
-        // $.ajax({
-        //     type: 'POST',
-        //     url: '/collection/tree/metadata',
-        //     datatype: 'json', // http://stackoverflow.com/a/9155217
-        //     data: {
-        //         collectionId: collectionId
-        //     }
-        // })
-        // .done(function(data, textStatus, jqXHR) {
-        //     console.log('[WGST] Got ' + collectionId + ' collection tree metadata');
-        //     console.dir(data.value);
-
-        //     // Create representative tree markers
-        //     var metadataCounter = data.value.metadata.length,
-        //         metadata = data.value.metadata,
-        //         accession,
-        //         marker;
-
-        //     for (; metadataCounter !== 0;) {
-        //         // Decrement counter
-        //         metadataCounter = metadataCounter - 1;
-
-        //         console.log('[WGST] Collection tree metadata for ' + metadata[metadataCounter] + ':');
-        //         console.dir(metadata[metadataCounter]);
-
-        //         accession = metadata[metadataCounter].accession;
-
-        //         // Set collection tree metadata
-        //         window.WGST.collection[collectionId].tree.metadata[accession] = metadata[metadataCounter];
-        //     } // for
-        // })
-        // .fail(function(jqXHR, textStatus, errorThrown) {
-        //     console.log('[WGST][ERROR] Failed to get ' + collectionId + ' collection tree metadata');
-        //     console.error(textStatus);
-        //     console.error(errorThrown);
-        //     console.error(jqXHR);
-        // });
     };
 
     // Init map
     WGST.geo.map.init();
 
-    // Handle Google Maps ready
-    // google.maps.event.addListenerOnce(WGST.geo.map.canvas, 'idle', function() {
+    var deselectAllTreeNodes = function(collectionId) {
+        var tree = window.WGST.collection[collectionId].tree.canvas;
 
-    //     // Open representative tree panel
-    //     // openPanel('representativeTree', function(){
-
-    //     //     // Init representative tree container
-    //     //     WGST.representativeTree = {
-    //     //         tree: new PhyloCanvas.Tree(document.getElementById('phylocanvas')),
-    //     //         metadata: {}
-    //     //     };
-
-    //     //     // Load representative tree
-    //     //     loadRepresentativeTree();
-    //     // });
-
-    // });
+        // Workaround
+        // TO DO: Refactor using official API
+        tree.selectNodes('');
+    };
 
     $('.tree-controls-select-none').on('click', function() {
 
-        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
-            tree = window.WGST.collection[collectionId].tree.canvas;
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+            //tree = window.WGST.collection[collectionId].tree.canvas;
+
+        deselectAllTreeNodes(collectionId);
 
         // This is a workaround
         // TO DO: Refactor using official API
-        tree.selectNodes('');
+        //tree.selectNodes('');
 
         //showRepresentativeTreeNodesOnMap('');
     });
@@ -1469,72 +1170,6 @@ $(function(){
         //     window.WGST.geo.map.setZoom(5);
         // }
     };
-
-    // var showRepresentativeTreeNodesOnMap = function(nodeIds) {
-
-    //     var existingMarkers = window.WGST.geo.markers.representativeTree,
-    //         existingMarker;
-
-    //     // Remove existing markers
-    //     for (existingMarker in existingMarkers) {
-    //         if (existingMarkers.hasOwnProperty(existingMarker)) {
-    //             existingMarkers[existingMarker].setMap(null);
-    //         }
-    //     }
-
-    //     // Reset marker bounds
-    //     window.WGST.geo.markerBounds = new google.maps.LatLngBounds();
-
-    //     if (typeof nodeIds === 'string' && nodeIds.length > 0) {
-    //         console.log('[WGST] Selected representative tree nodes: ' + nodeIds);
-
-    //         // Create representative tree markers
-    //         var selectedNodeIds = nodeIds.split(','),
-    //             nodeCounter = selectedNodeIds.length,
-    //             accession,
-    //             metadata;
-
-    //         // For each node create representative tree marker
-    //         for (; nodeCounter !== 0;) {
-    //             // Decrement counter
-    //             nodeCounter = nodeCounter - 1;
-
-    //             accession = selectedNodeIds[nodeCounter];
-
-    //             metadata = window.WGST.representativeTree[accession];
-
-    //             // Check if both latitude and longitude provided
-    //             if (metadata.latitude && metadata.longitude) {
-
-    //                 console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
-    //                 console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
-
-    //                 var marker = new google.maps.Marker({
-    //                     position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
-    //                     map: window.WGST.geo.map,
-    //                     icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-    //                     // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
-    //                     // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
-    //                     optimized: true
-    //                 });
-    //                 // Set marker
-    //                 window.WGST.geo.markers.representativeTree[accession] = marker;
-    //                 // Extend markerBounds with each metadata marker
-    //                 window.WGST.geo.markerBounds.extend(marker.getPosition());
-    //             }
-    //         } // for
-
-    //         // Pan to marker bounds
-    //         window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
-    //         // Set the map to fit marker bounds
-    //         window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
-    //     } else { // No nodes were selected
-    //         console.log('[WGST] No selected nodes');
-    //         // Show Europe
-    //         window.WGST.geo.map.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
-    //         window.WGST.geo.map.setZoom(5);
-    //     }
-    // };
 
         // Array of objects that store content of FASTA file and user-provided metadata
     var fastaFilesAndMetadata = {},
@@ -3181,6 +2816,7 @@ $(function(){
         // Show collection tree panel
         openPanel('collectionTree');
         showPanel('collectionTree');
+        showPanelBodyContent('collectionTree');
         bringPanelToTop('collectionTree');
 
         //======================================================
@@ -3201,8 +2837,6 @@ $(function(){
         //         checkedAssemblyNodesString = $(this).attr('data-assembly-id');
         //     }
         // });
-
-
 
         // //console.debug('checkedAssemblyNodesString: ' + checkedAssemblyNodesString);
         // //console.dir(window.WGST.collection[collectionId].tree.canvas);
@@ -3540,6 +3174,25 @@ $(function(){
 
     });
 
+    $('.wgst-panel__collection').on('click', '.show-on-representative-tree', function(event){
+
+        openRepresentativeCollectionTree();
+
+        // endPanelLoadingIndicator('representativeCollectionTree');
+        // openPanel('representativeCollectionTree');
+        // showPanel('representativeCollectionTree');
+        // showPanelBodyContent('representativeCollectionTree');
+        // bringPanelToTop('representativeCollectionTree');
+
+        var collectionId = $(this).closest('.wgst-panel__collection').attr('data-collection-id'),
+            assemblyId = $(this).attr('data-assembly-id'),
+            referenceId = window.WGST.collection[collectionId].assemblies[assemblyId].FP_COMP.topScore.referenceId;
+
+        window.WGST.collection.representative.tree.canvas.selectNodes(referenceId);
+
+        event.preventDefault();
+    });
+
     // Open Assembly from Collection list
     $('.wgst-panel__collection, .wgst-panel__assembly-upload-progress').on('click', '.open-assembly-button', function(e){
 
@@ -3805,9 +3458,209 @@ $(function(){
         });
     };
 
+    $('.collection-controls-show-on-representative-tree').on('click', function(){
+        var collectionId = $(this).closest('.wgst-panel__collection').attr('data-collection-id'),
+            nearestRepresentative = WGST.collection[collectionId];
+
+            console.dir(nearestRepresentative);
+    });
+
+    var renderRepresentativeCollectionTree = function() {
+        console.log('[WGST] Rendering representative collection tree');
+
+        var collectionId = 'representative';//WGST.settings.representativeCollectionId;
+
+        // Remove previosly rendered collection tree
+        $('.wgst-panel__representative-collection-tree .phylocanvas').html('');
+        // Attach collection id
+        $('.wgst-panel__representative-collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+
+        window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
+        window.WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
+        window.WGST.collection.representative.tree.canvas.treeType = 'rectangular';
+        //window.WGST.collection.representative.tree.showLabels = false;
+        window.WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
+        window.WGST.collection.representative.tree.canvas.setTextSize(20);
+        window.WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
+        window.WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
+        window.WGST.collection.representative.tree.canvas.rightClickZoom = true;
+    };
+
+    var openRepresentativeCollectionTree = function() {
+        console.log('[WGST] Opening representative collection tree');
+
+        // TO DO: Figure out whether representative tree is just another collection or it's a completely separate entity.
+        // Currently treating it like just another collection.
+
+        var collectionId = 'representative';//WGST.settings.representativeCollectionId;
+
+        // ----------------------------------------
+        // Init panels
+        // ----------------------------------------
+        // Set collection id to representativeCollectionTree panel
+        $('.wgst-panel__representative-collection-tree').attr('data-collection-id', collectionId);
+
+        // openPanel('representativeCollectionTree', function(){
+        //     startPanelLoadingIndicator('representativeCollectionTree');
+        // });
+
+        openPanel('representativeCollectionTree');
+        endPanelLoadingIndicator('representativeCollectionTree');
+        showPanelBodyContent('representativeCollectionTree');
+        showPanel('representativeCollectionTree');
+        bringPanelToTop('representativeCollectionTree');
+
+        // getRepresentativeCollectionTreeMetadata(function(error, representativeCollectionMetadata){
+        //     if (error) {
+        //         // Show error notification
+        //         return;
+        //     }
+           
+        //     renderRepresentativeCollectionTree();
+
+        //     // // Init collection tree
+        //     // window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
+        //     // // Render collection tree
+        //     // //renderCollectionTree(collectionId);
+
+        //     // window.WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
+        //     // window.WGST.collection.representative.tree.canvas.treeType = 'rectangular';
+        //     // //window.WGST.collection.representative.tree.showLabels = false;
+        //     // window.WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
+        //     // window.WGST.collection.representative.tree.canvas.setTextSize(24);
+        //     // window.WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
+        //     // window.WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
+        //     // window.WGST.collection.representative.tree.canvas.rightClickZoom = true;
+        //     // //window.WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
+
+        //     // endPanelLoadingIndicator('representativeCollectionTree');
+        //     // showPanelBodyContent('representativeCollectionTree');
+        //     // showPanel('representativeCollectionTree');
+        // });
+
+        // // Get representative collection metadata
+        // $.ajax({
+        //     type: 'GET',
+        //     url: '/api/collection/representative/metadata',
+        //     datatype: 'json' // http://stackoverflow.com/a/9155217
+        // })
+        // .done(function(representativeCollectionMetadata, textStatus, jqXHR) {
+        //     console.log('[WGST] Got representative collection metadata');
+        //     console.dir(representativeCollectionMetadata);
+
+        //     // ----------------------------------------
+        //     // Render collection tree
+        //     // ----------------------------------------
+        //     // Remove previosly rendered collection tree
+        //     $('.wgst-panel__representative-collection-tree .phylocanvas').html('');
+        //     // Attach collection id
+        //     $('.wgst-panel__representative-collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+        //     // Init collection tree
+        //     window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
+        //     // Render collection tree
+        //     //renderCollectionTree(collectionId);
+
+        //     window.WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
+        //     window.WGST.collection.representative.tree.canvas.treeType = 'rectangular';
+        //     //window.WGST.collection.representative.tree.showLabels = false;
+        //     window.WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
+        //     window.WGST.collection.representative.tree.canvas.setTextSize(24);
+        //     window.WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
+        //     window.WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
+        //     window.WGST.collection.representative.tree.canvas.rightClickZoom = true;
+        //     //window.WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
+
+        //     endPanelLoadingIndicator('representativeCollectionTree');
+        //     showPanelBodyContent('representativeCollectionTree');
+        //     showPanel('representativeCollectionTree');
+        // })
+        // .fail(function(jqXHR, textStatus, errorThrown) {
+        //     console.error('✗ [WGST][Error] Failed to get representative collection metadata');
+        //     console.error(textStatus);
+        //     console.error(errorThrown);
+        //     console.error(jqXHR);
+        // });
+
+            //window.WGST.collection.representative.tree.data = data.collection.tree;
+            //window.WGST.collection[collectionId].assemblies = data.collection.assemblies;
+
+            // // ----------------------------------------
+            // // Render collection tree
+            // // ----------------------------------------
+            // // Remove previosly rendered collection tree
+            // $('.wgst-panel__collection-tree .phylocanvas').html('');
+            // // Attach collection id
+            // $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+            // // Init collection tree
+            // window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+            // // Render collection tree
+            // renderCollectionTree(collectionId);
+
+            // endPanelLoadingIndicator('collectionTree');
+            // //showPanelBodyContent('collectionTree');
+
+        // ----------------------------------------
+        // Load representative collection tree
+        // ----------------------------------------
+        // AAA
+
+
+        // window.WGST.representativeTree.tree.load('/data/reference_tree.nwk');
+        // window.WGST.representativeTree.tree.treeType = 'rectangular';
+        // //window.WGST.representativeTree.tree.showLabels = false;
+        // window.WGST.representativeTree.tree.baseNodeSize = 0.5;
+        // window.WGST.representativeTree.tree.setTextSize(24);
+        // window.WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
+        // window.WGST.representativeTree.tree.selectedColor = '#0059DE';
+        // window.WGST.representativeTree.tree.rightClickZoom = true;
+        // window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
+
+        // // ==============================
+        // // Load reference tree metadata
+        // // ==============================
+        // console.log('[WGST] Getting representative tree metadata');
+
+        // $.ajax({
+        //     type: 'POST',
+        //     url: '/representative-tree-metadata/',
+        //     datatype: 'json', // http://stackoverflow.com/a/9155217
+        //     data: {}
+        // })
+        // .done(function(data, textStatus, jqXHR) {
+        //     console.log('[WGST] Got representative tree metadata');
+        //     console.dir(data.value);
+
+        //     // Create representative tree markers
+        //     var metadataCounter = data.value.metadata.length,
+        //         metadata = data.value.metadata,
+        //         accession,
+        //         marker;
+
+        //     for (; metadataCounter !== 0;) {
+        //         // Decrement counter
+        //         metadataCounter = metadataCounter - 1;
+
+        //         //console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
+        //         //console.log(metadata[metadataCounter]);
+
+        //         accession = metadata[metadataCounter].accession;
+
+        //         // Set representative tree metadata
+        //         window.WGST.representativeTree[accession] = metadata[metadataCounter];
+        //     } // for
+        // })
+        // .fail(function(jqXHR, textStatus, errorThrown) {
+        //     console.log('[WGST][ERROR] Failed to get representative tree metadata');
+        //     console.error(textStatus);
+        //     console.error(errorThrown);
+        //     console.error(jqXHR);
+        // });
+
+
+    };
+
     $('.show-representative-collection button').on('click', function(){
-        // Get representative collection
-        getCollection(WGST.settings.representativeCollectionId);
+        openRepresentativeCollectionTree();
     });
 
     // ============================================================
@@ -3823,6 +3676,9 @@ $(function(){
                 if (panelName === 'collection') {
                     var collectionId = panel.attr('data-collection-id');
                     closeCollection(collectionId);
+                } else if (panelName === 'representativeCollectionTree') {
+                    var collectionId = panel.attr('data-collection-id');
+                    deselectAllTreeNodes(collectionId);
                 }
             });
         } // if
@@ -3866,46 +3722,6 @@ $(function(){
         for (var i = 0; i < leaves.length; i++) {
             leaf = leaves[i];
 
-        //$.each(leaves, function(leafCounter, leaf){
-            // console.log('leaf x: ' + leaf.centerx);
-            // console.log('leaf y: ' + leaf.centery);
-            // console.log('canvasTopLeft.left: ' + canvasTopLeft.left);
-            // console.log('canvasBottomRight.right: ' + canvasBottomRight.right);
-            // console.log('canvasTopLeft.top: ' + canvasTopLeft.top);
-            // console.log('canvasBottomRight.bottom: ' + canvasBottomRight.bottom);
-            // console.dir(leaf);
-
-            // var leafIdHtml = $('<div>' + leaf.id + '</div>');
-            // leafIdHtml.css('position', 'absolute');
-            
-            // var leafHtml = $('.collection-tree-leaf-metadata[data-assembly-id="' + leaf.id + '"]');
-
-            // leafHtml.css('top', parseFloat(tree.reverseTranslateClickY(leaf.centery) - 10));
-            // leafHtml.css('left', parseFloat(tree.reverseTranslateClickX(leaf.centerx) + 15));
-
-            // canvas.after(leafIdHtml);
-
-
-            // Move html elements with metadata
-            //$('[data-assembly-id="' + leaf.id + '"]').css('top', tree.reverseTranslateClickY(leaf.centery) - 10);
-            //$('[data-assembly-id="' + leaf.id + '"]').css('left', tree.reverseTranslateClickX(leaf.centerx) + 15);
-
-            // var leafHtml = $('.collection-tree-leaf-metadata[data-assembly-id="' + leaf.id + '"]');
-
-            // var leafTop = tree.reverseTranslateClickY(leaf.centery) - 10,
-            //     leafLeft = tree.reverseTranslateClickX(leaf.centerx) + 15;
-
-            // console.debug('leafHtml.top: ' + leafHtml.offset().top);
-            // console.debug('leafHtml.top: ' + leafHtml.offset().top);
-
-            // $('.collection-tree-leaf-metadata').css('color', 'red');
-            // leafHtml.css('transform', 'translateX(' + parseFloat(leaf.centerx) + 'px)');
-            // //leafHtml.css('-moz-transform', 'translateX(' + parseFloat(tree.reverseTranslateClickX(leaf.centerx) + 15) + 'px)');
-            // leafHtml.css('transform', 'translateY(' + parseFloat(leaf.centery) + 'px)');
-            // //leafHtml.css('-moz-transform', 'translateY(' + tree.reverseTranslateClickX(leaf.centerx) + 15) + 'px)');
-
-            // //console.debug('translate(' + parseFloat(tree.reverseTranslateClickX(leaf.centerx) + 15) + 'px, ' + parseFloat(tree.reverseTranslateClickY(leaf.centery) - 10) + 'px)');
-
             if (leaf.centerx >= canvasTopLeft.left 
                 && leaf.centerx <= canvasBottomRight.right
                 && leaf.centery >= canvasTopLeft.top
@@ -3918,22 +3734,16 @@ $(function(){
 
                 visibleAssemblyListItemCounter = visibleAssemblyListItemCounter + 1;
             } // if
-
-        //});
-        }
+        } // for
 
         console.log('visibleAssemblyListItemCounter: ' + visibleAssemblyListItemCounter);
 
-        //Scrolling hint
+        // Scrolling hint
         if (visibleAssemblyListItemCounter > 7) {
             $('.collection-assembly-list-more-assemblies').show();
-            //$('.collection-assembly-list-all-assemblies').show();
         } else {
-            //$('.collection-assembly-list-all-assemblies').hide();
             $('.collection-assembly-list-more-assemblies').hide();
         }
-
-        //collectionAssemblyList.remove();
 
         // Remove existing assemblies from assembly list
         var myNode = collectionAssemblyList[0];
@@ -3942,16 +3752,9 @@ $(function(){
         }
 
         // Append new assemblies to assembly list
-        //myNode.appendChild(updatedAssemblyListHtml[0]);
         myNode.appendChild(documentFragment);
 
         collectionAssemblyList.find('.antibiotic[data-toggle="tooltip"]').tooltip();
-
-        //collectionAssemblyList.append(updatedAssemblyListHtml);
-        //$('.collection-assembly-list-headers').after($('<div class="collection-assembly-list"></div>').append(updatedAssemblyListHtml));
-        //$('.wgst-panel__collection .collection-assembly-list').append(updatedAssemblyListHtml);
-        // $('.wgst-panel__collection .collection-assembly-list').html('');
-        // $('.wgst-panel__collection .collection-assembly-list').append(updatedAssemblyListHtml);
     };
 
     $('.collection-assembly-list-view-all-assemblies').on('click', function(e){

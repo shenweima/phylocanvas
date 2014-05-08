@@ -31,6 +31,9 @@
         <link href='/css/dev.css' rel='stylesheet' type='text/css'>
     </head>
     <body>
+
+        <div class="error"></div>
+
         <div class="map"></div>
 
         <nav class="navigation">
@@ -42,10 +45,6 @@
               </span>
             </div><!-- /input-group -->
           </div><!-- /.map-search -->
-
-          <div class="add-data">
-            <button class="btn btn-info" type="button" data-toggle="button"><span class="glyphicon glyphicon-plus"></span></button>
-          </div><!-- /.add-data -->
 
           <div class="data-filters">
             <div class="btn-group" data-toggle="buttons">
@@ -72,27 +71,6 @@
               -->
             </div>
           </div><!-- /.data-filters -->
-
-          <div class="user-account">
-            <!-- Single button -->
-            <div class="btn-group">
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                <span class="glyphicon glyphicon-user"></span> <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="#">My assemblies</a></li>
-                <li><a href="#">My collections</a></li>
-                <li><a href="#">Profile</a></li>
-                <li class="divider"></li>
-                <li><a href="#">Save Session</a></li>
-                <li><a href="#">Sign Out</a></li>
-              </ul>
-            </div>
-          </div><!-- /.user-account -->
-
-          <div class="settings">
-            <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-cog"></span></button>
-          </div><!-- /.settings -->
 
           <div class="show-representative-collection">
             <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-tree-conifer"></span></button>
@@ -380,6 +358,46 @@
                 </div>
                 -->
 
+              </div>
+              <div class="phylocanvas"></div>
+
+            </div><!-- /.wgst-panel-body-content --> 
+          </article><!-- /.wgst-panel-body -->
+          <footer class="wgst-panel-footer wgst-draggable-handle">
+          </footer><!-- /.wgst-panel-footer -->
+        </div><!-- /.wgst-panel.tree-panel -->
+
+
+
+
+
+
+
+
+
+        <!-- Representative collection tree -->
+        <div class="wgst-panel wgst-panel__representative-collection-tree wgst-panel--active wgst-draggable" data-panel-name="representativeCollectionTree" data-collection-id="">
+          <header class="wgst-panel-header wgst-draggable-handle">
+            <h4 class="header-title">Representative Collection Tree</h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
+          </header>
+          <article class="wgst-panel-body">
+            <div class="wgst-panel-loading"><div class="loading"></div></div>
+            <div class="wgst-panel-body-content">
+              
+              <div class="tree-controls">
+
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-default tree-controls-show-labels">Show labels</button>
+                  <button type="button" class="btn btn-sm btn-default tree-controls-hide-labels">Hide labels</button>
+                </div>
+                <!--
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-default tree-controls-match-assembly-list">Match assembly list</button>
+                </div>
+                -->
               </div>
               <div class="phylocanvas"></div>
 

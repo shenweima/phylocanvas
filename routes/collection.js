@@ -460,6 +460,22 @@ exports.apiGetCollection = function(req, res) {
 	});
 };
 
+exports.apiGetRepresentativeCollection = function(req, res) {
+	console.log('[WGST] Getting representative collection');
+
+	// Get list of assemblies
+	couchbaseDatabaseConnections[testWgstResourcesBucket].get('REP_METADATA_1280', function(err, representativeCollectionMetadata) {
+		if (err) throw err;
+
+		representativeCollectionMetadata = representativeCollectionMetadata.value;
+
+		console.log('[WGST] Got representative collection metadata');
+		console.dir(representativeCollectionMetadata);
+
+		res.json(representativeCollectionMetadata);
+	});
+};
+
 // exports.apiGetCollection = function(req, res) {
 
 // 	var collectionId = req.body.collectionId,

@@ -57,8 +57,6 @@ if ('development' == app.get('env')) {
 // App home route
 app.get('/', routes.index);
 
-app.post('/representative-tree-metadata', routes.getRepresentativeTreeMetadata);
-
 // User routes
 app.get('/users', user.list);
 app.get('/users/name/:name', user.name);
@@ -66,6 +64,8 @@ app.get('/users/name/:name', user.name);
 // Collection routes
 app.post('/collection/', collection.apiGetCollection);
 app.post('/collection/add', collection.add);
+//app.get('/collection/representative', routes.getRepresentativeTreeMetadata);
+app.get('/api/collection/representative/metadata', collection.apiGetRepresentativeCollection);
 app.get('/collection/:id', collection.get);
 
 // Assembly routes
