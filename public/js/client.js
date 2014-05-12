@@ -938,7 +938,7 @@ $(function(){
 
         tree.parseNwk(window.WGST.collection[collectionId].tree.data);
         tree.treeType = 'rectangular';
-        tree.showLabels = false;
+        tree.showLabels = true;
         tree.baseNodeSize = 0.8;
         tree.setTextSize(0.8);
         tree.selectedNodeSizeIncrease = 0.5;
@@ -3474,6 +3474,22 @@ $(function(){
             console.dir(nearestRepresentative);
     });
 
+    $('.tree-controls-decrease-node').on('click', function(){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+        var currentNodeTextSize = window.WGST.collection[collectionId].tree.canvas.textSize;
+        window.WGST.collection[collectionId].tree.canvas.setTextSize(currentNodeTextSize - 3);
+        // window.WGST.collection[collectionId].tree.canvas.baseNodeSize(currentNodeTextSize - 2);
+        // window.WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeTextSize - 2);
+    });
+
+    $('.tree-controls-increase-node').on('click', function(){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+        var currentNodeTextSize = window.WGST.collection[collectionId].tree.canvas.textSize;
+        window.WGST.collection[collectionId].tree.canvas.setTextSize(currentNodeTextSize + 3);
+        // window.WGST.collection[collectionId].tree.canvas.baseNodeSize(currentNodeTextSize + 2);
+        // window.WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeTextSize + 2);
+    });
+
     var renderRepresentativeCollectionTree = function() {
         console.log('[WGST] Rendering representative collection tree');
 
@@ -3487,9 +3503,9 @@ $(function(){
         window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
         window.WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
         window.WGST.collection.representative.tree.canvas.treeType = 'rectangular';
-        //window.WGST.collection.representative.tree.showLabels = false;
-        window.WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
-        window.WGST.collection.representative.tree.canvas.setTextSize(20);
+        window.WGST.collection.representative.tree.showLabels = true;
+        window.WGST.collection.representative.tree.canvas.baseNodeSize = 1;
+        window.WGST.collection.representative.tree.canvas.setTextSize(1);
         window.WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
         window.WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
         window.WGST.collection.representative.tree.canvas.rightClickZoom = true;
