@@ -623,7 +623,10 @@ $(function(){
         $('.wgst-panel__collection .collection-assembly-list').html('');
 
         closePanel(['collection', 'collectionTree'], function(){
+            // Delete collection object
             delete window.WGST.collection[collectionId];
+            // Change URL
+            window.history.replaceState('Object', 'WGST Collection', '');
         });
     };
 
@@ -936,9 +939,9 @@ $(function(){
         tree.parseNwk(window.WGST.collection[collectionId].tree.data);
         tree.treeType = 'rectangular';
         tree.showLabels = false;
-        tree.baseNodeSize = 8;
+        tree.baseNodeSize = 0.5;
         tree.setTextSize(20);
-        //tree.selectedNodeSizeIncrease = 0.5;
+        tree.selectedNodeSizeIncrease = 0.5;
         tree.selectedColor = '#0059DE';
         //tree.rightClickZoom = true;
 
