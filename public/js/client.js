@@ -555,6 +555,7 @@ $(function(){
         console.log('[WGST] Rendering assembly analysis list');
 
         var assemblies = window.WGST.collection[collectionId].assemblies,
+            sortedAssemblyIds = window.WGST.collection[collectionId].sortedAssemblyIds,
             assemblyId,
             assemblyResistanceProfile,
             assemblyResistanceProfileHtml,
@@ -568,45 +569,46 @@ $(function(){
             assemblyListItemHtml,
             assemblyListItems = document.createDocumentFragment();
 
-        // Parse each assembly object
-        for (assemblyId in assemblies) {
-            if (assemblies.hasOwnProperty(assemblyId)) {               
-                // Create assembly resistance profile preview html
-                assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile;
-                assemblyResistanceProfileHtml = createAssemblyResistanceProfilePreviewHtml(assemblyResistanceProfile, antibiotics);
+        // Render assemblies according to the sorting order
+        for (;assemblyCounter < sortedAssemblyIds.length;) {            
+        
+            assemblyId = sortedAssemblyIds[assemblyCounter];
+             
+            // Create assembly resistance profile preview html
+            assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile;
+            assemblyResistanceProfileHtml = createAssemblyResistanceProfilePreviewHtml(assemblyResistanceProfile, antibiotics);
 
-                // Calculate assembly top score
-                assemblyTopScore = calculateAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
+            // Calculate assembly top score
+            assemblyTopScore = calculateAssemblyTopScore(assemblies[assemblyId]['FP_COMP'].scores);
 
-                WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore = assemblyTopScore;
+            WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore = assemblyTopScore;
 
-                // Get assembly latitude and longitudeß
-                assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.latitude;
-                assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.longitude;
+            // Get assembly latitude and longitudeß
+            assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.latitude;
+            assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.longitude;
 
-                assemblyListItemHtml = 
-                    $(((assemblyCounter % 2 === 0) ? '<div class="row-stripe assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<div class="assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
-                        + '<div class="show-on-tree-radio-button assembly-list-header-tree">'
-                            + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
+            assemblyListItemHtml = 
+                $(((assemblyCounter % 2 === 0) ? '<div class="row-stripe assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<div class="assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
+                    + '<div class="show-on-tree-radio-button assembly-list-header-tree">'
+                        + '<input type="radio" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" name="optionsRadios" value="' + assemblyTopScore.referenceId + '">'
+                    + '</div>'
+                    + '<div class="show-on-map-checkbox assembly-list-header-map">'
+                        + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
+                    + '</div>'
+                    //+ '<div class="assembly-list-generation"></div>'
+                    + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</div>'
+                    + '<div class="assembly-list-header-nearest-representative">' + '<a href="#" class="show-on-representative-tree" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblyTopScore.referenceId + '</a>' + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
+                    + '<div class="assembly-list-header-st-type">' + (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType) + '</div>'
+                    + '<div class="assembly-list-header-resistance-profile">'
+                        // Resistance profile
+                        +'<div class="assembly-resistance-profile-container">'
+                            + assemblyResistanceProfileHtml
                         + '</div>'
-                        + '<div class="show-on-map-checkbox assembly-list-header-map">'
-                            + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
-                        + '</div>'
-                        //+ '<div class="assembly-list-generation"></div>'
-                        + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</div>'
-                        + '<div class="assembly-list-header-nearest-representative">' + '<a href="#" class="show-on-representative-tree" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblyTopScore.referenceId + '</a>' + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
-                        + '<div class="assembly-list-header-st-type">' + (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType) + '</div>'
-                        + '<div class="assembly-list-header-resistance-profile">'
-                            // Resistance profile
-                            +'<div class="assembly-resistance-profile-container">'
-                                + assemblyResistanceProfileHtml
-                            + '</div>'
-                        + '</div>'
-                    + '</div>');
+                    + '</div>'
+                + '</div>');
 
-                assemblyListItems.appendChild(assemblyListItemHtml[0]);
-                assemblyCounter = assemblyCounter + 1;
-            } // if
+            assemblyListItems.appendChild(assemblyListItemHtml[0]);
+            assemblyCounter = assemblyCounter + 1;
         } // for
 
         collectionAssemblyList[0].appendChild(assemblyListItems.cloneNode(true));
@@ -688,12 +690,16 @@ $(function(){
             // ----------------------------------------
             var assemblies = window.WGST.collection[collectionId].assemblies,
                 antibiotics = data.antibiotics,
-                sortedAssemblies = [];
+                sortedAssemblies = [],
+                sortedAssemblyIds = [];
 
             // Sort assemblies in order in which they are displayed on tree
             $.each(window.WGST.collection[collectionId].tree.leavesOrder, function(leafCounter, leaf){
                 sortedAssemblies.push(assemblies[leaf.id]);
+                sortedAssemblyIds.push(leaf.id);
             });
+
+            window.WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
 
             //renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
             renderAssemblyAnalysisList(collectionId, antibiotics);
