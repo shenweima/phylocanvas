@@ -939,8 +939,8 @@ $(function(){
         tree.parseNwk(window.WGST.collection[collectionId].tree.data);
         tree.treeType = 'rectangular';
         tree.showLabels = false;
-        tree.baseNodeSize = 0.5;
-        tree.setTextSize(20);
+        tree.baseNodeSize = 0.8;
+        tree.setTextSize(0.8);
         tree.selectedNodeSizeIncrease = 0.5;
         tree.selectedColor = '#0059DE';
         //tree.rightClickZoom = true;

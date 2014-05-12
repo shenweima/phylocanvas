@@ -747,7 +747,7 @@ var PhyloCanvas = (function(){
             var ty = this.centery +(this.tree.textSize * (0.5 * Math.sin(this.angle)) + 0.5) +  ((5 + this.radius * 2)* Math.sin(this.angle));
             this.canvas.beginPath();
             this.canvas.fillStyle = (this.selected)?  this.tree.selectedColour : this.tree.branchColour;
-            this.canvas.fillText(lbl, tx ,ty);
+            this.canvas.fillText(lbl, tx ,ty + this.tree.baseNodeSize);
             this.canvas.closePath();
             }catch(e){alert(e);}
         },
