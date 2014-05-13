@@ -723,6 +723,16 @@ $(function(){
             // Convert to time ago string
             $('.timeago').timeago();
 
+            // ----------------------------------------
+            // Prepare collection stats
+            // ----------------------------------------
+            $('.wgst-stats__collection .wgst-stats-value__total-number-of-assemblies').html(sortedAssemblies.length);
+            $('.wgst-stats__collection .wgst-stats-value__number-of-displayed-assemblies').html(sortedAssemblies.length);
+            $('.wgst-stats__collection .wgst-stats-value__number-of-selected-assemblies').html('0');
+            $('.wgst-stats__collection .wgst-stats-value__created-on').html(moment(new Date()).format('DD/MM/YYYY'));
+            $('.wgst-stats__collection .wgst-stats-value__author').html('Anonymous');
+            $('.wgst-stats__collection .wgst-stats-value__privacy').html('Public');
+
             // Scrolling hint
             if ($('.collection-assembly-list .assembly-list-item:visible').length > 7) {
                 $('.collection-assembly-list-more-assemblies').show();
@@ -3478,16 +3488,12 @@ $(function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
         var currentNodeTextSize = window.WGST.collection[collectionId].tree.canvas.textSize;
         window.WGST.collection[collectionId].tree.canvas.setTextSize(currentNodeTextSize - 3);
-        // window.WGST.collection[collectionId].tree.canvas.baseNodeSize(currentNodeTextSize - 2);
-        // window.WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeTextSize - 2);
     });
 
     $('.tree-controls-increase-node').on('click', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
         var currentNodeTextSize = window.WGST.collection[collectionId].tree.canvas.textSize;
         window.WGST.collection[collectionId].tree.canvas.setTextSize(currentNodeTextSize + 3);
-        // window.WGST.collection[collectionId].tree.canvas.baseNodeSize(currentNodeTextSize + 2);
-        // window.WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeTextSize + 2);
     });
 
     var renderRepresentativeCollectionTree = function() {
