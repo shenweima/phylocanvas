@@ -2155,118 +2155,121 @@ $(function(){
     window.WGST.dragAndDrop.files = [];
 
     var handleFileDrop = function(event) {
-        event.stopPropagation();
-        event.preventDefault();
+        // Only handle file drops
+        if (event.dataTransfer.files.length > 0) {
+            event.stopPropagation();
+            event.preventDefault();
 
-        var collectionId = '';
+            var collectionId = '';
 
-        // Check if user drag and drops to the existing collection
-        if (isOpenedPanel('collection')) {
-            collectionId = $('.wgst-panel__collection').attr('data-collection-id');
-            $('.wgst-panel__assembly-upload-navigator').attr('data-collection-id', collectionId);
-            closeCollection();
-            closePanel('collection');
-        };
+            // Check if user drag and drops to the existing collection
+            if (isOpenedPanel('collection')) {
+                collectionId = $('.wgst-panel__collection').attr('data-collection-id');
+                $('.wgst-panel__assembly-upload-navigator').attr('data-collection-id', collectionId);
+                closeCollection();
+                closePanel('collection');
+            };
 
-        if (! isPanelOpened('assemblyUploadNavigator')) {
-            openPanel('assemblyUploadNavigator');
-            showPanel('assemblyUploadNavigator');
-        }
-
-        if (! isPanelOpened('assemblyUploadAnalytics')) {
-            openPanel('assemblyUploadAnalytics');
-            showPanel('assemblyUploadAnalytics');
-        }        
-
-        if (! isPanelOpened('assemblyUploadMetadata')) {
-            openPanel('assemblyUploadMetadata');
-            showPanel('assemblyUploadMetadata');
-        }
-
-        // Set the highest z index for this panel
-        $('.assembly-upload-panel').trigger('mousedown');
-
-        // FileList object
-        // https://developer.mozilla.org/en-US/docs/Web/API/FileList
-        var droppedFiles = event.dataTransfer.files;
-
-        window.WGST.dragAndDrop.files = $.merge(window.WGST.dragAndDrop.files, droppedFiles);
-        
-        var allDroppedFiles = window.WGST.dragAndDrop.files,
-            // A single file from FileList object
-            file = allDroppedFiles[0],
-            // File name is used for initial user assembly id
-            fileName = file.name,
-            // Count files
-            //fileCounter = 0,
-            // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
-            fileReader = new FileReader();
-
-        // Check if user dropped only 1 assembly
-        if (allDroppedFiles.length === 1) {
-            // Hide average number of contigs per assembly
-            $('.upload-multiple-assemblies-label').hide();
-            // Set file name of dropped file
-            $('.upload-single-assembly-file-name').text(fileName);
-            // Show single assembly upload label
-            $('.upload-single-assembly-label').show();
-        } else {
-            // Hide text that belongs to a single assembly upload summary
-            $('.upload-single-assembly-label').hide();
-            // Show multiple assemblies upload label
-            $('.upload-multiple-assemblies-label').show();
-        }
-
-        // Init assembly navigator
-
-        // Update total number of assemblies
-        $('.total-number-of-dropped-assemblies').text(allDroppedFiles.length);
-
-        // Update assembly list slider
-        $('.assembly-list-slider').slider("option", "max", allDroppedFiles.length);
-
-        // Set file name
-        $('.assembly-file-name').text(fileName);
-
-        // If there is more than 1 file dropped then show assembly navigator
-        if (allDroppedFiles.length > 1) {
-            // Show assembly navigator
-            $('.assembly-navigator').show();
-            // Focus on slider handle
-            $('.ui-slider-handle').focus();
-        }
-
-        $.each(allDroppedFiles, function(fileCounter, file){
-            // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
-            //file = droppedFiles.item(fileCounter);
-
-            // Validate file name   
-            if (file.name.match(fastaFileNameRegex)) {
-                if ($('.wgst-panel__assembly-upload-analytics .assembly-item[data-name="' + file.name + '"]').length === 0) {
-
-                    // Create closure (new scope) to save fileCounter, file variable with it's current value
-                    (function(){
-                        var fileReader = new FileReader();
-
-                        fileReader.addEventListener('load', function(event){
-                            parseFastaFile(event, fileCounter, file, droppedFiles, collectionId);
-                        });
-
-                        // Read file as text
-                        fileReader.readAsText(file);
-                    })();
-
-                }
-            // Invalid file name
-            } else {
-                console.log("[WGST] File not supported");
+            if (! isPanelOpened('assemblyUploadNavigator')) {
+                openPanel('assemblyUploadNavigator');
+                showPanel('assemblyUploadNavigator');
             }
-        });
 
-        // Update total number of assemblies to upload
-        $('.assembly-upload-total-number').text(allDroppedFiles.length);
-        // Update lable for total number of assemblies to upload
-        $('.assembly-upload-total-number-label').html((allDroppedFiles.length === 1 ? 'assembly': 'assemblies'));
+            if (! isPanelOpened('assemblyUploadAnalytics')) {
+                openPanel('assemblyUploadAnalytics');
+                showPanel('assemblyUploadAnalytics');
+            }        
+
+            if (! isPanelOpened('assemblyUploadMetadata')) {
+                openPanel('assemblyUploadMetadata');
+                showPanel('assemblyUploadMetadata');
+            }
+
+            // Set the highest z index for this panel
+            $('.assembly-upload-panel').trigger('mousedown');
+
+            // FileList object
+            // https://developer.mozilla.org/en-US/docs/Web/API/FileList
+            var droppedFiles = event.dataTransfer.files;
+
+            window.WGST.dragAndDrop.files = $.merge(window.WGST.dragAndDrop.files, droppedFiles);
+            
+            var allDroppedFiles = window.WGST.dragAndDrop.files,
+                // A single file from FileList object
+                file = allDroppedFiles[0],
+                // File name is used for initial user assembly id
+                fileName = file.name,
+                // Count files
+                //fileCounter = 0,
+                // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+                fileReader = new FileReader();
+
+            // Check if user dropped only 1 assembly
+            if (allDroppedFiles.length === 1) {
+                // Hide average number of contigs per assembly
+                $('.upload-multiple-assemblies-label').hide();
+                // Set file name of dropped file
+                $('.upload-single-assembly-file-name').text(fileName);
+                // Show single assembly upload label
+                $('.upload-single-assembly-label').show();
+            } else {
+                // Hide text that belongs to a single assembly upload summary
+                $('.upload-single-assembly-label').hide();
+                // Show multiple assemblies upload label
+                $('.upload-multiple-assemblies-label').show();
+            }
+
+            // Init assembly navigator
+
+            // Update total number of assemblies
+            $('.total-number-of-dropped-assemblies').text(allDroppedFiles.length);
+
+            // Update assembly list slider
+            $('.assembly-list-slider').slider("option", "max", allDroppedFiles.length);
+
+            // Set file name
+            $('.assembly-file-name').text(fileName);
+
+            // If there is more than 1 file dropped then show assembly navigator
+            if (allDroppedFiles.length > 1) {
+                // Show assembly navigator
+                $('.assembly-navigator').show();
+                // Focus on slider handle
+                $('.ui-slider-handle').focus();
+            }
+
+            $.each(allDroppedFiles, function(fileCounter, file){
+                // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
+                //file = droppedFiles.item(fileCounter);
+
+                // Validate file name   
+                if (file.name.match(fastaFileNameRegex)) {
+                    if ($('.wgst-panel__assembly-upload-analytics .assembly-item[data-name="' + file.name + '"]').length === 0) {
+
+                        // Create closure (new scope) to save fileCounter, file variable with it's current value
+                        (function(){
+                            var fileReader = new FileReader();
+
+                            fileReader.addEventListener('load', function(event){
+                                parseFastaFile(event, fileCounter, file, droppedFiles, collectionId);
+                            });
+
+                            // Read file as text
+                            fileReader.readAsText(file);
+                        })();
+
+                    }
+                // Invalid file name
+                } else {
+                    console.log("[WGST] File not supported");
+                }
+            });
+
+            // Update total number of assemblies to upload
+            $('.assembly-upload-total-number').text(allDroppedFiles.length);
+            // Update lable for total number of assemblies to upload
+            $('.assembly-upload-total-number-label').html((allDroppedFiles.length === 1 ? 'assembly': 'assemblies'));
+        }
     };
 
     // Listen to dragover and drop events
