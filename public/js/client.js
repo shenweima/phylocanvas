@@ -2,6 +2,10 @@
 // App
 // ============================================================
 
+    window.onerror = function(error) {
+        console.dir(error);
+    };
+
 $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
@@ -98,7 +102,7 @@ $(function(){
             markerBounds: new google.maps.LatLngBounds(),
             searchBoxBounds: new google.maps.LatLngBounds(),
             init: function() {
-                WGST.geo.map.canvas = new google.maps.Map($('.map')[0], WGST.geo.map.options);
+                WGST.geo.map.canvas = new google.maps.Map($('.wgst-map')[0], WGST.geo.map.options);
                 WGST.geo.map.markers.metadata = new google.maps.Marker({
                     position: new google.maps.LatLng(51.511214, -0.119824),
                     map: WGST.geo.map.canvas,
@@ -386,6 +390,28 @@ $(function(){
         });
     };
 
+    var showError = function(message) {
+        console.error('✗ [WGST][Error] ' + message);
+        var errorHtmlElement = $('.wgst-notification__error');
+        errorHtmlElement.html(message).show();
+        //if (errorHtmlElement.is(':visible')) {}
+        // setTimeout(function(){
+        //     errorHtmlElement.hide();
+        //     errorHtmlElement.html('');
+        // }, 5000);
+    };
+
+    var showWarning = function(message) {
+        console.log('• [WGST][Warning] ' + message);
+        var errorHtmlElement = $('.wgst-notification__warning');
+        errorHtmlElement.html(message).show();
+        //if (errorHtmlElement.is(':visible')) {}
+        setTimeout(function(){
+            errorHtmlElement.hide();
+            errorHtmlElement.html('');
+        }, 5000);
+    };
+
     // ============================================================
     // Init app
     // ============================================================    
@@ -472,10 +498,26 @@ $(function(){
         // Get socket room id
         WGST.socket.connection.emit('getRoomId');
 
+        WGST.socket.connection.on('error', function() {
+            showError('Socket error.');
+        });
+        WGST.socket.connection.on('connect_failed', function() {
+            showError('Socket failed to connect.');
+        });
+        WGST.socket.connection.on('reconnect_failed', function() {
+            showError('Socket failed to reconnect.');
+        });
+        WGST.socket.connection.on('disconnect', function() {
+            showError('Socket disconnected.');
+        });
+        WGST.socket.connection.on('reconnect', function() {
+            showError('Socket reconnected.');
+        });
         // Get representative collection tree metadata
         getRepresentativeCollectionTreeMetadata(function(error, representativeCollectionTreeMatadata){
             if (error) {
                 // Show notification
+                showError(error);
                 return;
             }
 
@@ -641,6 +683,8 @@ $(function(){
         // Set collection id to collection panel
         $('.wgst-panel__collection').attr('data-collection-id', collectionId);
 
+        $('.wgst-panel__collection .collection-details').attr('data-collection-id', collectionId);
+
         openPanel('collection', function(){
             startPanelLoadingIndicator('collection');
             showPanel('collection');
@@ -772,6 +816,8 @@ $(function(){
             console.error(textStatus);
             console.error(errorThrown);
             console.error(jqXHR);
+
+            showError(textStatus);
         });
     };
 
@@ -850,6 +896,14 @@ $(function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
 
         window.WGST.collection[collectionId].tree.canvas.hideLabels();
+    });
+
+    $('.collection-assembly-list').on('scroll', function(){
+        console.log('Scrolling...');
+
+        var collectionId = $(this).attr('data-collection-id');
+
+        window.WGST.collection[collectionId].displayedAssemblies = [];
     });
 
     var selectTreeNodes = function(collectionId, selectedAssemblyIds) {
@@ -2935,6 +2989,7 @@ $(function(){
                 console.error(errorThrown);
                 console.error(jqXHR);
 
+                showError(textStatus);
                 //updateAssemblyUploadProgressBar();
             });
         } else {
@@ -3105,6 +3160,8 @@ $(function(){
                         console.error(textStatus);
                         console.error(errorThrown);
                         console.error(jqXHR);
+
+                        showError(textStatus);
                     });
                 }, GET_COLLECTION_ID_TIMER);
         }); // openPanel()
@@ -3474,6 +3531,8 @@ $(function(){
             console.error(textStatus);
             console.error(errorThrown);
             console.error(jqXHR);
+
+            showError(textStatus);
         });
     };
 
@@ -3691,7 +3750,8 @@ $(function(){
     };
 
     $('.show-representative-collection button').on('click', function(){
-        openRepresentativeCollectionTree();
+        //openRepresentativeCollectionTree();
+        showError('Something strange going on!');
     });
 
     // ============================================================

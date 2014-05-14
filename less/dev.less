@@ -58,11 +58,6 @@ a {
 }
 
 // ============================
-// Error
-// ============================
-.error {}
-
-// ============================
 // Utils
 // ============================
 
@@ -71,10 +66,29 @@ a {
 }
 
 // ============================
+// Error
+// ============================
+.wgst-notification {
+    -webkit-box-shadow: 3px 3px 0px 0px rgba(50, 50, 50, 0.50);
+    -moz-box-shadow:    3px 3px 0px 0px rgba(50, 50, 50, 0.50);
+    box-shadow:         3px 3px 0px 0px rgba(50, 50, 50, 0.50);
+    z-index: 2;
+    position: absolute;
+    top: 40px;
+    right: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #999;
+}
+
+.wgst-notification__error {}
+.wgst-notification__warning {}
+
+// ============================
 // Map
 // ============================
 
-.map {
+.wgst-map {
     width: 100%;
     height: 100%;
 }
