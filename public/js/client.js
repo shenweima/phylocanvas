@@ -3816,8 +3816,7 @@ $(function(){
     };
 
     $('.show-representative-collection button').on('click', function(){
-        //openRepresentativeCollectionTree();
-        showError('Something strange going on!');
+        openRepresentativeCollectionTree();
     });
 
     // ============================================================
