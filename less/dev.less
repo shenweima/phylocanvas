@@ -66,8 +66,9 @@ a {
 }
 
 // ============================
-// Error
+// Notification
 // ============================
+
 .wgst-notification {
     -webkit-box-shadow: 3px 3px 0px 0px rgba(50, 50, 50, 0.50);
     -moz-box-shadow:    3px 3px 0px 0px rgba(50, 50, 50, 0.50);
@@ -80,9 +81,30 @@ a {
     background-color: #fff;
     border: 1px solid #999;
 }
-
 .wgst-notification__error {}
 .wgst-notification__warning {}
+
+// ============================
+// Alert
+// ============================
+
+.wgst-alert {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    color: #fff;
+    padding: 10px;
+    font-weight: 200;
+}
+
+.wgst-alert__failure {
+    background-color: #d43f3a;
+}
+
+.wgst-alert__success {
+    background-color: #5C9923;
+}
 
 // ============================
 // Map

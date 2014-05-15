@@ -390,7 +390,30 @@ $(function(){
         });
     };
 
-    var showError = function(message) {
+    WGST.alert = {
+        status: {
+            SUCCESS: 'success',
+            FAILURE: 'failure'
+        }
+    };
+
+    var showAlert = function(message, status, hideAfterShow) {
+        console.error('✗ [WGST][Error] ' + message);
+        var alertHtmlElement = $('.wgst-alert');
+        // Remove all previous status classes and add the current one
+        alertHtmlElement.attr('class', 'wgst-alert').addClass('wgst-alert__' + status);
+        // Add text message and show alert element
+        alertHtmlElement.html(message).show();
+        // Hide alert element after sometime if necessary
+        if (hideAfterShow) {
+            setTimeout(function(){
+                alertHtmlElement.hide();
+                alertHtmlElement.html('');
+            }, 5000);
+        } // if
+    };
+
+    var showNotification = function(message) {
         console.error('✗ [WGST][Error] ' + message);
         var errorHtmlElement = $('.wgst-notification__error');
         errorHtmlElement.html(message).show();
@@ -498,21 +521,33 @@ $(function(){
         // Get socket room id
         WGST.socket.connection.emit('getRoomId');
 
+        // WGST.socket.connection.on('connect', function() {
+        //     showAlert('Connected to the server.');
+        // });
+        // WGST.socket.connection.on('connecting', function() {
+        //     showAlert('Connecting to the server...');
+        // });
+        // WGST.socket.connection.on('connect_failed', function() {
+        //     showAlert('Failed to connect to the server.');
+        // });
+
+        // Socket errors
         WGST.socket.connection.on('error', function() {
-            showError('Socket error.');
-        });
-        WGST.socket.connection.on('connect_failed', function() {
-            showError('Socket failed to connect.');
-        });
-        WGST.socket.connection.on('reconnect_failed', function() {
-            showError('Socket failed to reconnect.');
+            showAlert('✕ Unexpected error has occured.', WGST.alert.status.FAILURE, false);
         });
         WGST.socket.connection.on('disconnect', function() {
-            showError('Socket disconnected.');
+            showAlert('✕ Disconnected from the server.', WGST.alert.status.FAILURE, false);
+        });
+        WGST.socket.connection.on('reconnecting', function() {
+            showAlert('↺ Reconnecting to the server...', WGST.alert.status.FAILURE, false);
         });
         WGST.socket.connection.on('reconnect', function() {
-            showError('Socket reconnected.');
+            showAlert('✓ Reconnected to the server.', WGST.alert.status.SUCCESS, true);
         });
+        WGST.socket.connection.on('reconnect_failed', function() {
+            showAlert('✕ Failed to reconnect to the server.', WGST.alert.status.FAILURE, false);
+        });
+
         // Get representative collection tree metadata
         getRepresentativeCollectionTreeMetadata(function(error, representativeCollectionTreeMatadata){
             if (error) {
