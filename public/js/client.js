@@ -546,7 +546,7 @@ $(function(){
 
         WGST.socket.connection.on('connect', function() {
             // This event can fire after app was initialised, so need to check for that first
-            if (typeof WGST.init !=== 'undefined') {
+            if (typeof WGST.init !== 'undefined') {
                 initApp(WGST.init.all.SOCKET_CONNECT);
             }
         });
