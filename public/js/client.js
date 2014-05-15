@@ -126,13 +126,14 @@ $(function(){
 
     WGST.init = {
         all: {
-            SOCKET: 'Socket ready',
+            SOCKET_CONNECT: 'Socket connected',
+            SOCKET_ROOM_ID: 'Received socket room id',
             REPRESENTATIVE_COLLECTION_TREE_METADATA: 'Loaded representative collectiontree metadata'
         },
         loaded: []
     }; 
 
-    var loadedApp = function(loaded) {
+    var initApp = function(loaded) {
         WGST.init.loaded.push(loaded);
         if (WGST.init.loaded.length === Object.keys(WGST.init.all).length) {
             var initHtmlElement = $('.wgst-init');
@@ -537,15 +538,15 @@ $(function(){
             // Set room id for this client
             window.WGST.socket.roomId = roomId;
 
-            loadedApp(WGST.init.all.SOCKET);
+            initApp(WGST.init.all.SOCKET_ROOM_ID);
         });
 
         // Get socket room id
         WGST.socket.connection.emit('getRoomId');
 
-        // WGST.socket.connection.on('connect', function() {
-        //     showAlert('Connected to the server.');
-        // });
+        WGST.socket.connection.on('connect', function() {
+            initApp(WGST.init.all.SOCKET_CONNECT);
+        });
         // WGST.socket.connection.on('connecting', function() {
         //     showAlert('Connecting to the server...');
         // });
@@ -586,7 +587,7 @@ $(function(){
                 renderRepresentativeCollectionTree();
             });
 
-            loadedApp(WGST.init.all.REPRESENTATIVE_COLLECTION_TREE_METADATA);
+            initApp(WGST.init.all.REPRESENTATIVE_COLLECTION_TREE_METADATA);
         });
 
     })();
