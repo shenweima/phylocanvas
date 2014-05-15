@@ -545,7 +545,10 @@ $(function(){
         WGST.socket.connection.emit('getRoomId');
 
         WGST.socket.connection.on('connect', function() {
-            initApp(WGST.init.all.SOCKET_CONNECT);
+            // This event can fire after app was initialised, so need to check for that first
+            if (typeof WGST.init !=== 'undefined') {
+                initApp(WGST.init.all.SOCKET_CONNECT);
+            }
         });
         // WGST.socket.connection.on('connecting', function() {
         //     showAlert('Connecting to the server...');
