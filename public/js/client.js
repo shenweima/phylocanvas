@@ -117,6 +117,34 @@ $(function(){
         placeSearchBox: {} // Store Google SearchBox object for each dropped file
     };
 
+    WGST.alert = {
+        status: {
+            SUCCESS: 'success',
+            FAILURE: 'failure'
+        }
+    };
+
+    WGST.init = {
+        all: {
+            SOCKET: 'Socket ready',
+            REPRESENTATIVE_COLLECTION_TREE_METADATA: 'Loaded representative collectiontree metadata'
+        },
+        loaded: []
+    }; 
+
+    var loadedApp = function(loaded) {
+        WGST.init.loaded.push(loaded);
+        if (WGST.init.loaded.length === Object.keys(WGST.init.all).length) {
+            var initHtmlElement = $('.wgst-init');
+            initHtmlElement.find('.wgst-init-status').html('Ready.');
+            setTimeout(function(){
+                initHtmlElement.fadeOut('fast');
+            }, 500);
+
+            delete WGST.init;
+        } // if
+    };
+
     // ============================================================
     // Panels
     // ============================================================
@@ -390,13 +418,6 @@ $(function(){
         });
     };
 
-    WGST.alert = {
-        status: {
-            SUCCESS: 'success',
-            FAILURE: 'failure'
-        }
-    };
-
     var showAlert = function(message, status, hideAfterShow) {
         console.error('✗ [WGST][Error] ' + message);
         var alertHtmlElement = $('.wgst-alert');
@@ -407,9 +428,8 @@ $(function(){
         // Hide alert element after sometime if necessary
         if (hideAfterShow) {
             setTimeout(function(){
-                alertHtmlElement.hide();
-                alertHtmlElement.html('');
-            }, 5000);
+                alertHtmlElement.fadeOut('fast');
+            }, 3000);
         } // if
     };
 
@@ -438,7 +458,7 @@ $(function(){
     // ============================================================
     // Init app
     // ============================================================    
-    console.log('[WGST] Reading app config');
+    //console.log('[WGST] Reading app config');
     //console.dir(window.WGST.config);
 
     // Init
@@ -516,6 +536,8 @@ $(function(){
 
             // Set room id for this client
             window.WGST.socket.roomId = roomId;
+
+            loadedApp(WGST.init.all.SOCKET);
         });
 
         // Get socket room id
@@ -533,19 +555,19 @@ $(function(){
 
         // Socket errors
         WGST.socket.connection.on('error', function() {
-            showAlert('✕ Unexpected error has occured.', WGST.alert.status.FAILURE, false);
+            showAlert('Unexpected error has occured.', WGST.alert.status.FAILURE, false);
         });
         WGST.socket.connection.on('disconnect', function() {
-            showAlert('✕ Disconnected from the server.', WGST.alert.status.FAILURE, false);
+            showAlert('Disconnected from the server.', WGST.alert.status.FAILURE, false);
         });
         WGST.socket.connection.on('reconnecting', function() {
-            showAlert('↺ Reconnecting to the server...', WGST.alert.status.FAILURE, false);
+            showAlert('Reconnecting to the server...', WGST.alert.status.FAILURE, false);
         });
         WGST.socket.connection.on('reconnect', function() {
-            showAlert('✓ Reconnected to the server.', WGST.alert.status.SUCCESS, true);
+            showAlert('Reconnected to the server.', WGST.alert.status.SUCCESS, true);
         });
         WGST.socket.connection.on('reconnect_failed', function() {
-            showAlert('✕ Failed to reconnect to the server.', WGST.alert.status.FAILURE, false);
+            showAlert('Failed to reconnect to the server.', WGST.alert.status.FAILURE, false);
         });
 
         // Get representative collection tree metadata
@@ -563,6 +585,8 @@ $(function(){
 
                 renderRepresentativeCollectionTree();
             });
+
+            loadedApp(WGST.init.all.REPRESENTATIVE_COLLECTION_TREE_METADATA);
         });
 
     })();
