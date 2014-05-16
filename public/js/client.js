@@ -3859,7 +3859,7 @@ $(function(){
             collectionId = canvas.closest('.wgst-panel').attr('data-collection-id'),
             tree = window.WGST.collection[collectionId].tree.canvas,
             leaves = tree.leaves,
-            leavesWithinCanvasViewport = [],
+            //leavesWithinCanvasViewport = [],
             canvasTopLeft = {
                 top: tree.translateClickY(canvasOffset.top),
                 left: tree.translateClickX(canvasOffset.left)
@@ -3872,27 +3872,32 @@ $(function(){
             collectionAssemblyList = $('.collection-assembly-list'),
             collectionAssemblyListFull = $('.collection-assembly-list-full');
 
-        var documentFragment = document.createDocumentFragment();
-        var visibleAssemblyListItemCounter = 0;
-        var leaf;
-        for (var i = 0; i < leaves.length; i++) {
-            leaf = leaves[i];
+        var filteredAssembliesHtml = document.createDocumentFragment(),
+            assemblyListItemHtml,
+            visibleAssemblyListItemCounter = 0,
+            leaf,
+            leafCounter = 0;
+
+        for (; leafCounter < leaves.length;) {
+            leaf = leaves[leafCounter];
 
             if (leaf.centerx >= canvasTopLeft.left 
                 && leaf.centerx <= canvasBottomRight.right
                 && leaf.centery >= canvasTopLeft.top
                 && leaf.centery <= canvasBottomRight.bottom) {
 
-                leavesWithinCanvasViewport.push(leaf.id);
+                //leavesWithinCanvasViewport.push(leaf.id);
 
-                var assemblyListItemNode = collectionAssemblyListFull.find('.assembly-list-item[data-assembly-id="' + leaf.id + '"]')[0];
-                documentFragment.appendChild(assemblyListItemNode.cloneNode(true));
+                assemblyListItemHtml = collectionAssemblyListFull.find('.assembly-list-item[data-assembly-id="' + leaf.id + '"]')[0];
+                filteredAssembliesHtml.appendChild(assemblyListItemHtml.cloneNode(true));
 
                 visibleAssemblyListItemCounter = visibleAssemblyListItemCounter + 1;
             } // if
+
+            leafCounter = leafCounter + 1;
         } // for
 
-        console.log('visibleAssemblyListItemCounter: ' + visibleAssemblyListItemCounter);
+        //console.log('visibleAssemblyListItemCounter: ' + visibleAssemblyListItemCounter);
 
         // Scrolling hint
         if (visibleAssemblyListItemCounter > 7) {
@@ -3902,13 +3907,13 @@ $(function(){
         }
 
         // Remove existing assemblies from assembly list
-        var myNode = collectionAssemblyList[0];
-        while (myNode.firstChild) {
-            myNode.removeChild(myNode.firstChild);
+        var assemblyListHtml = collectionAssemblyList[0];
+        while (assemblyListHtml.firstChild) {
+            assemblyListHtml.removeChild(assemblyListHtml.firstChild);
         }
 
         // Append new assemblies to assembly list
-        myNode.appendChild(documentFragment);
+        assemblyListHtml.appendChild(filteredAssembliesHtml);
 
         collectionAssemblyList.find('.antibiotic[data-toggle="tooltip"]').tooltip();
     };
