@@ -46,6 +46,13 @@ time, mark, audio, video {
 html, body {
     height: 100%;
     overflow: hidden;
+    background-image: -webkit-gradient(
+        linear,
+        left top,
+        left bottom,
+        color-stop(0, #F7F7F7),
+        color-stop(1, #EBEBEB)
+    );
 }
 
 a {
@@ -145,22 +152,40 @@ a {
 }
 
 // ============================
+// Fullscreen
+// ============================
+
+.wgst-fullscreen {
+    width: 100%;
+    height: 100%;
+    //z-index: -1;
+    display: none;
+}
+
+.wgst-fullscreen--visible {
+    display: block;
+}
+
+// ============================
 // Notification
 // ============================
 
 .wgst-notification {
-    -webkit-box-shadow: 3px 3px 0px 0px rgba(50, 50, 50, 0.50);
-    -moz-box-shadow:    3px 3px 0px 0px rgba(50, 50, 50, 0.50);
-    box-shadow:         3px 3px 0px 0px rgba(50, 50, 50, 0.50);
-    z-index: 2;
+    // -webkit-box-shadow: 3px 3px 0px 0px rgba(50, 50, 50, 0.50);
+    // -moz-box-shadow:    3px 3px 0px 0px rgba(50, 50, 50, 0.50);
+    // box-shadow:         3px 3px 0px 0px rgba(50, 50, 50, 0.50);
+    z-index: 999;
     position: absolute;
-    top: 40px;
+    top: 60px;
     right: 20px;
     padding: 20px;
     background-color: #fff;
-    border: 1px solid #999;
+    border-radius: 5px;
 }
-.wgst-notification__error {}
+.wgst-notification__error {
+    background-color: #d43f3a;
+    color: #fff;
+}
 .wgst-notification__warning {}
 
 // ============================
@@ -198,30 +223,60 @@ a {
 // Navigation
 // ============================
 
-.navigation {
-    position: absolute;
-    top: 28px;
-    left: 90px;
-    min-width: 800px;
-    &>div {
-        float: left;
+.wgst-navigation {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+    background-color: #000;
+    color: #fff;
+    padding: 10px 25px;
+
+    .wgst-navigation-logo {
+        display: inline-block;
+        font-weight: 300;
+        color: #999;
+        margin-right: 25px;
+    }
+
+    .wgst-navigation-item {
+        font-weight: 300;
+        color: #fff;
+        border-bottom: 1px dotted #fff;
+        margin-bottom: 10px;
         margin-right: 10px;
     }
-    .map-search {
-        width: 400px;
-        min-width: 200px;
-    }
-    .add-data {}
-    .data-filters {}
-    .user-account {}
-    .upload-data {
-      font-size: 14px;
-      font-weight: 300;
-    }
-    .upload-data input {
-      margin-top: 10px;
-    }
 }
+
+.wgst-background {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+}
+
+// .wgst-navigation {
+//     position: absolute;
+//     top: 28px;
+//     left: 90px;
+//     min-width: 800px;
+//     &>div {
+//         float: left;
+//         margin-right: 10px;
+//     }
+//     .map-search {
+//         width: 400px;
+//         min-width: 200px;
+//     }
+//     .add-data {}
+//     .data-filters {}
+//     .user-account {}
+//     .upload-data {
+//       font-size: 14px;
+//       font-weight: 300;
+//     }
+//     .upload-data input {
+//       margin-top: 10px;
+//     }
+// }
 
 // ============================
 // Panels
@@ -926,6 +981,9 @@ h2, h4 {
             color: #000;
         }
     }
+    .wgst-panel-control-button__maximize {
+        right: 91px; // 13 + 13 + 13
+    }
     .wgst-panel-control-button__opacity {
         right: 65px;
     }
@@ -951,14 +1009,11 @@ h2, h4 {
     overflow: hidden;
 }
 
-.wgst-panel__representative-tree {
+.wgst-panel__representative-collection-tree {
 
     // Position
     top: 80px;
     left: 90px;
-
-    // Presentation
-    //opacity: 0.85;
 
     overflow: hidden;
 
@@ -970,6 +1025,11 @@ h2, h4 {
             text-align: center;
             button {
                 outline: none;
+            }
+            .tree-controls-decrease-node {
+                .glyphicon {
+                    font-size: 10px;
+                }
             }
         }
         #phylocanvas {
@@ -1107,6 +1167,255 @@ h2, h4 {
         }
     }
 }
+
+// ****************************
+
+//======================================
+// Fullscreen
+//======================================
+
+.wgst-fullscreen__collection {}
+
+.collection-details {
+    padding: 20px;
+    height: 100%;
+    overflow: hidden;
+    .collection-assembly-list-headers {
+        width: 100%;
+        border-bottom: 1px solid #ddd;
+        overflow: hidden;
+        padding: 10px 0;
+        //margin-left: 2px;
+        padding-left: 2px;
+        .assembly-list-header {
+            float: left;
+            font-weight: 500;
+        }
+    }
+    .collection-assembly-list {
+        width: 100%;
+        height: 100%;
+        padding-bottom: 80px;
+        //overflow-x: hidden;
+        //overflow-y: scroll;
+        overflow: scroll;
+        //float: left;
+        //max-height: 266px;
+        //min-height: 0px;
+        .assembly-list-item {
+            width: 100%;
+            float: left;
+            clear: both;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+            color: #000;
+
+            padding-left: 2px;
+            border-left: 0;
+            &> div {
+                clear: both;
+                display: inline-block;
+                vertical-align: middle;
+            }
+            &.row-stripe {
+                background-color: #FAFAFA;
+            }
+            &:hover {
+                //background-color: #FFF8F0;
+                padding-left: 0;
+                border-left: 2px solid #333;
+                //border-right: 2px solid #333;
+            }
+            &.row-selected {
+                background-color: #F0F7FF;
+            }
+        }
+    }
+    .collection-assembly-list-more-assemblies, .collection-assembly-list-all-assemblies {
+        //background-color: #f5f5f5;
+        //float: left;
+        display: none;
+        clear: both;
+        width: 900px;
+        padding: 10px;
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        font-weight: 300;
+        //border-left: 2px solid #fff;
+        .glyphicon {
+            margin: 0 5px;
+        }
+    }
+
+    .assembly-list-header-tree {
+        width: 50px;
+        text-align: center;
+    }
+    .assembly-list-header-map {
+        width: 50px;
+        text-align: center;
+    }
+    .assembly-list-generation {
+        width: 120px;
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+    .assembly-list-item .assembly-list-generation {
+        font-size: 12px;
+    }
+    .assembly-list-header-id {
+        width: 15%;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        margin-right: 20px;
+        margin-left: 10px;
+    }
+    .assembly-list-header-st-type {
+        width: 7%;
+        min-width: 80px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        margin-right: 8px;
+    }
+    .assembly-list-header-nearest-representative {
+        width: 15%;
+        min-width: 170px;
+    }
+    .assembly-list-header-resistance-profile {
+        width: 30%;
+        min-width: 400px;
+    }
+
+
+
+    .assembly-upload-datetime {
+        font-weight: 400;
+    }
+    h2 {
+        font-size: 12px;
+        font-weight: 400;
+        margin: 20px 8px;
+        text-align: center;
+        text-transform: uppercase;
+    }
+    .mlst-number {
+        font-weight: 300;
+        font-size: 22px;
+        text-align: center;
+        margin-top: 20px;
+    }
+    .assembly-resistance-profile-container {
+        //width: 350px;
+        overflow: hidden;
+        .antibiotic-group {
+            float: left;
+            border: 1px solid #111;
+            margin-right: 2px;
+            .antibiotic {
+                width: 6px;
+                height: 16px;
+                float: left;
+                border-right: 1px solid #111;
+                padding-left: 7px;
+                &:last-of-type {
+                    border-right: 0 !important;
+                }
+                &.resistance-fail {
+                    background-color: #CF0000;
+                }
+                &.resistance-success {
+                    background-color: #038F05;
+                }
+                &.resistance-unknown {
+                    background-color: #f5f5f5;
+                }
+            }
+        }
+    }
+    // .collection-assembly-list, table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
+    //     width: 900px;
+    //     //max-height: 400px;
+    //     overflow: scroll;
+    //     margin-bottom: 0;
+        // colgroup {
+        //     .col-target-fp {
+        //         width: auto;
+        //     }
+        //     .col-score, .col-score-percentage {
+        //         width: 20%;
+        //     }
+        // }
+        // th {
+        //     border-bottom: 1px;
+        //     font-weight: 500;
+        //     font-size: 14px;
+        //     text-transform: uppercase;
+        //     &:nth-child(1), &:nth-child(2) {
+        //         text-align: center;
+        //     }
+        // }
+        // td.show-on-map-checkbox {
+        //     padding: 6px 5px 5px 5px;
+        //     text-align: center;
+        // }
+        // td.show-on-tree-radio-button {
+        //     padding: 7px 5px 5px 5px;
+        //     text-align: center;
+        // }
+        // th, td {
+        //     padding-left: 12px;
+        //     padding-right: 12px;
+        // }
+        // tbody tr {
+        //     /*
+
+        //     Order is important.
+        //     You want :hover to overwrite .row-stripe rule.
+
+        //     */
+        //     &.row-stripe {
+        //         background-color: #FAFAFA;
+        //     }
+        //     &.row-selected {
+        //         background-color: #F0F7FF;
+        //     }
+        //     &:hover {
+        //         background-color: #FFF8F0;
+
+        //     }
+        // }
+    //}
+    table.assembly-resistance-profile {
+        margin: 0;
+        th {
+            font-weight: 400;
+        }
+        td {
+            width: 3px;
+            height: 18px;
+            border: 0;
+            margin: 0;
+            padding: 0;
+            &.resistance-fail {
+                background-color: #CF0000;
+            }
+            &.resistance-success {
+                background-color: #038F05;
+            }
+            &.resistance-unknown {
+                background-color: #f5f5f5;
+                color: #000;
+            }
+        }
+    }
+}
+
+// ****************************
+// Fullscreen layout
+
 
 // Object
 .wgst-panel__collection {
@@ -1379,6 +1688,11 @@ h2, h4 {
         .btn-group {
             margin: 0 10px;
         }
+        .tree-controls-decrease-node {
+            .glyphicon {
+                font-size: 10px;
+            }
+        }
     }
     // .collection-tree-leaf-metadata {
     //     z-index: 100;
@@ -1529,6 +1843,19 @@ h2, h4 {
             .progress-bar {
                 text-shadow: 1px 1px #444;
             }
+        }
+    }
+}
+
+.wgst-panel__map {
+    width: 800px;
+    //height: 600px;
+    overflow: hidden;
+    .wgst-panel-body {
+        width: 100%;
+        .wgst-map {
+            width: 100%;
+            height: 500px;
         }
     }
 }

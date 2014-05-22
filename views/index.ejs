@@ -49,61 +49,19 @@
             </div>
           </div>
           -->
-        </div>
+        </div><!-- /.wgst-init -->
 
         <div class="wgst-notification wgst-notification__error hide-this"></div>
         <div class="wgst-notification wgst-notification__warning hide-this"></div>
-
         <div class="wgst-alert hide-this"></div>
 
-        <div class="wgst-map"></div>
+        <nav class="wgst-navigation">
+          <div class="wgst-navigation-logo">WGST</div>
+          <a href="#" class="wgst-navigation-item wgst-navigation-item__map">Map</a>
+          <a href="#" class="wgst-navigation-item wgst-navigation-item__representative-tree">Representative tree</a>
+        </nav>
 
-        <nav class="navigation">
-          <div class="map-search">
-            <div class="input-group">
-              <input type="text" class="form-control" placeholder="Search">
-              <span class="input-group-btn">
-                <button class="btn btn-danger" type="button"><span class="glyphicon glyphicon-search"></span></button>
-              </span>
-            </div><!-- /input-group -->
-          </div><!-- /.map-search -->
-
-          <div class="data-filters">
-            <div class="btn-group" data-toggle="buttons">
-              <!--<label class="btn btn-primary map-toggle-button">
-                <input type="checkbox"> Map
-              </label>-->
-              <!--
-              <label class="btn btn-primary graph-toggle-button">
-                <input type="checkbox"><span class="glyphicon glyphicon-tree-conifer"></span>
-              </label>
-              -->
-              <!--          
-              <label class="btn btn-primary all-panels-toggle-button active">
-                <input type="checkbox"><span class="glyphicon glyphicon-th-large"></span>
-              </label>
-              -->
-              <!--
-              <label class="btn btn-primary timeline-toggle-button">
-                <input type="checkbox"> Timeline
-              </label>
-              <label class="btn btn-primary">
-                <input type="checkbox"> Metadata
-              </label>
-              -->
-            </div>
-          </div><!-- /.data-filters -->
-
-          <div class="show-representative-collection">
-            <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-tree-conifer"></span></button>
-          </div><!-- /.settings -->
-
-        </nav><!-- /.navigation -->
-
-
-
-
-
+        <div class="wgst-background"></div>
 
 
 
@@ -277,18 +235,24 @@
 
 
 
+        <!-- Collection -->
+        <div class="wgst-fullscreen wgst-fullscreen__collection" data-fullscreen-name="collection">
+        </div><!-- /.wgst-fullscreen__collection -->
 
         <!-- Collection -->
-        <section class="wgst-panel wgst-panel__collection wgst-draggable" data-panel-name="collection" data-collection-id="">
+        <section class="wgst-panel wgst-panel__collection wgst-draggable" data-panel-name="collection" data-panel-id="" data-collection-id="">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Collection</h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-globe"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize wgst-panel-control-button--active glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
           <article class="wgst-panel-body">
             <div class="wgst-panel-loading"><div class="loading"></div></div>
             <div class="wgst-panel-body-content">
+
+
 
               <div class="collection-controls">
                 <div class="btn-group">
@@ -336,18 +300,7 @@
                 <div class="wgst-stats-value wgst-stats-value--small wgst-stats-value__created-author"></div>
               </div> -->
 
-              <div class="collection-details" data-collection-id="">
-
-                <!--
-                <ul class="collection-properties">
-                  <li class="collection-property collection-property-created-timestamp">
-                    <span class="glyphicon glyphicon-search"></span><span class="assembly-created-datetime timeago" title=""></span>
-                  </li>
-                </ul>
-                -->
-
-                <!--<h2>Assemblies:</h2>-->
-                <!-- Created <span class="assembly-created-datetime timeago" title=""></span>. -->
+              <div class="collection-details wgst-collection wgst-collection-info" data-collection-id="">
 
                 <div class="collection-assembly-list-headers">
                   <div class="assembly-list-header assembly-list-header-tree">Tree</div>
@@ -367,6 +320,7 @@
                 <div class="collection-assembly-list-all-assemblies">
                   <span class="glyphicon glyphicon-filter"></span> Some assemblies are filtered out. <a href="#" class="collection-assembly-list-view-all-assemblies">View all assemblies</a>
                 </div>
+
               </div><!-- /.collection-details -->
 
             </div><!-- /.wgst-panel-body-content -->      
@@ -411,10 +365,9 @@
                 </div>
                 -->
 
-                Font size:
                 <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-default tree-controls-decrease-node"><span class="glyphicon glyphicon-minus"></span></button>
-                  <button type="button" class="btn btn-sm btn-default tree-controls-increase-node"><span class="glyphicon glyphicon-plus"></span></button>
+                  <button type="button" class="btn btn-sm btn-default tree-controls-decrease-node"><span class="glyphicon glyphicon-font"></span></button>
+                  <button type="button" class="btn btn-sm btn-default tree-controls-increase-node"><span class="glyphicon glyphicon-font"></span></button>
                 </div>
 
                 <div class="btn-group">
@@ -466,10 +419,9 @@
                 </div>
                 -->
 
-                Font size:
                 <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-default tree-controls-decrease-node"><span class="glyphicon glyphicon-minus"></span></button>
-                  <button type="button" class="btn btn-sm btn-default tree-controls-increase-node"><span class="glyphicon glyphicon-plus"></span></button>
+                  <button type="button" class="btn btn-sm btn-default tree-controls-decrease-node"><span class="glyphicon glyphicon-font"></span></button>
+                  <button type="button" class="btn btn-sm btn-default tree-controls-increase-node"><span class="glyphicon glyphicon-font"></span></button>
                 </div>
 
                 <!--
@@ -580,6 +532,33 @@
           <footer class="wgst-panel-footer wgst-draggable-handle">
           </footer><!-- /.wgst-panel-footer -->
         </section>
+
+
+
+        <!-- Map -->
+        <div class="wgst-fullscreen wgst-fullscreen__map wgst-fullscreen--active wgst-fullscreen--visible" data-fullscreen-name="map">
+          <div class="wgst-map"></div>
+        </div><!-- /.wgst-fullscreen__map -->
+
+        <!-- Map -->
+        <div class="wgst-panel wgst-panel__map wgst-draggable" data-panel-name="map">
+          <header class="wgst-panel-header wgst-draggable-handle">
+            <h4 class="header-title">Map</h4>
+            <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
+          </header>
+          <article class="wgst-panel-body">
+            <div class="wgst-panel-loading"><div class="loading"></div></div>
+            <div class="wgst-panel-body-content">
+            <!-- AAA -->
+            </div><!-- /.wgst-panel-body-content --> 
+          </article><!-- /.wgst-panel-body -->
+          <footer class="wgst-panel-footer wgst-draggable-handle">
+          </footer><!-- /.wgst-panel-footer -->
+        </div><!-- /.wgst-panel__map -->
+
+
 
 
 
