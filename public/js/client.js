@@ -326,6 +326,16 @@ $('[title]').tooltip({
         }
     };
 
+    var isPanelVisible = function(panelName) {
+        var panelElement = $('[data-panel-name="' + panelName + '"]');
+
+        if (panelElement.hasClass('wgst-panel--visible')) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     var activatePanel = function(panelNames, callback) {
         // Overwrite function
         var activatePanel = function(panelName) {
@@ -2215,24 +2225,24 @@ $('[title]').tooltip({
             var collectionId = '';
 
             // Check if user drag and drops to the existing collection
-            if (isOpenedPanel('collection')) {
+            if (isPanelActive('collection')) {
                 collectionId = $('.wgst-panel__collection').attr('data-collection-id');
                 $('.wgst-panel__assembly-upload-navigator').attr('data-collection-id', collectionId);
                 closeCollection();
                 deactivatePanel('collection');
             };
 
-            if (! isPanelOpened('assemblyUploadNavigator')) {
+            if (! isPanelActive('assemblyUploadNavigator')) {
                 activatePanel('assemblyUploadNavigator');
                 showPanel('assemblyUploadNavigator');
             }
 
-            if (! isPanelOpened('assemblyUploadAnalytics')) {
+            if (! isPanelActive('assemblyUploadAnalytics')) {
                 activatePanel('assemblyUploadAnalytics');
                 showPanel('assemblyUploadAnalytics');
             }        
 
-            if (! isPanelOpened('assemblyUploadMetadata')) {
+            if (! isPanelActive('assemblyUploadMetadata')) {
                 activatePanel('assemblyUploadMetadata');
                 showPanel('assemblyUploadMetadata');
             }
@@ -2886,6 +2896,28 @@ $('[title]').tooltip({
         }
     };
 
+    var isFullscreenVisible = function(fullscreenName) {
+        var fullscreenElement = $('[data-fullscreen-name="' + fullscreenName + '"]');
+
+        if (fullscreenElement.hasClass('wgst-fullscreen--visible')) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    // User wants to show/hide all assemblies on map
+    $('input[type="checkbox"].show-all-assemblies-on-map').on('change', function(e) {
+        var showOnMapCheckboxes = $(this).closest('.collection-details').find('.collection-assembly-list .assembly-list-header-map input[type="checkbox"]');
+        if ($(this).prop('checked')) {
+            // Check all
+            showOnMapCheckboxes.prop('checked', true).trigger('change');
+        } else {
+            // Uncheck all
+            showOnMapCheckboxes.prop('checked', false).trigger('change');
+        }
+    });
+
     // User wants to show assembly on map
     $('.wgst-panel__collection .collection-assembly-list').on('change', 'input[type="checkbox"]', function(e) {
 
@@ -2915,9 +2947,12 @@ $('[title]').tooltip({
             // Highlight row
             $(this).closest('tr').addClass("row-highlighted");
 
-            openPanel('map');
-
-            google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+            if (! isFullscreenVisible('map')) {
+                if (! isPanelVisible('map')) {
+                    openPanel('map');
+                    google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+                }
+            }
 
         // Unchecked
         } else {
@@ -2936,6 +2971,11 @@ $('[title]').tooltip({
         window.WGST.geo.map.canvas.panToBounds(window.WGST.geo.map.markerBounds);
         // Set the map to fit marker bounds
         window.WGST.geo.map.canvas.fitBounds(window.WGST.geo.map.markerBounds);
+
+        // Check if you have selected all (filtered out) assemblies
+        if ($(this).closest('.collection-assembly-list').find('input[type="checkbox"]:not(:checked)').length === 0) {
+            $('input[type="checkbox"].show-all-assemblies-on-map').prop('checked', true);
+        }
     });
 
     // User wants to select representative tree branch
