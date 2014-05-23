@@ -1174,12 +1174,15 @@ h2, h4 {
 // Fullscreen
 //======================================
 
-.wgst-fullscreen__collection {}
+.wgst-fullscreen__collection {
+    overflow: scroll;
+}
 
 .collection-details {
     padding: 20px;
     height: 100%;
     overflow: hidden;
+    min-width: 1000px;
     .collection-assembly-list-headers {
         width: 100%;
         border-bottom: 1px solid #ddd;
@@ -1447,6 +1450,7 @@ h2, h4 {
     .collection-details {
         padding: 20px;
         overflow: hidden;
+        min-width: 100%;
         .collection-assembly-list-headers {
             width: 900px;
             border-bottom: 1px solid #ddd;

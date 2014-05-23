@@ -2,14 +2,14 @@
 // App
 // ============================================================
 
-window.onerror = function(error) {
-    console.error('[WGST][Error] ' + error);
-    showNotification(error);
-};
-
 $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
+
+    window.onerror = function(error) {
+        console.error('[WGST][Error] ' + error);
+        showNotification(error);
+    };
 
     // ============================================================
     // Store application state
