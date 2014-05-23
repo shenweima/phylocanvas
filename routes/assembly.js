@@ -189,101 +189,104 @@ exports.add = function(req, res) {
 					assemblyMetadata = req.body.metadata,
 					metadata = {
 						assemblyId: assemblyId,
-						assemblyUserId: req.body.name,
-						geographic: assemblyMetadata.geographic
+						userAssemblyId: req.body.name,
+						datetime: assemblyMetadata.datetime,
+						geography: assemblyMetadata.geography,
+						source: assemblyMetadata.source
 					};
 
-					console.log('[WGST][Couchbase] Inserting metadata with key: ' + metadataKey);
+				console.log('[WGST][Couchbase] Inserting metadata with key: ' + metadataKey);
+				console.dir(metadata);
 
-					couchbaseDatabaseConnections[testWgstBucket].set(metadataKey, metadata, function(err, result) {
-						if (err) {
-							console.error('✗ [WGST][Couchbase][ERROR] ' + err);
-							return;
-						}
+				couchbaseDatabaseConnections[testWgstBucket].set(metadataKey, metadata, function(err, result) {
+					if (err) {
+						console.error('✗ [WGST][Couchbase][ERROR] ' + err);
+						return;
+					}
 
-						console.log('[WGST][Couchbase] Inserted metadata:');
-						console.dir(result);
+					console.log('[WGST][Couchbase] Inserted metadata:');
+					console.dir(result);
 
-						console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
-						io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
-							collectionId: collectionId,
-							assemblyId: assemblyId,
-							userAssemblyId: userAssemblyId,
-							status: "METADATA_OK ready",
-							result: "METADATA_OK",
-							socketRoomId: socketRoomId
-						});
+					console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
+					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+						collectionId: collectionId,
+						assemblyId: assemblyId,
+						userAssemblyId: userAssemblyId,
+						status: "METADATA_OK ready",
+						result: "METADATA_OK",
+						socketRoomId: socketRoomId
+					});
+				});
+
+				// -----------------------------------------------------------
+				// Upload assembly
+				// -----------------------------------------------------------
+
+				var uploadQueueId = 'ART_ASSEMBLY_UPLOAD_' + assemblyId;
+
+				uploadExchange = uploadConnection.exchange('wgst-ex', {
+						type: 'direct',
+						passive: true,
+						durable: false,
+						confirm: false,
+						autoDelete: false,
+						noDeclare: false,
+						confirm: false
+					}, function(exchange) {
+						console.log('✔ [WGST][RabbitMQ] Upload exchange "' + exchange.name + '" is open');
 					});
 
-					// -----------------------------------------------------------
-					// Upload assembly
-					// -----------------------------------------------------------
+				// Prepare object to publish
+				var assembly = {
+					"speciesId" : "1280",
+					"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
+					"assemblyId": assemblyId,
+					"userAssemblyId" : userAssemblyId,
+					"taskId" : "Experiment_1",
+					"collectionId": collectionId
+				};
 
-					var uploadQueueId = 'ART_ASSEMBLY_UPLOAD_' + assemblyId;
+				console.log('[WGST][RabbitMQ] Uploading assembly ' + assemblyId + ' to collection ' + collectionId);
 
-					uploadExchange = uploadConnection.exchange('wgst-ex', {
-							type: 'direct',
-							passive: true,
-							durable: false,
-							confirm: false,
-							autoDelete: false,
-							noDeclare: false,
-							confirm: false
-						}, function(exchange) {
-							console.log('✔ [WGST][RabbitMQ] Upload exchange "' + exchange.name + '" is open');
-						});
+				// Publish message
+				uploadExchange.publish('upload', assembly, { 
+					mandatory: true,
+					contentType: 'application/json',
+					deliveryMode: 1,
+					correlationId: 'Art', // Generate UUID?
+					replyTo: uploadQueueId
+				}, function(err){
+					if (err) {
+						console.error('✗ [WGST][RabbitMQ][ERROR] Error when trying to publish to upload exchange');
+						return;
+					}
 
-					// Prepare object to publish
-					var assembly = {
-						"speciesId" : "1280",
-						"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
-						"assemblyId": assemblyId,
-						"userAssemblyId" : userAssemblyId,
-						"taskId" : "Experiment_1",
-						"collectionId": collectionId
-					};
+					console.log('[WGST][RabbitMQ] Message was published to upload exchange');
+				});
 
-					console.log('[WGST][RabbitMQ] Uploading assembly ' + assemblyId + ' to collection ' + collectionId);
+				uploadQueue = uploadConnection
+					.queue(uploadQueueId, {
+						passive: false,
+						durable: false,
+						exclusive: true,
+						autoDelete: true,
+						noDeclare: false,
+						closeChannelOnUnsubscribe: false
+					}, function(queue){
+						console.log('[WGST][RabbitMQ] Upload queue "' + queue.name + '" is open');
+					}) // Subscribe to response message
+					.subscribe(function(message, headers, deliveryInfo){
+						console.log('[WGST][RabbitMQ] Preparing metadata object');									
 
-					// Publish message
-					uploadExchange.publish('upload', assembly, { 
-						mandatory: true,
-						contentType: 'application/json',
-						deliveryMode: 1,
-						correlationId: 'Art', // Generate UUID?
-						replyTo: uploadQueueId
-					}, function(err){
-						if (err) {
-							console.error('✗ [WGST][RabbitMQ][ERROR] Error when trying to publish to upload exchange');
-							return;
-						}
+						var buffer = new Buffer(message.data),
+							bufferJSON = buffer.toString(),
+							parsedMessage = JSON.parse(bufferJSON);
 
-						console.log('[WGST][RabbitMQ] Message was published to upload exchange');
+						console.log('[WGST][RabbitMQ] Received message from upload queue:');
+						console.dir(parsedMessage);
+
+						uploadConnection.end();
 					});
-
-					uploadQueue = uploadConnection
-						.queue(uploadQueueId, {
-							passive: false,
-							durable: false,
-							exclusive: true,
-							autoDelete: true,
-							noDeclare: false,
-							closeChannelOnUnsubscribe: false
-						}, function(queue){
-							console.log('[WGST][RabbitMQ] Upload queue "' + queue.name + '" is open');
-						}) // Subscribe to response message
-						.subscribe(function(message, headers, deliveryInfo){
-							console.log('[WGST][RabbitMQ] Preparing metadata object');									
-
-							var buffer = new Buffer(message.data),
-								bufferJSON = buffer.toString(),
-								parsedMessage = JSON.parse(bufferJSON);
-
-							console.log('[WGST][RabbitMQ] Received message from upload queue:');
-							console.dir(parsedMessage);
-
-							uploadConnection.end();
-						});
 			});
 		});
 };

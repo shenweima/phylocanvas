@@ -736,8 +736,8 @@ $('[title]').tooltip({
             WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore = assemblyTopScore;
 
             // Get assembly latitude and longitude
-            assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.latitude;
-            assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geographic.position.longitude;
+            assemblyLatitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geography.position.latitude;
+            assemblyLongitude = assemblies[assemblyId]['ASSEMBLY_METADATA'].geography.position.longitude;
 
             assemblyListItemHtml = 
                 $(((assemblyCounter % 2 === 0) ? '<div class="row-stripe assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' : '<div class="assembly-list-item" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">')
@@ -748,7 +748,7 @@ $('[title]').tooltip({
                         + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                     + '</div>'
                     //+ '<div class="assembly-list-generation"></div>'
-                    + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['assemblyUserId'] + '</a>' + '</div>'
+                    + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['userAssemblyId'] + '</a>' + '</div>'
                     + '<div class="assembly-list-header-nearest-representative">' + '<a href="#" class="show-on-representative-tree" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblyTopScore.referenceId + '</a>' + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
                     + '<div class="assembly-list-header-st-type">' + (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType) + '</div>'
                     + '<div class="assembly-list-header-resistance-profile">'
@@ -1086,7 +1086,7 @@ $('[title]').tooltip({
             if (assemblies.hasOwnProperty(assemblyId)) {
                 // Set label only to leaf nodes, filtering out the root node
                 if (tree.branches[assemblyId].leaf) {
-                    tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.assemblyUserId;                 
+                    tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId;                 
                 }
             }
         }
@@ -1112,7 +1112,7 @@ $('[title]').tooltip({
 
         for (assemblyId in assemblies) {
             if (assemblies.hasOwnProperty(assemblyId)) {
-                newickString = newickString.replace(assemblyId, assemblies[assemblyId].ASSEMBLY_METADATA.assemblyUserId);
+                newickString = newickString.replace(assemblyId, assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId);
             }
         }
 
@@ -1223,8 +1223,8 @@ $('[title]').tooltip({
 
                 assemblyId = assemblyIds[assemblyCounter];
                 assemblyMetadata = window.WGST.collection[collectionId].assemblies[assemblyId]['ASSEMBLY_METADATA'];
-                latitude = assemblyMetadata.geographic.position.latitude;
-                longitude = assemblyMetadata.geographic.position.longitude;
+                latitude = assemblyMetadata.geography.position.latitude;
+                longitude = assemblyMetadata.geography.position.longitude;
 
                 //Check if both latitude and longitude provided
                 if (latitude && longitude) {
@@ -1718,33 +1718,63 @@ $('[title]').tooltip({
             '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block">'
                 + '<div class="form-group">'
                     + '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
-                    + '<div class="input-group">'
-                        + '<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'
-                        + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
-                    + '</div>'
+                    + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
+
+                    // + '<div class="input-group">'
+                    //     //+ '<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>'
+                    // + '</div>'
                 + '</div>'
-                + '<div class="checkbox">'
-                    + '<label>'
-                      + '<input type="checkbox" id="assemblySampleDatetimeNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
-                    + '</label>'
-                + '</div>'
+                // + '<div class="checkbox">'
+                //     + '<label>'
+                //       + '<input type="checkbox" id="assemblySampleDatetimeNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
+                //     + '</label>'
+                // + '</div>'
             + '</div>'
             ),
             assemblySampleLocationFormBlock = $(
             '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
                 + '<div class="form-group">'
                     + '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
-                    + '<div class="input-group">'
-                        + '<span class="input-group-addon"><span class="glyphicon glyphicon-globe"></span></span>'
-                        + '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
-                    + '</div>'
+                    + '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
+
+                    // + '<div class="input-group">'
+                    //     //+ '<span class="input-group-addon"><span class="glyphicon glyphicon-globe"></span></span>'
+                    // + '</div>'
                 + '</div>'
 
-                + '<div class="checkbox">'
-                    + '<label>'
-                      + '<input type="checkbox" id="assemblySampleLocationNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
-                    + '</label>'
-                + '</div>'  
+                // + '<div class="checkbox">'
+                //     + '<label>'
+                //       + '<input type="checkbox" id="assemblySampleLocationNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
+                //     + '</label>'
+                // + '</div>'  
+            + '</div>'
+            ),
+            assemblySampleSourceFormBlock = $(
+            '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
+                + '<div class="form-group">'
+                    + '<label for="assemblySampleSourceInput' + fileCounter + '">What is the source of this sample?</label>'
+                    + '<select name="select" class="form-control assembly-sample-source-input" id="assemblySampleSourceInput' + fileCounter + '">'
+                      + '<option value="0" selected>Choose source</option>'
+                      + '<option value="1">Human</option>'
+                      + '<option value="2">Livestock</option>'
+                      + '<option value="3">Biosphere</option>'
+                      + '<option value="4">Environment</option>'
+                    + '</select>'
+
+                    // + '<div class="input-group">'
+                    //     //+ '<span class="input-group-addon"><span class="glyphicon glyphicon-leaf"></span></span>'
+
+
+
+                    //     //+ '<input type="text" class="form-control assembly-sample-source-input" id="assemblySampleSourceInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
+                    // + '</div>'
+                + '</div>'
+
+                // + '<div class="checkbox">'
+                //     + '<label>'
+                //       + '<input type="checkbox" id="assemblySampleLocationNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
+                //     + '</label>'
+                // + '</div>'  
             + '</div>'
             ),
             assemblyControlsFormBlock = $(
@@ -1767,6 +1797,7 @@ $('[title]').tooltip({
         //assemblyMetadataForm.append(assemblySampleSpeciesFormBlock);
         assemblyMetadataForm.append(assemblySampleDatetimeFormBlock);
         assemblyMetadataForm.append(assemblySampleLocationFormBlock);
+        assemblyMetadataForm.append(assemblySampleSourceFormBlock);
 
         // Show form navigation buttons only when you're at the last assembly
         // TO DO: Append to .assembly-metadata instead of the classless div
@@ -1940,7 +1971,9 @@ $('[title]').tooltip({
 
         // Init bootstrap datetimepicker
         //$('.assembly-upload-panel .assembly-sample-datetime-input').datetimepicker();
-        $('#assemblySampleDatetimeInput' + fileCounter).datetimepicker();
+        // $('#assemblySampleDatetimeInput' + fileCounter).datetimepicker().on('dp.change', function(){
+        //     console.log('Datetime changed');
+        // });
 
         // Create closure to save value of fileName
         (function(fileName){
@@ -1957,8 +1990,7 @@ $('[title]').tooltip({
                 bounds: WGST.geo.map.searchBoxBounds
             });
 
-            // When the user selects an address from the dropdown,
-            // get geo coordinates
+            // When the user selects an address from the dropdown, get geo coordinates
             // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
             // TO DO: Remove this event listener after metadata was sent
             // view-source:http://rawgit.com/klokan/8408394/raw/5ab795fb36c67ad73c215269f61c7648633ae53e/places-enter-first-item.html
@@ -1994,7 +2026,7 @@ $('[title]').tooltip({
 
                 WGST.upload.assembly[fileName] = WGST.upload.assembly[fileName] || {};
                 WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
-                WGST.upload.assembly[fileName].metadata.geographic = {
+                WGST.upload.assembly[fileName].metadata.geography = {
                     address: formattedAddress,
                     position: {
                         latitude: latitude,
@@ -2003,11 +2035,23 @@ $('[title]').tooltip({
                     // https://developers.google.com/maps/documentation/geocoding/#Types
                     type: place.types[0]
                 };
-
-                // Store provided metadata
-                //autocompleteInput.attr('data-latitude', places[0].geometry.location.lat());
-                //autocompleteInput.attr('data-longitude', places[0].geometry.location.lng());
             });
+
+            // On change store datetime in assembly metadata
+            $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-datetime-input').datetimepicker({
+                useCurrent: false,
+                language: 'en-gb'
+            }).on('change', function(){
+                WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
+                WGST.upload.assembly[fileName].metadata.datetime = $(this).val();
+            });
+
+            // On change store source in assembly metadata
+            $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-source-input').on('change', function(){
+                WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
+                WGST.upload.assembly[fileName].metadata.source = $(this).val();
+            });
+        
         }(file.name));
     
     }; // parseFastaFile()
@@ -2514,18 +2558,12 @@ $('[title]').tooltip({
     var updateMetadataProgressBar = function() {
         // Calculate total number of metadata form elements
         var totalNumberOfMetadataItems = 
-            //$('.assembly-sample-species-select').length
             + $('.assembly-sample-datetime-input').length
-            + $('.assembly-sample-location-input').length;
+            + $('.assembly-sample-location-input').length
+            + $('.assembly-sample-source-input').length;
 
         // Calculate number of non empty metadata form elements
         var numberOfNonEmptyMetadataItems =
-            /*
-            // Filter out default value
-            $('.assembly-sample-species-select').filter(function(){
-                return $(this).val() !== '0';
-            }).length
-            */
             // Filter out empty datetime inputs
             + $('.assembly-sample-datetime-input').filter(function(){
                 return this.value.length !== 0;
@@ -2533,6 +2571,10 @@ $('[title]').tooltip({
             // Filter out empty location inputs
             + $('.assembly-sample-location-input').filter(function(){
                 return this.value.length !== 0;
+            }).length
+            // Filter out default source inputs
+            + $('.assembly-sample-source-input').filter(function(){
+                return this.value !== '0';
             }).length;
 
         // Calculate new progress bar percentage value
@@ -2623,9 +2665,30 @@ $('[title]').tooltip({
         $('.adding-metadata-progress-container .progress-hint').fadeOut();
     });
 
+
+
+    // Show next form block when user fills in an input
+    $('.assembly-metadata-list-container').on('change', '.assembly-sample-source-input', function(){
+
+        // Show next form block if user selected non default option
+        if ($(this).val() !== 0) {
+            // Show next metadata form block
+            $(this).closest('.form-block').next('.form-block').fadeIn();
+            // Scroll to the next form block
+            $(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
+        } // if
+
+        // Increment metadata progress bar
+        updateMetadataProgressBar();
+        // Hide progress hint
+        $('.adding-metadata-progress-container .progress-hint').fadeOut();
+    });
+
+
+
     // TO DO: Refactor
     // When 'Next empty assembly' button is pressed
-    $('.assembly-metadata-list-container').on('click', '.assembly-metadata button.next-assembly-button', function(e){
+    $('.assembly-metadata-list-container').on('click', '.assembly-metadata button.next-assembly-button', function(event){
         // Show assembly with empty metadata input field
 
         // Trigger to show next assembly
@@ -2641,7 +2704,7 @@ $('[title]').tooltip({
 
         $(this).closest('.assembly-metadata-list-container').find('.assembly-metadata-block input:text[value=""]').focus();
 
-        e.preventDefault();
+        event.preventDefault();
     });
 
     // var REMOVE_updateAssemblyUploadProgressBar = function(collectionId) {
@@ -3243,12 +3306,14 @@ $('[title]').tooltip({
 
                                 // Add metadata to each FASTA file object
                                 fastaFilesAndMetadata[assemblyId].metadata = {
-                                    geographic: {
+                                    datetime: WGST.upload.assembly[userAssemblyId].metadata.datetime,
+                                    geography: {
                                         position: {
-                                            latitude: window.WGST.upload.assembly[userAssemblyId].metadata.geographic.position.latitude,
-                                            longitude: window.WGST.upload.assembly[userAssemblyId].metadata.geographic.position.longitude
+                                            latitude: window.WGST.upload.assembly[userAssemblyId].metadata.geography.position.latitude,
+                                            longitude: window.WGST.upload.assembly[userAssemblyId].metadata.geography.position.longitude
                                         }
-                                    }
+                                    },
+                                    source: WGST.upload.assembly[userAssemblyId].metadata.source
                                 };
 
                                 console.log('[WGST] Metadata for ' + assemblyId + ':');
@@ -3343,11 +3408,13 @@ $('[title]').tooltip({
 
         // Get metadata from selected assembly
         var metadataElementTimestamp = $(this).closest('.assembly-metadata').find('.assembly-sample-datetime-input'),
-            metadataElementLocation = $(this).closest('.assembly-metadata').find('.assembly-sample-location-input');
+            metadataElementLocation = $(this).closest('.assembly-metadata').find('.assembly-sample-location-input'),
+            metadataElementSource = $(this).closest('.assembly-metadata').find('.assembly-sample-source-input');
 
         // Set value
         $('.assembly-metadata').find('.assembly-sample-datetime-input').val(metadataElementTimestamp.val());
         $('.assembly-metadata').find('.assembly-sample-location-input').val(metadataElementLocation.val());
+        $('.assembly-metadata').find('.assembly-sample-source-input').val(metadataElementSource.val());
 
         // // Set data
         // $('.assembly-metadata').find('.assembly-sample-location-input').attr('data-latitude', metadataElementLocation.attr('data-latitude'));
@@ -3448,7 +3515,7 @@ $('[title]').tooltip({
                 assemblyPanel = $('.wgst-panel__assembly');
 
             // Set assembly name
-            assemblyPanel.find('.header-title small').text(assembly.ASSEMBLY_METADATA.assemblyUserId);
+            assemblyPanel.find('.header-title small').text(assembly.ASSEMBLY_METADATA.userAssemblyId);
 
             // ============================================================
             // Prepare predicted resistance profile
