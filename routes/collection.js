@@ -38,130 +38,97 @@ exports.add = function(req, res) {
 
 	// TODO: Validate request
 
-	// Call RabbitMQ
-	var amqp = require('amqp'),
-		connection = amqp.createConnection({
-			host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
-			port: 5670
-		}, {
-			reconnect: false,
-			autoDelete: true
-		});
+	var queueId = 'ART_CREATE_COLLECTION_' + uuid.v4();
 
-	connection.on('error', function(error) {
-	    console.error('✗ [WGST][RabbitMQ][ERROR] Ignoring error: ' + error);
+	// Publish message
+	rabbitMQExchanges[rabbitMQExchangeNames.COLLECTION_ID].publish('id-request', collectionRequest, { 
+		mandatory: true,
+		contentType: 'application/json',
+		deliveryMode: 1,
+		correlationId: 'Art', // Generate UUID?
+		replyTo: queueId
+	}, function(err){
+		if (err) {
+			console.log('✗ [WGST][RabbitMQ][ERROR] Error in trying to publish');
+			return; // return undefined?
+		}
+
+		console.log('[WGST][RabbitMQ] Message was published');
 	});
 
-	connection.on("ready", function(){
-		console.log('[WGST][RabbitMQ] Connection is ready');
+	rabbitMQConnection
+	.queue(queueId, { // Create queue
+		passive: false,
+		durable: false,
+		exclusive: true,
+		autoDelete: true,
+		noDeclare: false,
+		closeChannelOnUnsubscribe: false
+	}, function(queue){
+		console.log('[WGST][RabbitMQ] Queue "' + queue.name + '" is open');
 
-		var queueId = 'ART_CREATE_COLLECTION_' + uuid.v4(),
-			exchange = connection.exchange('grid-ex', {
-				type: 'direct',
-				passive: true,
-				durable: false,
-				confirm: false,
-				autoDelete: false,
-				noDeclare: false,
-				confirm: false
-			}, function(exchange) {
-				console.log('[WGST][RabbitMQ] Exchange "' + exchange.name + '" is open');
+	}) // Subscribe to response message
+	.subscribe(function(message, headers, deliveryInfo){
+		console.log('[WGST][RabbitMQ] Received response');
+
+		var buffer = new Buffer(message.data),
+			data = JSON.parse(buffer.toString()),
+			collectionId = data.uuid,
+			userAssemblyIdToAssemblyIdMap = data.idMap;
+
+		if (isNewCollection) {
+			couchbaseDatabaseConnections[testWgstFrontBucket].set('collection_' + collectionId, userAssemblyIdToAssemblyIdMap, function(err, result) {
+				if (err) {
+					console.error('✗ [WGST][Couchbase][ERROR] ' + err);
+					return;
+				}
+
+				console.log('[WGST][Couchbase] Inserted new collection:');
+				console.dir(result);
+
+				console.dir(userAssemblyIdToAssemblyIdMap);
+
+				// Return result data
+				res.json({
+					collectionId: collectionId,
+					userAssemblyIdToAssemblyIdMap: userAssemblyIdToAssemblyIdMap
+				});
+
 			});
+		} else {
+			// Get list of assemblies
+			couchbaseDatabaseConnections[testWgstFrontBucket].get('collection_' + collectionId, function(err, existingUserAssemblyIdToAssemblyIdMap) {
+				if (err) throw err;
 
-		// Publish message
-		exchange.publish('id-request', collectionRequest, { 
-			mandatory: true,
-			contentType: 'application/json',
-			deliveryMode: 1,
-			correlationId: 'Art', // Generate UUID?
-			replyTo: queueId
-		}, function(err){
-			if (err) {
-				console.log('✗ [WGST][RabbitMQ][ERROR] Error in trying to publish');
-				return; // return undefined?
-			}
+				console.log('Does that look correct to you?');
+				console.dir(existingUserAssemblyIdToAssemblyIdMap);
 
-			console.log('[WGST][RabbitMQ] Message was published');
-		});
+				// Merge exisinting user assembly id to assembly id map with a new one
+				var updatedUserAssemblyIdToAssemblyIdMap = existingUserAssemblyIdToAssemblyIdMap.value,
+					assemblyId;
 
-		connection
-		.queue(queueId, { // Create queue
-			passive: false,
-			durable: false,
-			exclusive: true,
-			autoDelete: true,
-			noDeclare: false,
-			closeChannelOnUnsubscribe: false
-		}, function(queue){
-			console.log('[WGST][RabbitMQ] Queue "' + queue.name + '" is open');
+				for (assemblyId in userAssemblyIdToAssemblyIdMap) {
+					updatedUserAssemblyIdToAssemblyIdMap[assemblyId] = userAssemblyIdToAssemblyIdMap[assemblyId];
+				}
 
-		}) // Subscribe to response message
-		.subscribe(function(message, headers, deliveryInfo){
-			console.log('[WGST][RabbitMQ] Received response');
-
-			var buffer = new Buffer(message.data),
-				data = JSON.parse(buffer.toString()),
-				collectionId = data.uuid,
-				userAssemblyIdToAssemblyIdMap = data.idMap;
-
-			if (isNewCollection) {
-				couchbaseDatabaseConnections[testWgstFrontBucket].set('collection_' + collectionId, userAssemblyIdToAssemblyIdMap, function(err, result) {
+				couchbaseDatabaseConnections[testWgstFrontBucket].set('collection_' + collectionId, updatedUserAssemblyIdToAssemblyIdMap, function(err, result) {
 					if (err) {
 						console.error('✗ [WGST][Couchbase][ERROR] ' + err);
 						return;
 					}
 
-					console.log('[WGST][Couchbase] Inserted new collection:');
+					console.log('[WGST][Couchbase] Updated existing collection:');
 					console.dir(result);
-
-					console.dir(userAssemblyIdToAssemblyIdMap);
 
 					// Return result data
 					res.json({
 						collectionId: collectionId,
-						userAssemblyIdToAssemblyIdMap: userAssemblyIdToAssemblyIdMap
+						userAssemblyIdToAssemblyIdMap: updatedUserAssemblyIdToAssemblyIdMap
 					});
 
-					// End connection, however in reality it's being dropped before it's ended so listen for error too
-					connection.end();
 				});
-			} else {
-				// Get list of assemblies
-				couchbaseDatabaseConnections[testWgstFrontBucket].get('collection_' + collectionId, function(err, existingUserAssemblyIdToAssemblyIdMap) {
-					if (err) throw err;
-
-					console.log('Does that look correct to you?');
-					console.dir(existingUserAssemblyIdToAssemblyIdMap);
-
-					// Merge exisinting user assembly id to assembly id map with a new one
-					var updatedUserAssemblyIdToAssemblyIdMap = existingUserAssemblyIdToAssemblyIdMap.value,
-						assemblyId;
-
-					for (assemblyId in userAssemblyIdToAssemblyIdMap) {
-						updatedUserAssemblyIdToAssemblyIdMap[assemblyId] = userAssemblyIdToAssemblyIdMap[assemblyId];
-					}
-
-					couchbaseDatabaseConnections[testWgstFrontBucket].set('collection_' + collectionId, updatedUserAssemblyIdToAssemblyIdMap, function(err, result) {
-						if (err) {
-							console.error('✗ [WGST][Couchbase][ERROR] ' + err);
-							return;
-						}
-
-						console.log('[WGST][Couchbase] Updated existing collection:');
-						console.dir(result);
-
-						// Return result data
-						res.json({
-							collectionId: collectionId,
-							userAssemblyIdToAssemblyIdMap: updatedUserAssemblyIdToAssemblyIdMap
-						});
-
-						// End connection, however in reality it's being dropped before it's ended so listen for error too
-						connection.end();
-					});
-				});
-			} // else
-		});
+			});
+		} // else
 	});
 };
 

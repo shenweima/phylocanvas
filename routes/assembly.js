@@ -1,44 +1,3 @@
-var rabbitMQConnectionOptions = {
-		host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
-		port: 5672
-	},
-	rabbitMQConnectionImplementationOptions = {
-		reconnect: false,
-		autoDelete: true
-	};
-
-var amqp = require('amqp');
-
-// Create RabbitMQ connection
-var notificationConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
-
-notificationConnection.on('error', function(error) {
-    console.error("✗ [WGST][RabbitMQ][ERROR] Notification connection: " + error);
-});
-
-var notificationExchange = undefined;
-
-notificationConnection.on("ready", function(){
-	console.log('✔ [WGST][RabbitMQ] Notification connection is ready');
-
-	notificationConnection.exchange('notifications-ex',
-		{
-			type: 'topic',
-			passive: true,
-			durable: false,
-			confirm: false,
-			autoDelete: false,
-			noDeclare: false,
-			confirm: false
-		}, function(readyNotificationExchange) {
-
-			notificationExchange = readyNotificationExchange;
-
-			console.log('✔ [WGST][RabbitMQ] Notification exchange "' + notificationExchange.name + '" is open');
-		});
-
-});
-
 exports.add = function(req, res) {
 
 	var collectionId = req.body.collectionId,
@@ -68,15 +27,13 @@ exports.add = function(req, res) {
 	// -------------------------------------
 	// RabbitMQ Notifications
 	// -------------------------------------
-	var uploadQueue,
-		uploadExchange,
-		uploadConnection;
+	var uploadQueue;
 
 	// Generate queue id
 	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId;
 
 	// Create queue
-	var notificationQueue = notificationConnection.queue(notificationQueueId, 
+	var notificationQueue = rabbitMQConnection.queue(notificationQueueId, 
 		{
 			exclusive: true
 		}, function(queue){
@@ -84,8 +41,8 @@ exports.add = function(req, res) {
 
 			var readyResults = [];
 
-			queue.bind(notificationExchange, "*.ASSEMBLY." + assemblyId); // binding routing key
-			queue.bind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
+			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "*.ASSEMBLY." + assemblyId); // binding routing key
+			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "COLLECTION_TREE.COLLECTION." + collectionId);
 
 			// Subscribe to response message
 			queue.subscribe(function(message, headers, deliveryInfo){
@@ -164,130 +121,102 @@ exports.add = function(req, res) {
 					//queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
 					queue.destroy();
 					//notificationExchange.destroy();
-					//notificationConnection.end();
+					//rabbitMQConnection.end();
 				} // if
 			});
 
-			// -------------------------------------
-			// RabbitMQ Upload
-			// -------------------------------------
+			// -----------------------------------------------------------
+			// Insert assembly metadata into Couchbase
+			// -----------------------------------------------------------
 
-			uploadConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
-
-			uploadConnection.on('error', function(error) {
-			    console.error('✗ [WGST][RabbitMQ][ERROR] Upload connection: ' + error);
-			});
-
-			uploadConnection.on("ready", function(){
-				console.log('✔ [WGST][RabbitMQ] Upload connection is ready');
-
-				// -----------------------------------------------------------
-				// Insert assembly metadata into Couchbase
-				// -----------------------------------------------------------
-
-				var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
-					assemblyMetadata = req.body.metadata,
-					metadata = {
-						assemblyId: assemblyId,
-						userAssemblyId: req.body.name,
-						datetime: assemblyMetadata.datetime,
-						geography: assemblyMetadata.geography,
-						source: assemblyMetadata.source
-					};
-
-				console.log('[WGST][Couchbase] Inserting metadata with key: ' + metadataKey);
-				console.dir(metadata);
-
-				couchbaseDatabaseConnections[testWgstBucket].set(metadataKey, metadata, function(err, result) {
-					if (err) {
-						console.error('✗ [WGST][Couchbase][ERROR] ' + err);
-						return;
-					}
-
-					console.log('[WGST][Couchbase] Inserted metadata:');
-					console.dir(result);
-
-					console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
-					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
-						collectionId: collectionId,
-						assemblyId: assemblyId,
-						userAssemblyId: userAssemblyId,
-						status: "METADATA_OK ready",
-						result: "METADATA_OK",
-						socketRoomId: socketRoomId
-					});
-				});
-
-				// -----------------------------------------------------------
-				// Upload assembly
-				// -----------------------------------------------------------
-
-				var uploadQueueId = 'ART_ASSEMBLY_UPLOAD_' + assemblyId;
-
-				uploadExchange = uploadConnection.exchange('wgst-ex', {
-						type: 'direct',
-						passive: true,
-						durable: false,
-						confirm: false,
-						autoDelete: false,
-						noDeclare: false,
-						confirm: false
-					}, function(exchange) {
-						console.log('✔ [WGST][RabbitMQ] Upload exchange "' + exchange.name + '" is open');
-					});
-
-				// Prepare object to publish
-				var assembly = {
-					"speciesId" : "1280",
-					"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
-					"assemblyId": assemblyId,
-					"userAssemblyId" : userAssemblyId,
-					"taskId" : "Experiment_1",
-					"collectionId": collectionId
+			var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
+				assemblyMetadata = req.body.metadata,
+				metadata = {
+					assemblyId: assemblyId,
+					userAssemblyId: req.body.name,
+					datetime: assemblyMetadata.datetime,
+					geography: assemblyMetadata.geography,
+					source: assemblyMetadata.source
 				};
 
-				console.log('[WGST][RabbitMQ] Uploading assembly ' + assemblyId + ' to collection ' + collectionId);
+			console.log('[WGST][Couchbase] Inserting metadata with key: ' + metadataKey);
+			console.dir(metadata);
 
-				// Publish message
-				uploadExchange.publish('upload', assembly, { 
-					mandatory: true,
-					contentType: 'application/json',
-					deliveryMode: 1,
-					correlationId: 'Art', // Generate UUID?
-					replyTo: uploadQueueId
-				}, function(err){
-					if (err) {
-						console.error('✗ [WGST][RabbitMQ][ERROR] Error when trying to publish to upload exchange');
-						return;
-					}
+			couchbaseDatabaseConnections[testWgstBucket].set(metadataKey, metadata, function(err, result) {
+				if (err) {
+					console.error('✗ [WGST][Couchbase][ERROR] ' + err);
+					return;
+				}
 
-					console.log('[WGST][RabbitMQ] Message was published to upload exchange');
+				console.log('[WGST][Couchbase] Inserted metadata:');
+				console.dir(result);
+
+				console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
+				io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+					collectionId: collectionId,
+					assemblyId: assemblyId,
+					userAssemblyId: userAssemblyId,
+					status: "METADATA_OK ready",
+					result: "METADATA_OK",
+					socketRoomId: socketRoomId
 				});
-
-				uploadQueue = uploadConnection
-					.queue(uploadQueueId, {
-						passive: false,
-						durable: false,
-						exclusive: true,
-						autoDelete: true,
-						noDeclare: false,
-						closeChannelOnUnsubscribe: false
-					}, function(queue){
-						console.log('[WGST][RabbitMQ] Upload queue "' + queue.name + '" is open');
-					}) // Subscribe to response message
-					.subscribe(function(message, headers, deliveryInfo){
-						console.log('[WGST][RabbitMQ] Preparing metadata object');									
-
-						var buffer = new Buffer(message.data),
-							bufferJSON = buffer.toString(),
-							parsedMessage = JSON.parse(bufferJSON);
-
-						console.log('[WGST][RabbitMQ] Received message from upload queue:');
-						console.dir(parsedMessage);
-
-						uploadConnection.end();
-					});
 			});
+
+			// -----------------------------------------------------------
+			// Upload assembly
+			// -----------------------------------------------------------
+
+			var uploadQueueId = 'ART_ASSEMBLY_UPLOAD_' + assemblyId;
+
+			// Prepare object to publish
+			var assembly = {
+				"speciesId" : "1280",
+				"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
+				"assemblyId": assemblyId,
+				"userAssemblyId" : userAssemblyId,
+				"taskId" : "Experiment_1",
+				"collectionId": collectionId
+			};
+
+			console.log('[WGST][RabbitMQ] Uploading assembly ' + assemblyId + ' to collection ' + collectionId);
+
+			// Publish message
+			rabbitMQExchanges[rabbitMQExchangeNames.UPLOAD].publish('upload', assembly, { 
+				mandatory: true,
+				contentType: 'application/json',
+				deliveryMode: 1,
+				correlationId: 'Art', // Generate UUID?
+				replyTo: uploadQueueId
+			}, function(err){
+				if (err) {
+					console.error('✗ [WGST][RabbitMQ][ERROR] Error when trying to publish to upload exchange');
+					return;
+				}
+
+				console.log('[WGST][RabbitMQ] Message was published to upload exchange');
+			});
+
+			uploadQueue = rabbitMQConnection
+				.queue(uploadQueueId, {
+					passive: false,
+					durable: false,
+					exclusive: true,
+					autoDelete: true,
+					noDeclare: false,
+					closeChannelOnUnsubscribe: false
+				}, function(queue){
+					console.log('[WGST][RabbitMQ] Upload queue "' + queue.name + '" is open');
+				}) // Subscribe to response message
+				.subscribe(function(message, headers, deliveryInfo){
+					console.log('[WGST][RabbitMQ] Preparing metadata object');									
+
+					var buffer = new Buffer(message.data),
+						bufferJSON = buffer.toString(),
+						parsedMessage = JSON.parse(bufferJSON);
+
+					console.log('[WGST][RabbitMQ] Received message from upload queue:');
+					console.dir(parsedMessage);
+				});
 		});
 };
 

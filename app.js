@@ -155,7 +155,7 @@ var createCouchbaseConnection = function(bucketName) {
 			return;
 		}
 
-		console.log('✔ [WGST][Couchbase] Successfuly opened Couchbase connection to "' + bucketName + '" bucket');
+		console.log('✔ [WGST][Couchbase] Opened Couchbase connection to "' + bucketName + '" bucket');
 	});
 };
 
@@ -163,28 +163,65 @@ couchbaseDatabaseConnections[testWgstBucket] = createCouchbaseConnection(testWgs
 couchbaseDatabaseConnections[testWgstResourcesBucket] = createCouchbaseConnection(testWgstResourcesBucket);
 couchbaseDatabaseConnections[testWgstFrontBucket] = createCouchbaseConnection(testWgstFrontBucket);
 
-// couchbaseDatabaseConnections[testWgstBucket] = new couchbase.Connection({
-// 	host: 'http://129.31.26.151:8091/pools',
-// 	bucket: testWgstBucket,
-// 	password: '.oneir66'
-// }, function(error) {
-// 	if (error) {
-// 		console.error('✗ [WGST][Couchbase][ERROR] ' + error);
-// 		return;
-// 	}
+//======================================================
+// RabbitMQ
+//======================================================
 
-// 	console.log('✔ [WGST][Couchbase] Successfuly opened Couchbase connection to "' + testWgstBucket + '" bucket');
-// });
+var amqp = require('amqp'),
+	rabbitMQConnectionOptions = {
+		host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
+		port: 5672
+	},
+	rabbitMQConnectionImplementationOptions = {
+		reconnect: false,
+		autoDelete: true
+	};
 
-// couchbaseDatabaseConnections[testWgstResourcesBucket] = new couchbase.Connection({
-// 	host: 'http://129.31.26.151:8091/pools',
-// 	bucket: testWgstResourcesBucket,
-// 	password: '.oneir66'
-// }, function(error) {
-// 	if (error) {
-// 		console.error('✗ [WGST][Couchbase][ERROR] ' + error);
-// 		return;
-// 	}
+rabbitMQExchanges = {};
+rabbitMQExchangeNames = {
+	NOTIFICATION: 'notifications-ex',
+	UPLOAD: 'wgst-ex',
+	COLLECTION_ID: 'grid-ex'
+};
 
-// 	console.log('✔ [WGST][Couchbase] Successfuly opened Couchbase connection to "' + testWgstResourcesBucket + '" bucket');
-// });
+rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
+
+rabbitMQConnection.on('error', function(error) {
+    console.error("✗ [WGST][RabbitMQ][Error] Connection: " + error);
+});
+
+rabbitMQConnection.on("ready", function(){
+	console.log('✔ [WGST][RabbitMQ] Connection is ready');
+
+	// Exchange for uploading assemblies
+	createExchange(rabbitMQExchangeNames.UPLOAD, {
+		type: 'direct'
+	});
+
+	// Exchange for getting notifications
+	createExchange(rabbitMQExchangeNames.NOTIFICATION, {
+		type: 'topic'
+	});
+
+	// Exchange for getting collection id
+	createExchange(rabbitMQExchangeNames.COLLECTION_ID, {
+		type: 'direct'
+	});
+
+});
+
+var createExchange = function(exchangeName, exchangeProperties) {
+	rabbitMQConnection.exchange(exchangeName, {
+			type: exchangeProperties.type,
+			passive: true,
+			durable: false,
+			confirm: false,
+			autoDelete: false,
+			noDeclare: false,
+			confirm: false
+		}, function(exchange) {
+			rabbitMQExchanges[exchange.name] = exchange;
+
+			console.log('✔ [WGST][RabbitMQ] Exchange "' + exchange.name + '" is open');
+		});
+};
