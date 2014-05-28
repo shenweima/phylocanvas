@@ -966,13 +966,13 @@ $('[title]').tooltip({
         window.WGST.collection[collectionId].tree.canvas.hideLabels();
     });
 
-    $('.collection-assembly-list').on('scroll', function(){
-        console.log('Scrolling...');
+    // $('.collection-assembly-list').on('scroll', function(){
+    //     console.log('Scrolling...');
 
-        var collectionId = $(this).attr('data-collection-id');
+    //     var collectionId = $(this).attr('data-collection-id');
 
-        window.WGST.collection[collectionId].displayedAssemblies = [];
-    });
+    //     window.WGST.collection[collectionId].displayedAssemblies = [];
+    // });
 
     var selectTreeNodes = function(collectionId, selectedAssemblyIds) {
         var assemblies = window.WGST.collection[collectionId].assemblies;
