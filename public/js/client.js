@@ -769,6 +769,32 @@ $('[title]').tooltip({
         $('.antibiotic[data-toggle="tooltip"]').tooltip();
     };
 
+    var isNavItemEnabled = function(navItemName) {
+        var navItem = $('.wgst-navigation-item__' + navItemName);
+
+        if (navItem.hasClass('wgst-navigation-item--active')) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    var enableNavItem = function(navItemName) {
+        var navItem = $('.wgst-navigation-item__' + navItemName);
+
+        if (! isNavItemEnabled(navItemName)) {
+            navItem.addClass('wgst-navigation-item--active');
+        }
+    };
+
+    var disableNavItem = function(navItemName) {
+        var navItem = $('.wgst-navigation-item__' + navItemName);
+
+        if (isNavItemEnabled(navItemName)) {
+            navItem.removeClass('wgst-navigation-item--active');
+        }
+    };
+
     var closeCollection = function(collectionId) {
         console.log('[WGST] Closing collection ' + collectionId);
 
@@ -780,6 +806,9 @@ $('[title]').tooltip({
             // Change URL
             window.history.replaceState('Object', 'WGST Collection', '');
         });
+
+        // Disable 'Collection' nav item
+        disableNavItem('collection');
     };
 
     var getCollection = function(collectionId) {
@@ -936,6 +965,9 @@ $('[title]').tooltip({
                 maximizeCollection(collectionId);
                 deactivatePanel('collection');
             }
+
+            // Enable 'Collection' nav item
+            enableNavItem('collection');            
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log('[WGST][ERROR] Failed to get collection id');
@@ -3936,22 +3968,12 @@ $('[title]').tooltip({
         event.preventDefault();
     });
 
-    var Panel = function() {
-
-    };
-
     $('.wgst-navigation-item__map').on('click', function(){
         var activeFullscreenElement = $('.wgst-fullscreen--active');
 
         if (activeFullscreenElement.attr('data-fullscreen-name') === 'map') {
             bringFullscreenToPanel(false); 
         }
-
-        // activatePanel('map');
-        // endPanelLoadingIndicator('map');
-        // showPanel('map');
-        // showPanelBodyContent('map');
-        // bringPanelToTop('map');
 
         openPanel('map');
 
@@ -3960,6 +3982,18 @@ $('[title]').tooltip({
 
     $('.wgst-navigation-item__representative-tree').on('click', function(){
         openRepresentativeCollectionTree();
+    });
+
+    $('.wgst-navigation-item__collection').on('click', function(){
+        if (isNavItemEnabled('collection')) {
+            var activeFullscreenElement = $('.wgst-fullscreen--active');
+
+            if (activeFullscreenElement.attr('data-fullscreen-name') === 'collection') {
+                bringFullscreenToPanel(false); 
+            }
+
+            openPanel('collection');
+        }
     });
 
 google.maps.event.addDomListener(window, "resize", function() {
@@ -4078,18 +4112,29 @@ google.maps.event.addDomListener(window, "resize", function() {
                 panelName = panel.attr('data-panel-name'),
                 panelId = panel.attr('data-panel-id');
 
-            // Destroy Twitter Bootstrap tooltip
-            $('[data-toggle="tooltip"]').tooltip('destroy');
-
-            bringFullscreenToPanel(false);
-
             if (panelName === 'collection') {
-                bringPanelToFullscreen(panelId, function(){
+                // Destroy Twitter Bootstrap tooltip
+                $('[data-toggle="tooltip"]').tooltip('destroy');
+                
+                bringFullscreenToPanel(false);
 
-                    $('.wgst-fullscreen__' + panelName).append($('.collection-details').clone(true))
+                bringPanelToFullscreen(panelId, function(){
+                    $('.wgst-fullscreen__' + panelName)
+                        .html('')
+                        .append($('.collection-details').clone(true))
 
                     // Trigger Twitter Bootstrap tooltip
                     $('[data-toggle="tooltip"]').tooltip();
+                });
+            } else if (panelName === 'map') {
+                bringFullscreenToPanel(false);
+
+                bringPanelToFullscreen(panelId, function(){
+                    $('.wgst-fullscreen__' + panelName)
+                        .html('')
+                        .append(WGST.geo.map.canvas.getDiv());
+
+                    google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
                 });
             }
         } // if

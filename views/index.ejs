@@ -57,8 +57,9 @@
 
         <nav class="wgst-navigation">
           <div class="wgst-navigation-logo">WGST</div>
-          <a href="#" class="wgst-navigation-item wgst-navigation-item__map">Map</a>
-          <a href="#" class="wgst-navigation-item wgst-navigation-item__representative-tree">Representative tree</a>
+          <a href="#" class="wgst-navigation-item wgst-navigation-item__map wgst-navigation-item--active">Map</a>
+          <a href="#" class="wgst-navigation-item wgst-navigation-item__representative-tree wgst-navigation-item--active">Representative tree</a>
+          <a href="#" class="wgst-navigation-item wgst-navigation-item__collection">Collection</a>
         </nav>
 
         <div class="wgst-background"></div>
@@ -544,11 +545,16 @@
         </div><!-- /.wgst-fullscreen__map -->
 
         <!-- Map -->
-        <div class="wgst-panel wgst-panel__map wgst-draggable" data-panel-name="map">
+        <div class="wgst-panel wgst-panel__map wgst-draggable" data-panel-name="map" data-panel-id="map">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Map</h4>
-            <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
+<!--             <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
+ -->
+            <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize wgst-panel-control-button--active glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
           <article class="wgst-panel-body">
