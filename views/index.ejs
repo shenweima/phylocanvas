@@ -67,25 +67,6 @@
 
 
 
-        <!-- Representative tree -->
-        <div class="wgst-panel wgst-panel__representative-tree wgst-panel--active wgst-draggable" data-panel-name="representativeTree">
-          <header class="wgst-panel-header wgst-draggable-handle">
-            <h4 class="header-title">Representative Tree</h4>
-            <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
-            <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
-          </header>
-          <div class="wgst-panel-body">
-            <div class="tree-controls">
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-default tree-controls-select-all">Select all nodes</button>
-                <button type="button" class="btn btn-sm btn-default tree-controls-select-none">Deselect all nodes</button>
-              </div>
-            </div>
-            <div id="phylocanvas"></div>
-          </div><!-- /.wgst-panel-body -->
-          <footer class="wgst-panel-footer wgst-draggable-handle">
-          </footer><!-- /.wgst-panel-footer -->
-        </div><!-- /.wgst-panel.tree-panel -->
 
 
 
@@ -246,7 +227,7 @@
             <h4 class="header-title">Collection</h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span>
-            <span class="wgst-panel-control-button wgst-panel-control-button__minimize wgst-panel-control-button--active glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
           <article class="wgst-panel-body">
@@ -353,7 +334,7 @@
             <div class="wgst-panel-loading"><div class="loading"></div></div>
             <div class="wgst-panel-body-content">
               
-              <div class="tree-controls">
+              <div class="wgst-tree-controls">
 
                 <!--
                 <div class="btn-group">
@@ -386,7 +367,7 @@
                 -->
 
               </div>
-              <div class="phylocanvas"></div>
+              <div class="wgst-tree-content"></div>
 
             </div><!-- /.wgst-panel-body-content --> 
           </article><!-- /.wgst-panel-body -->
@@ -400,12 +381,15 @@
 
 
 
-
+        <!-- Representative collection tree -->
+        <div class="wgst-fullscreen wgst-fullscreen__representative-collection-tree" data-fullscreen-name="representativeCollectionTree">
+        </div><!-- /.wgst-fullscreen__representative-collection-tree -->
 
         <!-- Representative collection tree -->
-        <div class="wgst-panel wgst-panel__representative-collection-tree wgst-panel--active wgst-draggable" data-panel-name="representativeCollectionTree" data-collection-id="">
+        <div class="wgst-panel wgst-panel__representative-collection-tree wgst-panel--active wgst-draggable" data-panel-name="representativeCollectionTree" data-panel-id="representativeCollectionTree" data-collection-id="">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Staphylococcus Aureus Representative Tree</h4>
+            <!-- <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span> -->
             <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
@@ -414,7 +398,7 @@
             <div class="wgst-panel-loading"><div class="loading"></div></div>
             <div class="wgst-panel-body-content">
               
-              <div class="tree-controls">
+              <div class="wgst-tree-controls">
 
                 <!--                 
                 <div class="btn-group">
@@ -435,15 +419,13 @@
                 -->
 
               </div>
-              <div class="phylocanvas"></div>
+              <div class="wgst-tree-content"></div>
 
             </div><!-- /.wgst-panel-body-content --> 
           </article><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer wgst-draggable-handle">
           </footer><!-- /.wgst-panel-footer -->
         </div><!-- /.wgst-panel.tree-panel -->
-
-
 
 
 
@@ -548,19 +530,19 @@
         <div class="wgst-panel wgst-panel__map wgst-draggable" data-panel-name="map" data-panel-id="map">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Map</h4>
-<!--             <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
+<!--             
+            <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
  -->
             <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span>
-            <span class="wgst-panel-control-button wgst-panel-control-button__minimize wgst-panel-control-button--active glyphicon glyphicon-minus"></span>
+            <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
           <article class="wgst-panel-body">
             <div class="wgst-panel-loading"><div class="loading"></div></div>
             <div class="wgst-panel-body-content">
-            <!-- AAA -->
             </div><!-- /.wgst-panel-body-content --> 
           </article><!-- /.wgst-panel-body -->
           <footer class="wgst-panel-footer wgst-draggable-handle">

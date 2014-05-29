@@ -155,24 +155,6 @@ $(function(){
         } // if
     };
 
-$('body').tooltip({
-  selector: '[title]'
-});
-$('[title]').tooltip({
-  container: 'body'
-});
-
-
-    // $('body').tooltip({
-    //     //selector: '.wgst-collection'
-    //     selector: '[title]'
-    //     //selector: '[data-toggle="tooltip"]'
-    // });
-
-    // $('.wgst-collection').on('hidden.bs.tooltip', function () {
-    //     console.log('Tooltip visible');
-    // });
-
     // ============================================================
     // Panels
     // ============================================================
@@ -862,9 +844,9 @@ $('[title]').tooltip({
             // Render collection tree
             // ----------------------------------------
             // Remove previosly rendered collection tree
-            $('.wgst-panel__collection-tree .phylocanvas').html('');
+            $('.wgst-panel__collection-tree .wgst-tree-content').html('');
             // Attach collection id
-            $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+            $('.wgst-panel__collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
             // Init collection tree
             window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
             // Render collection tree
@@ -3424,7 +3406,7 @@ $('[title]').tooltip({
     });
 
     // Deselect Twitter Bootstrap button on click
-    $('.tree-panel .tree-controls button').on('click', function(){
+    $('.tree-panel .wgst-tree-controls button').on('click', function(){
         $(this).blur();
     });
 
@@ -3771,11 +3753,11 @@ $('[title]').tooltip({
         var collectionId = 'representative';//WGST.settings.representativeCollectionId;
 
         // Remove previosly rendered collection tree
-        $('.wgst-panel__representative-collection-tree .phylocanvas').html('');
+        $('.wgst-panel__representative-collection-tree .wgst-tree-content').html('');
         // Attach collection id
-        $('.wgst-panel__representative-collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+        $('.wgst-panel__representative-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
 
-        window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
+        window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .wgst-tree-content')[0]);
         window.WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
         window.WGST.collection.representative.tree.canvas.treeType = 'rectangular';
         window.WGST.collection.representative.tree.showLabels = true;
@@ -4090,12 +4072,8 @@ google.maps.event.addDomListener(window, "resize", function() {
         var panel = $('[data-panel-id="' + panelId + '"]'),
             panelName = panel.attr('data-panel-name');
 
-        // $('.wgst-fullscreen__' + panelName)
-        //     .append($('.collection-details').clone(true))
-        //     .addClass('wgst-fullscreen--active')
-        //     .addClass('wgst-fullscreen--visible');
-        
-        $('.wgst-fullscreen__' + panelName)
+        //$('.wgst-fullscreen__' + panelName)
+        $('[data-fullscreen-name="' + panelName + '"]')
             .addClass('wgst-fullscreen--active')
             .addClass('wgst-fullscreen--visible');
 
@@ -4113,13 +4091,14 @@ google.maps.event.addDomListener(window, "resize", function() {
                 panelId = panel.attr('data-panel-id');
 
             if (panelName === 'collection') {
+
                 // Destroy Twitter Bootstrap tooltip
                 $('[data-toggle="tooltip"]').tooltip('destroy');
                 
                 bringFullscreenToPanel(false);
 
                 bringPanelToFullscreen(panelId, function(){
-                    $('.wgst-fullscreen__' + panelName)
+                    $('[data-fullscreen-name="' + panelName + '"]')
                         .html('')
                         .append($('.collection-details').clone(true))
 
@@ -4127,10 +4106,11 @@ google.maps.event.addDomListener(window, "resize", function() {
                     $('[data-toggle="tooltip"]').tooltip();
                 });
             } else if (panelName === 'map') {
+
                 bringFullscreenToPanel(false);
 
                 bringPanelToFullscreen(panelId, function(){
-                    $('.wgst-fullscreen__' + panelName)
+                    $('[data-fullscreen-name="' + panelName + '"]')
                         .html('')
                         .append(WGST.geo.map.canvas.getDiv());
 
