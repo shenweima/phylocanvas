@@ -688,8 +688,8 @@ $(function(){
     var renderAssemblyAnalysisList = function(collectionId, antibiotics) {
         console.log('[WGST] Rendering assembly analysis list');
 
-        var assemblies = window.WGST.collection[collectionId].assemblies,
-            sortedAssemblyIds = window.WGST.collection[collectionId].sortedAssemblyIds,
+        var assemblies = WGST.collection[collectionId].assemblies,
+            sortedAssemblyIds = WGST.collection[collectionId].sortedAssemblyIds,
             assemblyId,
             assemblyResistanceProfile,
             assemblyResistanceProfileHtml,
@@ -704,8 +704,8 @@ $(function(){
             assemblyListItems = document.createDocumentFragment();
 
         // Render assemblies according to the sorting order
-        for (;assemblyCounter < sortedAssemblyIds.length;) {            
-        
+        for (;assemblyCounter < sortedAssemblyIds.length;) {
+                
             assemblyId = sortedAssemblyIds[assemblyCounter];
              
             // Create assembly resistance profile preview html
@@ -777,10 +777,17 @@ $(function(){
         }
     };
 
+    var clearCollectionAssemblyList = function(collectionId) {
+        console.log('[WGST] Clearing ' + collectionId + ' collection assembly list');
+
+        $('.wgst-panel__collection .collection-assembly-list').html('');
+    };
+
     var closeCollection = function(collectionId) {
         console.log('[WGST] Closing collection ' + collectionId);
 
-        $('.wgst-panel__collection .collection-assembly-list').html('');
+        //$('.wgst-panel__collection .collection-assembly-list').html('');
+        clearCollectionAssemblyList(collectionId);
 
         deactivatePanel(['collection', 'collectionTree'], function(){
             // Delete collection object
@@ -901,11 +908,11 @@ $(function(){
             $('.wgst-stats__collection .wgst-stats-value__privacy').html('Public');
 
             // Scrolling hint
-            if ($('.collection-assembly-list .assembly-list-item:visible').length > 7) {
-                $('.collection-assembly-list-more-assemblies').show();
-            } else {
-                $('.collection-assembly-list-more-assemblies').hide();
-            }
+            // if ($('.collection-assembly-list .assembly-list-item:visible').length > 7) {
+            //     $('.collection-assembly-list-more-assemblies').show();
+            // } else {
+            //     $('.collection-assembly-list-more-assemblies').hide();
+            // }
 
             //showPanel('collection');
             endPanelLoadingIndicator('collection');
@@ -2274,7 +2281,7 @@ $(function(){
         event.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy
     };
 
-    var handleFileDrop = function(event) {
+    var handleDrop = function(event) {
         // Only handle file drops
         if (event.dataTransfer.files.length > 0) {
             event.stopPropagation();
@@ -2284,11 +2291,22 @@ $(function(){
 
             // Check if user drag and drops to the existing collection
             if (isPanelActive('collection')) {
+
                 collectionId = $('.wgst-panel__collection').attr('data-collection-id');
                 $('.wgst-panel__assembly-upload-navigator').attr('data-collection-id', collectionId);
-                closeCollection();
                 deactivatePanel('collection');
-            };
+                clearCollectionAssemblyList(collectionId);
+
+            } else if (isFullscreenActive('collection')) {
+
+                collectionId = $('.wgst-fullscreen__collection .wgst-collection').attr('data-collection-id');
+                $('.wgst-panel__assembly-upload-navigator').attr('data-collection-id', collectionId);
+                clearCollectionAssemblyList(collectionId);
+
+                // Show fullscreen map
+                bringMapPanelToFullscreen('map', 'map');
+
+            }
 
             if (! isPanelActive('assemblyUploadNavigator')) {
                 activatePanel('assemblyUploadNavigator');
@@ -2394,7 +2412,7 @@ $(function(){
 
     // Listen to dragover and drop events
     dropZone.addEventListener('dragover', handleDragOver, false);
-    dropZone.addEventListener('drop', handleFileDrop, false);
+    dropZone.addEventListener('drop', handleDrop, false);
 
     /*
         Sequence list navigation buttons
@@ -4063,6 +4081,9 @@ google.maps.event.addDomListener(window, "resize", function() {
             google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
         } // if
 
+        // Remove fullscreen content
+        activeFullscreenElement.html('');
+
         if (typeof callback === 'function') {
             callback();
         }
@@ -4082,6 +4103,20 @@ google.maps.event.addDomListener(window, "resize", function() {
         if (typeof callback === 'function') {
             callback();
         }
+    };
+
+    var bringMapPanelToFullscreen = function(panelName, panelId) {
+        if (! isFullscreenActive(panelName)) {
+            bringFullscreenToPanel(false);
+
+            bringPanelToFullscreen(panelId, function(){
+                $('[data-fullscreen-name="' + panelName + '"]')
+                    .html('')
+                    .append(WGST.geo.map.canvas.getDiv());
+
+                google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+            });
+        } 
     };
 
     $('body').on('click', '.wgst-panel-control-button__maximize', function(){
@@ -4107,15 +4142,17 @@ google.maps.event.addDomListener(window, "resize", function() {
                 });
             } else if (panelName === 'map') {
 
-                bringFullscreenToPanel(false);
+                bringMapPanelToFullscreen(panelName, panelId);
 
-                bringPanelToFullscreen(panelId, function(){
-                    $('[data-fullscreen-name="' + panelName + '"]')
-                        .html('')
-                        .append(WGST.geo.map.canvas.getDiv());
+                // bringFullscreenToPanel(false);
 
-                    google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
-                });
+                // bringPanelToFullscreen(panelId, function(){
+                //     $('[data-fullscreen-name="' + panelName + '"]')
+                //         .html('')
+                //         .append(WGST.geo.map.canvas.getDiv());
+
+                //     google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+                // });
             }
         } // if
     });
@@ -4193,8 +4230,6 @@ google.maps.event.addDomListener(window, "resize", function() {
 
             leafCounter = leafCounter + 1;
         } // for
-
-        //console.log('visibleAssemblyListItemCounter: ' + visibleAssemblyListItemCounter);
 
         // Scrolling hint
         if (visibleAssemblyListItemCounter > 7) {

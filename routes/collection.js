@@ -5,8 +5,6 @@ var getCollectionId = function() {
 exports.add = function(req, res) {
 	var collectionId = req.body.collectionId;
 
-	console.log('Adding collection! collectionId: ' + collectionId);
-
 	console.log('[WGST] ' + (collectionId.length > 0 ? 'Received request for collection id: ' + collectionId: 'Received request for new collection id'));
 
 	var uuid = require('node-uuid'),
@@ -15,7 +13,6 @@ exports.add = function(req, res) {
 
 	// Create new collection id
 	if (collectionId.length === 0) {
-		console.log('New collection id');
 
 		// Prepare object to publish
 		var collectionRequest = {
@@ -25,7 +22,6 @@ exports.add = function(req, res) {
 
 	// Reuse existing collection id and just get new user assembly id to assembly id mapping
 	}  else {
-		console.log('Reusing collection id');
 
 		// Prepare object to publish
 		var collectionRequest = {
