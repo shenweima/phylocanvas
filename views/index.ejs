@@ -293,7 +293,7 @@
                   <!-- <div class="assembly-list-header assembly-list-generation">Generation</div> -->
                   <div class="assembly-list-header assembly-list-header-id">Assembly</div>
                   <div class="assembly-list-header assembly-list-header-nearest-representative">Nearest Representative</div>
-                  <div class="assembly-list-header assembly-list-header-st-type">ST Type</div>
+                  <div class="assembly-list-header assembly-list-header-st">MLST</div>
                   <div class="assembly-list-header assembly-list-header-resistance-profile">Predicted Resistance Profile</div>
                 </div>
 
@@ -325,6 +325,9 @@
 
 
 
+        <!-- Collection tree -->
+        <div class="wgst-fullscreen wgst-fullscreen__collection-tree" data-fullscreen-name="collectionTree" data-fullscreen-id="collectionTree">
+        </div><!-- /.wgst-fullscreen__collection-tree -->
 
         <!-- Collection tree -->
         <div class="wgst-panel wgst-panel__collection-tree wgst-panel--active wgst-draggable" data-panel-name="collectionTree" data-collection-id="">
@@ -332,6 +335,7 @@
             <h4 class="header-title">Collection Tree</h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
             <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
+            <!-- <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span> -->
             <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
           </header>
           <article class="wgst-panel-body">
@@ -354,12 +358,22 @@
                 </div>
                 -->
 
-                <div class="btn-group">
+                <div class="wgst-tree-control wgst-tree-control__change-node-label">
+                  <label for="select-tree-node-label-input">Labels:</label>
+                  <select class="form-control" id="select-tree-node-label-input">
+                    <option value="1">Assembly Name</option>
+                    <option value="2">Nearest Representative</option>
+                    <option value="3">MLST</option>
+                    <option value="4">Predicted Resistance Profile</option>
+                  </select>
+                </div>
+
+                <div class="btn-group wgst-tree-control">
                   <button type="button" class="btn btn-sm btn-default tree-controls-decrease-node"><span class="glyphicon glyphicon-font"></span> -</button>
                   <button type="button" class="btn btn-sm btn-default tree-controls-increase-node"><span class="glyphicon glyphicon-font"></span> +</button>
                 </div>
 
-                <div class="btn-group">
+                <div class="btn-group wgst-tree-control">
                   <button type="button" class="btn btn-sm btn-default tree-controls-match-assembly-list">Match assembly list</button>
                 </div>
 
@@ -461,7 +475,7 @@
               </div>
 
               <div class="assembly-detail assembly-detail__st-type">
-                <h4>ST Type</h4>
+                <h4>Sequence Type</h4>
                 <div class="assembly-detail-content"></div>
               </div> 
 

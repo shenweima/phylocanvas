@@ -624,6 +624,58 @@ $(function(){
 
     })();
 
+    var createAssemblyResistanceProfilePreviewString = function(assemblyResistanceProfile, antibiotics) {
+        var assemblyResistanceProfileHtml = '',
+            antibioticGroup,
+            antibioticGroupName,
+            antibioticGroupHtml,
+            antibioticName,
+            // Store single antibiotic HTML string
+            antibioticHtml,
+            // Store all antibiotic HTML strings
+            antibioticsHtml,
+            antibioticResistanceState;
+
+        // Parse each antibiotic group
+        for (antibioticGroupName in antibiotics) {
+            if (antibiotics.hasOwnProperty(antibioticGroupName)) {
+                antibioticGroup = antibiotics[antibioticGroupName];
+                antibioticGroupHtml = '  ';
+                antibioticsHtml = '';
+                // Parse each antibiotic
+                for (antibioticName in antibioticGroup) {
+                    if (antibioticGroup.hasOwnProperty(antibioticName)) {
+                        // Store single antibiotic HTML string
+                        antibioticHtml = '';
+                        // Antibiotic found in Resistance Profile for this assembly
+                        if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
+                            if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
+                                antibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
+                                if (antibioticResistanceState === 'RESISTANT') {
+                                    antibioticHtml = antibioticHtml + '⦿';
+                                } else if (antibioticResistanceState === 'SENSITIVE') {
+                                    antibioticHtml = antibioticHtml + '○';
+                                } else {
+                                    antibioticHtml = antibioticHtml + '○';
+                                }
+                            } else {
+                                antibioticHtml = antibioticHtml + '○';
+                            }
+                        } else {
+                            antibioticHtml = antibioticHtml + '○';
+                        }
+                        // Concatenate all antibiotic HTML strings into a single string
+                        antibioticsHtml = antibioticsHtml + antibioticHtml;
+                    } // if
+                } // for
+                antibioticGroupHtml = antibioticGroupHtml + antibioticsHtml;
+                assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
+            } // if
+        } // for
+
+        return assemblyResistanceProfileHtml;
+    };
+
     var createAssemblyResistanceProfilePreviewHtml = function(assemblyResistanceProfile, antibiotics) {
         var assemblyResistanceProfileHtml = '',
             antibioticGroup,
@@ -705,7 +757,7 @@ $(function(){
 
         // Render assemblies according to the sorting order
         for (;assemblyCounter < sortedAssemblyIds.length;) {
-                
+
             assemblyId = sortedAssemblyIds[assemblyCounter];
              
             // Create assembly resistance profile preview html
@@ -730,9 +782,9 @@ $(function(){
                         + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                     + '</div>'
                     //+ '<div class="assembly-list-generation"></div>'
-                    + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['userAssemblyId'] + '</a>' + '</div>'
+                    + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" title="">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['userAssemblyId'] + '</a>' + '</div>'
                     + '<div class="assembly-list-header-nearest-representative">' + '<a href="#" class="show-on-representative-tree" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblyTopScore.referenceId + '</a>' + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
-                    + '<div class="assembly-list-header-st-type">' + (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType) + '</div>'
+                    + '<div class="assembly-list-header-st">' + (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType) + '</div>'
                     + '<div class="assembly-list-header-resistance-profile">'
                         // Resistance profile
                         +'<div class="assembly-resistance-profile-container">'
@@ -854,8 +906,11 @@ $(function(){
             $('.wgst-panel__collection-tree .wgst-tree-content').html('');
             // Attach collection id
             $('.wgst-panel__collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
-            // Init collection tree
-            window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+
+            // WGST.collection[collectionId].tree.canvas.setTextSize(20);
+            // WGST.collection[collectionId].tree.canvas.selectedNodeSizeIncrease = 2;
+            // WGST.collection[collectionId].tree.canvas.selectedColor = '#0059DE';
+
             // Render collection tree
             renderCollectionTree(collectionId);
 
@@ -870,13 +925,15 @@ $(function(){
                 sortedAssemblies = [],
                 sortedAssemblyIds = [];
 
+            WGST.antibiotics = antibiotics;
+
             // Sort assemblies in order in which they are displayed on tree
             $.each(window.WGST.collection[collectionId].tree.leavesOrder, function(leafCounter, leaf){
                 sortedAssemblies.push(assemblies[leaf.id]);
                 sortedAssemblyIds.push(leaf.id);
             });
 
-            window.WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
+            WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
 
             //renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
             renderAssemblyAnalysisList(collectionId, antibiotics);
@@ -1019,86 +1076,165 @@ $(function(){
         // }
     };
 
-    $('body').on('mouseenter', '.glyphicon-leaf', function(){
-        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
-            assemblyId = $(this).closest('.assembly-list-item').attr('data-assembly-id'),
-            branch = window.WGST.collection[collectionId].tree.canvas.branches[assemblyId],
-            children = branch.parent.children;
+    // $('body').on('mouseenter', '.glyphicon-leaf', function(){
+    //     var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+    //         assemblyId = $(this).closest('.assembly-list-item').attr('data-assembly-id'),
+    //         branch = window.WGST.collection[collectionId].tree.canvas.branches[assemblyId],
+    //         children = branch.parent.children;
 
-        $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
+    //     $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
 
-        $.each(children, function(childCounter, child){
-            $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + child.id + '"] .glyphicon-leaf').css('color', 'blue');
-        });
-    });
-    $('body').on('mouseleave', '.glyphicon-leaf', function(){
-        $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
-    });
+    //     $.each(children, function(childCounter, child){
+    //         $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + child.id + '"] .glyphicon-leaf').css('color', 'blue');
+    //     });
+    // });
+    // $('body').on('mouseleave', '.glyphicon-leaf', function(){
+    //     $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
+    // });
 
     // DEPRECATED
-    var renderCollectionFamily = function(collectionId) {
-        var tree = window.WGST.collection[collectionId].tree.canvas;
+    // var renderCollectionFamily = function(collectionId) {
+    //     var tree = window.WGST.collection[collectionId].tree.canvas;
 
 
-        var branches = tree.branches;
+    //     var branches = tree.branches;
 
-        console.debug('branches');
-        console.dir(branches);
+    //     console.debug('branches');
+    //     console.dir(branches);
 
-        $.each(branches, function(branchId, branch){
-
-
-
-
-
-            var childIds = branch.getChildIds();
-
-            //console.debug('childIds:');
-            //console.dir(childIds.split(','));
-
-            if (branch.leaf) {
-                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-generation').append(
-                    //'<div>&#169; OK</div>'
-                    '<span class="glyphicon glyphicon-leaf"></span>'
-                );
-            } else if (branchId === 'root') {
-                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-generation').append(
-                    //'<div>&#169; OK</div>'
-                    '<span class="glyphicon glyphicon-plus"></span>'
-                );
-            } else {
-                $.each(childIds.split(','), function(childIdCounter, childId){
+    //     $.each(branches, function(branchId, branch){
 
 
 
-                    $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + childId + '"] .assembly-list-generation').append(
-                        //'<span>{</span>'
-                        '<span class="glyphicon glyphicon-tree-deciduous"></span>'
-                        );
-                });
+
+
+    //         var childIds = branch.getChildIds();
+
+    //         //console.debug('childIds:');
+    //         //console.dir(childIds.split(','));
+
+    //         if (branch.leaf) {
+    //             $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-generation').append(
+    //                 //'<div>&#169; OK</div>'
+    //                 '<span class="glyphicon glyphicon-leaf"></span>'
+    //             );
+    //         } else if (branchId === 'root') {
+    //             $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-generation').append(
+    //                 //'<div>&#169; OK</div>'
+    //                 '<span class="glyphicon glyphicon-plus"></span>'
+    //             );
+    //         } else {
+    //             $.each(childIds.split(','), function(childIdCounter, childId){
+
+
+
+    //                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + childId + '"] .assembly-list-generation').append(
+    //                     //'<span>{</span>'
+    //                     '<span class="glyphicon glyphicon-tree-deciduous"></span>'
+    //                     );
+    //             });
+    //         }
+
+    //     });
+    // };
+
+    $('#select-tree-node-label-input').on('change', function(){
+        var selectedOption = $(this),
+            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id');
+
+        var tree = WGST.collection[collectionId].tree.canvas,
+            assemblies = WGST.collection[collectionId].assemblies,
+            assemblyId;
+
+        if (selectedOption.val() === '1') {
+
+            // Set user assembly id as node label
+            for (assemblyId in assemblies) {
+                if (assemblies.hasOwnProperty(assemblyId)) {
+                    // Set label only to leaf nodes, filtering out the root node
+                    if (tree.branches[assemblyId].leaf) {
+                        tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId;                 
+                    }
+                }
+            }
+            
+        } else if (selectedOption.val() === '2') {
+
+            // Set user assembly id as node label
+            for (assemblyId in assemblies) {
+                if (assemblies.hasOwnProperty(assemblyId)) {
+                    // Set label only to leaf nodes, filtering out the root node
+                    if (tree.branches[assemblyId].leaf) {
+                        tree.branches[assemblyId].label = WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore.referenceId;              
+                    }
+                }
             }
 
-        });
-    };
+        } else if (selectedOption.val() === '3') {
+
+            // Set user assembly id as node label
+            for (assemblyId in assemblies) {
+                if (assemblies.hasOwnProperty(assemblyId)) {
+                    // Set label only to leaf nodes, filtering out the root node
+                    if (tree.branches[assemblyId].leaf) {
+                        tree.branches[assemblyId].label = (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType);               
+                    }
+                }
+            }
+
+        } else if (selectedOption.val() === '4') {
+
+            var assemblyResistanceProfile,
+                resistanceProfileString;
+
+            // Set user assembly id as node label
+            for (assemblyId in assemblies) {
+                if (assemblies.hasOwnProperty(assemblyId)) {
+
+                    assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile,
+                    resistanceProfileString = createAssemblyResistanceProfilePreviewString(assemblyResistanceProfile, WGST.antibiotics);
+
+                    // Set label only to leaf nodes, filtering out the root node
+                    if (tree.branches[assemblyId].leaf) {
+                        tree.branches[assemblyId].label = resistanceProfileString;            
+                    }
+                }
+            }
+        }
+
+        WGST.collection[collectionId].tree.canvas.draw();
+
+    });
 
     var renderCollectionTree = function(collectionId) {
         console.log('[WGST] Rendering ' + collectionId + ' collection tree');
-        console.dir(window.WGST.collection[collectionId].tree);
+        console.dir(WGST.collection[collectionId].tree);
 
-        var tree = window.WGST.collection[collectionId].tree.canvas,
-            assemblies = window.WGST.collection[collectionId].assemblies,
+        // Init collection tree
+        WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+        WGST.collection[collectionId].tree.canvas.parseNwk(WGST.collection[collectionId].tree.data);
+        WGST.collection[collectionId].tree.canvas.treeType = 'rectangular';
+        WGST.collection[collectionId].tree.canvas.showLabels = true;
+        WGST.collection[collectionId].tree.canvas.baseNodeSize = 2;
+        WGST.collection[collectionId].tree.canvas.setTextSize(21);
+        WGST.collection[collectionId].tree.canvas.selectedNodeSizeIncrease = 1;
+        WGST.collection[collectionId].tree.canvas.selectedColor = '#0059DE';
+        WGST.collection[collectionId].tree.canvas.rightClickZoom = false;
+
+        var tree = WGST.collection[collectionId].tree.canvas,
+            assemblies = WGST.collection[collectionId].assemblies,
             assemblyId;
 
-        tree.parseNwk(window.WGST.collection[collectionId].tree.data);
-        tree.treeType = 'rectangular';
-        tree.showLabels = true;
-        tree.baseNodeSize = 0.8;
-        tree.setTextSize(0.8);
-        tree.selectedNodeSizeIncrease = 0.5;
-        tree.selectedColor = '#0059DE';
+        //tree.parseNwk(WGST.collection[collectionId].tree.data);
+        // tree.treeType = 'rectangular';
+        // tree.showLabels = true;
+        // tree.baseNodeSize = 0.8;
+        // tree.setTextSize(0.8);
+        // tree.selectedNodeSizeIncrease = 0.5;
+        // tree.selectedColor = '#0059DE';
         //tree.rightClickZoom = true;
 
-        window.WGST.collection[collectionId].tree.canvas.onselected = function(selectedNodeIds) {
+        WGST.collection[collectionId].tree.canvas.onselected = function(selectedNodeIds) {
             selectTreeNodes(collectionId, selectedNodeIds);
         };
 
@@ -1112,6 +1248,8 @@ $(function(){
             }
         }
 
+        WGST.collection[collectionId].tree.canvas.draw();
+
         // Get order of nodes
         var leaves = tree.leaves;
 
@@ -1122,7 +1260,7 @@ $(function(){
             return leafOne.centery - leafTwo.centery;
         });
 
-        window.WGST.collection[collectionId].tree.leavesOrder = leaves;
+        WGST.collection[collectionId].tree.leavesOrder = leaves;
 
         // ====================================================================================================================
         // For dev only
@@ -3778,12 +3916,12 @@ $(function(){
         window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .wgst-tree-content')[0]);
         window.WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
         window.WGST.collection.representative.tree.canvas.treeType = 'rectangular';
-        window.WGST.collection.representative.tree.showLabels = true;
-        window.WGST.collection.representative.tree.canvas.baseNodeSize = 1;
-        window.WGST.collection.representative.tree.canvas.setTextSize(1);
-        window.WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
+        window.WGST.collection.representative.tree.canvas.showLabels = true;
+        window.WGST.collection.representative.tree.canvas.baseNodeSize = 2;
+        window.WGST.collection.representative.tree.canvas.setTextSize(21);
+        window.WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 1;
         window.WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
-        window.WGST.collection.representative.tree.canvas.rightClickZoom = true;
+        window.WGST.collection.representative.tree.canvas.rightClickZoom = false;
     };
 
     var openRepresentativeCollectionTree = function() {
@@ -4153,6 +4291,25 @@ google.maps.event.addDomListener(window, "resize", function() {
 
                 //     google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
                 // });
+
+            } else if (panelName === 'collectionTree') {
+
+                bringPanelToFullscreen(panelName, function(){
+
+                    var treeHtmlElement = $('.wgst-panel__collection-tree').find('.wgst-tree-content'),
+                        collectionTreeFullscreen = $('.wgst-fullscreen__collection-tree');
+
+                    //collectionTreeFullscreen.append(treeHtmlElement.cloneNode(true));
+                    collectionTreeFullscreen.append(treeHtmlElement.clone(true));
+
+                    var collectionId = $('.wgst-panel__collection-tree').attr('data-collection-id');
+
+                    $('.wgst-panel__collection-tree').html('');
+
+                    console.log(collectionId);
+
+                    WGST.collection[collectionId].tree.canvas.draw();
+                });
             }
         } // if
     });
