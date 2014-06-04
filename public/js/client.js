@@ -1200,6 +1200,18 @@ $(function(){
                     }
                 }
             }
+
+        } else if (selectedOption.val() === '5') {
+
+            // Set user assembly id as node label
+            for (assemblyId in assemblies) {
+                if (assemblies.hasOwnProperty(assemblyId)) {
+                    // Set label only to leaf nodes, filtering out the root node
+                    if (tree.branches[assemblyId].leaf) {
+                        tree.branches[assemblyId].label = assemblies[assemblyId]['ASSEMBLY_METADATA'].geography.address;              
+                    }
+                }
+            }
         }
 
         WGST.collection[collectionId].tree.canvas.draw();
@@ -3345,6 +3357,7 @@ $(function(){
     $('.assemblies-upload-ready-button').on('click', function() {
         console.log('[WGST] Getting ready to upload assemblies and metadata');
 
+        // Reset panels
         resetPanelAssemblyUploadMetadata();
         resetPanelAssemblyUploadProgress();
 
@@ -3357,12 +3370,7 @@ $(function(){
         // Close panels
         deactivatePanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
 
-        // Reset panels
-        // Enable upload button
-        //$(this).attr('disabled','enabled');
         window.WGST.dragAndDrop.files = [];
-
-        // AAA
 
         var userAssemblyId,
             assembltUploadProgressTemplate,
@@ -3429,10 +3437,10 @@ $(function(){
                             userAssemblyIdToAssemblyIdMap = collectionIdData.userAssemblyIdToAssemblyIdMap,
                             assemblyId;
 
-                        window.WGST.upload.collection[collectionId] = {};
-                        window.WGST.upload.collection[collectionId].notifications = {};
-                        window.WGST.upload.collection[collectionId].notifications.all = [];
-                        window.WGST.upload.collection[collectionId].notifications.tree = false; // Have you received at least 1 COLLECTION_TREE notification
+                        WGST.upload.collection[collectionId] = {};
+                        WGST.upload.collection[collectionId].notifications = {};
+                        WGST.upload.collection[collectionId].notifications.all = [];
+                        WGST.upload.collection[collectionId].notifications.tree = false; // Have you received at least 1 COLLECTION_TREE notification
 
                         // Replace user assembly id (fasta file name) with assembly id generated on server side
                         var fastaFilesAndMetadataWithUpdatedIds = {};
@@ -3442,8 +3450,7 @@ $(function(){
                             console.log(assemblyId);
 
                             var userAssemblyId = userAssemblyIdToAssemblyIdMap[assemblyId];
-                            console.log(userAssemblyId);
-                            // AAA
+
                             if (typeof fastaFilesAndMetadata[userAssemblyId] !== 'undefined') {
                                 fastaFilesAndMetadataWithUpdatedIds[assemblyId] = fastaFilesAndMetadata[userAssemblyId];
                             }
@@ -3479,9 +3486,10 @@ $(function(){
                                     datetime: WGST.upload.assembly[userAssemblyId].metadata.datetime,
                                     geography: {
                                         position: {
-                                            latitude: window.WGST.upload.assembly[userAssemblyId].metadata.geography.position.latitude,
-                                            longitude: window.WGST.upload.assembly[userAssemblyId].metadata.geography.position.longitude
-                                        }
+                                            latitude: WGST.upload.assembly[userAssemblyId].metadata.geography.position.latitude,
+                                            longitude: WGST.upload.assembly[userAssemblyId].metadata.geography.position.longitude
+                                        },
+                                        address: WGST.upload.assembly[userAssemblyId].metadata.geography.address
                                     },
                                     source: WGST.upload.assembly[userAssemblyId].metadata.source
                                 };
