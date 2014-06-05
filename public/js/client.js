@@ -84,6 +84,8 @@ $(function(){
     WGST.settings = WGST.settings || {};
     WGST.settings.representativeCollectionId = '1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
 
+    WGST.antibioticNameRegex = /[\W]+/g;
+
     WGST.socket = {
         connection: io.connect(WGST.config.socketAddress),
         roomId: ''
@@ -607,7 +609,7 @@ $(function(){
         getRepresentativeCollectionTreeMetadata(function(error, representativeCollectionTreeMatadata){
             if (error) {
                 // Show notification
-                showError(error);
+                showNotification(error);
                 return;
             }
 
@@ -708,6 +710,7 @@ $(function(){
                     if (antibioticGroup.hasOwnProperty(antibioticName)) {
                         // Store single antibiotic HTML string
                         antibioticHtml = '';
+
                         // Antibiotic found in Resistance Profile for this assembly
                         if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
                             if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
@@ -721,9 +724,11 @@ $(function(){
                                 }
                             } else {
                                 antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                                console.error('[!] Assembly resistatance profile has no antibiotic: ' + antibioticName);
                             }
                         } else {
-                            antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                            antibioticHtml = antibioticHtml + '<span class="antibiotic no-resistance-data" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
+                            console.error('[!] Assembly resistatance profile has no antibiotic group: ' + antibioticGroupName);
                         }
                         // Concatenate all antibiotic HTML strings into a single string
                         antibioticsHtml = antibioticsHtml + antibioticHtml;
@@ -760,6 +765,9 @@ $(function(){
 
             assemblyId = sortedAssemblyIds[assemblyCounter];
              
+            console.log('[?] Assembly resistance profile:');
+            console.dir(assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile);
+
             // Create assembly resistance profile preview html
             assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile;
             assemblyResistanceProfileHtml = createAssemblyResistanceProfilePreviewHtml(assemblyResistanceProfile, antibiotics);
@@ -898,6 +906,41 @@ $(function(){
 
             WGST.collection[collectionId].tree.data = data.collection.tree;
             WGST.collection[collectionId].assemblies = data.collection.assemblies;
+            WGST.antibiotics = data.antibiotics;
+
+            // ----------------------------------------
+            // Ungroup antibiotic resistance profile
+            // ----------------------------------------
+            var assemblyId,
+                assembly,
+                resistanceProfileGroups = {},
+                resistanceProfileGroupName,
+                resistanceProfileGroup,
+                ungroupedResistanceProfile,
+                antibioticName;
+
+            for (assemblyId in WGST.collection[collectionId].assemblies) {
+                assembly = WGST.collection[collectionId].assemblies[assemblyId];
+                resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+                ungroupedResistanceProfile = {};
+
+                console.log('resistanceProfileGroups: ' + resistanceProfileGroups);
+                console.dir(resistanceProfileGroups); // ZZZ
+
+                for (resistanceProfileGroupName in resistanceProfileGroups) {
+                    resistanceProfileGroup = resistanceProfileGroups[resistanceProfileGroupName];
+
+                    for (antibioticName in resistanceProfileGroup) {
+                        ungroupedResistanceProfile[antibioticName] = resistanceProfileGroup[antibioticName];
+                    }                    
+                }
+
+                WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile = ungroupedResistanceProfile;
+            
+                console.log('WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile:');
+                console.dir(WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile);
+
+            } // for
 
             // ----------------------------------------
             // Render collection tree
@@ -921,11 +964,8 @@ $(function(){
             // Render assembly metadata list
             // ----------------------------------------
             var assemblies = window.WGST.collection[collectionId].assemblies,
-                antibiotics = data.antibiotics,
                 sortedAssemblies = [],
                 sortedAssemblyIds = [];
-
-            WGST.antibiotics = antibiotics;
 
             // Sort assemblies in order in which they are displayed on tree
             $.each(window.WGST.collection[collectionId].tree.leavesOrder, function(leafCounter, leaf){
@@ -936,7 +976,7 @@ $(function(){
             WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
 
             //renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
-            renderAssemblyAnalysisList(collectionId, antibiotics);
+            renderAssemblyAnalysisList(collectionId, WGST.antibiotics);
 
             //renderCollectionFamily(collectionId);
 
@@ -1021,7 +1061,7 @@ $(function(){
             console.error(errorThrown);
             console.error(jqXHR);
 
-            showError(textStatus);
+            showNotification(textStatus);
         });
     };
 
@@ -1138,7 +1178,7 @@ $(function(){
     //     });
     // };
 
-    $('#select-tree-node-label-input').on('change', function(){
+    $('.wgst-tree-control__change-node-label').on('change', function(){
         var selectedOption = $(this),
             collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id');
 
@@ -1218,6 +1258,66 @@ $(function(){
 
     });
 
+    $('.wgst-tree-control__change-node-colour').on('change', function(){
+        var selectedOption = $(this).find('option:selected'),
+            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id');
+
+        var tree = WGST.collection[collectionId].tree.canvas,
+            assemblies = WGST.collection[collectionId].assemblies,
+            assemblyId;
+
+        if (selectedOption.val() === '0') {
+            // Colour assembly nodes according to default colour
+            for (assemblyId in assemblies) {
+                if (assemblies.hasOwnProperty(assemblyId)) {
+                    tree.setNodeColourAndShape(assemblyId, '#000000');
+                }
+            } // for
+        } else {
+            var ungroupedResistanceProfile,
+                antibioticResistance;
+
+            // Colour assembly nodes according to resistance profile of selected antibiotic
+            for (assemblyId in assemblies) {
+                if (assemblies.hasOwnProperty(assemblyId)) {
+
+                    ungroupedResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile;
+                    antibioticResistance = ungroupedResistanceProfile[selectedOption.text()];
+
+                    // Check assembly has resistance profile for this antibiotic
+                    if (typeof antibioticResistance !== 'undefined') {
+                        if (tree.branches[assemblyId].leaf) {
+                            if (antibioticResistance.resistanceState === 'RESISTANT') {
+                                // Red
+                                tree.setNodeColourAndShape(assemblyId, '#ff0000');                 
+                            } else if (antibioticResistance.resistanceState === 'SENSITIVE') {
+                                // Green
+                                tree.setNodeColourAndShape(assemblyId, '#4dbd33');                 
+                            } else if (antibioticResistance.resistanceState === 'UNKNOWN') {
+                                // White
+                                tree.setNodeColourAndShape(assemblyId, '#ffffff');
+                            }
+                        }                        
+                    } else {
+                    // Assembly has no resistance profile for this antibiotic
+                        if (tree.branches[assemblyId].leaf) {
+                            // Black
+                            tree.setNodeColourAndShape(assemblyId, '#000000');
+                        }
+                    }
+                } // if
+            } // for
+        } // if
+    });
+
+    $('.wgst-tree-control__change-tree-type').on('change', function(){
+        var selectedOption = $(this).find('option:selected'),
+            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
+            tree = WGST.collection[collectionId].tree.canvas;
+
+        tree.setTreeType(selectedOption.val());
+    });
+
     var renderCollectionTree = function(collectionId) {
         console.log('[WGST] Rendering ' + collectionId + ' collection tree');
         console.dir(WGST.collection[collectionId].tree);
@@ -1226,12 +1326,12 @@ $(function(){
         WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
         WGST.collection[collectionId].tree.canvas.parseNwk(WGST.collection[collectionId].tree.data);
         WGST.collection[collectionId].tree.canvas.treeType = 'rectangular';
-        WGST.collection[collectionId].tree.canvas.showLabels = true;
-        WGST.collection[collectionId].tree.canvas.baseNodeSize = 2;
-        WGST.collection[collectionId].tree.canvas.setTextSize(21);
-        WGST.collection[collectionId].tree.canvas.selectedNodeSizeIncrease = 1;
-        WGST.collection[collectionId].tree.canvas.selectedColor = '#0059DE';
-        WGST.collection[collectionId].tree.canvas.rightClickZoom = false;
+        // WGST.collection[collectionId].tree.canvas.showLabels = true;
+        // WGST.collection[collectionId].tree.canvas.baseNodeSize = 5;
+        // WGST.collection[collectionId].tree.canvas.setTextSize(10);
+        // WGST.collection[collectionId].tree.canvas.selectedNodeSizeIncrease = 5;
+        // WGST.collection[collectionId].tree.canvas.selectedColor = '#0059DE';
+        // WGST.collection[collectionId].tree.canvas.rightClickZoom = false;
 
         var tree = WGST.collection[collectionId].tree.canvas,
             assemblies = WGST.collection[collectionId].assemblies,
@@ -1292,6 +1392,34 @@ $(function(){
         //console.dir(newickString);
 
         // ====================================================================================================================
+    
+        // Populate list of antibiotics
+        var selectAntibioticInputElement = $('#select-tree-node-antibiotic'),
+            antibioticGroupName,
+            antibioticName,
+            antibioticNames = [],
+            antibioticOptionHtmlElements = {};
+            //antibiotics = {};
+
+        for (antibioticGroupName in WGST.antibiotics) {
+            for (antibioticName in WGST.antibiotics[antibioticGroupName]) {
+                //antibiotics[antibioticName] = WGST.antibiotics[antibioticGroupName][antibioticName];
+                antibioticNames.push(antibioticName);
+                antibioticOptionHtmlElements[antibioticName] = '<option value="' + antibioticName.replace(WGST.antibioticNameRegex, '_').toLowerCase() + '">' + antibioticName + '</option>';
+            }
+        }
+
+        // Sort antibiotic names
+        antibioticNames.sort();
+
+        var antibioticCounter = antibioticNames.length;
+
+        for (antibioticCounter = 0; antibioticCounter < antibioticNames.length;) {
+            antibioticName = antibioticNames[antibioticCounter];
+            selectAntibioticInputElement.append($(antibioticOptionHtmlElements[antibioticName]));
+            
+            antibioticCounter = antibioticCounter + 1;
+        }
     };
 
     // Init map
@@ -3344,7 +3472,7 @@ $(function(){
                 console.error(errorThrown);
                 console.error(jqXHR);
 
-                showError(textStatus);
+                showNotification(textStatus);
                 //updateAssemblyUploadProgressBar();
             });
         } else {
@@ -3514,7 +3642,7 @@ $(function(){
                         console.error(errorThrown);
                         console.error(jqXHR);
 
-                        showError(textStatus);
+                        showNotification(textStatus);
                     });
                 }, GET_COLLECTION_ID_TIMER);
         }); // activatePanel()
@@ -3742,6 +3870,8 @@ $(function(){
                                 
                                 if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
 
+                                    console.log('antibioticName: ' + antibioticName);
+
                                     var assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
 
                                     if (assemblyAntibioticResistanceState === 'RESISTANT') {
@@ -3754,10 +3884,12 @@ $(function(){
 
                                 } else {
                                     antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
+                                    console.log('>>> Assembly resistance profile has no antibiotic: ' + antibioticName);
                                 }
 
                             } else {
                                 antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
+                                console.log('>>> Assembly resistance profile has no antibiotic group: ' + antibioticGroupName);
                             }
 
                         } // if
@@ -3888,27 +4020,57 @@ $(function(){
             console.error(errorThrown);
             console.error(jqXHR);
 
-            showError(textStatus);
+            showNotification(textStatus);
         });
     };
 
-    $('.collection-controls-show-on-representative-tree').on('click', function(){
-        var collectionId = $(this).closest('.wgst-panel__collection').attr('data-collection-id'),
-            nearestRepresentative = WGST.collection[collectionId];
+    // $('.collection-controls-show-on-representative-tree').on('click', function(){
+    //     var collectionId = $(this).closest('.wgst-panel__collection').attr('data-collection-id'),
+    //         nearestRepresentative = WGST.collection[collectionId];
 
-            console.dir(nearestRepresentative);
+    //         console.dir(nearestRepresentative);
+    // });
+
+    $('.wgst-tree-control__decrease-label-font-size').on('click', function(){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            currentNodeTextSize = WGST.collection[collectionId].tree.canvas.textSize;
+        
+        WGST.collection[collectionId].tree.canvas.setTextSize(currentNodeTextSize - 3);
+    });
+    $('.wgst-tree-control__increase-label-font-size').on('click', function(){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            currentNodeTextSize = WGST.collection[collectionId].tree.canvas.textSize;
+        
+        WGST.collection[collectionId].tree.canvas.setTextSize(currentNodeTextSize + 3);
     });
 
-    $('.tree-controls-decrease-node').on('click', function(){
-        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
-        var currentNodeTextSize = window.WGST.collection[collectionId].tree.canvas.textSize;
-        window.WGST.collection[collectionId].tree.canvas.setTextSize(currentNodeTextSize - 3);
+    $('.wgst-tree-control__decrease-node-size').on('click', function(){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            currentNodeSize = WGST.collection[collectionId].tree.canvas.baseNodeSize;
+        
+        WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeSize - 3);
+    });
+    $('.wgst-tree-control__increase-node-size').on('click', function(){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            currentNodeSize = WGST.collection[collectionId].tree.canvas.baseNodeSize;
+        
+        WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeSize + 3);
     });
 
-    $('.tree-controls-increase-node').on('click', function(){
+    $('.wgst-tree-control__show-node-labels').on('change', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
-        var currentNodeTextSize = window.WGST.collection[collectionId].tree.canvas.textSize;
-        window.WGST.collection[collectionId].tree.canvas.setTextSize(currentNodeTextSize + 3);
+
+        WGST.collection[collectionId].tree.canvas.toggleLabels();
+
+        // if (showNodeLabelsCheckbox.is(':checked')) {
+        //     // WGST.collection[collectionId].tree.canvas.showLabels = true;
+        //     // WGST.collection[collectionId].tree.canvas.draw();
+        //     WGST.collection[collectionId].tree.canvas.toggleLabels();
+        // } else {
+        //     // WGST.collection[collectionId].tree.canvas.showLabels = false;
+        //     // WGST.collection[collectionId].tree.canvas.draw();
+        //     WGST.collection[collectionId].tree.canvas.toggleLabels();
+        // }
     });
 
     var renderRepresentativeCollectionTree = function() {
@@ -3921,15 +4083,15 @@ $(function(){
         // Attach collection id
         $('.wgst-panel__representative-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
 
-        window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .wgst-tree-content')[0]);
-        window.WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
-        window.WGST.collection.representative.tree.canvas.treeType = 'rectangular';
-        window.WGST.collection.representative.tree.canvas.showLabels = true;
-        window.WGST.collection.representative.tree.canvas.baseNodeSize = 2;
-        window.WGST.collection.representative.tree.canvas.setTextSize(21);
-        window.WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 1;
-        window.WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
-        window.WGST.collection.representative.tree.canvas.rightClickZoom = false;
+        WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .wgst-tree-content')[0]);
+        WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
+        WGST.collection.representative.tree.canvas.treeType = 'rectangular';
+        // WGST.collection.representative.tree.canvas.showLabels = true;
+        // WGST.collection.representative.tree.canvas.baseNodeSize = 2;
+        // WGST.collection.representative.tree.canvas.setTextSize(21);
+        // WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 1;
+        // WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
+        // WGST.collection.representative.tree.canvas.rightClickZoom = false;
     };
 
     var openRepresentativeCollectionTree = function() {
