@@ -356,7 +356,7 @@
                         <option value="hierarchy">Hierarchy</option>
                       </select>
                     </div>
-                  
+
                     <div class="wgst-tree-control">
                       <label for="select-tree-node-label-input">Node label:</label>
                       <select class="form-control wgst-tree-control__change-node-label" id="select-tree-node-label-input">
@@ -665,7 +665,8 @@
 
               <% if (typeof appConfig !== 'undefined') { %>
                 // Store requested assembly
-                window.WGST.config = <%- appConfig %>;
+                //window.WGST.config = <%- appConfig %>;
+                window.WGST.config = window.location.hostname;
               <% } %>
             })();
           });

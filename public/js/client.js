@@ -1324,6 +1324,8 @@ $(function(){
 
         // Init collection tree
         WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+        //WGST.collection[collectionId].tree.canvas.use_navigator = false;
+        //WGST.collection[collectionId].tree.canvas.backColour = true;
         WGST.collection[collectionId].tree.canvas.parseNwk(WGST.collection[collectionId].tree.data);
         WGST.collection[collectionId].tree.canvas.treeType = 'rectangular';
         // WGST.collection[collectionId].tree.canvas.showLabels = true;
@@ -2076,6 +2078,19 @@ $(function(){
                 // + '</div>'  
             + '</div>'
             ),
+            // assemblySampleMRSAFormBlock = $(
+            // '<div class="form-block assembly-metadata-' + fileCounter + ' assembly-metadata-block hide-this">'
+            //     + '<div class="form-group">'
+            //         + '<label for="assemblySampleMRSAInput' + fileCounter + '">MRSA or MSSA?</label>'
+            //         + '<select name="select" class="form-control assembly-sample-source-input" id="assemblySampleMRSAInput' + fileCounter + '">'
+            //           + '<option value="0" selected>Choose</option>'
+            //           + '<option value="1">MRSA</option>'
+            //           + '<option value="2">MSSA</option>'
+            //           + '<option value="3">Don\'t know</option>'
+            //         + '</select>'
+            //     + '</div>'
+            // + '</div>'
+            // ),
             assemblyControlsFormBlock = $(
             '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
                 + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next empty metadata</button>'
