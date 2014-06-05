@@ -666,7 +666,7 @@
               <% if (typeof appConfig !== 'undefined') { %>
                 // Store requested assembly
                 //window.WGST.config = <%- appConfig %>;
-                window.WGST.config = window.location.hostname;
+                window.WGST.config = 'http://' + window.location.hostname;
               <% } %>
             })();
           });
