@@ -2311,7 +2311,7 @@ $(function(){
             google.maps.event.addListener(WGST.geo.placeSearchBox[fileName], 'places_changed', function() {
 
                 // Get the place details from the autocomplete object.
-                var places = window.WGST.geo.placeSearchBox[fileName].getPlaces(),
+                var places = WGST.geo.placeSearchBox[fileName].getPlaces(),
                     place = places[0];
 
                 if (typeof place.geometry === 'undefined') {
@@ -2326,9 +2326,29 @@ $(function(){
                 console.log('[WGST] Google Places API first SearchBox place:');
                 console.log(formattedAddress);
 
-                // Set first place to as input's value
-                $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-location-input').blur().val(formattedAddress);
+                // ------------------------------------------
+                // Update metadata form
+                // ------------------------------------------
+                var currentInputElement = $('.wgst-panel__assembly-upload-metadata .assembly-item[data-name="' + fileName + '"]').find('.assembly-sample-location-input');
 
+                // Show next form block if current input has some value
+                if (currentInputElement.val().length > 0) {
+
+                    // Show next metadata form block
+                    currentInputElement.closest('.form-block').next('.form-block').fadeIn();
+
+                    // Scroll to the next form block
+                    currentInputElement.closest('.assembly-metadata').animate({scrollTop: currentInputElement.closest('.assembly-metadata').height()}, 400);
+                } // if
+
+                // Increment metadata progress bar
+                updateMetadataProgressBar();
+                // Replace whatever user typed into this input box with formatted address returned by Google
+                currentInputElement.blur().val(formattedAddress);
+
+                // ------------------------------------------
+                // Update map, marker and put metadata into assembly object
+                // ------------------------------------------
                 // Set map center to selected address
                 WGST.geo.map.canvas.setCenter(place.geometry.location);
                 // Set map
@@ -2968,29 +2988,54 @@ $(function(){
         }, 500);
     });
 
-    // Show next form block when user fills in an input
-    $('.assembly-metadata-list-container').on('change', '.assembly-sample-location-input', function(){
+    var handleMetadataInputChange = function(inputElement) {
+
+        console.log(inputElement);
 
         // Show next form block if current input has some value
-        if ($(this).val().length > 0) {
+        if (inputElement.val().length > 0) {
 
             // TO DO: Validate input value
 
             // Show next metadata form block
-            $(this).closest('.form-block').next('.form-block').fadeIn();
+            inputElement.closest('.form-block').next('.form-block').fadeIn();
 
             // Scroll to the next form block
             //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
-            $(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
+            inputElement.closest('.assembly-metadata').animate({scrollTop: inputElement.closest('.assembly-metadata').height()}, 400);
         } // if
 
         // Increment metadata progress bar
         updateMetadataProgressBar();
         // Hide progress hint
         $('.adding-metadata-progress-container .progress-hint').fadeOut();
-    });
+    };
 
+    // DEPRECATED
+    // Show next form block when user fills in an input
+    // $('.assembly-metadata-list-container').on('input_content_change', '.assembly-sample-location-input', function(){
+    // } 
+    // function(){
 
+    //     // Show next form block if current input has some value
+    //     if ($(this).val().length > 0) {
+
+    //         // TO DO: Validate input value
+
+    //         // Show next metadata form block
+    //         $(this).closest('.form-block').next('.form-block').fadeIn();
+
+    //         // Scroll to the next form block
+    //         //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
+    //         $(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
+    //     } // if
+
+    //     // Increment metadata progress bar
+    //     updateMetadataProgressBar();
+    //     // Hide progress hint
+    //     $('.adding-metadata-progress-container .progress-hint').fadeOut();
+    // }
+    // );
 
     // Show next form block when user fills in an input
     $('.assembly-metadata-list-container').on('change', '.assembly-sample-source-input', function(){
@@ -4641,8 +4686,3 @@ google.maps.event.addDomListener(window, "resize", function() {
 
 // TO DO:
 // + Sort assemblies selected to upload alphabetically.
-
-
-
-
-
