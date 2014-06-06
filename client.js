@@ -1270,7 +1270,7 @@ $(function(){
             // Colour assembly nodes according to default colour
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
-                    tree.setNodeColourAndShape(assemblyId, '#000000');
+                    tree.setNodeColourAndShape(assemblyId, '#ffffff');
                 }
             } // for
         } else {
@@ -1302,7 +1302,7 @@ $(function(){
                     // Assembly has no resistance profile for this antibiotic
                         if (tree.branches[assemblyId].leaf) {
                             // Black
-                            tree.setNodeColourAndShape(assemblyId, '#000000');
+                            tree.setNodeColourAndShape(assemblyId, '#ffffff');
                         }
                     }
                 } // if
