@@ -724,11 +724,11 @@ $(function(){
                                 }
                             } else {
                                 antibioticHtml = antibioticHtml + '<span class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                                console.error('[!] Assembly resistatance profile has no antibiotic: ' + antibioticName);
+                                console.warn('[!] Assembly resistatance profile has no antibiotic: ' + antibioticName);
                             }
                         } else {
                             antibioticHtml = antibioticHtml + '<span class="antibiotic no-resistance-data" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + antibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '"></span>';
-                            console.error('[!] Assembly resistatance profile has no antibiotic group: ' + antibioticGroupName);
+                            console.warn('[!] Assembly resistatance profile has no antibiotic group: ' + antibioticGroupName);
                         }
                         // Concatenate all antibiotic HTML strings into a single string
                         antibioticsHtml = antibioticsHtml + antibioticHtml;
@@ -1103,7 +1103,7 @@ $(function(){
                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').addClass('row-selected');
 
                 // Check map
-                //$('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="checkbox"]').prop('checked', true).trigger("change");
+                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="checkbox"]').prop('checked', true).trigger("change");
 
             } else {
                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').removeClass('row-selected');
@@ -1112,14 +1112,13 @@ $(function(){
                 //$('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="radio"]').prop('checked', false);
             
                 // Check map
-                //$('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="checkbox"]').prop('checked', false).trigger("change");
+                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="checkbox"]').prop('checked', false).trigger("change");
             }
         });
         // If only one assembly was selected then check radiobox
         if (selectedAssemblyIds.split(',').length === 1) {
             $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + selectedAssemblyIds + '"] [type="radio"]').prop('checked', true);
         }
-
         // if (selectedAssemblyIds.split(',').length > 2) {
         //     $('.tree-controls-draw-subtree').attr('data-selected-node', selectedAssemblyIds.split(',')[0]);
         // }
@@ -3367,14 +3366,16 @@ $(function(){
         // Map
         //======================================================
 
-        var checkedAssemblyId = $(this).attr('data-assembly-id');
+        var checkedAssemblyId = $(this).attr('data-assembly-id'),
+            assemblyIdMarker,
+            assemblyMarkerBounds = new google.maps.LatLngBounds();
 
         // Checked
         if ($(this).is(":checked")) {
             console.log('[WGST] Creating marker for assembly id: ' + checkedAssemblyId);
 
             // Create marker
-            window.WGST.geo.map.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
+            WGST.geo.map.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
                 position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
                 map: window.WGST.geo.map.canvas,
                 icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
@@ -3382,12 +3383,12 @@ $(function(){
             });
 
             // Open assembly on marker click
-            google.maps.event.addListener(window.WGST.geo.map.markers.assembly[checkedAssemblyId], 'click', function() {
+            google.maps.event.addListener(WGST.geo.map.markers.assembly[checkedAssemblyId], 'click', function() {
                 openAssemblyPanel(checkedAssemblyId);
             });
 
             // Highlight row
-            $(this).closest('tr').addClass("row-highlighted");
+            $(this).closest('.assembly-list-item').addClass("row-selected");
 
             if (! isFullscreenVisible('map')) {
                 if (! isPanelVisible('map')) {
@@ -3396,27 +3397,51 @@ $(function(){
                 }
             }
 
+            // Extend markerBounds with each metadata marker
+            //WGST.geo.map.markerBounds.extend(WGST.geo.map.markers.assembly[checkedAssemblyId].getPosition());
+            assemblyMarkerBounds.extend(WGST.geo.map.markers.assembly[checkedAssemblyId].getPosition());
+
         // Unchecked
         } else {
-            console.log('[WGST] Removing marker for assembly id: ' + checkedAssemblyId);
 
-            // Remove marker
-            window.WGST.geo.map.markers.assembly[checkedAssemblyId].setMap(null);
+            if (typeof WGST.geo.map.markers.assembly[checkedAssemblyId] !== 'undefined') {
+                console.log('[WGST] Removing marker for assembly id: ' + checkedAssemblyId);
+
+                // Remove marker
+                WGST.geo.map.markers.assembly[checkedAssemblyId].setMap(null);
+                delete WGST.geo.map.markers.assembly[checkedAssemblyId];
+
+                for (assemblyIdMarker in WGST.geo.map.markers.assembly) {
+                    if (WGST.geo.map.markers.assembly.hasOwnProperty(assemblyIdMarker)) {
+                        assemblyMarkerBounds.extend(WGST.geo.map.markers.assembly[assemblyIdMarker].getPosition());                        
+                    }
+                }
+
+                // Extend markerBounds with each metadata marker
+                //WGST.geo.map.markerBounds.extend(WGST.geo.map.markers.assembly[checkedAssemblyId].getPosition());
+            }
 
             // Remove node highlighing
-            $(this).closest('tr').removeClass("row-highlighted");
+            $(this).closest('.assembly-list-item').removeClass("row-selected");
         }
 
-        // Extend markerBounds with each metadata marker
-        window.WGST.geo.map.markerBounds.extend(window.WGST.geo.map.markers.assembly[checkedAssemblyId].getPosition());
-        // Pan to marker bounds
-        window.WGST.geo.map.canvas.panToBounds(window.WGST.geo.map.markerBounds);
-        // Set the map to fit marker bounds
-        window.WGST.geo.map.canvas.fitBounds(window.WGST.geo.map.markerBounds);
+        if (assemblyMarkerBounds.isEmpty()) {
+            WGST.geo.map.canvas.setCenter(new google.maps.LatLng(48.6908333333, 9.14055555556));
+            WGST.geo.map.canvas.setZoom(5);
+        } else {
+            // Pan to marker bounds
+            //WGST.geo.map.canvas.panToBounds(WGST.geo.map.markerBounds);
+            WGST.geo.map.canvas.panToBounds(assemblyMarkerBounds);
+            // Set the map to fit marker bounds
+            //WGST.geo.map.canvas.fitBounds(WGST.geo.map.markerBounds);
+            WGST.geo.map.canvas.fitBounds(assemblyMarkerBounds);
+        }
 
         // Check if you have selected all (filtered out) assemblies
         if ($(this).closest('.collection-assembly-list').find('input[type="checkbox"]:not(:checked)').length === 0) {
             $('input[type="checkbox"].show-all-assemblies-on-map').prop('checked', true);
+        } else {
+            $('input[type="checkbox"].show-all-assemblies-on-map').prop('checked', false);
         }
     });
 
