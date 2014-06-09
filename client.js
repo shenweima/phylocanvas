@@ -1096,14 +1096,23 @@ $(function(){
         var assemblies = window.WGST.collection[collectionId].assemblies;
         // Uncheck all radio buttons
         $('.collection-assembly-list .assembly-list-item [type="radio"]').prop('checked', false);
+
         // Add/Remove row highlight
         $.each(assemblies, function(assemblyId, assembly) {
             if ($.inArray(assemblyId, selectedAssemblyIds.split(',')) !== -1) {
                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').addClass('row-selected');
+
+                // Check map
+                //$('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="checkbox"]').prop('checked', true).trigger("change");
+
             } else {
                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').removeClass('row-selected');
+                
                 // Uncheck radio button
                 //$('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="radio"]').prop('checked', false);
+            
+                // Check map
+                //$('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="checkbox"]').prop('checked', false).trigger("change");
             }
         });
         // If only one assembly was selected then check radiobox

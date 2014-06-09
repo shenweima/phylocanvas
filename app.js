@@ -9,50 +9,52 @@ var fs = require('fs'),
 	file = __dirname + '/config.json';
 
 var appConfigData = fs.readFileSync(file, 'utf8');
-
 // Global var on purpose
 appConfig = JSON.parse(appConfigData);
-
 console.dir(appConfig);
 
 //======================================================
 // Module dependencies.
 //======================================================
 var express = require('express'),
+	//favicon = require('serve-favicon'),
+	morgan  = require('morgan'),
+	bodyParser = require('body-parser'),
+	//methodOverride = require('method-override'),
+	//cookieParser = require('cookie-parser'),
+	//session = require('express-session'),
+	router = express.Router(),
 	routes = require('./routes'),
 	user = require('./routes/user'),
 	assembly = require('./routes/assembly'),
 	collection = require('./routes/collection');
 	http = require('http'),
 	path = require('path'),
-	passport = require('passport'),
-	LocalStrategy = require('passport-local').Strategy,
+	//passport = require('passport'),
+	//LocalStrategy = require('passport-local').Strategy,
 	socketio = require('socket.io');
-	uuid = require('node-uuid');
-
-var app = express();
+	uuid = require('node-uuid'),
+	app = express();
 
 // all environments
 app.set('port', process.env.PORT || appConfig.server.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.use(express.favicon());
-app.use(express.logger('dev'));
+//app.use(favicon(__dirname + '/favicon.ico'));
+app.use(morgan({ format: 'dev', immediate: true }));
 // http://stackoverflow.com/a/19965089
-app.use(express.json({limit: '500mb'}));
-app.use(express.urlencoded({limit: '50mb'}));
-app.use(express.methodOverride());
-app.use(express.cookieParser('your secret here'));
-app.use(express.session());
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(app.router);
+app.use(bodyParser.json({limit: '500mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb'}));
+//app.use(methodOverride('X-HTTP-Method-Override'));
+//app.use(cookieParser());
+// app.use(session({
+//     secret: 'keyboard cat',
+//     proxy: true // if you do SSL outside of node.
+// }));
+// app.use(passport.initialize());
+// app.use(passport.session());
+//app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
-
-// development only
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
-}
 
 // App home route
 app.get('/', routes.index);
@@ -102,7 +104,7 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 
 var socketio = require('socket.io');
 
-// Global variable on purpose - will store socket connection and will be shared with routes
+// Global variable on purpose - will store socket connection and will share with routes
 socket = undefined;
 io = socketio.listen(server);
 
