@@ -107,7 +107,7 @@ app.get('/dev/canvas', require('./routes/dev').canvas);
 //app.post('/signin', user.signIn);
 
 var secureServer = https.createServer(sslOptions, app).listen(app.get('port'), function(){
-  console.log('✔ [WGST] Express server listening on port ' + app.get('port'));
+  console.log('✔ [WGST] Express secure server listening on port ' + app.get('port'));
 });
 
 //======================================================
@@ -118,7 +118,7 @@ var socketio = require('socket.io');
 
 // Global variable on purpose - will store socket connection and will share with routes
 socket = undefined;
-io = socketio.listen(server);
+io = socketio.listen(secureServer);
 
 io.sockets.on('connection', function (socketConnection) {
 	console.log('✔ [WGST][Socket.io] Connnected');
