@@ -25,7 +25,7 @@ var sslOptions = {
 };
 
 //======================================================
-// Module dependencies.
+// Module dependencies
 //======================================================
 var express = require('express'),
 	//favicon = require('serve-favicon'),
@@ -48,7 +48,6 @@ var express = require('express'),
 	uuid = require('node-uuid'),
 	app = express();
 
-// all environments
 app.set('port', process.env.PORT || appConfig.server.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -66,6 +65,7 @@ app.use(bodyParser.urlencoded({limit: '50mb'}));
 // app.use(passport.initialize());
 // app.use(passport.session());
 //app.use(app.router);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // App home route
@@ -109,6 +109,19 @@ app.get('/dev/canvas', require('./routes/dev').canvas);
 var secureServer = https.createServer(sslOptions, app).listen(app.get('port'), function(){
   console.log('✔ [WGST] Express secure server listening on port ' + app.get('port'));
 });
+
+//======================================================
+// Hack: Redirects to HTTPS
+//======================================================
+
+var net = require('net'),
+	handle = net.createServer().listen(80);
+
+http.createServer(function(request,response){
+   	response.statusCode = 302; 
+    response.setHeader("Location", "https://" + request.headers.host + request.url);
+    response.end();
+}).listen(handle);
 
 //======================================================
 // Socket.io
