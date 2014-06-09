@@ -87,7 +87,7 @@ $(function(){
     WGST.antibioticNameRegex = /[\W]+/g;
 
     WGST.socket = {
-        connection: io.connect(WGST.config.socketAddress),
+        connection: io.connect(WGST.config.socketAddress, {secure: true}),
         roomId: ''
     };
 
