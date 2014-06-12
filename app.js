@@ -82,11 +82,14 @@ app.post('/collection/add', collection.add);
 app.get('/api/collection/representative/metadata', collection.apiGetRepresentativeCollection);
 app.get('/collection/:id', collection.get);
 
+app.post('/api/collection/tree/merge', collection.mergeCollectionTrees);
+
 // Assembly routes
 app.get('/assembly/:id', assembly.get);
 //app.post('/assembly', assembly.getData);
 
 app.post('/api/assembly', assembly.apiGetAssembly);
+app.post('/api/assemblies', assembly.apiGetAssemblies);
 app.post('/api/assemblies', assembly.apiGetAssemblies);
 
 app.post('/assembly/add', assembly.add);
@@ -208,7 +211,8 @@ rabbitMQExchanges = {};
 rabbitMQExchangeNames = {
 	NOTIFICATION: 'notifications-ex',
 	UPLOAD: 'wgst-ex',
-	COLLECTION_ID: 'grid-ex'
+	COLLECTION_ID: 'grid-ex',
+	TASKS: 'wgst-tasks-ex'
 };
 
 rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
@@ -235,6 +239,10 @@ rabbitMQConnection.on("ready", function(){
 		type: 'direct'
 	});
 
+	// Exchange for getting collection id
+	createExchange(rabbitMQExchangeNames.TASKS, {
+		type: 'direct'
+	});
 });
 
 var createExchange = function(exchangeName, exchangeProperties) {

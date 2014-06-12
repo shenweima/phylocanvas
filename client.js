@@ -30,6 +30,10 @@ $(function(){
             top: 160,
             left: 180  
         },
+        mergedCollectionTree: {
+            top: 160,
+            left: 180
+        },
         representativeCollectionTree: {
             top: 80,
             left: 90
@@ -3229,6 +3233,103 @@ $(function(){
         }
     };
 
+    WGST.socket.connection.on('collectionTreeMergeNotification', function(mergedCollectionTreeData) {
+        console.dir(mergedCollectionTreeData);
+
+        // ------------------------------------------
+        // Get assemblies
+        // ------------------------------------------
+
+        var assemblyIds = [],
+            assemblyIdCounter = mergedCollectionTreeData.assemblies.length,
+            assemblies;
+
+        for (; assemblyIdCounter !== 0;) {
+            assemblyIdCounter = assemblyIdCounter - 1;
+
+            assemblyIds.push(mergedCollectionTreeData.assemblies[assemblyIdCounter].assemblyId);
+        }
+
+        console.log('Assembly ids to request:');
+        console.dir(assemblyIds);
+
+        $.ajax({
+            type: 'POST',
+            url: '/api/assemblies/',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: {
+                assemblyIds: assemblyIds
+            }
+        })
+        .done(function(assemblies, textStatus, jqXHR) {
+            console.log('Assemblies:');
+            console.dir(assemblies);
+
+            // ------------------------------------------
+            // Render tree
+            // ------------------------------------------
+
+            var mergedCollectionTreeId = mergedCollectionTreeData.mergedCollectionTreeId,
+                panelName = 'mergedCollectionTree'; // RRR
+
+            console.log('[WGST] Rendering merged collection tree ' + mergedCollectionTreeId);
+
+            $('.wgst-panel__merged-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + mergedCollectionTreeId);
+
+            activatePanel(panelName);
+
+            WGST.mergedCollectionTree = WGST.mergedCollectionTree || {};
+            WGST.mergedCollectionTree[mergedCollectionTreeId] = {
+                tree: {
+                    canvas: {},
+                    data: mergedCollectionTreeData.tree
+                }
+            };
+
+            // Init collection tree
+            WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + mergedCollectionTreeId));
+            WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.parseNwk(WGST.mergedCollectionTree[mergedCollectionTreeId].tree.data);
+            WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.treeType = 'rectangular';
+            // WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.onselected = function(selectedNodeIds) {
+            //     selectTreeNodes(collectionId, selectedNodeIds);
+            // };
+
+            // Get assemblies from merged collection
+
+            var tree = WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas,
+                assemblyId;
+
+            // Set user assembly id as node label
+            for (assemblyId in assemblies) {
+                if (assemblies.hasOwnProperty(assemblyId)) {
+                    // Set label only to leaf nodes, filtering out the root node
+                    if (tree.branches[assemblyId].leaf) {
+                        tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId;                 
+                    }
+
+                    // Create marker for each assembly
+
+                }
+            }
+
+            WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.draw();
+
+            //WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.draw();
+
+            endPanelLoadingIndicator(panelName);
+            showPanelBodyContent(panelName);
+            showPanel(panelName);
+            bringPanelToTop(panelName);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.error('[WGST][Error] Failed to get assemblies');
+            console.error(textStatus);
+            console.error(errorThrown);
+            console.error(jqXHR);
+
+        });
+    });
+
     // Listen to notifications
     WGST.socket.connection.on('assemblyUploadNotification', function(data) {
 
@@ -4150,7 +4251,6 @@ $(function(){
         
         WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeSize + 3);
     });
-
     $('.wgst-tree-control__show-node-labels').on('change', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
 
@@ -4166,7 +4266,25 @@ $(function(){
         //     WGST.collection[collectionId].tree.canvas.toggleLabels();
         // }
     });
+    $('.wgst-tree-control__merge-collection-trees').on('click', function(){
+        var requestData = {
+            collectionId: $(this).closest('.wgst-panel').attr('data-collection-id'),
+            mergeWithCollectionId: '851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+            socketRoomId: WGST.socket.roomId
+        };
 
+        // Merge collection trees
+        $.ajax({
+            type: 'POST',
+            url: '/api/collection/tree/merge',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: requestData
+        })
+        .done(function(mergeRequestSent, textStatus, jqXHR) {
+            console.log('[WGST] Requested to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
+        });
+
+    });
     var renderRepresentativeCollectionTree = function() {
         console.log('[WGST] Rendering representative collection tree');
 

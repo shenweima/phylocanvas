@@ -33,7 +33,7 @@ exports.add = function(req, res) {
 	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId;
 
 	// Create queue
-	var notificationQueue = rabbitMQConnection.queue(notificationQueueId, 
+	rabbitMQConnection.queue(notificationQueueId, 
 		{
 			exclusive: true
 		}, function(queue){

@@ -503,3 +503,117 @@ exports.get = function(req, res) {
 		requestedCollectionId: collectionId
 	});
 };
+
+exports.mergeCollectionTrees = function(req, res) {
+	console.log('[WGST] Merging trees');
+	console.dir(req.body);
+
+	res.json({});
+
+	var socketRoomId = req.body.socketRoomId;
+
+	var mergeRequest = {
+		assemblies: [],
+		targetCollectionId: req.body.collectionId, // Your collection id
+		inputData: [req.body.mergeWithCollectionId], // e.g.: EARSS collection, etc.
+		dataSource: 'CORE'
+	};
+
+	console.dir(mergeRequest);
+
+	// Generate queue id
+	// To do: Rename ART to WGST_CLIENT_
+	var notificationQueueId = 'ART_NOTIFICATION_MERGE_TREES_' + uuid.v4();
+
+	// Create queue
+	rabbitMQConnection.queue(notificationQueueId, 
+	{
+		exclusive: true
+	}, function(queue){
+		console.log('[WGST][RabbitMQ] Notification queue "' + queue.name + '" is open');
+
+		queue.bind(rabbitMQExchangeNames.NOTIFICATION, "MERGE_TREE.COLLECTION." + mergeRequest.targetCollectionId); // binding routing key
+
+		// Subscribe to response message
+		queue.subscribe(function(message, headers, deliveryInfo){
+			console.log('[WGST][RabbitMQ] Received notification message');
+
+			var buffer = new Buffer(message.data),
+				bufferJSON = buffer.toString(),
+				parsedMessage = JSON.parse(bufferJSON),
+				mergedTreeId = parsedMessage.documentId
+
+			console.log('=== Parsed message');
+			console.dir(parsedMessage);
+
+			queue.destroy();
+
+			// -----------------------------------------------------------
+			// Get merged tree
+			// -----------------------------------------------------------
+			getMergedCollectionTree(mergedTreeId, function(error, mergedTree){
+				if (error) {
+					console.error('✗ [WGST][Couchbase][Error] ' + error);
+					return;
+				}
+
+				console.log('Thats it?');
+				console.dir(mergedTree);
+
+				// -----------------------------------------------------------
+				// Emit socket message
+				// -----------------------------------------------------------
+				if (parsedMessage.taskType === 'MERGE') {
+					console.log('[WGST][Socket.io] Emitting ' + parsedMessage.taskType + ' message for socketRoomId: ' + socketRoomId);
+					io.sockets.in(socketRoomId).emit("collectionTreeMergeNotification", {
+						mergedCollectionTreeId: parsedMessage.documentId.replace('MERGE_TREE_', ''),
+						tree: mergedTree.newickTree,
+						assemblies: mergedTree.assemblies,
+						targetCollectionId: mergeRequest.targetCollectionId,
+						inputData: mergeRequest.inputData,
+						status: "MERGE ready",
+						result: "MERGE",
+						socketRoomId: socketRoomId
+					});
+				} // if
+			});
+		});
+
+		// -----------------------------------------------------------
+		// Publish collection tree merge request
+		// -----------------------------------------------------------
+		rabbitMQExchanges[rabbitMQExchangeNames.TASKS].publish('merge-trees', mergeRequest, { 
+			mandatory: true,
+			contentType: 'application/json',
+			deliveryMode: 1,
+			correlationId: 'Art', // Generate UUID?
+			replyTo: 'noQueueId'
+		}, function(err){
+			if (err) {
+				console.error('✗ [WGST][RabbitMQ][Error] Failed to publish to ' + rabbitMQExchangeNames.TASKS + ' exchange');
+				return;
+			}
+
+			console.log('[WGST][RabbitMQ] Message was published to ' + rabbitMQExchangeNames.TASKS + ' exchange');
+		});
+	});
+};
+
+var getMergedCollectionTree = function(mergedTreeId, callback) {
+	console.log('[WGST] Getting merged tree ' + mergedTreeId);
+
+	couchbaseDatabaseConnections[testWgstBucket].get(mergedTreeId, function(err, result) {
+		if (err) {
+			callback(err, null);
+			return;
+		}
+
+		console.log('[WGST] Got merged tree ' + mergedTreeId);
+
+		var treeData = result.value;
+		//console.dir(treeData);
+
+		callback(null, treeData);
+	});
+};
+
