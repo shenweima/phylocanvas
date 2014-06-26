@@ -16,13 +16,13 @@ console.dir(appConfig);
 //======================================================
 // SSL
 //======================================================
-var sslOptions = {
-  key: fs.readFileSync('./ssl/server.key'),
-  cert: fs.readFileSync('./ssl/server.crt'),
-  ca: fs.readFileSync('./ssl/ca.crt'),
-  requestCert: true,
-  rejectUnauthorized: false
-};
+// var sslOptions = {
+//   key: fs.readFileSync('./ssl/server.key'),
+//   cert: fs.readFileSync('./ssl/server.crt'),
+//   ca: fs.readFileSync('./ssl/ca.crt'),
+//   requestCert: true,
+//   rejectUnauthorized: false
+// };
 
 //======================================================
 // Module dependencies
@@ -40,7 +40,7 @@ var express = require('express'),
 	assembly = require('./routes/assembly'),
 	collection = require('./routes/collection');
 	http = require('http'),
-	https = require('https'),
+	//https = require('https'),
 	path = require('path'),
 	//passport = require('passport'),
 	//LocalStrategy = require('passport-local').Strategy,
@@ -108,8 +108,8 @@ app.get('/dev/canvas', require('./routes/dev').canvas);
 
 //app.post('/join', user.join);
 //app.post('/signin', user.signIn);
-
-var secureServer = https.createServer(sslOptions, app).listen(app.get('port'), function(){
+var server = http.createServer(app).listen(app.get('port'), function(){
+//var secureServer = https.createServer(sslOptions, app).listen(app.get('port'), function(){
   console.log('✔ [WGST] Express secure server listening on port ' + app.get('port'));
 });
 
@@ -117,14 +117,14 @@ var secureServer = https.createServer(sslOptions, app).listen(app.get('port'), f
 // Hack: Redirects to HTTPS
 //======================================================
 
-var net = require('net'),
-	handle = net.createServer().listen(80);
+// var net = require('net'),
+// 	handle = net.createServer().listen(80);
 
-http.createServer(function(request,response){
-   	response.statusCode = 302; 
-    response.setHeader("Location", "https://" + request.headers.host + request.url);
-    response.end();
-}).listen(handle);
+// http.createServer(function(request,response){
+//    	response.statusCode = 302; 
+//     response.setHeader("Location", "https://" + request.headers.host + request.url);
+//     response.end();
+// }).listen(handle);
 
 //======================================================
 // Socket.io
@@ -134,7 +134,8 @@ var socketio = require('socket.io');
 
 // Global variable on purpose - will store socket connection and will share with routes
 socket = undefined;
-io = socketio.listen(secureServer);
+io = socketio.listen(server);
+//io = socketio.listen(secureServer);
 
 io.sockets.on('connection', function (socketConnection) {
 	console.log('✔ [WGST][Socket.io] Connnected');
