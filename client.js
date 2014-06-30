@@ -909,156 +909,161 @@ $(function(){
             console.log('[WGST] Got collection ' + collectionId + ' data');
             console.dir(data);
 
-            WGST.collection[collectionId].tree.data = data.collection.tree;
-            WGST.collection[collectionId].assemblies = data.collection.assemblies;
-            WGST.antibiotics = data.antibiotics;
+            console.log('Data: ');
+            console.log(Object.keys(data).length);
 
-            // ----------------------------------------
-            // Ungroup antibiotic resistance profile
-            // ----------------------------------------
-            var assemblyId,
-                assembly,
-                resistanceProfileGroups = {},
-                resistanceProfileGroupName,
-                resistanceProfileGroup,
-                ungroupedResistanceProfile,
-                antibioticName;
+            if (Object.keys(data).length > 0) {
+                WGST.collection[collectionId].tree.data = data.collection.tree;
+                WGST.collection[collectionId].assemblies = data.collection.assemblies;
+                WGST.antibiotics = data.antibiotics;
 
-            for (assemblyId in WGST.collection[collectionId].assemblies) {
-                assembly = WGST.collection[collectionId].assemblies[assemblyId];
-                resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
-                ungroupedResistanceProfile = {};
+                // ----------------------------------------
+                // Ungroup antibiotic resistance profile
+                // ----------------------------------------
+                var assemblyId,
+                    assembly,
+                    resistanceProfileGroups = {},
+                    resistanceProfileGroupName,
+                    resistanceProfileGroup,
+                    ungroupedResistanceProfile,
+                    antibioticName;
 
-                console.log('resistanceProfileGroups: ' + resistanceProfileGroups);
-                console.dir(resistanceProfileGroups); // ZZZ
+                for (assemblyId in WGST.collection[collectionId].assemblies) {
+                    assembly = WGST.collection[collectionId].assemblies[assemblyId];
+                    resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+                    ungroupedResistanceProfile = {};
 
-                for (resistanceProfileGroupName in resistanceProfileGroups) {
-                    resistanceProfileGroup = resistanceProfileGroups[resistanceProfileGroupName];
+                    console.log('resistanceProfileGroups: ' + resistanceProfileGroups);
+                    console.dir(resistanceProfileGroups); // ZZZ
 
-                    for (antibioticName in resistanceProfileGroup) {
-                        ungroupedResistanceProfile[antibioticName] = resistanceProfileGroup[antibioticName];
-                    }                    
+                    for (resistanceProfileGroupName in resistanceProfileGroups) {
+                        resistanceProfileGroup = resistanceProfileGroups[resistanceProfileGroupName];
+
+                        for (antibioticName in resistanceProfileGroup) {
+                            ungroupedResistanceProfile[antibioticName] = resistanceProfileGroup[antibioticName];
+                        }                    
+                    }
+
+                    WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile = ungroupedResistanceProfile;
+                
+                    console.log('WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile:');
+                    console.dir(WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile);
+
+                } // for
+
+                // ----------------------------------------
+                // Render collection tree
+                // ----------------------------------------
+                // Remove previosly rendered collection tree
+                $('.wgst-panel__collection-tree .wgst-tree-content').html('');
+                // Attach collection id
+                $('.wgst-panel__collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
+
+                // WGST.collection[collectionId].tree.canvas.setTextSize(20);
+                // WGST.collection[collectionId].tree.canvas.selectedNodeSizeIncrease = 2;
+                // WGST.collection[collectionId].tree.canvas.selectedColor = '#0059DE';
+
+                // Render collection tree
+                renderCollectionTree(collectionId);
+
+                endPanelLoadingIndicator('collectionTree');
+                //showPanelBodyContent('collectionTree');
+
+                // ----------------------------------------
+                // Render assembly metadata list
+                // ----------------------------------------
+                var assemblies = window.WGST.collection[collectionId].assemblies,
+                    sortedAssemblies = [],
+                    sortedAssemblyIds = [];
+
+                // Sort assemblies in order in which they are displayed on tree
+                $.each(window.WGST.collection[collectionId].tree.leavesOrder, function(leafCounter, leaf){
+                    sortedAssemblies.push(assemblies[leaf.id]);
+                    sortedAssemblyIds.push(leaf.id);
+                });
+
+                WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
+
+                //renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
+                renderAssemblyAnalysisList(collectionId, WGST.antibiotics);
+
+                //renderCollectionFamily(collectionId);
+
+                // ----------------------------------------
+                // Prepare collection
+                // ----------------------------------------
+                console.log('[WGST] Collection ' + collectionId + ' has ' + Object.keys(assemblies).length + ' assemblies');
+
+                // Set collection creation timestamp
+                var assemblyIds = Object.keys(assemblies),
+                    lastAssemblyId = assemblyIds[assemblyIds.length - 1],
+                    lastAssemblyTimestamp = assemblies[lastAssemblyId]['FP_COMP'].timestamp;
+                // Format to readable string so that user could read detailed timestamp on mouse over
+                $('.assembly-created-datetime').attr('title', moment(lastAssemblyTimestamp, "YYYYMMDD_HHmmss").format('YYYY-MM-DD HH:mm:ss'));
+                // Convert to time ago string
+                $('.timeago').timeago();
+
+                // ----------------------------------------
+                // Prepare collection stats
+                // ----------------------------------------
+                $('.wgst-stats__collection .wgst-stats-value__total-number-of-assemblies').html(sortedAssemblies.length);
+                $('.wgst-stats__collection .wgst-stats-value__number-of-displayed-assemblies').html(sortedAssemblies.length);
+                $('.wgst-stats__collection .wgst-stats-value__number-of-selected-assemblies').html('0');
+                $('.wgst-stats__collection .wgst-stats-value__created-on').html(moment(new Date()).format('DD/MM/YYYY'));
+                $('.wgst-stats__collection .wgst-stats-value__author').html('Anonymous');
+                $('.wgst-stats__collection .wgst-stats-value__privacy').html('Public');
+
+                // Scrolling hint
+                // if ($('.collection-assembly-list .assembly-list-item:visible').length > 7) {
+                //     $('.collection-assembly-list-more-assemblies').show();
+                // } else {
+                //     $('.collection-assembly-list-more-assemblies').hide();
+                // }
+
+                //showPanel('collection');
+                endPanelLoadingIndicator('collection');
+                showPanelBodyContent('collection');
+
+                // TO DO: Create table with results for each assembly in this collection
+                // TO DO: Highlight parent node on the reference tree
+                // TO DO: Create markers for each assembly in this collection?
+
+                // deactivatePanel('assemblyUploadProgress', function(){
+                //     resetAssemlyUploadPanel();                
+                // });
+
+                //AAA
+                // activatePanel(['collection', 'collectionTree'], function(){
+                //     // Prepare Collection Tree
+                //     $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+                //     // Init collection tree
+                //     window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+                //     // Render collection tree
+                //     renderCollectionTree(collectionId);
+                // });
+
+                // var w = window.open();
+                // var html = $(collectionReportHtml).html();
+                // $(w.document.body).html(html);
+
+
+
+
+
+                //
+                // If collection has more than 100 assemblies then show fullscreen instead of panel.
+                //
+                // Collection has more than 100 assemblies - show fullscreen, otherwise show panel.
+                if (Object.keys(WGST.collection[collectionId].assemblies).length > 100) {
+                    console.log('[WGST] Collection ' + collectionId + ' will be displayed fullscreen');
+                    
+                    maximizeCollection(collectionId);
+                    deactivatePanel('collection');
                 }
 
-                WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile = ungroupedResistanceProfile;
-            
-                console.log('WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile:');
-                console.dir(WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile);
-
-            } // for
-
-            // ----------------------------------------
-            // Render collection tree
-            // ----------------------------------------
-            // Remove previosly rendered collection tree
-            $('.wgst-panel__collection-tree .wgst-tree-content').html('');
-            // Attach collection id
-            $('.wgst-panel__collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
-
-            // WGST.collection[collectionId].tree.canvas.setTextSize(20);
-            // WGST.collection[collectionId].tree.canvas.selectedNodeSizeIncrease = 2;
-            // WGST.collection[collectionId].tree.canvas.selectedColor = '#0059DE';
-
-            // Render collection tree
-            renderCollectionTree(collectionId);
-
-            endPanelLoadingIndicator('collectionTree');
-            //showPanelBodyContent('collectionTree');
-
-            // ----------------------------------------
-            // Render assembly metadata list
-            // ----------------------------------------
-            var assemblies = window.WGST.collection[collectionId].assemblies,
-                sortedAssemblies = [],
-                sortedAssemblyIds = [];
-
-            // Sort assemblies in order in which they are displayed on tree
-            $.each(window.WGST.collection[collectionId].tree.leavesOrder, function(leafCounter, leaf){
-                sortedAssemblies.push(assemblies[leaf.id]);
-                sortedAssemblyIds.push(leaf.id);
-            });
-
-            WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
-
-            //renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
-            renderAssemblyAnalysisList(collectionId, WGST.antibiotics);
-
-            //renderCollectionFamily(collectionId);
-
-            // ----------------------------------------
-            // Prepare collection
-            // ----------------------------------------
-            console.log('[WGST] Collection ' + collectionId + ' has ' + Object.keys(assemblies).length + ' assemblies');
-
-            // Set collection creation timestamp
-            var assemblyIds = Object.keys(assemblies),
-                lastAssemblyId = assemblyIds[assemblyIds.length - 1],
-                lastAssemblyTimestamp = assemblies[lastAssemblyId]['FP_COMP'].timestamp;
-            // Format to readable string so that user could read detailed timestamp on mouse over
-            $('.assembly-created-datetime').attr('title', moment(lastAssemblyTimestamp, "YYYYMMDD_HHmmss").format('YYYY-MM-DD HH:mm:ss'));
-            // Convert to time ago string
-            $('.timeago').timeago();
-
-            // ----------------------------------------
-            // Prepare collection stats
-            // ----------------------------------------
-            $('.wgst-stats__collection .wgst-stats-value__total-number-of-assemblies').html(sortedAssemblies.length);
-            $('.wgst-stats__collection .wgst-stats-value__number-of-displayed-assemblies').html(sortedAssemblies.length);
-            $('.wgst-stats__collection .wgst-stats-value__number-of-selected-assemblies').html('0');
-            $('.wgst-stats__collection .wgst-stats-value__created-on').html(moment(new Date()).format('DD/MM/YYYY'));
-            $('.wgst-stats__collection .wgst-stats-value__author').html('Anonymous');
-            $('.wgst-stats__collection .wgst-stats-value__privacy').html('Public');
-
-            // Scrolling hint
-            // if ($('.collection-assembly-list .assembly-list-item:visible').length > 7) {
-            //     $('.collection-assembly-list-more-assemblies').show();
-            // } else {
-            //     $('.collection-assembly-list-more-assemblies').hide();
-            // }
-
-            //showPanel('collection');
-            endPanelLoadingIndicator('collection');
-            showPanelBodyContent('collection');
-
-            // TO DO: Create table with results for each assembly in this collection
-            // TO DO: Highlight parent node on the reference tree
-            // TO DO: Create markers for each assembly in this collection?
-
-            // deactivatePanel('assemblyUploadProgress', function(){
-            //     resetAssemlyUploadPanel();                
-            // });
-
-            //AAA
-            // activatePanel(['collection', 'collectionTree'], function(){
-            //     // Prepare Collection Tree
-            //     $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
-            //     // Init collection tree
-            //     window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
-            //     // Render collection tree
-            //     renderCollectionTree(collectionId);
-            // });
-
-            // var w = window.open();
-            // var html = $(collectionReportHtml).html();
-            // $(w.document.body).html(html);
-
-
-
-
-
-            //
-            // If collection has more than 100 assemblies then show fullscreen instead of panel.
-            //
-            // Collection has more than 100 assemblies - show fullscreen, otherwise show panel.
-            if (Object.keys(WGST.collection[collectionId].assemblies).length > 100) {
-                console.log('[WGST] Collection ' + collectionId + ' will be displayed fullscreen');
-                
-                maximizeCollection(collectionId);
-                deactivatePanel('collection');
+                // Enable 'Collection' nav item
+                enableNavItem('collection');             
             }
-
-            // Enable 'Collection' nav item
-            enableNavItem('collection');            
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log('[WGST][ERROR] Failed to get collection id');
@@ -3480,7 +3485,12 @@ $(function(){
             WGST.geo.map.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
                 position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
                 map: window.WGST.geo.map.canvas,
-                icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                //icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 10
+                },
+                draggable: true,
                 optimized: true // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
             });
 

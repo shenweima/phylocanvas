@@ -341,7 +341,11 @@ exports.apiGetCollection = function(req, res) {
 
 	// Get list of assemblies
 	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
-		if (err) throw err;
+		if (err) {
+			// Ignore this error for now
+			res.json({});
+			return;
+		}
 
 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
 
@@ -355,7 +359,11 @@ exports.apiGetCollection = function(req, res) {
 			var assemblyId = assemblyIds[assemblyCounter];
 
 			require('./assembly').getAssembly(assemblyId, function(error, assembly){
-				if (error) throw error;
+				if (err) {
+					// Ignore this error for now
+					res.json({});
+					return;
+				}
 
 				console.log('[WGST] Got assembly ' + assembly.ASSEMBLY_METADATA.assemblyId);
 
@@ -367,7 +375,11 @@ exports.apiGetCollection = function(req, res) {
 				if (Object.keys(collection.assemblies).length === assemblyIds.length) {
 					// Get collection tree data
 					couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
-						if (err) throw err;
+						if (err) {
+							// Ignore this error for now
+							res.json({});
+							return;
+						}
 
 						var collectionTreeData = collectionTreeData.value.newickTree;
 
@@ -378,7 +390,11 @@ exports.apiGetCollection = function(req, res) {
 
 						// Get antibiotics
 						require('./assembly').getAllAntibiotics(function(error, antibiotics){
-							if (error) throw error;
+							if (err) {
+								// Ignore this error for now
+								res.json({});
+								return;
+							}
 
 							res.json({
 								collection: collection,

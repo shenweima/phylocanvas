@@ -141,7 +141,7 @@ io.sockets.on('connection', function (socketConnection) {
 	console.log('✔ [WGST][Socket.io] Connnected');
 
 	socketConnection.on('disconnect', function() {
-		console.log('[WGST][Socket.io] Disconnnected');
+		console.log('✗ [WGST][Socket.io] Disconnnected');
 	});
 
 	socketConnection.on('getRoomId', function() {
