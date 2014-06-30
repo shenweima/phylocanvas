@@ -91,7 +91,8 @@ $(function(){
     WGST.antibioticNameRegex = /[\W]+/g;
 
     WGST.socket = {
-        connection: io.connect(WGST.config.socketAddress, {secure: true}),
+        //connection: io.connect(WGST.config.socketAddress, {secure: true}),
+        connection: io.connect(WGST.config.socketAddress),
         roomId: ''
     };
 
@@ -4243,13 +4244,24 @@ $(function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
             currentNodeSize = WGST.collection[collectionId].tree.canvas.baseNodeSize;
         
-        WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeSize - 3);
+        if (currentNodeSize > 3) {
+            WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeSize - 3);
+            currentNodeSize = WGST.collection[collectionId].tree.canvas.baseNodeSize;
+            if (currentNodeSize < 3) {
+                $(this).attr('disabled', true);
+            }
+        } else {
+            $(this).attr('disabled', true);
+        }
     });
     $('.wgst-tree-control__increase-node-size').on('click', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
             currentNodeSize = WGST.collection[collectionId].tree.canvas.baseNodeSize;
-        
+
         WGST.collection[collectionId].tree.canvas.setNodeSize(currentNodeSize + 3);
+        if (WGST.collection[collectionId].tree.canvas.baseNodeSize > 3) {
+            $(this).closest('.wgst-tree-control').find('.wgst-tree-control__decrease-node-size').attr('disabled', false);
+        }
     });
     $('.wgst-tree-control__show-node-labels').on('change', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
