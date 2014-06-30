@@ -340,8 +340,8 @@ exports.apiGetCollection = function(req, res) {
 	console.log('[WGST] Getting collection ' + collectionId);
 
 	// Get list of assemblies
-	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
-		if (err) {
+	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
+		if (error) {
 			// Ignore this error for now
 			res.json({});
 			return;
@@ -359,7 +359,7 @@ exports.apiGetCollection = function(req, res) {
 			var assemblyId = assemblyIds[assemblyCounter];
 
 			require('./assembly').getAssembly(assemblyId, function(error, assembly){
-				if (err) {
+				if (error) {
 					// Ignore this error for now
 					res.json({});
 					return;
@@ -374,8 +374,8 @@ exports.apiGetCollection = function(req, res) {
 				// If got all assemblies
 				if (Object.keys(collection.assemblies).length === assemblyIds.length) {
 					// Get collection tree data
-					couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
-						if (err) {
+					couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(error, collectionTreeData) {
+						if (error) {
 							// Ignore this error for now
 							res.json({});
 							return;
@@ -390,7 +390,7 @@ exports.apiGetCollection = function(req, res) {
 
 						// Get antibiotics
 						require('./assembly').getAllAntibiotics(function(error, antibiotics){
-							if (err) {
+							if (error) {
 								// Ignore this error for now
 								res.json({});
 								return;
