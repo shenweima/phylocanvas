@@ -3466,38 +3466,104 @@ $(function(){
         }
     });
 
+    var getAssembliesWithIdenticalPosition = function(markerPositionLatLng) {
+        //------------------------------------------------------
+        // Figure out which marker to create
+        //------------------------------------------------------
+        var newMarkerLatitude = $(this).attr('data-latitude'),
+            newMarkerLongitude = $(this).attr('data-longitude'),
+            newMarkerPosition = new google.maps.LatLng(newMarkerLatitude, newMarkerLongitude);
+
+        // Count markers with identical position
+        var assemblyId,
+            existingMarker,
+            //numberOfMarkersWithIdenticalPosition = 1,
+            assembliesWithIdenticalPosition = [];
+        for (assemblyId in WGST.geo.map.markers.assembly) {
+            existingMarker = WGST.geo.map.markers.assembly[assemblyId];
+            if (markerPositionLatLng.equals(existingMarker.getPosition())) {
+                //numberOfMarkersWithIdenticalPosition++;
+                assembliesWithIdenticalPosition.push(assemblyId);
+            }
+        }
+
+        return assembliesWithIdenticalPosition;
+    };
+
     // User wants to show assembly on map
     $('.wgst-panel__collection .collection-assembly-list').on('change', 'input[type="checkbox"]', function(e) {
 
         //======================================================
         // Map
         //======================================================
-
         var checkedAssemblyId = $(this).attr('data-assembly-id'),
             assemblyIdMarker,
             assemblyMarkerBounds = new google.maps.LatLngBounds();
+
+        //------------------------------------------------------
+        // Find markers with identical position
+        //------------------------------------------------------
+        var newMarkerLatitude = $(this).attr('data-latitude'),
+            newMarkerLongitude = $(this).attr('data-longitude'),
+            newMarkerPosition = new google.maps.LatLng(newMarkerLatitude, newMarkerLongitude);
+
+        var markerIcon = '',
+            markersWithIdenticalPosition = getAssembliesWithIdenticalPosition(newMarkerPosition);
 
         // Checked
         if ($(this).is(":checked")) {
             console.log('[WGST] Creating marker for assembly id: ' + checkedAssemblyId);
 
-            // Create marker
-            WGST.geo.map.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
-                position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
-                map: window.WGST.geo.map.canvas,
-                //icon: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 10
-                },
-                draggable: true,
-                optimized: true // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
-            });
+            // //------------------------------------------------------
+            // // Figure out which marker to create
+            // //------------------------------------------------------
+            // var newMarkerLatitude = $(this).attr('data-latitude'),
+            //     newMarkerLongitude = $(this).attr('data-longitude'),
+            //     newMarkerPosition = new google.maps.LatLng(newMarkerLatitude, newMarkerLongitude);
 
-            // Open assembly on marker click
-            google.maps.event.addListener(WGST.geo.map.markers.assembly[checkedAssemblyId], 'click', function() {
-                openAssemblyPanel(checkedAssemblyId);
-            });
+            // var markerIcon = '',
+            //     markersWithIdenticalPosition = getMarkersWithIdenticalPosition(newMarkerPosition);
+
+            // Count markers with identical position
+            // var markerIcon = '',
+            //     assemblyId,
+            //     existingMarker,
+            //     //numberOfMarkersWithIdenticalPosition = 1,
+            //     markersWithIdenticalPosition = [];
+            // for (assemblyId in WGST.geo.map.markers.assembly) {
+            //     existingMarker = WGST.geo.map.markers.assembly[assemblyId];
+            //     if (newMarkerPosition.equals(existingMarker.getPosition())) {
+            //         //numberOfMarkersWithIdenticalPosition++;
+            //         markersWithIdenticalPosition.push(assemblyId);
+            //     }
+            // }
+
+            markerIcon = '//chart.apis.google.com/chart?chst=d_map_pin_letter&chld=' + (markersWithIdenticalPosition.length + 1) + '|00FFFF|000000';
+
+            // If more than one marker has identical position then check their resistance profiles and find out if they are any different
+            console.log(markersWithIdenticalPosition.length + ' markers with identical position');
+            // if (markersWithIdenticalPosition.length > 0) {
+            //     // Marker already exists for this position - do not create a new one, just update marker icon
+            //     WGST.geo.map.markers.assembly[checkedAssemblyId].setIcon(markerIcon);
+            // } else {
+                // Create marker
+                WGST.geo.map.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
+                    position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
+                    map: window.WGST.geo.map.canvas,
+                    icon: markerIcon,
+                    draggable: true,
+                    optimized: true // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+                });
+
+                // Open assembly on marker click
+                google.maps.event.addListener(WGST.geo.map.markers.assembly[checkedAssemblyId], 'click', function() {
+                    openAssemblyPanel(checkedAssemblyId);
+                });
+            // }
+
+            //------------------------------------------------------
+            // Update list of assemblies
+            //------------------------------------------------------
 
             // Highlight row
             $(this).closest('.assembly-list-item').addClass("row-selected");
@@ -3519,6 +3585,8 @@ $(function(){
             if (typeof WGST.geo.map.markers.assembly[checkedAssemblyId] !== 'undefined') {
                 console.log('[WGST] Removing marker for assembly id: ' + checkedAssemblyId);
 
+                markerIcon = '//chart.apis.google.com/chart?chst=d_map_pin_letter&chld=' + (markersWithIdenticalPosition.length - 1) + '|00FFFF|000000';
+
                 // Remove marker
                 WGST.geo.map.markers.assembly[checkedAssemblyId].setMap(null);
                 delete WGST.geo.map.markers.assembly[checkedAssemblyId];
@@ -3526,6 +3594,20 @@ $(function(){
                 for (assemblyIdMarker in WGST.geo.map.markers.assembly) {
                     if (WGST.geo.map.markers.assembly.hasOwnProperty(assemblyIdMarker)) {
                         assemblyMarkerBounds.extend(WGST.geo.map.markers.assembly[assemblyIdMarker].getPosition());                        
+                    }
+                }
+
+                // Update other identical markers
+                var assemblyId,
+                    existingMarker;
+                    //numberOfMarkersWithIdenticalPosition = 1,
+                    //assembliesWithIdenticalPosition = [];
+                for (assemblyId in WGST.geo.map.markers.assembly) {
+                    existingMarker = WGST.geo.map.markers.assembly[assemblyId];
+                    if (newMarkerPosition.equals(existingMarker.getPosition())) {
+                        //numberOfMarkersWithIdenticalPosition++;
+                        //assembliesWithIdenticalPosition.push(assemblyId);
+                        existingMarker.setIcon(markerIcon);
                     }
                 }
 
