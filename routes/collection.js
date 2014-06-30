@@ -361,7 +361,7 @@ exports.apiGetCollection = function(req, res) {
 			require('./assembly').getAssembly(assemblyId, function(error, assembly){
 				if (error) {
 					// Ignore this error for now
-					res.json({});
+					//res.json({});
 					return;
 				}
 
@@ -377,7 +377,7 @@ exports.apiGetCollection = function(req, res) {
 					couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(error, collectionTreeData) {
 						if (error) {
 							// Ignore this error for now
-							res.json({});
+							//res.json({});
 							return;
 						}
 
@@ -392,7 +392,7 @@ exports.apiGetCollection = function(req, res) {
 						require('./assembly').getAllAntibiotics(function(error, antibiotics){
 							if (error) {
 								// Ignore this error for now
-								res.json({});
+								//res.json({});
 								return;
 							}
 
