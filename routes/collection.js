@@ -297,7 +297,7 @@ var getCollection = function(collectionId, callback) {
 	console.log('[WGST] Getting collection ' + collectionId);
 
 	// Get list of assemblies
-	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
+	couchbaseDatabaseConnections[testWgstBucket].get('CORE_TREE_RESULT_' + collectionId, function(err, assemblyIdsData) {
 		if (err) throw err;
 
 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
@@ -311,7 +311,7 @@ var getCollection = function(collectionId, callback) {
 			collection.assemblies = assemblies;
 
 			// Get collection tree data
-			couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+			couchbaseDatabaseConnections[testWgstBucket].get('CORE_TREE_RESULT_' + collectionId, function(err, collectionTreeData) {
 				if (err) throw err;
 
 				var collectionTreeData = collectionTreeData.value.newickTree;
@@ -374,7 +374,7 @@ exports.apiGetCollection = function(req, res) {
 				// If got all assemblies
 				if (Object.keys(collection.assemblies).length === assemblyIds.length) {
 					// Get collection tree data
-					couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_TREE_' + collectionId, function(error, collectionTreeData) {
+					couchbaseDatabaseConnections[testWgstBucket].get('CORE_TREE_RESULT_' + collectionId, function(error, collectionTreeData) {
 						if (error) {
 							// Ignore this error for now
 							//res.json({});

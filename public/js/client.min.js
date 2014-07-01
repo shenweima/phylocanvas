@@ -4373,7 +4373,7 @@ $(function(){
     $('.wgst-tree-control__merge-collection-trees').on('click', function(){
         var requestData = {
             collectionId: $(this).closest('.wgst-panel').attr('data-collection-id'),
-            mergeWithCollectionId: '851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+            mergeWithCollectionId: '78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
             socketRoomId: WGST.socket.roomId
         };
 
