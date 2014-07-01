@@ -55,8 +55,8 @@ $(function(){
             left: 90
         },
         map: {
-            top: 80,
-            left: 90
+            top: '15%',
+            left: '20%'
         }
     };
 
@@ -1174,6 +1174,10 @@ $(function(){
 
     var triggerMapMarkers = function(collectionId, selectedAssemblyIds) {
 
+        var assemblyMarkerBounds = new google.maps.LatLngBounds();
+
+        //ZZZ
+
         // Remove existing markers
         removeAllGroupMarkers();
 
@@ -1195,7 +1199,19 @@ $(function(){
                 positionGroupLng = assemblies[assemblyId].ASSEMBLY_METADATA.geography.position.longitude;
 
                 createGroupMarker(positionGroup, positionGroupLat, positionGroupLng, positionGroup.length);
+
+                assemblyMarkerBounds.extend(new google.maps.LatLng(positionGroupLat, positionGroupLng));
             } // for
+        } // if
+
+        if (assemblyMarkerBounds.isEmpty()) {
+            WGST.geo.map.canvas.setCenter(new google.maps.LatLng(48.6908333333, 9.14055555556));
+            WGST.geo.map.canvas.setZoom(5);
+        } else {
+            // Pan to marker bounds
+            WGST.geo.map.canvas.panToBounds(assemblyMarkerBounds);
+            // Set the map to fit marker bounds
+            WGST.geo.map.canvas.fitBounds(assemblyMarkerBounds);
         }
     };
 
@@ -3611,9 +3627,9 @@ $(function(){
         // Map
         //======================================================
         var checkedAssemblyId = $(this).attr('data-assembly-id'),
-            collectionId = $(this).closest('.wgst-collection').attr('data-collection-id'),
-            assemblyIdMarker,
-            assemblyMarkerBounds = new google.maps.LatLngBounds();
+            collectionId = $(this).closest('.wgst-collection').attr('data-collection-id');//,
+            //assemblyIdMarker;//,
+            //assemblyMarkerBounds = new google.maps.LatLngBounds();
 
         var allCheckedCheckboxes = $(this).closest('.collection-assembly-list').find('.show-on-map-checkbox [type="checkbox"]:checked'),
             selectedAssemblyIds = [],
@@ -3625,6 +3641,10 @@ $(function(){
         });
 
         triggerMapMarkers(collectionId, selectedAssemblyIds);
+
+        // ZZZ
+
+        openPanel('map');
 
         // //------------------------------------------------------
         // // Find markers with identical position
@@ -4804,7 +4824,7 @@ google.maps.event.addDomListener(window, "resize", function() {
             openPanel('map');
         });
 
-        //google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+        google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
 
         // EEE
 
