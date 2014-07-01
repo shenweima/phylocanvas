@@ -104,7 +104,7 @@ $(function(){
                 center: new google.maps.LatLng(48.6908333333, 9.14055555556), // new google.maps.LatLng(51.511214, -0.119824),
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 minZoom: 2,
-                maxZoom: 6
+                maxZoom: 11
             },
             markers: {
                 assembly: {},
