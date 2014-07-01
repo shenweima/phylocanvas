@@ -1059,7 +1059,8 @@ $(function(){
                     console.log('[WGST] Collection ' + collectionId + ' will be displayed fullscreen');
                     
                     maximizeCollection(collectionId);
-                    deactivatePanel('collection');
+
+                    //deactivatePanel('collection');
                 }
 
                 // Enable 'Collection' nav item
@@ -1077,8 +1078,8 @@ $(function(){
     };
 
     // If user provided collection id in url then load requested collection
-    if (typeof window.WGST.requestedCollectionId !== 'undefined') {
-        getCollection(window.WGST.requestedCollectionId);
+    if (typeof WGST.requestedCollectionId !== 'undefined') {
+        getCollection(WGST.requestedCollectionId);
     }
 
     $('.tree-controls-show-labels').on('click', function(){
@@ -1313,7 +1314,7 @@ $(function(){
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId].leaf) {
+                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
                         tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId;                 
                     }
                 }
@@ -1325,7 +1326,7 @@ $(function(){
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId].leaf) {
+                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
                         tree.branches[assemblyId].label = WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore.referenceId;              
                     }
                 }
@@ -1337,7 +1338,7 @@ $(function(){
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId].leaf) {
+                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
                         tree.branches[assemblyId].label = (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType);               
                     }
                 }
@@ -1356,7 +1357,7 @@ $(function(){
                     resistanceProfileString = createAssemblyResistanceProfilePreviewString(assemblyResistanceProfile, WGST.antibiotics);
 
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId].leaf) {
+                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
                         tree.branches[assemblyId].label = resistanceProfileString;            
                     }
                 }
@@ -1368,7 +1369,7 @@ $(function(){
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId].leaf) {
+                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
                         tree.branches[assemblyId].label = assemblies[assemblyId]['ASSEMBLY_METADATA'].geography.address;              
                     }
                 }
@@ -1407,7 +1408,7 @@ $(function(){
 
                     // Check assembly has resistance profile for this antibiotic
                     if (typeof antibioticResistance !== 'undefined') {
-                        if (tree.branches[assemblyId].leaf) {
+                        if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
                             if (antibioticResistance.resistanceState === 'RESISTANT') {
                                 // Red
                                 tree.setNodeColourAndShape(assemblyId, '#ff0000');                 
@@ -1421,7 +1422,7 @@ $(function(){
                         }                        
                     } else {
                     // Assembly has no resistance profile for this antibiotic
-                        if (tree.branches[assemblyId].leaf) {
+                        if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
                             // Black
                             tree.setNodeColourAndShape(assemblyId, '#ffffff');
                         }
@@ -4790,8 +4791,44 @@ google.maps.event.addDomListener(window, "resize", function() {
     var maximizeCollection = function(collectionId) {
         console.log('[WGST] Maximizing collection ' + collectionId);
 
+        // Put map into panel
+        bringFullscreenToPanel('map');
+
         // Destroy all Twitter Bootstrap Tooltips
         $('[data-toggle="tooltip"]').tooltip('destroy');
+
+        bringPanelToFullscreen('collection_' + collectionId, function(){
+            // Trigger Twitter Bootstrap tooltip
+            $('[data-toggle="tooltip"]').tooltip();
+            // Open Map panel
+            openPanel('map');
+        });
+
+        //google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+
+        // EEE
+
+        // $('.wgst-fullscreen__collection')
+        // .append($('.collection-details').clone(true))
+        // .addClass('wgst-fullscreen--active')
+        // .addClass('wgst-fullscreen--visible');
+
+        // deactivatePanel('collection');
+
+        //google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // var activeFullscreenElement = $('.wgst-fullscreen--active'),
         //     fullscreentName = activeFullscreenElement.attr('data-fullscreen-name'),
@@ -4800,7 +4837,6 @@ google.maps.event.addDomListener(window, "resize", function() {
         // $('.wgst-panel[data-panel-name="' + fullscreenName + '"] .wgst-panel-body-content')
         //     .html('')
         //     .append(WGST.geo.map.canvas.getDiv());
-
 
         //.html(activeFullscreenElement.html());
 
@@ -4814,8 +4850,6 @@ google.maps.event.addDomListener(window, "resize", function() {
         // showPanelBodyContent(fullscreenName);
 
         //$('.wgst-fullscreen__collection').html($('.collection-details').html());
-
-        $('.wgst-fullscreen__collection').append($('.collection-details').clone(true)).addClass('wgst-fullscreen--active').addClass('wgst-fullscreen--visible');
         
         //$('.wgst-fullscreen__collection').append($('.collection-details').clone(true)).addClass('wgst-fullscreen--active').addClass('wgst-fullscreen--visible');
         // $('.wgst-fullscreen__collection')
@@ -4826,15 +4860,10 @@ google.maps.event.addDomListener(window, "resize", function() {
         // activatePanel('map');
         // showPanel('map');
         // bringPanelToTop('map');
-        deactivatePanel('collection');
 
-        google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+        //EEE
+        // Put collection content into background
 
-        // Trigger Twitter Bootstrap tooltip
-        $('[data-toggle="tooltip"]').tooltip();
-
-        // Put map into panel
-        // Put collection content into backgr
     };
 
     // ============================================================
@@ -4861,7 +4890,7 @@ google.maps.event.addDomListener(window, "resize", function() {
                 .html('')
                 .append(WGST.geo.map.canvas.getDiv());
 
-            google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+            //google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
         } // if
 
         // Remove fullscreen content
@@ -4877,9 +4906,13 @@ google.maps.event.addDomListener(window, "resize", function() {
             panelName = panel.attr('data-panel-name');
 
         //$('.wgst-fullscreen__' + panelName)
-        $('[data-fullscreen-name="' + panelName + '"]')
+        var fullscreen = $('[data-fullscreen-name="' + panelName + '"]')
             .addClass('wgst-fullscreen--active')
             .addClass('wgst-fullscreen--visible');
+
+        if (panelName === 'collection') {
+            fullscreen.append($('.collection-details').clone(true));
+        }
 
         deactivatePanel(panelName); // or closePanel() ?
 
