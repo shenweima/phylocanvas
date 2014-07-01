@@ -5019,8 +5019,8 @@ google.maps.event.addDomListener(window, "resize", function() {
 
             deactivatePanel(panelName, function(){
                 if (panelName === 'collection') {
-                    var collectionId = panel.attr('data-collection-id');
-                    closeCollection(collectionId);
+                    //var collectionId = panel.attr('data-collection-id');
+                    //closeCollection(collectionId);
                 } else if (panelName === 'representativeCollectionTree') {
                     var collectionId = panel.attr('data-collection-id');
                     deselectAllTreeNodes(collectionId);
