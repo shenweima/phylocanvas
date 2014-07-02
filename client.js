@@ -476,7 +476,8 @@ $(function(){
     var showNotification = function(message) {
         console.error('✗ [WGST][Error] ' + message);
         var errorHtmlElement = $('.wgst-notification__error');
-        errorHtmlElement.html(message).show();
+        //errorHtmlElement.html(message).show();
+        errorHtmlElement.html('Please refresh your page.').show();
         //if (errorHtmlElement.is(':visible')) {}
         // setTimeout(function(){
         //     errorHtmlElement.hide();
