@@ -234,32 +234,66 @@ exports.get = function(req, res) {
 	});
 };
 
-exports.getSTType = function(alleles, callback) {
-	console.log('[WGST] Getting ST Type for alleles:');
-	console.dir(alleles);
+var generateStQueryKey = function(alleles) {
 
 	// Prepare ST query key
 	// 'ST_' + species id + allele ids
-	var stQueryKey = 'ST_' + '1280',
+	var stQueryKey = 'ST_1280',
 		alleleId;
 
 	for (allele in alleles) {
 		if (alleles.hasOwnProperty(allele)) {
 			// If allele id is NEW or null, then don't query ST (Sequence Types) codes
-			if (alleles[allele] === null) {
-				callback(null, '');
-				return;
-			} else {
+			if (alleles[allele] !== null) {
 				alleleId = alleles[allele].alleleId;
-				if (alleleId === 'NEW') {
-					callback(null, '');
-					return;
-				} else {
+
+				if (alleleId !== 'NEW') {
 					stQueryKey = stQueryKey + '_' + alleleId;
 				}			
 			}
 		}
 	} // for
+
+	if (stQueryKey === 'ST_1280') {
+		return '';
+	} else {
+		return stQueryKey;
+	}
+};
+
+exports.getST = function(alleles, callback) {
+	console.log('[WGST] Getting ST');
+	//console.dir(alleles);
+
+	var stQueryKey = generateStQueryKey(alleles);
+
+	if (stQueryKey === '') {
+		callback(null, '');
+		return;
+	}
+
+	// // Prepare ST query key
+	// // 'ST_' + species id + allele ids
+	// var stQueryKey = 'ST_' + '1280',
+	// 	alleleId;
+
+	// for (allele in alleles) {
+	// 	if (alleles.hasOwnProperty(allele)) {
+	// 		// If allele id is NEW or null, then don't query ST (Sequence Types) codes
+	// 		if (alleles[allele] === null) {
+	// 			callback(null, '');
+	// 			return;
+	// 		} else {
+	// 			alleleId = alleles[allele].alleleId;
+	// 			if (alleleId === 'NEW') {
+	// 				callback(null, '');
+	// 				return;
+	// 			} else {
+	// 				stQueryKey = stQueryKey + '_' + alleleId;
+	// 			}			
+	// 		}
+	// 	}
+	// } // for
 
 	// Get ST code
 	couchbaseDatabaseConnections[testWgstResourcesBucket].get(stQueryKey, function(error, stData) {
@@ -278,10 +312,119 @@ exports.getSTType = function(alleles, callback) {
 	});
 };
 
+exports.getSTs = function(stQueryKeys, callback) {
+	console.log('[WGST] Getting STs');
+	//console.dir(alleles);
+
+	// Get ST codes
+	couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(stQueryKeys, {}, function(error, stData) {
+
+		// Have to ignore error for now, because this some keys might not be found
+
+		// if (error) {
+		// 	if (error.code === 13) {
+		// 		// console.log('! [WGST][Warning] No such ST key found: ' + stQueryKey);
+		// 		// callback(null, 'New');
+		// 		// return;
+
+		// 		// Ignore for now
+		// 	} else {
+		// 		callback(error, stData);
+		// 		return;
+		// 	}
+		// } // if
+
+		callback(error, stData);
+	});
+};
+
+var getMlstQueryKeys = function(alleles) {
+	// Prepare allele query keys
+	var alleleQueryKey,
+		mlstAllelesQueryKeys = [];
+
+	for (allele in alleles) {
+		if (alleles.hasOwnProperty(allele)) {
+			alleleQueryKey = alleles[allele];
+			// Allele can be 'null'. If that happens - replace it with 'None' and don't add it to query keys array
+			if (alleleQueryKey !== null) {
+				mlstAllelesQueryKeys.push(alleleQueryKey);
+			}
+		}
+	} // for
+
+	return mlstAllelesQueryKeys;
+};
+
+var getStData = function(mlstAllelesQueryKeys, callback) {
+	// Get MLST alleles data
+	exports.getMlstAllelesData(mlstAllelesQueryKeys, function(error, mlstAlleles){
+		if (error) {
+			callback(error, mlstAlleles);
+			return;
+		}
+
+		var mlstAlleleValue,
+			mlstAllele,
+			locusId;
+
+		// console.log('>>> assemblyId: ' + assemblyId);
+
+		// Check if any MLST alleles data returned
+		if (Object.keys(mlstAlleles).length > 0) {
+			// Parse MLST alleles data
+			for (mlstAllele in mlstAlleles) {
+				if (mlstAlleles.hasOwnProperty(mlstAllele)) {
+					// Get value object from query result object
+					mlstAlleleValue = mlstAlleles[mlstAllele].value;
+					// Get locus id from value object
+					locusId = mlstAlleleValue.locusId;
+					// Add allele value object to assembly object
+					assembly.MLST_RESULT.alleles[locusId] = mlstAlleleValue;
+				} // if
+			} // for				
+		} // if
+
+		exports.getST(assembly.MLST_RESULT.alleles, function(error, stType){
+			if (error) {
+				callback(error, stType);
+				return;
+			}
+
+			assembly.MLST_RESULT.stType = stType;
+
+			callback(null, assembly);
+		});
+	});
+};
+
+var addMlstAlleleToAssembly = function(assembly, mlstAlleles) {
+	var mlstAlleleValue,
+		mlstAllele,
+		locusId;
+
+	// Check if any MLST alleles data returned
+	if (Object.keys(mlstAlleles).length > 0) {
+		// Parse MLST alleles data
+		for (mlstAllele in mlstAlleles) {
+			if (mlstAlleles.hasOwnProperty(mlstAllele)) {
+				// Get value object from query result object
+				mlstAlleleValue = mlstAlleles[mlstAllele].value;
+				// Get locus id from value object
+				locusId = mlstAlleleValue.locusId;
+				// Add allele value object to assembly object
+				assembly.MLST_RESULT.alleles[locusId] = mlstAlleleValue;
+			} // if
+		} // for				
+	} // if
+};
+
 exports.getAssembly = function(assemblyId, callback) {
 	console.log('[WGST] Getting assembly ' + assemblyId);
 
+	// ------------------------------------------
 	// Prepare query keys
+	// ------------------------------------------
 	var scoresQueryKey = 'FP_COMP_' + assemblyId,
 		metadataQueryKey = 'ASSEMBLY_METADATA_' + assemblyId,
 		resistanceProfileQueryKey = 'PAARSNP_RESULT_' + assemblyId,
@@ -292,6 +435,10 @@ exports.getAssembly = function(assemblyId, callback) {
 	console.log('[WGST] Assembly query keys: ');
 	console.dir(assemblyQueryKeys);
 
+	// ------------------------------------------
+	// Query assembly data
+	// ------------------------------------------
+
 	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyQueryKeys, {}, function(error, assemblyData) {
 		console.log('[WGST] Got assembly data');
 		console.dir(assemblyData);
@@ -301,11 +448,11 @@ exports.getAssembly = function(assemblyId, callback) {
 			return;
 		}
 
-		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
+		// ---------------------------------------------
+		// Merge assembly data into one assembly object
+		// ---------------------------------------------
+
 		var assembly = {};
-			//assemblyId,
-			//assemblyIdKey,
-			//cleanAssemblyId,
 
 		for (assemblyKey in assemblyData) {
             // Parsing assembly scores
@@ -330,50 +477,57 @@ exports.getAssembly = function(assemblyId, callback) {
 		console.log('[WGST] Assembly with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data: ');
 		console.dir(assembly);
 
-		// Prepare allele query keys
-		var alleles = assembly['MLST_RESULT'].alleles,
-			alleleQueryKey,
-			mlstAllelesQueryKeys = [];
+		// ---------------------------------------------
+		// Get ST
+		// ---------------------------------------------
 
-		for (allele in alleles) {
-			if (alleles.hasOwnProperty(allele)) {
-				alleleQueryKey = alleles[allele];
-				// Allele can be 'null'. If that happens - replace it with 'None' and don't add it to query keys array
-				if (alleleQueryKey !== null) {
-					mlstAllelesQueryKeys.push(alleleQueryKey);
-				}
-			}
-		}
+		// Prepare allele query keys
+		// var alleles = assembly['MLST_RESULT'].alleles,
+		// 	alleleQueryKey,
+		// 	mlstAllelesQueryKeys = [];
+
+		// for (allele in alleles) {
+		// 	if (alleles.hasOwnProperty(allele)) {
+		// 		alleleQueryKey = alleles[allele];
+		// 		// Allele can be 'null'. If that happens - replace it with 'None' and don't add it to query keys array
+		// 		if (alleleQueryKey !== null) {
+		// 			mlstAllelesQueryKeys.push(alleleQueryKey);
+		// 		}
+		// 	}
+		// }
+		var mlstAllelesQueryKeys = getMlstQueryKeys(assembly['MLST_RESULT'].alleles);
 
 		// Get MLST alleles data
-		exports.getMlstAlleles(mlstAllelesQueryKeys, function(error, mlstAlleles){
+		exports.getMlstAllelesData(mlstAllelesQueryKeys, function(error, mlstAlleles){
 			if (error) {
 				callback(error, mlstAlleles);
 				return;
 			}
 
-			var mlstAlleleValue,
-				mlstAllele,
-				locusId;
+			// var mlstAlleleValue,
+			// 	mlstAllele,
+			// 	locusId;
 
-			// console.log('>>> assemblyId: ' + assemblyId);
+			// // Check if any MLST alleles data returned
+			// if (Object.keys(mlstAlleles).length > 0) {
+			// 	// Parse MLST alleles data
+			// 	for (mlstAllele in mlstAlleles) {
+			// 		if (mlstAlleles.hasOwnProperty(mlstAllele)) {
+			// 			// Get value object from query result object
+			// 			mlstAlleleValue = mlstAlleles[mlstAllele].value;
+			// 			// Get locus id from value object
+			// 			locusId = mlstAlleleValue.locusId;
+			// 			// Add allele value object to assembly object
+			// 			assembly.MLST_RESULT.alleles[locusId] = mlstAlleleValue;
+			// 		} // if
+			// 	} // for				
+			// } // if
+			addMlstAlleleToAssembly(assembly, mlstAlleles);
 
-			// Check if any MLST alleles data returned
-			if (Object.keys(mlstAlleles).length > 0) {
-				// Parse MLST alleles data
-				for (mlstAllele in mlstAlleles) {
-					if (mlstAlleles.hasOwnProperty(mlstAllele)) {
-						// Get value object from query result object
-						mlstAlleleValue = mlstAlleles[mlstAllele].value;
-						// Get locus id from value object
-						locusId = mlstAlleleValue.locusId;
-						// Add allele value object to assembly object
-						assembly.MLST_RESULT.alleles[locusId] = mlstAlleleValue;
-					} // if
-				} // for				
-			} // if
+			console.log('Looking for this');
+			console.log(assembly.MLST_RESULT.alleles);
 
-			exports.getSTType(assembly.MLST_RESULT.alleles, function(error, stType){
+			exports.getST(assembly.MLST_RESULT.alleles, function(error, stType){
 				if (error) {
 					callback(error, stType);
 					return;
@@ -409,7 +563,7 @@ exports.apiGetAssembly = function(req, res) {
 	});
 };
 
-exports.getMlstAlleles = function(queryKeys, callback) {
+exports.getMlstAllelesData = function(queryKeys, callback) {
 	console.log('[WGST] Getting MLST alleles data');
 
 	if (queryKeys.length === 0) {
@@ -431,65 +585,240 @@ exports.getMlstAlleles = function(queryKeys, callback) {
 };
 
 exports.apiGetAssemblies = function(req, res) {
-	console.log('[WGST] Getting assemblies with ids: ' + req.body.assemblyIds);
+	var assemblyIds = req.body.assemblyIds;
+
+	console.log('[WGST] Getting assemblies with ids:');
+	console.dir(assemblyIds);
+
+	// ------------------------------------------
+	// Prepare query keys
+	// ------------------------------------------
 
 	// Prepend FP_COMP_ to each assembly id
-	var scoresAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
+	var scoresAssemblyIds = assemblyIds.map(function(assemblyId){
 		return 'FP_COMP_' + assemblyId;
 	});
 
 	// Prepend ASSEMBLY_METADATA_ to each assembly id
-	var metadataAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
+	var metadataAssemblyIds = assemblyIds.map(function(assemblyId){
 		return 'ASSEMBLY_METADATA_' + assemblyId;
 	});
 
 	// Prepend PAARSNP_RESULT_ to each assembly id
-	var resistanceProfileAssemblyIds = req.body.assemblyIds.map(function(assemblyId){
+	var resistanceProfileAssemblyIds = assemblyIds.map(function(assemblyId){
 		return 'PAARSNP_RESULT_' + assemblyId;
 	});
 
+	// Prepend MLST_RESULT_ to each assembly id
+	var mlstAssemblyIds = assemblyIds.map(function(assemblyId){
+		return 'MLST_RESULT_' + assemblyId;
+	});
+
 	// Merge all assembly ids
-	var assemblyIds = scoresAssemblyIds
+	var assemblyIdQueryKeys = scoresAssemblyIds
 						.concat(metadataAssemblyIds)
-						.concat(resistanceProfileAssemblyIds);
+						.concat(resistanceProfileAssemblyIds)
+						.concat(mlstAssemblyIds);
 
-	console.log('[WGST] Querying keys: ');
-	console.log(assemblyIds);
+	console.log('[WGST] Querying keys:');
+	console.log(assemblyIdQueryKeys);
 
-	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIds, {}, function(err, results) {
-		console.log('[WGST][Couchbase] Got assemblies data: ');
+	// ------------------------------------------
+	// Query assembly data
+	// ------------------------------------------
+	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIdQueryKeys, {}, function(error, results) {
+		console.log('[WGST][Couchbase] Got assemblies data:');
 		console.log(results);
 
-		if (err) throw err;
+		if (error) {
+			throw error;
+		}
 
-		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
+		// ---------------------------------------------
+		// Merge assembly data into one assembly object
+		// ---------------------------------------------
 		var assemblies = {},
 			assemblyId,
 			cleanAssemblyId;
 
 		for (assemblyId in results) {
-            // Parsing assembly scores
-            if (assemblyId.indexOf('FP_COMP_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
-            // Parsing assembly metadata
-            } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
-            // Parsing assembly resistance profile
-            } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
-            	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
-            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
-				assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
+			if (results.hasOwnProperty(assemblyId)) {
+	            // Parsing assembly scores
+	            if (assemblyId.indexOf('FP_COMP_') !== -1) {
+	            	cleanAssemblyId = assemblyId.replace('FP_COMP_','');
+	            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['FP_COMP'] = results[assemblyId].value;
+	            // Parsing assembly metadata
+	            } else if (assemblyId.indexOf('ASSEMBLY_METADATA_') !== -1) {
+	            	cleanAssemblyId = assemblyId.replace('ASSEMBLY_METADATA_','');
+	            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['ASSEMBLY_METADATA'] = results[assemblyId].value;
+	            // Parsing assembly resistance profile
+	            } else if (assemblyId.indexOf('PAARSNP_RESULT_') !== -1) {
+	            	cleanAssemblyId = assemblyId.replace('PAARSNP_RESULT_','');
+	            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['PAARSNP_RESULT'] = results[assemblyId].value;
+	            // Parsing mlst
+	            } else if (assemblyId.indexOf('MLST_RESULT_') !== -1) {
+	            	cleanAssemblyId = assemblyId.replace('MLST_RESULT_','');
+	            	assemblies[cleanAssemblyId] = assemblies[cleanAssemblyId] || {};
+					assemblies[cleanAssemblyId]['MLST_RESULT'] = results[assemblyId].value;
+				} // if
+			} // if
+		} // for
+
+		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data: ');
+		console.dir(assemblies);
+
+		// ---------------------------------------------
+		// Get ST for all assemblies
+		// 1. Extract all alleles query keys and query them.
+		// ---------------------------------------------
+		var assemblyId,
+			assembly,
+			assemblyMlstAllelesQueryKeys = [],
+			allAssembliesMlstAllelesQueryKeys = [],
+			mlstAllelesQueryKeysToAssemblyMap = {};
+
+		for (assemblyId in assemblies) {
+			if (assemblies.hasOwnProperty(assemblyId)) {
+				assembly = assemblies[assemblyId];
+
+				// Get mlst alleles query keys for this assembly
+				assemblyMlstAllelesQueryKeys = getMlstQueryKeys(assembly['MLST_RESULT'].alleles);
+
+				// Put all mlst alleles query keys in to single array for query
+				allAssembliesMlstAllelesQueryKeys = allAssembliesMlstAllelesQueryKeys.concat(assemblyMlstAllelesQueryKeys);
+				
+				// ---------------------------------------------------------
+				// Group assemblies by mlst alleles query keys
+				// Example:
+				// { 'MLST_1280_4vKkf4rbZy6tac02Ppbu37LVWyM=' : ['a4bb3c91-2d8b-43fd-87e8-64501b3de82c', '42c88107-7f58-4577-9957-f5f469acfdff']}
+				// ---------------------------------------------------------
+				var assemblyMlstAllelesQueryKey;
+				for (var i = 0; i < assemblyMlstAllelesQueryKeys.length; i++) {
+					assemblyMlstAllelesQueryKey = assemblyMlstAllelesQueryKeys[i];
+					// Track which assemblies belong to which mlst alleles query keys
+					// Map assembly ids to mlst alleles query keys
+					mlstAllelesQueryKeysToAssemblyMap[assemblyMlstAllelesQueryKey] = mlstAllelesQueryKeysToAssemblyMap[assemblyMlstAllelesQueryKey] || [];
+					mlstAllelesQueryKeysToAssemblyMap[assemblyMlstAllelesQueryKey].push(assemblyId);
+				} // for
+			} // if
+		} // for
+
+		// Get MLST alleles data
+		exports.getMlstAllelesData(allAssembliesMlstAllelesQueryKeys, function(error, mlstAllelesData){
+			if (error) {
+				throw error;
 			}
-		}
 
-		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA and PAARSNP_RESULT data: ');
-		console.log(assemblies);
+			// Group mlst alleles data by assembly id
+			// ---------------------------------------------------------
+			// Group mlst alleles data by assembly id
+			// Example:
+			// { 'a4bb3c91-2d8b-43fd-87e8-64501b3de82c' : { 'MLST_1280_ySUwgFjEbIx5XpoyomFs+W3poI0=': { cas: [Object], flags: 0, value: [Object] },
+			// 												'MLST_1280_uS1ci2t4E82d/sCVd6k2OC+3nw0=': { cas: [Object], flags: 0, value: [Object] }}
+			// ---------------------------------------------------------
+			var mlstAlleleQueryKey,
+				assemblyIdsWithMlstAlleleQueryKey,
+				assemblyIdWithMlstAlleleQueryKey,
+				assemblyIdToMlstAllelesDataMap = {};
 
-		res.json(assemblies);
+			for (mlstAlleleQueryKey in mlstAllelesData) {
+				if (mlstAllelesData.hasOwnProperty(mlstAlleleQueryKey)) {
+					assemblyIdsWithMlstAlleleQueryKey = mlstAllelesQueryKeysToAssemblyMap[mlstAlleleQueryKey];
+					for (var i = 0; i < assemblyIdsWithMlstAlleleQueryKey.length; i++) {
+						assemblyIdWithMlstAlleleQueryKey = assemblyIdsWithMlstAlleleQueryKey[i];
+						assemblyIdToMlstAllelesDataMap[assemblyIdWithMlstAlleleQueryKey] = assemblyIdToMlstAllelesDataMap[assemblyIdWithMlstAlleleQueryKey] || {};
+						assemblyIdToMlstAllelesDataMap[assemblyIdWithMlstAlleleQueryKey][mlstAlleleQueryKey] = mlstAllelesData[mlstAlleleQueryKey];
+					}
+				}
+			}
+
+			// ---------------------------------------------------------
+			// Add mlst allele data to each assembly object
+			// ---------------------------------------------------------
+			var assemblyId;
+			for (assemblyId in assemblyIdToMlstAllelesDataMap) {
+				if (assemblyIdToMlstAllelesDataMap.hasOwnProperty(assemblyId)) {
+					addMlstAlleleToAssembly(assemblies[assemblyId], assemblyIdToMlstAllelesDataMap[assemblyId]);
+				}
+			}
+
+			var allelesData = [],
+				assemblyId,
+				assembly;
+
+			for (assemblyId in assemblies) {
+				if (assemblies.hasOwnProperty(assemblyId)) {
+					assembly = assemblies[assemblyId];
+
+					allelesData.push({
+						assemblyId: assemblyId,
+						assemblyAlleles: assembly.MLST_RESULT.alleles
+					});
+				}
+			}
+
+			// ---------------------------------------------------------
+			// Create ST query keys
+			// ---------------------------------------------------------
+
+			var stQueryKeys = [],
+				stQueryKey,
+				assemblyAllelesData,
+				stQueryKeyToAssemblyIdMap = {};
+
+			for (var i = 0; i < allelesData.length; i++) {
+				// Get allele
+				assemblyAllelesData = allelesData[i].assemblyAlleles;
+				stQueryKey = generateStQueryKey(assemblyAllelesData);
+				// Do not query empty keys
+				if (stQueryKey !== '') {
+					// Store st query key
+					stQueryKeys.push(stQueryKey);
+					// Map st query key to assembly id
+					stQueryKeyToAssemblyIdMap[stQueryKey] = stQueryKeyToAssemblyIdMap[stQueryKey] || [];
+					stQueryKeyToAssemblyIdMap[stQueryKey].push(allelesData[i].assemblyId);
+				}
+			} // for
+
+			// ---------------------------------------------------------
+			// Query STs for all assemblies with one query
+			// ---------------------------------------------------------
+
+			exports.getSTs(stQueryKeys, function(error, allStData) {
+				if (error) {}
+				// Most likely error returns 1 when some of the keys were not found.
+				// In this case we need set ST value for missing keys as 'NEW'.
+
+				var stQuery,
+					stData,
+					st,
+					assemblyId,
+					assembly,
+					assemblyIds;
+
+				for (stQuery in allStData) {
+					stData = allStData[stQuery];
+
+					if (typeof stData.value === 'undefined') {
+						st = 'NEW'
+					} else {
+						st = stData.value.stType;
+					}
+
+					assemblyIds = stQueryKeyToAssemblyIdMap[stQuery];
+					for (var i = 0; i < assemblyIds.length; i++) {
+						assemblyId = assemblyIds[i];
+
+						assemblies[assemblyId].MLST_RESULT.stType = st;
+					}
+				} // for
+
+				res.json(assemblies);
+			});
+		});
 	});
 };
 

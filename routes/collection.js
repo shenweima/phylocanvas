@@ -128,7 +128,22 @@ exports.add = function(req, res) {
 	});
 };
 
-var getAssemblies = function(assemblyIds, callback) {
+exports.apiGetAssemblies = function(req, res) {
+	var assemblyIds = req.body.assemblyIds;
+
+	exports.getAssemblies(assemblyIds, function(error, assemblies){
+		if (error) {
+			throw error;
+		}
+
+		console.log('RES ASSEMBL:');
+		console.dir(assemblies);
+
+		res.json(assemblies);		
+	});
+};
+
+exports.getAssemblies = function(assemblyIds, callback) {
 	console.log('[WGST] Getting assemblies with ids:');
 	console.dir(assemblyIds);
 

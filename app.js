@@ -90,7 +90,7 @@ app.get('/assembly/:id', assembly.get);
 
 app.post('/api/assembly', assembly.apiGetAssembly);
 app.post('/api/assemblies', assembly.apiGetAssemblies);
-app.post('/api/assemblies', assembly.apiGetAssemblies);
+//app.post('/api/assemblies', assembly.apiGetAssemblies);
 
 app.post('/assembly/add', assembly.add);
 

@@ -474,7 +474,7 @@ $(function(){
     };
 
     var showNotification = function(message) {
-        console.error('✗ [WGST][Error] ' + message);
+        //console.error('✗ [WGST][Error] ' + message);
         var errorHtmlElement = $('.wgst-notification__error');
         //errorHtmlElement.html(message).show();
         errorHtmlElement.html('Please refresh your page.').show();
@@ -867,6 +867,15 @@ $(function(){
         disableNavItem('collection');
     };
 
+    var initEmptyCollection = function(collectionId) {
+        WGST.collection[collectionId] = {
+            assemblies: {},
+            tree: {
+                data: {}
+            }
+        };
+    };
+
     var getCollection = function(collectionId) {
         console.log('[WGST] Getting collection ' + collectionId);
 
@@ -891,12 +900,13 @@ $(function(){
         });
 
         // Init collection object
-        window.WGST.collection[collectionId] = {
-            assemblies: {},
-            tree: {
-                data: {}
-            }
-        };
+        // WGST.collection[collectionId] = {
+        //     assemblies: {},
+        //     tree: {
+        //         data: {}
+        //     }
+        // };
+        initEmptyCollection(collectionId);
 
         // Get collection data
         $.ajax({
@@ -1366,6 +1376,9 @@ $(function(){
             var assemblyResistanceProfile,
                 resistanceProfileString;
 
+            console.log('Assemblies:');
+            console.dir(assemblies);
+
             // Set user assembly id as node label
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
@@ -1454,12 +1467,13 @@ $(function(){
             collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
             tree;
 
-        if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
-            tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
-        } else {
-            tree = WGST.collection[collectionId].tree.canvas;
-        }
-
+        // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
+        //     tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
+        // } else {
+        //     tree = WGST.collection[collectionId].tree.canvas;
+        // }
+        
+        tree = WGST.collection[collectionId].tree.canvas;
         tree.setTreeType(selectedOption.val());
     });
 
@@ -3383,7 +3397,7 @@ $(function(){
             assemblyIds.push(mergedCollectionTreeData.assemblies[assemblyIdCounter].assemblyId);
         }
 
-        console.log('Assembly ids to request:');
+        console.log('[WGST] Requesting the following assemblies:');
         console.dir(assemblyIds);
 
         $.ajax({
@@ -3402,38 +3416,47 @@ $(function(){
             // Render tree
             // ------------------------------------------
 
-            var mergedCollectionTreeId = mergedCollectionTreeData.mergedCollectionTreeId,
+            var mergedCollectionId = mergedCollectionTreeData.mergedCollectionTreeId,
                 panelName = 'mergedCollectionTree';
 
-            console.log('[WGST] Rendering merged collection tree ' + mergedCollectionTreeId);
+            console.log('[WGST] Rendering merged collection tree ' + mergedCollectionId);
 
-            $('.wgst-panel__merged-collection-tree').attr('data-collection-id', mergedCollectionTreeId);
-            $('.wgst-panel__merged-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + mergedCollectionTreeId);
+            $('.wgst-panel__merged-collection-tree').attr('data-collection-id', mergedCollectionId);
+            $('.wgst-panel__merged-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + mergedCollectionId);
 
             activatePanel(panelName);
 
-            console.log('mergedCollectionTreeId:');
-            console.log(mergedCollectionTreeId);
+            initEmptyCollection(mergedCollectionId);
+            WGST.collection[mergedCollectionId].tree.data = mergedCollectionTreeData.tree;
+            WGST.collection[mergedCollectionId].assemblies = assemblies;
 
-            WGST.mergedCollectionTree = WGST.mergedCollectionTree || {};
-            WGST.mergedCollectionTree[mergedCollectionTreeId] = {
-                tree: {
-                    canvas: {},
-                    data: mergedCollectionTreeData.tree
-                }
-            };
+            // ------------------------------------------
+            // Prepare nearest representative
+            // ------------------------------------------
+            var assemblyId,
+                assembly,
+                assemblyScores;
+
+            for (assemblyId in WGST.collection[mergedCollectionId].assemblies) {
+                if (WGST.collection[mergedCollectionId].assemblies.hasOwnProperty(assemblyId)) {
+                    assembly = WGST.collection[mergedCollectionId].assemblies[assemblyId];
+                    assemblyScores = assembly['FP_COMP'].scores;
+                    // Set top score
+                    WGST.collection[mergedCollectionId].assemblies[assemblyId]['FP_COMP'].topScore = calculateAssemblyTopScore(assemblyScores);
+                } // if
+            } // for
 
             // Init collection tree
-            WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + mergedCollectionTreeId));
-            WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.parseNwk(WGST.mergedCollectionTree[mergedCollectionTreeId].tree.data);
-            WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.treeType = 'rectangular';
-            // WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.onselected = function(selectedNodeIds) {
-            //     selectTreeNodes(collectionId, selectedNodeIds);
-            // };
+            WGST.collection[mergedCollectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + mergedCollectionId));
+            WGST.collection[mergedCollectionId].tree.canvas.parseNwk(WGST.collection[mergedCollectionId].tree.data);
+            WGST.collection[mergedCollectionId].tree.canvas.treeType = 'rectangular';
+            WGST.collection[mergedCollectionId].tree.canvas.onselected = function(selectedNodeIds) {
+                selectTreeNodes(mergedCollectionId, selectedNodeIds);
+            };
 
             // Get assemblies from merged collection
 
-            var tree = WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas,
+            var tree = WGST.collection[mergedCollectionId].tree.canvas,
                 assemblyId;
 
             // Set user assembly id as node label
@@ -3449,7 +3472,7 @@ $(function(){
                 }
             }
 
-            WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.draw();
+            WGST.collection[mergedCollectionId].tree.canvas.draw();
 
             //WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.draw();
 
@@ -4181,9 +4204,9 @@ $(function(){
         var collectionId = $(this).closest('.wgst-collection-info').attr('data-collection-id'),
             //collectionId = $(this).closest('.wgst-panel__collection').attr('data-collection-id'),
             assemblyId = $(this).attr('data-assembly-id'),
-            referenceId = window.WGST.collection[collectionId].assemblies[assemblyId].FP_COMP.topScore.referenceId;
+            referenceId = WGST.collection[collectionId].assemblies[assemblyId].FP_COMP.topScore.referenceId;
 
-        window.WGST.collection.representative.tree.canvas.selectNodes(referenceId);
+        WGST.collection.representative.tree.canvas.selectNodes(referenceId);
 
         event.preventDefault();
     });
@@ -4471,14 +4494,16 @@ $(function(){
             currentNodeTextSize,
             tree;
 
-        if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
-            tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
-            currentNodeTextSize = tree.textSize;
-        } else {
-            tree = WGST.collection[collectionId].tree.canvas;
-            currentNodeTextSize = tree.textSize;
-        }
+        // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
+        //     tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
+        //     currentNodeTextSize = tree.textSize;
+        // } else {
+        //     tree = WGST.collection[collectionId].tree.canvas;
+        //     currentNodeTextSize = tree.textSize;
+        // }
         
+        tree = WGST.collection[collectionId].tree.canvas;
+        currentNodeTextSize = tree.textSize;
         tree.setTextSize(currentNodeTextSize - 3);
     });
     $('.wgst-tree-control__increase-label-font-size').on('click', function(){
@@ -4486,14 +4511,16 @@ $(function(){
             currentNodeTextSize,
             tree;
 
-        if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
-            tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
-            currentNodeTextSize = tree.textSize;
-        } else {
-            tree = WGST.collection[collectionId].tree.canvas;
-            currentNodeTextSize = tree.textSize;
-        }
+        // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
+        //     tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
+        //     currentNodeTextSize = tree.textSize;
+        // } else {
+        //     tree = WGST.collection[collectionId].tree.canvas;
+        //     currentNodeTextSize = tree.textSize;
+        // }
 
+        tree = WGST.collection[collectionId].tree.canvas;
+        currentNodeTextSize = tree.textSize;
         tree.setTextSize(currentNodeTextSize + 3);
     });
 
@@ -4502,13 +4529,16 @@ $(function(){
             tree,
             currentNodeSize;
 
-        if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
-            tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
-            currentNodeSize = tree.baseNodeSize;
-        } else {
-            tree = WGST.collection[collectionId].tree.canvas;
-            currentNodeSize = tree.baseNodeSize;
-        }
+        // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
+        //     tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
+        //     currentNodeSize = tree.baseNodeSize;
+        // } else {
+        //     tree = WGST.collection[collectionId].tree.canvas;
+        //     currentNodeSize = tree.baseNodeSize;
+        // }
+
+        tree = WGST.collection[collectionId].tree.canvas;
+        currentNodeSize = tree.baseNodeSize;
 
         if (currentNodeSize > 3) {
             tree.setNodeSize(currentNodeSize - 3);
@@ -4525,14 +4555,16 @@ $(function(){
             tree,
             currentNodeSize;
 
-        if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
-            tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
-            currentNodeSize = tree.baseNodeSize;
-        } else {
-            tree = WGST.collection[collectionId].tree.canvas;
-            currentNodeSize = tree.baseNodeSize;
-        }
+        // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
+        //     tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
+        //     currentNodeSize = tree.baseNodeSize;
+        // } else {
+        //     tree = WGST.collection[collectionId].tree.canvas;
+        //     currentNodeSize = tree.baseNodeSize;
+        // }
 
+        tree = WGST.collection[collectionId].tree.canvas;
+        currentNodeSize = tree.baseNodeSize;
         tree.setNodeSize(currentNodeSize + 3);
 
         if (tree.baseNodeSize > 3) {
@@ -4543,12 +4575,13 @@ $(function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
             tree;
 
-        if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
-            tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
-        } else {
-            tree = WGST.collection[collectionId].tree.canvas;
-        }
-
+        // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
+        //     tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
+        // } else {
+        //     tree = WGST.collection[collectionId].tree.canvas;
+        // }
+        
+        tree = WGST.collection[collectionId].tree.canvas;
         tree.toggleLabels();
     });
     $('.wgst-tree-control__merge-collection-trees').on('click', function(){
@@ -4568,7 +4601,6 @@ $(function(){
         .done(function(mergeRequestSent, textStatus, jqXHR) {
             console.log('[WGST] Requested to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
         });
-
     });
     var renderRepresentativeCollectionTree = function() {
         console.log('[WGST] Rendering representative collection tree');
