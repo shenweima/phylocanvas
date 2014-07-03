@@ -3480,6 +3480,17 @@ $(function(){
             showPanelBodyContent(panelName);
             showPanel(panelName);
             bringPanelToTop(panelName);
+
+            // Enable Merge Collections button
+            var mergeCollectionTreesButton = $('.wgst-tree-control__merge-collection-trees');
+            mergeCollectionTreesButton.find('.wgst-spinner').hide();
+            mergeCollectionTreesButton.find('.wgst-spinner-label').show();
+            mergeCollectionTreesButton.attr('disabled', false);
+
+            // Close Collection panel
+            $('.wgst-panel__collection .wgst-panel-control-button__close').trigger('click');
+            // Close Collection Tree panel
+            $('.wgst-panel__collection-tree .wgst-panel-control-button__close').trigger('click');
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.error('[WGST][Error] Failed to get assemblies');
@@ -4587,6 +4598,8 @@ $(function(){
     $('.wgst-tree-control__merge-collection-trees').on('click', function(){
 
         $(this).attr('disabled', true);
+        $(this).find('.wgst-spinner-label').hide();
+        $(this).find('.wgst-spinner').show();
 
         var requestData = {
             collectionId: $(this).closest('.wgst-panel').attr('data-collection-id'),
