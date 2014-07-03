@@ -929,39 +929,40 @@ $(function(){
                 WGST.collection[collectionId].assemblies = data.collection.assemblies;
                 WGST.antibiotics = data.antibiotics;
 
-                // ----------------------------------------
-                // Ungroup antibiotic resistance profile
-                // ----------------------------------------
-                var assemblyId,
-                    assembly,
-                    resistanceProfileGroups = {},
-                    resistanceProfileGroupName,
-                    resistanceProfileGroup,
-                    ungroupedResistanceProfile,
-                    antibioticName;
+                // // ----------------------------------------
+                // // Ungroup antibiotic resistance profile
+                // // ----------------------------------------
+                // var assemblyId,
+                //     assembly,
+                //     resistanceProfileGroups = {},
+                //     resistanceProfileGroupName,
+                //     resistanceProfileGroup,
+                //     ungroupedResistanceProfile,
+                //     antibioticName;
 
-                for (assemblyId in WGST.collection[collectionId].assemblies) {
-                    assembly = WGST.collection[collectionId].assemblies[assemblyId];
-                    resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
-                    ungroupedResistanceProfile = {};
+                // for (assemblyId in WGST.collection[collectionId].assemblies) {
+                //     assembly = WGST.collection[collectionId].assemblies[assemblyId];
+                //     resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+                //     ungroupedResistanceProfile = {};
 
-                    console.log('resistanceProfileGroups: ' + resistanceProfileGroups);
-                    console.dir(resistanceProfileGroups); // ZZZ
+                //     console.log('resistanceProfileGroups: ' + resistanceProfileGroups);
+                //     console.dir(resistanceProfileGroups); // ZZZ
 
-                    for (resistanceProfileGroupName in resistanceProfileGroups) {
-                        resistanceProfileGroup = resistanceProfileGroups[resistanceProfileGroupName];
+                //     for (resistanceProfileGroupName in resistanceProfileGroups) {
+                //         resistanceProfileGroup = resistanceProfileGroups[resistanceProfileGroupName];
 
-                        for (antibioticName in resistanceProfileGroup) {
-                            ungroupedResistanceProfile[antibioticName] = resistanceProfileGroup[antibioticName];
-                        }                    
-                    }
+                //         for (antibioticName in resistanceProfileGroup) {
+                //             ungroupedResistanceProfile[antibioticName] = resistanceProfileGroup[antibioticName];
+                //         }                    
+                //     }
 
-                    WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile = ungroupedResistanceProfile;
+                //     WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile = ungroupedResistanceProfile;
                 
-                    console.log('WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile:');
-                    console.dir(WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile);
+                //     console.log('WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile:');
+                //     console.dir(WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile);
 
-                } // for
+                // } // for
+                addResistanceProfileToCollection(collectionId);
 
                 // ----------------------------------------
                 // Render collection tree
@@ -1554,33 +1555,34 @@ $(function(){
 
         // ====================================================================================================================
     
-        // Populate list of antibiotics
-        var selectAntibioticInputElement = $('#select-tree-node-antibiotic'),
-            antibioticGroupName,
-            antibioticName,
-            antibioticNames = [],
-            antibioticOptionHtmlElements = {};
-            //antibiotics = {};
+        // // Populate list of antibiotics
+        // var selectAntibioticInputElement = $('#select-tree-node-antibiotic'),
+        //     antibioticGroupName,
+        //     antibioticName,
+        //     antibioticNames = [],
+        //     antibioticOptionHtmlElements = {};
+        //     //antibiotics = {};
 
-        for (antibioticGroupName in WGST.antibiotics) {
-            for (antibioticName in WGST.antibiotics[antibioticGroupName]) {
-                //antibiotics[antibioticName] = WGST.antibiotics[antibioticGroupName][antibioticName];
-                antibioticNames.push(antibioticName);
-                antibioticOptionHtmlElements[antibioticName] = '<option value="' + antibioticName.replace(WGST.antibioticNameRegex, '_').toLowerCase() + '">' + antibioticName + '</option>';
-            }
-        }
+        // for (antibioticGroupName in WGST.antibiotics) {
+        //     for (antibioticName in WGST.antibiotics[antibioticGroupName]) {
+        //         //antibiotics[antibioticName] = WGST.antibiotics[antibioticGroupName][antibioticName];
+        //         antibioticNames.push(antibioticName);
+        //         antibioticOptionHtmlElements[antibioticName] = '<option value="' + antibioticName.replace(WGST.antibioticNameRegex, '_').toLowerCase() + '">' + antibioticName + '</option>';
+        //     }
+        // }
 
-        // Sort antibiotic names
-        antibioticNames.sort();
+        // // Sort antibiotic names
+        // antibioticNames.sort();
 
-        var antibioticCounter = antibioticNames.length;
+        // var antibioticCounter = antibioticNames.length;
 
-        for (antibioticCounter = 0; antibioticCounter < antibioticNames.length;) {
-            antibioticName = antibioticNames[antibioticCounter];
-            selectAntibioticInputElement.append($(antibioticOptionHtmlElements[antibioticName]));
+        // for (antibioticCounter = 0; antibioticCounter < antibioticNames.length;) {
+        //     antibioticName = antibioticNames[antibioticCounter];
+        //     selectAntibioticInputElement.append($(antibioticOptionHtmlElements[antibioticName]));
             
-            antibioticCounter = antibioticCounter + 1;
-        }
+        //     antibioticCounter = antibioticCounter + 1;
+        // }
+        populateListOfAntibiotics('#select-tree-node-antibiotic');
     };
 
     // Init map
@@ -3380,6 +3382,71 @@ $(function(){
         }
     };
 
+    var addResistanceProfileToCollection = function(collectionId) {
+        // ----------------------------------------
+        // Ungroup antibiotic resistance profile
+        // ----------------------------------------
+        var assemblyId,
+            assembly,
+            resistanceProfileGroups = {},
+            resistanceProfileGroupName,
+            resistanceProfileGroup,
+            ungroupedResistanceProfile,
+            antibioticName;
+
+        for (assemblyId in WGST.collection[collectionId].assemblies) {
+            assembly = WGST.collection[collectionId].assemblies[assemblyId];
+            resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+            ungroupedResistanceProfile = {};
+
+            console.log('resistanceProfileGroups: ' + resistanceProfileGroups);
+            console.dir(resistanceProfileGroups); // ZZZ
+
+            for (resistanceProfileGroupName in resistanceProfileGroups) {
+                resistanceProfileGroup = resistanceProfileGroups[resistanceProfileGroupName];
+
+                for (antibioticName in resistanceProfileGroup) {
+                    ungroupedResistanceProfile[antibioticName] = resistanceProfileGroup[antibioticName];
+                }                    
+            }
+
+            WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile = ungroupedResistanceProfile;
+        
+            console.log('WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile:');
+            console.dir(WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile);
+        } // for
+    };
+
+    var populateListOfAntibiotics = function(elementSelector) {
+        // Populate list of antibiotics
+        var selectAntibioticInputElement = $(elementSelector),
+            antibioticGroupName,
+            antibioticName,
+            antibioticNames = [],
+            antibioticOptionHtmlElements = {};
+            //antibiotics = {};
+
+        for (antibioticGroupName in WGST.antibiotics) {
+            for (antibioticName in WGST.antibiotics[antibioticGroupName]) {
+                //antibiotics[antibioticName] = WGST.antibiotics[antibioticGroupName][antibioticName];
+                antibioticNames.push(antibioticName);
+                antibioticOptionHtmlElements[antibioticName] = '<option value="' + antibioticName.replace(WGST.antibioticNameRegex, '_').toLowerCase() + '">' + antibioticName + '</option>';
+            }
+        }
+
+        // Sort antibiotic names
+        antibioticNames.sort();
+
+        var antibioticCounter = antibioticNames.length;
+
+        for (antibioticCounter = 0; antibioticCounter < antibioticNames.length;) {
+            antibioticName = antibioticNames[antibioticCounter];
+            selectAntibioticInputElement.append($(antibioticOptionHtmlElements[antibioticName]));
+            
+            antibioticCounter = antibioticCounter + 1;
+        }
+    };
+
     WGST.socket.connection.on('collectionTreeMergeNotification', function(mergedCollectionTreeData) {
         console.dir(mergedCollectionTreeData);
 
@@ -3475,6 +3542,72 @@ $(function(){
             WGST.collection[mergedCollectionId].tree.canvas.draw();
 
             //WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.draw();
+
+            // ====================================================================================================================
+    
+            // // ----------------------------------------
+            // // Ungroup antibiotic resistance profile
+            // // ----------------------------------------
+            // var assemblyId,
+            //     assembly,
+            //     resistanceProfileGroups = {},
+            //     resistanceProfileGroupName,
+            //     resistanceProfileGroup,
+            //     ungroupedResistanceProfile,
+            //     antibioticName;
+
+            // for (assemblyId in WGST.collection[mergedCollectionId].assemblies) {
+            //     assembly = WGST.collection[mergedCollectionId].assemblies[assemblyId];
+            //     resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+            //     ungroupedResistanceProfile = {};
+
+            //     for (resistanceProfileGroupName in resistanceProfileGroups) {
+            //         resistanceProfileGroup = resistanceProfileGroups[resistanceProfileGroupName];
+
+            //         for (antibioticName in resistanceProfileGroup) {
+            //             ungroupedResistanceProfile[antibioticName] = resistanceProfileGroup[antibioticName];
+            //         }                    
+            //     }
+
+            //     WGST.collection[mergedCollectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile = ungroupedResistanceProfile;
+            
+            //     console.log('WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile:');
+            //     console.dir(WGST.collection[mergedCollectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile);
+
+            // } // for
+            addResistanceProfileToCollection(mergedCollectionId);
+
+            // // Populate list of antibiotics
+            // var selectAntibioticInputElement = $('#select-tree-node-antibiotic-merged'),
+            //     antibioticGroupName,
+            //     antibioticName,
+            //     antibioticNames = [],
+            //     antibioticOptionHtmlElements = {};
+            //     //antibiotics = {};
+
+            // for (antibioticGroupName in WGST.antibiotics) {
+            //     for (antibioticName in WGST.antibiotics[antibioticGroupName]) {
+            //         //antibiotics[antibioticName] = WGST.antibiotics[antibioticGroupName][antibioticName];
+            //         antibioticNames.push(antibioticName);
+            //         antibioticOptionHtmlElements[antibioticName] = '<option value="' + antibioticName.replace(WGST.antibioticNameRegex, '_').toLowerCase() + '">' + antibioticName + '</option>';
+            //     }
+            // }
+
+            // // Sort antibiotic names
+            // antibioticNames.sort();
+
+            // var antibioticCounter = antibioticNames.length;
+
+            // for (antibioticCounter = 0; antibioticCounter < antibioticNames.length;) {
+            //     antibioticName = antibioticNames[antibioticCounter];
+            //     selectAntibioticInputElement.append($(antibioticOptionHtmlElements[antibioticName]));
+                
+            //     antibioticCounter = antibioticCounter + 1;
+            // }
+            populateListOfAntibiotics('#select-tree-node-antibiotic-merged');
+
+        // ====================================================================================================================
+    
 
             endPanelLoadingIndicator(panelName);
             showPanelBodyContent(panelName);
