@@ -768,6 +768,8 @@ $(function(){
             assemblyListItems = document.createDocumentFragment();
 
         // Render assemblies according to the sorting order
+        
+        
         for (;assemblyCounter < sortedAssemblyIds.length;) {
 
             assemblyId = sortedAssemblyIds[assemblyCounter];
