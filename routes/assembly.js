@@ -441,7 +441,7 @@ exports.getAssembly = function(assemblyId, callback) {
 
 	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyQueryKeys, {}, function(error, assemblyData) {
 		console.log('[WGST] Got assembly data');
-		console.dir(assemblyData);
+		//console.dir(assemblyData);
 
 		if (error) {
 			callback(error, assemblyData);
@@ -474,8 +474,8 @@ exports.getAssembly = function(assemblyId, callback) {
 			} // if
 		} // for
 
-		console.log('[WGST] Assembly with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data: ');
-		console.dir(assembly);
+		// console.log('[WGST] Assembly with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data: ');
+		// console.dir(assembly);
 
 		// ---------------------------------------------
 		// Get ST
@@ -573,7 +573,7 @@ exports.getMlstAllelesData = function(queryKeys, callback) {
 
 	couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(queryKeys, {}, function(error, mlstAllelesData) {
 		console.log('[WGST] Got MLST alleles data:');
-		console.dir(mlstAllelesData);
+		//console.dir(mlstAllelesData);
 
 		if (error) {
 			callback(error, mlstAllelesData);
@@ -628,7 +628,7 @@ exports.apiGetAssemblies = function(req, res) {
 	// ------------------------------------------
 	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIdQueryKeys, {}, function(error, results) {
 		console.log('[WGST][Couchbase] Got assemblies data:');
-		console.log(results);
+		//console.log(results);
 
 		if (error) {
 			throw error;

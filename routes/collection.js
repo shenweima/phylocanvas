@@ -464,7 +464,7 @@ exports.apiGetRepresentativeCollection = function(req, res) {
 		representativeCollectionMetadata = representativeCollectionMetadata.value;
 
 		console.log('[WGST] Got representative collection metadata');
-		console.dir(representativeCollectionMetadata);
+		//console.dir(representativeCollectionMetadata);
 
 		res.json(representativeCollectionMetadata);
 	});

@@ -18,15 +18,15 @@
         <![endif]-->
 
         <!-- Bootstrap -->
-        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
         <!-- Bootstrap Slider -->
         <!-- <link rel="stylesheet" href="/css/bootstrap-slider.css"> -->
         <!-- jQuery UI -->
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
         <!-- Bootstrap v3 datetimepicker widget -->
         <link rel="stylesheet" href="/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css">
         <!-- Fonts -->
-        <link href='http://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900' rel='stylesheet' type='text/css'>
         <!-- Client -->
         <link href='/css/dev.css' rel='stylesheet' type='text/css'>
 
@@ -719,25 +719,25 @@
 
 
         <!-- jQuery -->
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <!-- jQuery UI -->
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
         <!-- Angular -->
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
         <!-- Bootstrap -->
-        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
         <!-- Bootstrap Slider -->
         <!-- <script src="/js/bootstrap-slider.min.js"></script> -->
         <!-- Google Maps v3 API with Places library -->
-        <script src="http://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
+        <script src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
         <!-- D3 -->
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js" charset="utf-8"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js" charset="utf-8"></script>
         <!-- Modernizr -->
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
         <!-- Moment.js -->
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.4.0/moment.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.4.0/moment.min.js"></script>
         <!-- TimeAgo http://timeago.yarp.com/ -->
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.1.0/jquery.timeago.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.1.0/jquery.timeago.min.js"></script>
         <!-- 
             Bootstrap v3 datetimepicker widget 
             https://github.com/Eonasdan/bootstrap-datetimepicker
@@ -783,7 +783,7 @@
               <% if (typeof appConfig !== 'undefined') { %>
                 // Store requested assembly
                 //window.WGST.config = <%- appConfig %>;
-                window.WGST.config = 'http://' + window.location.hostname;
+                window.WGST.config = window.location.protocol + window.location.hostname;
               <% } %>
             })();
           });

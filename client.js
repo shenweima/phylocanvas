@@ -768,8 +768,6 @@ $(function(){
             assemblyListItems = document.createDocumentFragment();
 
         // Render assemblies according to the sorting order
-        
-        
         for (;assemblyCounter < sortedAssemblyIds.length;) {
 
             assemblyId = sortedAssemblyIds[assemblyCounter];
@@ -1189,8 +1187,6 @@ $(function(){
     var triggerMapMarkers = function(collectionId, selectedAssemblyIds) {
 
         var assemblyMarkerBounds = new google.maps.LatLngBounds();
-
-        //ZZZ
 
         // Remove existing markers
         removeAllGroupMarkers();
@@ -3460,11 +3456,15 @@ $(function(){
             assemblyIdCounter = mergedCollectionTreeData.assemblies.length,
             assemblies;
 
-        for (; assemblyIdCounter !== 0;) {
-            assemblyIdCounter = assemblyIdCounter - 1;
+        assemblyIds = mergedCollectionTreeData.assemblies.map(function(assembly){
+            return assembly.assemblyId;
+        });
 
-            assemblyIds.push(mergedCollectionTreeData.assemblies[assemblyIdCounter].assemblyId);
-        }
+        // for (; assemblyIdCounter !== 0;) {
+        //     assemblyIdCounter = assemblyIdCounter - 1;
+
+        //     assemblyIds.push(mergedCollectionTreeData.assemblies[assemblyIdCounter].assemblyId);
+        // }
 
         console.log('[WGST] Requesting the following assemblies:');
         console.dir(assemblyIds);
@@ -3535,82 +3535,15 @@ $(function(){
                     if (tree.branches[assemblyId].leaf) {
                         tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId;                 
                     }
-
-                    // Create marker for each assembly
-
                 }
             }
 
             WGST.collection[mergedCollectionId].tree.canvas.draw();
-
-            //WGST.mergedCollectionTree[mergedCollectionTreeId].tree.canvas.draw();
-
-            // ====================================================================================================================
-    
-            // // ----------------------------------------
-            // // Ungroup antibiotic resistance profile
-            // // ----------------------------------------
-            // var assemblyId,
-            //     assembly,
-            //     resistanceProfileGroups = {},
-            //     resistanceProfileGroupName,
-            //     resistanceProfileGroup,
-            //     ungroupedResistanceProfile,
-            //     antibioticName;
-
-            // for (assemblyId in WGST.collection[mergedCollectionId].assemblies) {
-            //     assembly = WGST.collection[mergedCollectionId].assemblies[assemblyId];
-            //     resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
-            //     ungroupedResistanceProfile = {};
-
-            //     for (resistanceProfileGroupName in resistanceProfileGroups) {
-            //         resistanceProfileGroup = resistanceProfileGroups[resistanceProfileGroupName];
-
-            //         for (antibioticName in resistanceProfileGroup) {
-            //             ungroupedResistanceProfile[antibioticName] = resistanceProfileGroup[antibioticName];
-            //         }                    
-            //     }
-
-            //     WGST.collection[mergedCollectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile = ungroupedResistanceProfile;
-            
-            //     console.log('WGST.collection[collectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile:');
-            //     console.dir(WGST.collection[mergedCollectionId].assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile);
-
-            // } // for
             addResistanceProfileToCollection(mergedCollectionId);
-
-            // // Populate list of antibiotics
-            // var selectAntibioticInputElement = $('#select-tree-node-antibiotic-merged'),
-            //     antibioticGroupName,
-            //     antibioticName,
-            //     antibioticNames = [],
-            //     antibioticOptionHtmlElements = {};
-            //     //antibiotics = {};
-
-            // for (antibioticGroupName in WGST.antibiotics) {
-            //     for (antibioticName in WGST.antibiotics[antibioticGroupName]) {
-            //         //antibiotics[antibioticName] = WGST.antibiotics[antibioticGroupName][antibioticName];
-            //         antibioticNames.push(antibioticName);
-            //         antibioticOptionHtmlElements[antibioticName] = '<option value="' + antibioticName.replace(WGST.antibioticNameRegex, '_').toLowerCase() + '">' + antibioticName + '</option>';
-            //     }
-            // }
-
-            // // Sort antibiotic names
-            // antibioticNames.sort();
-
-            // var antibioticCounter = antibioticNames.length;
-
-            // for (antibioticCounter = 0; antibioticCounter < antibioticNames.length;) {
-            //     antibioticName = antibioticNames[antibioticCounter];
-            //     selectAntibioticInputElement.append($(antibioticOptionHtmlElements[antibioticName]));
-                
-            //     antibioticCounter = antibioticCounter + 1;
-            // }
             populateListOfAntibiotics('#select-tree-node-antibiotic-merged');
 
         // ====================================================================================================================
     
-
             endPanelLoadingIndicator(panelName);
             showPanelBodyContent(panelName);
             showPanel(panelName);
@@ -3797,9 +3730,7 @@ $(function(){
         // Map
         //======================================================
         var checkedAssemblyId = $(this).attr('data-assembly-id'),
-            collectionId = $(this).closest('.wgst-collection').attr('data-collection-id');//,
-            //assemblyIdMarker;//,
-            //assemblyMarkerBounds = new google.maps.LatLngBounds();
+            collectionId = $(this).closest('.wgst-collection').attr('data-collection-id');
 
         var allCheckedCheckboxes = $(this).closest('.collection-assembly-list').find('.show-on-map-checkbox [type="checkbox"]:checked'),
             selectedAssemblyIds = [],
@@ -3812,9 +3743,12 @@ $(function(){
 
         triggerMapMarkers(collectionId, selectedAssemblyIds);
 
-        // ZZZ
-
-        openPanel('map');
+        // Open map panel if it's not displayed and map is not in fullscreen mode
+        if ($('.wgst-fullscreen--active').attr('data-fullscreen-name') !== 'map') {
+            if (! $('.wgst-panel__map').hasClass('wgst-panel--active')) {
+                openPanel('map');
+            }
+        }
 
         // //------------------------------------------------------
         // // Find markers with identical position
