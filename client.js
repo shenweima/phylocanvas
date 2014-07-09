@@ -27,7 +27,7 @@ $(function(){
             left: 90
         },
         collectionTree: {
-            top: 160,
+            top: 120,
             left: 180  
         },
         mergedCollectionTree: {
@@ -92,7 +92,7 @@ $(function(){
 
     WGST.socket = {
         //connection: io.connect(WGST.config.socketAddress, {secure: true}),
-        connection: io.connect(WGST.config.socketAddress),
+        connection: io.connect(window.WGST.config.socketAddress),
         roomId: ''
     };
 
@@ -146,7 +146,7 @@ $(function(){
         loaded: []
     };
 
-    WGST.dragAndDrop = window.WGST.dragAndDrop || {};
+    WGST.dragAndDrop = WGST.dragAndDrop || {};
     WGST.dragAndDrop.files = [];
     WGST.dragAndDrop.fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i;
 
@@ -298,7 +298,7 @@ $(function(){
         console.log('collectionId: ' + collectionId);
         console.log('selectedNode: ' + selectedNode);
 
-        window.WGST.collection[collectionId].tree.canvas.redrawFromBranch(selectedNode);
+        WGST.collection[collectionId].tree.canvas.redrawFromBranch(selectedNode);
     });
 
     $('.collection-view-horizontal-split').on('click', function(){
@@ -574,7 +574,7 @@ $(function(){
             console.log('[WGST][Socket.io] Ready');
 
             // Set room id for this client
-            window.WGST.socket.roomId = roomId;
+            WGST.socket.roomId = roomId;
 
             initApp(WGST.init.all.SOCKET_ROOM_ID);
         });
@@ -858,7 +858,7 @@ $(function(){
 
         deactivatePanel(['collection', 'collectionTree'], function(){
             // Delete collection object
-            delete window.WGST.collection[collectionId];
+            delete WGST.collection[collectionId];
             // Change URL
             window.history.replaceState('Object', 'WGST Collection', '');
         });
@@ -985,12 +985,12 @@ $(function(){
                 // ----------------------------------------
                 // Render assembly metadata list
                 // ----------------------------------------
-                var assemblies = window.WGST.collection[collectionId].assemblies,
+                var assemblies = WGST.collection[collectionId].assemblies,
                     sortedAssemblies = [],
                     sortedAssemblyIds = [];
 
                 // Sort assemblies in order in which they are displayed on tree
-                $.each(window.WGST.collection[collectionId].tree.leavesOrder, function(leafCounter, leaf){
+                $.each(WGST.collection[collectionId].tree.leavesOrder, function(leafCounter, leaf){
                     sortedAssemblies.push(assemblies[leaf.id]);
                     sortedAssemblyIds.push(leaf.id);
                 });
@@ -1050,7 +1050,7 @@ $(function(){
                 //     // Prepare Collection Tree
                 //     $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
                 //     // Init collection tree
-                //     window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+                //     WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
                 //     // Render collection tree
                 //     renderCollectionTree(collectionId);
                 // });
@@ -1098,14 +1098,14 @@ $(function(){
         // Get collection id
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
 
-        window.WGST.collection[collectionId].tree.canvas.displayLabels();
+        WGST.collection[collectionId].tree.canvas.displayLabels();
     });
 
     $('.tree-controls-hide-labels').on('click', function(){
         // Get collection id
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
 
-        window.WGST.collection[collectionId].tree.canvas.hideLabels();
+        WGST.collection[collectionId].tree.canvas.hideLabels();
     });
 
     // $('.collection-assembly-list').on('scroll', function(){
@@ -1113,7 +1113,7 @@ $(function(){
 
     //     var collectionId = $(this).attr('data-collection-id');
 
-    //     window.WGST.collection[collectionId].displayedAssemblies = [];
+    //     WGST.collection[collectionId].displayedAssemblies = [];
     // });
 
     var groupAssembliesByPosition = function(collectionId, assemblyIds) {
@@ -1182,6 +1182,9 @@ $(function(){
             groupMarker.setMap(null);
             delete WGST.geo.map.markers.group[groupPositionString];
         }
+
+        // Uncheck All Assemblies On Map checkbox
+        $('.show-all-assemblies-on-map').prop('checked', false);
     };
 
     var triggerMapMarkers = function(collectionId, selectedAssemblyIds) {
@@ -1226,13 +1229,13 @@ $(function(){
     };
 
     var selectTreeNodes = function(collectionId, selectedAssemblyIds) {
-        var assemblies = window.WGST.collection[collectionId].assemblies;
+        var assemblies = WGST.collection[collectionId].assemblies;
 
-        if (selectedAssemblyIds.length > 0) {
-            selectedAssemblyIds = selectedAssemblyIds.split(',');
-        } else {
-            selectedAssemblyIds = [];
-        }
+        // if (selectedAssemblyIds.length > 0) {
+        //     selectedAssemblyIds = selectedAssemblyIds.split(',');
+        // } else {
+        //     selectedAssemblyIds = [];
+        // }
 
         // Uncheck all radio buttons
         $('.collection-assembly-list .assembly-list-item [type="radio"]').prop('checked', false);
@@ -1267,7 +1270,7 @@ $(function(){
     // $('body').on('mouseenter', '.glyphicon-leaf', function(){
     //     var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
     //         assemblyId = $(this).closest('.assembly-list-item').attr('data-assembly-id'),
-    //         branch = window.WGST.collection[collectionId].tree.canvas.branches[assemblyId],
+    //         branch = WGST.collection[collectionId].tree.canvas.branches[assemblyId],
     //         children = branch.parent.children;
 
     //     $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
@@ -1282,7 +1285,7 @@ $(function(){
 
     // DEPRECATED
     // var renderCollectionFamily = function(collectionId) {
-    //     var tree = window.WGST.collection[collectionId].tree.canvas;
+    //     var tree = WGST.collection[collectionId].tree.canvas;
 
 
     //     var branches = tree.branches;
@@ -1480,35 +1483,33 @@ $(function(){
         console.log('[WGST] Rendering ' + collectionId + ' collection tree');
         console.dir(WGST.collection[collectionId].tree);
 
-        // Init collection tree
-        WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
-        //WGST.collection[collectionId].tree.canvas.use_navigator = false;
-        //WGST.collection[collectionId].tree.canvas.backColour = true;
+        WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId), { history_collapsed: true });
         WGST.collection[collectionId].tree.canvas.parseNwk(WGST.collection[collectionId].tree.data);
         WGST.collection[collectionId].tree.canvas.treeType = 'rectangular';
-        // WGST.collection[collectionId].tree.canvas.showLabels = true;
-        // WGST.collection[collectionId].tree.canvas.baseNodeSize = 5;
-        // WGST.collection[collectionId].tree.canvas.setTextSize(10);
-        // WGST.collection[collectionId].tree.canvas.selectedNodeSizeIncrease = 5;
-        // WGST.collection[collectionId].tree.canvas.selectedColor = '#0059DE';
-        // WGST.collection[collectionId].tree.canvas.rightClickZoom = false;
 
         var tree = WGST.collection[collectionId].tree.canvas,
             assemblies = WGST.collection[collectionId].assemblies,
             assemblyId;
 
-        //tree.parseNwk(WGST.collection[collectionId].tree.data);
-        // tree.treeType = 'rectangular';
-        // tree.showLabels = true;
-        // tree.baseNodeSize = 0.8;
-        // tree.setTextSize(0.8);
-        // tree.selectedNodeSizeIncrease = 0.5;
-        // tree.selectedColor = '#0059DE';
-        //tree.rightClickZoom = true;
+        // WGST.collection[collectionId].tree.canvas.onselected = function(selectedNodeIds) {
+        //     selectTreeNodes(collectionId, selectedNodeIds);
+        // };
 
-        WGST.collection[collectionId].tree.canvas.onselected = function(selectedNodeIds) {
-            selectTreeNodes(collectionId, selectedNodeIds);
-        };
+        WGST.collection[collectionId].tree.canvas.on('selected', function(event) {
+            var selectedNodeIds = event.nodeIds;
+
+            /*
+             * Unfortunately selectedNodeIds can return string
+             * if only one node has been selected.
+             *
+             * In that case convert it to array.
+             */
+            if (typeof selectedNodeIds === 'string') {
+                selectedNodeIds = [selectedNodeIds];
+            }
+
+           selectTreeNodes(collectionId, selectedNodeIds); 
+        });
 
         // Set user assembly id as node label
         for (assemblyId in assemblies) {
@@ -1519,15 +1520,15 @@ $(function(){
                 }
             }
         }
-
+        
+        // Need to resize to fit it correctly
+        WGST.collection[collectionId].tree.canvas.resizeToContainer();
+        // Need to redraw to actually see it
+        WGST.collection[collectionId].tree.canvas.drawn = false;
         WGST.collection[collectionId].tree.canvas.draw();
 
         // Get order of nodes
         var leaves = tree.leaves;
-
-        // console.log('Unsorted:');
-        // console.dir(leaves);
-
         leaves.sort(function(leafOne, leafTwo){
             return leafOne.centery - leafTwo.centery;
         });
@@ -1539,7 +1540,7 @@ $(function(){
         // ====================================================================================================================
 
         // Replace user assembly id with assembly id
-        var newickString = window.WGST.collection[collectionId].tree.data;
+        var newickString = WGST.collection[collectionId].tree.data;
 
         for (assemblyId in assemblies) {
             if (assemblies.hasOwnProperty(assemblyId)) {
@@ -1587,7 +1588,7 @@ $(function(){
     WGST.geo.map.init();
 
     var deselectAllTreeNodes = function(collectionId) {
-        var tree = window.WGST.collection[collectionId].tree.canvas;
+        var tree = WGST.collection[collectionId].tree.canvas;
 
         // Workaround
         // TO DO: Refactor using official API
@@ -1597,7 +1598,7 @@ $(function(){
     $('.tree-controls-select-none').on('click', function() {
 
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
-            //tree = window.WGST.collection[collectionId].tree.canvas;
+            //tree = WGST.collection[collectionId].tree.canvas;
 
         deselectAllTreeNodes(collectionId);
 
@@ -1611,9 +1612,9 @@ $(function(){
     $('.tree-controls-select-all').on('click', function() {
 
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
-            tree = window.WGST.collection[collectionId].tree.canvas;
+            tree = WGST.collection[collectionId].tree.canvas;
         
-        //console.debug(window.WGST.collection[collectionId]);
+        //console.debug(WGST.collection[collectionId]);
         //console.debug(tree);
 
         // Get all assembly ids in this tree
@@ -1649,10 +1650,10 @@ $(function(){
 
     var showCollectionMetadataOnMap = function(collectionId, assemblyIds) {
 
-        window.WGST.collection[collectionId].geo = window.WGST.collection[collectionId].geo || {};
+        WGST.collection[collectionId].geo = WGST.collection[collectionId].geo || {};
 
-        var collectionTree = window.WGST.collection[collectionId].tree.canvas,
-            existingMarkers = window.WGST.collection[collectionId].geo.markers,
+        var collectionTree = WGST.collection[collectionId].tree.canvas,
+            existingMarkers = WGST.collection[collectionId].geo.markers,
             existingMarkerCounter = existingMarkers.length;
 
         // Remove existing markers
@@ -1661,28 +1662,25 @@ $(function(){
             // Remove marker
             existingMarkers[existingMarkerCounter].setMap(null);
         }
-        window.WGST.collection[collectionId].geo.markers = [];
+        WGST.collection[collectionId].geo.markers = [];
 
         // Reset marker bounds
-        window.WGST.geo.map.markerBounds = new google.maps.LatLngBounds();
+        WGST.geo.map.markerBounds = new google.maps.LatLngBounds();
 
         // Create new markers
         if (assemblyIds.length > 0) {
-            console.log('[WGST] Selected assembly ids:' );
-            console.dir(assemblyIds);
-
             var assemblyCounter = assemblyIds.length,
-                assemblyId,
-                assemblyMetadata,
-                latitude,
-                longitude;
+                assemblyId = '',
+                assemblyMetadata = {},
+                latitude = {},
+                longitude = {};
 
             // For each assembly create marker
             for (; assemblyCounter !== 0;) {
                 assemblyCounter = assemblyCounter - 1;
 
                 assemblyId = assemblyIds[assemblyCounter];
-                assemblyMetadata = window.WGST.collection[collectionId].assemblies[assemblyId]['ASSEMBLY_METADATA'];
+                assemblyMetadata = WGST.collection[collectionId].assemblies[assemblyId]['ASSEMBLY_METADATA'];
                 latitude = assemblyMetadata.geography.position.latitude;
                 longitude = assemblyMetadata.geography.position.longitude;
 
@@ -1693,7 +1691,7 @@ $(function(){
 
                     var marker = new google.maps.Marker({
                         position: new google.maps.LatLng(latitude, longitude),
-                        map: window.WGST.geo.map.canvas,
+                        map: WGST.geo.map.canvas,
                         icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
                         // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
                         // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
@@ -1701,75 +1699,21 @@ $(function(){
                     });
 
                     // Set marker
-                    //window.WGST.geo.markers.representativeTree[accession] = marker;
-                    window.WGST.collection[collectionId].assemblies[assemblyId].geo = window.WGST.collection[collectionId].assemblies[assemblyId].geo || {};
-                    window.WGST.collection[collectionId].assemblies[assemblyId].geo.marker = marker;
+                    WGST.collection[collectionId].assemblies[assemblyId].geo = WGST.collection[collectionId].assemblies[assemblyId].geo || {};
+                    WGST.collection[collectionId].assemblies[assemblyId].geo.marker = marker;
 
                     // Store list of assembly ids with markers
-                    window.WGST.collection[collectionId].geo.markers.push(assemblyIds);
+                    WGST.collection[collectionId].geo.markers.push(assemblyIds);
                     
                     // Extend markerBounds with each metadata marker
-                    window.WGST.geo.map.markerBounds.extend(marker.getPosition());
+                    WGST.geo.map.markerBounds.extend(marker.getPosition());
                 } // if
             } // for
         } else { // No assemblies were selected
-            console.log('[WGST] No selected assemblies');
-
             // Show Europe
-            window.WGST.geo.map.canvas.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
-            window.WGST.geo.map.canvas.setZoom(5);
+            WGST.geo.map.canvas.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
+            WGST.geo.map.canvas.setZoom(5);
         }
-
-        // if (typeof assemblyIds === 'string' && assemblyIds.length > 0) {
-        //     console.log('[WGST] Selected assembly ids: ' );
-        //     console.dir(assemblyIds);
-
-        //     // Create collection tree markers
-        //     var selectedNodeIds = nodeIds.split(','),
-        //         nodeCounter = selectedNodeIds.length,
-        //         accession,
-        //         metadata;
-
-        //     // For each node create representative tree marker
-        //     for (; nodeCounter !== 0;) {
-        //         // Decrement counter
-        //         nodeCounter = nodeCounter - 1;
-
-        //         accession = selectedNodeIds[nodeCounter];
-
-        //         metadata = window.WGST.collection[collectionId].assemblies[accession];
-
-        //         // Check if both latitude and longitude provided
-        //         if (metadata.latitude && metadata.longitude) {
-
-        //             console.log('[WGST] Marker\'s latitude: ' + metadata.latitude);
-        //             console.log('[WGST] Marker\'s longitude: ' + metadata.longitude);
-
-        //             var marker = new google.maps.Marker({
-        //                 position: new google.maps.LatLng(metadata.latitude, metadata.longitude),
-        //                 map: window.WGST.geo.map,
-        //                 icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-        //                 // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
-        //                 // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
-        //                 optimized: true
-        //             });
-        //             // Set marker
-        //             window.WGST.geo.markers.representativeTree[accession] = marker;
-        //             // Extend markerBounds with each metadata marker
-        //             window.WGST.geo.markerBounds.extend(marker.getPosition());
-        //         }
-        //     } // for
-
-        //     // Pan to marker bounds
-        //     window.WGST.geo.map.panToBounds(window.WGST.geo.markerBounds);
-        //     // Set the map to fit marker bounds
-        //     window.WGST.geo.map.fitBounds(window.WGST.geo.markerBounds);
-        // } else { // No nodes were selected
-        //     console.log('[WGST] No selected nodes');
-        //     // Show Europe
-        //     window.WGST.geo.map.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
-        //     window.WGST.geo.map.setZoom(5);
-        // }
     };
 
         // Array of objects that store content of FASTA file and user-provided metadata
@@ -1785,13 +1729,8 @@ $(function(){
         // Count total number of contigs in all selected assemblies
         totalContigsSum = 0;
 
+    // Refactor to fastajs.parse()
     var parseFastaFile = function(e, fileCounter, file, droppedFiles, collectionId) {
-
-        // Init assembly upload metadata
-        window.WGST.upload.assembly[file.name] = {
-            metadata: {}
-        };
-
             // Array of contigs
         var contigs = [],
             // Array of sequence parts
@@ -1810,6 +1749,11 @@ $(function(){
             assemblyListItem = $(),
             // N50 chart data
             chartData = [];
+
+        // Init assembly upload metadata
+        WGST.upload.assembly[file.name] = {
+            metadata: {}
+        };
 
         // Trim, and split assembly string into array of individual contigs
         // then filter that array by removing empty strings
@@ -3170,32 +3114,6 @@ $(function(){
         $('.adding-metadata-progress-container .progress-hint').fadeOut();
     };
 
-    // DEPRECATED
-    // Show next form block when user fills in an input
-    // $('.assembly-metadata-list-container').on('input_content_change', '.assembly-sample-location-input', function(){
-    // } 
-    // function(){
-
-    //     // Show next form block if current input has some value
-    //     if ($(this).val().length > 0) {
-
-    //         // TO DO: Validate input value
-
-    //         // Show next metadata form block
-    //         $(this).closest('.form-block').next('.form-block').fadeIn();
-
-    //         // Scroll to the next form block
-    //         //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
-    //         $(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
-    //     } // if
-
-    //     // Increment metadata progress bar
-    //     updateMetadataProgressBar();
-    //     // Hide progress hint
-    //     $('.adding-metadata-progress-container .progress-hint').fadeOut();
-    // }
-    // );
-
     // Show next form block when user fills in an input
     $('.assembly-metadata-list-container').on('change', '.assembly-sample-source-input', function(){
 
@@ -3212,8 +3130,6 @@ $(function(){
         // Hide progress hint
         $('.adding-metadata-progress-container .progress-hint').fadeOut();
     });
-
-
 
     // TO DO: Refactor
     // When 'Next empty assembly' button is pressed
@@ -3485,19 +3401,19 @@ $(function(){
             // Render tree
             // ------------------------------------------
 
-            var mergedCollectionId = mergedCollectionTreeData.mergedCollectionTreeId,
+            var collectionId = mergedCollectionTreeData.mergedCollectionTreeId,
                 panelName = 'mergedCollectionTree';
 
-            console.log('[WGST] Rendering merged collection tree ' + mergedCollectionId);
+            console.log('[WGST] Rendering merged collection tree ' + collectionId);
 
-            $('.wgst-panel__merged-collection-tree').attr('data-collection-id', mergedCollectionId);
-            $('.wgst-panel__merged-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + mergedCollectionId);
+            $('.wgst-panel__merged-collection-tree').attr('data-collection-id', collectionId);
+            $('.wgst-panel__merged-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
 
             activatePanel(panelName);
 
-            initEmptyCollection(mergedCollectionId);
-            WGST.collection[mergedCollectionId].tree.data = mergedCollectionTreeData.tree;
-            WGST.collection[mergedCollectionId].assemblies = assemblies;
+            initEmptyCollection(collectionId);
+            WGST.collection[collectionId].tree.data = mergedCollectionTreeData.tree;
+            WGST.collection[collectionId].assemblies = assemblies;
 
             // ------------------------------------------
             // Prepare nearest representative
@@ -3506,26 +3422,47 @@ $(function(){
                 assembly,
                 assemblyScores;
 
-            for (assemblyId in WGST.collection[mergedCollectionId].assemblies) {
-                if (WGST.collection[mergedCollectionId].assemblies.hasOwnProperty(assemblyId)) {
-                    assembly = WGST.collection[mergedCollectionId].assemblies[assemblyId];
+            for (assemblyId in WGST.collection[collectionId].assemblies) {
+                if (WGST.collection[collectionId].assemblies.hasOwnProperty(assemblyId)) {
+                    assembly = WGST.collection[collectionId].assemblies[assemblyId];
                     assemblyScores = assembly['FP_COMP'].scores;
                     // Set top score
-                    WGST.collection[mergedCollectionId].assemblies[assemblyId]['FP_COMP'].topScore = calculateAssemblyTopScore(assemblyScores);
+                    WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore = calculateAssemblyTopScore(assemblyScores);
                 } // if
             } // for
 
             // Init collection tree
-            WGST.collection[mergedCollectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + mergedCollectionId));
-            WGST.collection[mergedCollectionId].tree.canvas.parseNwk(WGST.collection[mergedCollectionId].tree.data);
-            WGST.collection[mergedCollectionId].tree.canvas.treeType = 'rectangular';
-            WGST.collection[mergedCollectionId].tree.canvas.onselected = function(selectedNodeIds) {
-                selectTreeNodes(mergedCollectionId, selectedNodeIds);
-            };
+            WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId), { history_collapsed: true });
+            WGST.collection[collectionId].tree.canvas.parseNwk(WGST.collection[collectionId].tree.data);
+            WGST.collection[collectionId].tree.canvas.treeType = 'rectangular';
+
+            // WGST.collection[collectionId].tree.canvas.onselected = function(selectedNodeIds) {
+            //     selectTreeNodes(collectionId, selectedNodeIds);
+            // };
+            WGST.collection[collectionId].tree.canvas.on('selected', function(event) {
+                var selectedNodeIds = event.nodeIds;
+
+                /*
+                 * Unfortunately selectedNodeIds can return string
+                 * if only one node has been selected.
+                 *
+                 * In that case convert it to array.
+                 */
+                if (typeof selectedNodeIds === 'string') {
+                    selectedNodeIds = [selectedNodeIds];
+                }
+
+               selectTreeNodes(collectionId, selectedNodeIds); 
+            });
+
+            // Need to resize to fit it correctly
+            WGST.collection[collectionId].tree.canvas.resizeToContainer();
+            // Need to redraw to actually see it
+            WGST.collection[collectionId].tree.canvas.drawn = false;
+            WGST.collection[collectionId].tree.canvas.draw();
 
             // Get assemblies from merged collection
-
-            var tree = WGST.collection[mergedCollectionId].tree.canvas,
+            var tree = WGST.collection[collectionId].tree.canvas,
                 assemblyId;
 
             // Set user assembly id as node label
@@ -3538,8 +3475,8 @@ $(function(){
                 }
             }
 
-            WGST.collection[mergedCollectionId].tree.canvas.draw();
-            addResistanceProfileToCollection(mergedCollectionId);
+            WGST.collection[collectionId].tree.canvas.draw();
+            addResistanceProfileToCollection(collectionId);
             populateListOfAntibiotics('#select-tree-node-antibiotic-merged');
 
         // ====================================================================================================================
@@ -3799,7 +3736,7 @@ $(function(){
         //     //     // Create marker
         //     //     WGST.geo.map.markers.assembly[checkedAssemblyId] = new google.maps.Marker({
         //     //         position: new google.maps.LatLng($(this).attr('data-latitude'), $(this).attr('data-longitude')),
-        //     //         map: window.WGST.geo.map.canvas,
+        //     //         map: WGST.geo.map.canvas,
         //     //         icon: markerIcon,
         //     //         draggable: true,
         //     //         optimized: true // http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
@@ -3899,13 +3836,13 @@ $(function(){
         $('.collection-assembly-list .assembly-list-item.row-selected').removeClass('row-selected');
         $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + selectedAssemblyId + '"]').addClass('row-selected');
 
-        window.WGST.collection[collectionId].tree.canvas.selectNodes(selectedAssemblyId);
+        WGST.collection[collectionId].tree.canvas.selectNodes(selectedAssemblyId);
 
-        // var leaves = window.WGST.collection[collectionId].tree.canvas.leaves;
-        // console.dir(window.WGST.collection[collectionId].tree.canvas.leaves);
+        // var leaves = WGST.collection[collectionId].tree.canvas.leaves;
+        // console.dir(WGST.collection[collectionId].tree.canvas.leaves);
         // var selectedLeaf = $.grep(leaves, function(leaf){ return leaf.id === selectedAssemblyId; });
         // selectedLeaf[0].nodeShape = 'square';
-        //window.WGST.collection[collectionId].tree.canvas.leaves[selectedAssemblyId].nodeShape = 'rectangular';
+        //WGST.collection[collectionId].tree.canvas.leaves[selectedAssemblyId].nodeShape = 'rectangular';
 
         // Show collection tree panel
         activatePanel('collectionTree');
@@ -3933,12 +3870,12 @@ $(function(){
         // });
 
         // //console.debug('checkedAssemblyNodesString: ' + checkedAssemblyNodesString);
-        // //console.dir(window.WGST.collection[collectionId].tree.canvas);
+        // //console.dir(WGST.collection[collectionId].tree.canvas);
 
         // // Highlight assembly with the highest score on the representative tree
 
-        // window.WGST.collection[collectionId].tree.canvas.selectNodes(checkedAssemblyNodesString);
-        // //window.WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
+        // WGST.collection[collectionId].tree.canvas.selectNodes(checkedAssemblyNodesString);
+        // //WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
     });
 
     $('.assemblies-upload-cancel-button').on('click', function() {
@@ -3960,7 +3897,7 @@ $(function(){
         // Update percentage value
         $('.adding-metadata-progress-container .progress-percentage').text('0%');
         // Remove metadata marker
-        window.WGST.geo.map.markers.metadata.setMap(null);
+        WGST.geo.map.markers.metadata.setMap(null);
     });
 
     // var assemblyUploadDoneHandler = function(collectionId, assemblyId) {
@@ -3990,7 +3927,7 @@ $(function(){
             // Increment number of assembly upload counter
             numberOfFilesProcessing = numberOfFilesProcessing + 1;
             // Set socket room id
-            fastaFilesAndMetadata[assemblyId].socketRoomId = window.WGST.socket.roomId;
+            fastaFilesAndMetadata[assemblyId].socketRoomId = WGST.socket.roomId;
             // Set assembly id
             fastaFilesAndMetadata[assemblyId].assemblyId = assemblyId;
             // Post assembly
@@ -4031,12 +3968,12 @@ $(function(){
         //$(this).attr('disabled','disabled');
 
         // Remove metadata marker
-        window.WGST.geo.map.markers.metadata.setMap(null);
+        WGST.geo.map.markers.metadata.setMap(null);
 
         // Close panels
         deactivatePanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
 
-        window.WGST.dragAndDrop.files = [];
+        WGST.dragAndDrop.files = [];
 
         var userAssemblyId,
             assembltUploadProgressTemplate,
@@ -4145,7 +4082,7 @@ $(function(){
                                 var autocompleteInput = $('li[data-name="' + userAssemblyId + '"] .assembly-sample-location-input');
 
                                 console.debug('userAssemblyId: ' + userAssemblyId);
-                                console.dir(window.WGST.upload);
+                                console.dir(WGST.upload);
 
                                 // Add metadata to each FASTA file object
                                 fastaFilesAndMetadata[assemblyId].metadata = {
@@ -4244,10 +4181,10 @@ $(function(){
 
         // Copy the same metadata to all assemblies
         var sourceFileName = $(this).closest('.assembly-item').attr('data-name'),
-            sourceMetadata = window.WGST.upload.assembly[sourceFileName].metadata;
+            sourceMetadata = WGST.upload.assembly[sourceFileName].metadata;
 
-        $.each(window.WGST.upload.assembly, function(destinationFileName, destinationMetadata){
-            window.WGST.upload.assembly[destinationFileName].metadata = sourceMetadata;
+        $.each(WGST.upload.assembly, function(destinationFileName, destinationMetadata){
+            WGST.upload.assembly[destinationFileName].metadata = sourceMetadata;
         });
 
         // Get metadata from selected assembly
@@ -4697,7 +4634,7 @@ $(function(){
         // Attach collection id
         $('.wgst-panel__representative-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
 
-        WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .wgst-tree-content')[0]);
+        WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .wgst-tree-content').get(0), { history_collapsed: true });
         WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
         WGST.collection.representative.tree.canvas.treeType = 'rectangular';
         // WGST.collection.representative.tree.canvas.showLabels = true;
@@ -4741,19 +4678,19 @@ $(function(){
         //     renderRepresentativeCollectionTree();
 
         //     // // Init collection tree
-        //     // window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
+        //     // WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
         //     // // Render collection tree
         //     // //renderCollectionTree(collectionId);
 
-        //     // window.WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
-        //     // window.WGST.collection.representative.tree.canvas.treeType = 'rectangular';
-        //     // //window.WGST.collection.representative.tree.showLabels = false;
-        //     // window.WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
-        //     // window.WGST.collection.representative.tree.canvas.setTextSize(24);
-        //     // window.WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
-        //     // window.WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
-        //     // window.WGST.collection.representative.tree.canvas.rightClickZoom = true;
-        //     // //window.WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
+        //     // WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
+        //     // WGST.collection.representative.tree.canvas.treeType = 'rectangular';
+        //     // //WGST.collection.representative.tree.showLabels = false;
+        //     // WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
+        //     // WGST.collection.representative.tree.canvas.setTextSize(24);
+        //     // WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
+        //     // WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
+        //     // WGST.collection.representative.tree.canvas.rightClickZoom = true;
+        //     // //WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
 
         //     // endPanelLoadingIndicator('representativeCollectionTree');
         //     // showPanelBodyContent('representativeCollectionTree');
@@ -4778,19 +4715,19 @@ $(function(){
         //     // Attach collection id
         //     $('.wgst-panel__representative-collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
         //     // Init collection tree
-        //     window.WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
+        //     WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
         //     // Render collection tree
         //     //renderCollectionTree(collectionId);
 
-        //     window.WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
-        //     window.WGST.collection.representative.tree.canvas.treeType = 'rectangular';
-        //     //window.WGST.collection.representative.tree.showLabels = false;
-        //     window.WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
-        //     window.WGST.collection.representative.tree.canvas.setTextSize(24);
-        //     window.WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
-        //     window.WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
-        //     window.WGST.collection.representative.tree.canvas.rightClickZoom = true;
-        //     //window.WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
+        //     WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
+        //     WGST.collection.representative.tree.canvas.treeType = 'rectangular';
+        //     //WGST.collection.representative.tree.showLabels = false;
+        //     WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
+        //     WGST.collection.representative.tree.canvas.setTextSize(24);
+        //     WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
+        //     WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
+        //     WGST.collection.representative.tree.canvas.rightClickZoom = true;
+        //     //WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
 
         //     endPanelLoadingIndicator('representativeCollectionTree');
         //     showPanelBodyContent('representativeCollectionTree');
@@ -4803,8 +4740,8 @@ $(function(){
         //     console.error(jqXHR);
         // });
 
-            //window.WGST.collection.representative.tree.data = data.collection.tree;
-            //window.WGST.collection[collectionId].assemblies = data.collection.assemblies;
+            //WGST.collection.representative.tree.data = data.collection.tree;
+            //WGST.collection[collectionId].assemblies = data.collection.assemblies;
 
             // // ----------------------------------------
             // // Render collection tree
@@ -4814,7 +4751,7 @@ $(function(){
             // // Attach collection id
             // $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
             // // Init collection tree
-            // window.WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+            // WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
             // // Render collection tree
             // renderCollectionTree(collectionId);
 
@@ -4827,15 +4764,15 @@ $(function(){
         // AAA
 
 
-        // window.WGST.representativeTree.tree.load('/data/reference_tree.nwk');
-        // window.WGST.representativeTree.tree.treeType = 'rectangular';
-        // //window.WGST.representativeTree.tree.showLabels = false;
-        // window.WGST.representativeTree.tree.baseNodeSize = 0.5;
-        // window.WGST.representativeTree.tree.setTextSize(24);
-        // window.WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
-        // window.WGST.representativeTree.tree.selectedColor = '#0059DE';
-        // window.WGST.representativeTree.tree.rightClickZoom = true;
-        // window.WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
+        // WGST.representativeTree.tree.load('/data/reference_tree.nwk');
+        // WGST.representativeTree.tree.treeType = 'rectangular';
+        // //WGST.representativeTree.tree.showLabels = false;
+        // WGST.representativeTree.tree.baseNodeSize = 0.5;
+        // WGST.representativeTree.tree.setTextSize(24);
+        // WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
+        // WGST.representativeTree.tree.selectedColor = '#0059DE';
+        // WGST.representativeTree.tree.rightClickZoom = true;
+        // WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
 
         // // ==============================
         // // Load reference tree metadata
@@ -4868,7 +4805,7 @@ $(function(){
         //         accession = metadata[metadataCounter].accession;
 
         //         // Set representative tree metadata
-        //         window.WGST.representativeTree[accession] = metadata[metadataCounter];
+        //         WGST.representativeTree[accession] = metadata[metadataCounter];
         //     } // for
         // })
         // .fail(function(jqXHR, textStatus, errorThrown) {
@@ -5164,7 +5101,7 @@ google.maps.event.addDomListener(window, "resize", function() {
         var canvas = $(canvasElement),
             canvasOffset = canvas.offset(),
             collectionId = canvas.closest('.wgst-panel').attr('data-collection-id'),
-            tree = window.WGST.collection[collectionId].tree.canvas,
+            tree = WGST.collection[collectionId].tree.canvas,
             leaves = tree.leaves,
             //leavesWithinCanvasViewport = [],
             canvasTopLeft = {
@@ -5228,8 +5165,8 @@ google.maps.event.addDomListener(window, "resize", function() {
             collectionAssemblyList = $('.collection-assembly-list');
 
         // Redraw original tree and set original zoom
-        window.WGST.collection[collectionId].tree.canvas.redrawOriginalTree();
-        window.WGST.collection[collectionId].tree.canvas.setZoom(-0.05);
+        WGST.collection[collectionId].tree.canvas.redrawOriginalTree();
+        WGST.collection[collectionId].tree.canvas.setZoom(-0.05);
 
         // Remove existing assemblies from assembly list
         collectionAssemblyList.find('.assembly-list-item').remove();
