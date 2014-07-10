@@ -1,7 +1,7 @@
-wgst-front
+WGSA Front End
 ==========
 
-Front end code for the WGST system.
+Front end code for the WGSA system.
 
 Install
 ----------------
