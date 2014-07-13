@@ -2,6 +2,8 @@
 // App
 // ============================================================
 
+//WGST = {};
+
 $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
@@ -17,7 +19,7 @@ $(function(){
     // Store application state
     // ============================================================
 
-    var WGST = window.WGST || {};
+    //var WGST = window.WGST || {};
 
     WGST.panels = {
         assembly: {
@@ -1796,8 +1798,12 @@ $(function(){
         });        
     }());
 
-    // Generate years
-    var generateYearElements = function(startYear, endYear) {
+
+
+
+
+
+    var generateYearHtmlElements = function(startYear, endYear) {
         var yearCounter = startYear,
             yearElementTemplate = '<option value="{{year}}">{{year}}</option>',
             yearElements = '',
@@ -1812,22 +1818,71 @@ $(function(){
         return yearElements;
     };
 
-    // Generate months
-    var generateMonthElements = function() {
+    var generateMonthHtmlElements = function() {
         var monthCounter = 0,
             listOfMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-            monthElementTemplate = '<option value="{{month}}">{{month}}</option>',
+            monthElementTemplate = '<option value="{{monthCounter}}">{{month}}</option>',
             monthElements = '',
             monthElement;
 
         for (; monthCounter < listOfMonths.length;) {
             monthElement = monthElementTemplate.replace(/{{month}}/g, listOfMonths[monthCounter]);
+            monthElement = monthElement.replace(/{{monthCounter}}/g, monthCounter);
             monthElements = monthElements + monthElement;
             monthCounter = monthCounter + 1;
         } // for
 
         return monthElements;
     };
+
+    var generateDayHtmlElements = function(year, month) {
+
+        if (typeof year === 'undefined' || typeof month === 'undefined') {
+            return '';
+        }
+
+        console.log('B');
+
+        var totalNumberOfDays = getTotalNumberOfDaysInMonth(year, month),
+            dayCounter = 0,
+            dayElementTemplate = '<option value="{{day}}">{{day}}</option>',
+            dayElements = '',
+            dayElement;
+
+        console.log('totalNumberOfDays: ' + totalNumberOfDays);  
+
+        while (dayCounter < totalNumberOfDays) {
+            dayCounter = dayCounter + 1;
+            dayElement = dayElementTemplate.replace(/{{day}}/g, dayCounter);
+            dayElements = dayElements + dayElement;
+        }
+
+        return dayElements;
+    };
+
+    var getTotalNumberOfDaysInMonth = function(year, month) {
+        return new Date(year, month, 0).getDate();
+    };
+
+    $('.assembly-metadata-list-container').on('change', '.assembly-sample-timestamp-input', function(){
+
+        var timestampPart = $(this).attr('data-timestamp-input'),
+            timestampYear = $(this).closest('.assembly-metadata-block').find('[data-timestamp-input="year"]'),
+            timestampMonth = $(this).closest('.assembly-metadata-block').find('[data-timestamp-input="month"]'),
+            timestampDay = $(this).closest('.assembly-metadata-block').find('[data-timestamp-input="day"]');
+
+        if (timestampPart === 'year' || timestampPart === 'month') {
+            if (timestampYear.val() !== '-1' && timestampMonth.val() !== '-1') {
+                generateDayHtmlElements(timestampYear.val(), timestampMonth.val());
+                timestampDay.html('').append(generateDayHtmlElements(timestampYear.val(), timestampMonth.val()));
+            }
+        }
+    });
+
+
+
+
+
 
         // Array of objects that store content of FASTA file and user-provided metadata
     var fastaFilesAndMetadata = {},
@@ -2222,26 +2277,34 @@ $(function(){
             '<div class="form-block assembly-metadata-{{fileCounter}} assembly-metadata-block">'
                 + '<div class="form-group form-horizontal">'
 
-                    + '<label for="assemblySampleDatetimeInput{{fileCounter}}">When this assembly was sampled?</label>'
-                    + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput{{fileCounter}}" placeholder="">'
+                    // + '<label for="assemblySampleDatetimeInput{{fileCounter}}">When this assembly was sampled?</label>'
+                    // + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput{{fileCounter}}" placeholder="">'
                     
-                    // + '<label for="assemblySampleYearInput{{fileCounter}}">Year</label>'
-                    // + '<select name="select" class="form-control assembly-sample-source-input" id="assemblySampleYearInput{{fileCounter}}">'
-                    //     + '<option value="0">Choose year</option>'
-                    //     + '{{listOfYears}}'
-                    // + '</select>'
+                    + '<label for="assemblySampleTimestampInput{{fileCounter}}">When this assembly was sampled?</label>'
 
-                    // + '<label for="assemblySampleYearInput{{fileCounter}}">Month</label>'
-                    // + '<select name="select" class="form-control assembly-sample-source-input" id="assemblySampleYearInput{{fileCounter}}">'
-                    //     + '<option value="0">Choose month</option>'
-                    //     + '{{listOfMonths}}'
-                    // + '</select>'
+                    + '<div class="assembly-metadata-sample-timestamp-block">'
+                        //+ '<label for="assemblySampleYearInput{{fileCounter}}">Year</label>'
+                        + '<select name="select" class="form-control assembly-sample-timestamp-input" data-timestamp-input="year" id="assemblySampleTimestampInput{{fileCounter}}">'
+                            + '<option value="-1">Choose year</option>'
+                            + '{{listOfYears}}'
+                        + '</select>'
+                    + '</div>'
 
-                    // + '<label for="assemblySampleYearInput{{fileCounter}}">Year</label>'
-                    // + '<select name="select" class="form-control assembly-sample-source-input" id="assemblySampleYearInput{{fileCounter}}">'
-                    //     + '<option value="0">Choose day</option>'
-                    //     + '{{listOfDays}}'
-                    // + '</select>'
+                    + '<div class="assembly-metadata-sample-timestamp-block">'
+                        //+ '<label for="assemblySampleYearInput{{fileCounter}}">Month</label>'
+                        + '<select name="select" class="form-control assembly-sample-timestamp-input" data-timestamp-input="month">'
+                            + '<option value="-1">Choose month</option>'
+                            + '{{listOfMonths}}'
+                        + '</select>'
+                    + '</div>'
+
+                    + '<div class="assembly-metadata-sample-timestamp-block">'
+                        //+ '<label for="assemblySampleYearInput{{fileCounter}}">Day</label>'
+                        + '<select name="select" class="form-control assembly-sample-timestamp-input" data-timestamp-input="day">'
+                            + '<option value="-1">Choose day</option>'
+                            + '{{listOfDays}}'
+                        + '</select>'
+                    + '</div>'
 
                 + '</div>'
             + '</div>',
@@ -2278,9 +2341,10 @@ $(function(){
             + '</div>';
 
         // Apply templates
-        assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{listOfYears}}/g, generateYearElements(1900, 2014));
-        assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{listOfMonths}}/g, generateMonthElements());
-        
+        assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{listOfYears}}/g, generateYearHtmlElements(1940, 2014));
+        assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{listOfMonths}}/g, generateMonthHtmlElements());
+        assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{listOfDays}}/g, generateDayHtmlElements());
+
         assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{fileCounter}}/g, fileCounter);
         assemblySampleLocationFormBlock = assemblySampleLocationFormBlock.replace(/{{fileCounter}}/g, fileCounter);
         assemblySampleSourceFormBlock = assemblySampleSourceFormBlock.replace(/{{fileCounter}}/g, fileCounter);
