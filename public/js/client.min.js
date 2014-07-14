@@ -1804,15 +1804,15 @@ $(function(){
 
 
     var generateYearHtmlElements = function(startYear, endYear) {
-        var yearCounter = startYear,
+        var yearCounter = endYear,
             yearElementTemplate = '<option value="{{year}}">{{year}}</option>',
             yearElements = '',
             yearElement;
 
-        for (; yearCounter < endYear + 1;) {
+        for (; yearCounter !== startYear - 1;) {
             yearElement = yearElementTemplate.replace(/{{year}}/g, yearCounter);
             yearElements = yearElements + yearElement;
-            yearCounter = yearCounter + 1;
+            yearCounter = yearCounter - 1;
         } // for
 
         return yearElements;
@@ -1841,15 +1841,11 @@ $(function(){
             return '';
         }
 
-        console.log('B');
-
         var totalNumberOfDays = getTotalNumberOfDaysInMonth(year, month),
             dayCounter = 0,
             dayElementTemplate = '<option value="{{day}}">{{day}}</option>',
             dayElements = '',
             dayElement;
-
-        console.log('totalNumberOfDays: ' + totalNumberOfDays);  
 
         while (dayCounter < totalNumberOfDays) {
             dayCounter = dayCounter + 1;
@@ -1861,22 +1857,90 @@ $(function(){
     };
 
     var getTotalNumberOfDaysInMonth = function(year, month) {
-        return new Date(year, month, 0).getDate();
+        // http://www.dzone.com/snippets/determining-number-days-month
+        return 32 - new Date(year, month, 32).getDate();
     };
 
-    $('.assembly-metadata-list-container').on('change', '.assembly-sample-timestamp-input', function(){
+    $('.assembly-metadata-list-container').on('change', '.assembly-timestamp-input', function(){
 
-        var timestampPart = $(this).attr('data-timestamp-input'),
-            timestampYear = $(this).closest('.assembly-metadata-block').find('[data-timestamp-input="year"]'),
-            timestampMonth = $(this).closest('.assembly-metadata-block').find('[data-timestamp-input="month"]'),
-            timestampDay = $(this).closest('.assembly-metadata-block').find('[data-timestamp-input="day"]');
+        var $input = $(this),
+            fileId = $input.attr('data-file-id'),
+            fileName = $input.attr('data-file-name'),
+            selectedYear = $('.assembly-timestamp-input-year[data-file-name="' + fileName +'"]').val(),
+            selectedMonth = $('.assembly-timestamp-input-month[data-file-name="' + fileName +'"]').val(),
+            $timestampDayInput = $('.assembly-timestamp-input-day[data-file-name="' + fileName +'"]'),
+            selectedDay = $timestampDayInput.val();
+
+        // ----------------------------------------------------
+        // Create list of days
+        // ----------------------------------------------------
+        var timestampPart = $(this).attr('data-timestamp-input');
+            // timestampYear = $(this).closest('.assembly-metadata-block').find('[data-timestamp-input="year"]'),
+            // timestampMonth = $(this).closest('.assembly-metadata-block').find('[data-timestamp-input="month"]'),
+            // timestampDay = $(this).closest('.assembly-metadata-block').find('[data-timestamp-input="day"]');
 
         if (timestampPart === 'year' || timestampPart === 'month') {
-            if (timestampYear.val() !== '-1' && timestampMonth.val() !== '-1') {
-                generateDayHtmlElements(timestampYear.val(), timestampMonth.val());
-                timestampDay.html('').append(generateDayHtmlElements(timestampYear.val(), timestampMonth.val()));
+            // Generate list of days
+            if (selectedYear !== '-1' && selectedMonth !== '-1') {
+                // Remove previous list of days and append a new one
+                $timestampDayInput.html('')
+                    .append($('<option value="-1">Choose day</option>'))
+                    .append(generateDayHtmlElements(selectedYear, selectedMonth));
+
+                // Select the same day as previously if newly selected year/month combination has this day
+                if (selectedDay !== '-1') {
+                    $timestampDayInput.find('option:contains("' + selectedDay + '")').prop('selected', true);   
+                }
             }
+        } // if
+
+        // ----------------------------------------------------
+        // Show next input of date metadata
+        // ----------------------------------------------------
+        if (timestampPart === 'year') {
+            $('.assembly-metadata-timestamp-month[data-file-id="' + fileId + '"]').removeClass('hide-this');
+        } else if (timestampPart === 'month') {
+            $('.assembly-metadata-timestamp-day[data-file-id="' + fileId + '"]').removeClass('hide-this');
         }
+
+        // ----------------------------------------------------
+        // Store date in assembly metadata object
+        // ----------------------------------------------------
+        var date;
+
+        // If at least year is provided then set metadata datetime
+        if (selectedYear !== '-1') {
+            // Check if month is provided
+            if (selectedMonth !== '-1') {
+                // Check if day is provided
+                if (selectedDay !== '-1') {
+                    date = new Date(selectedYear, selectedMonth, selectedDay);
+
+                // No day is provided
+                } else {
+                    date = new Date(selectedYear, selectedMonth);
+                }
+
+            // No month is provided
+            } else {
+                date = new Date(selectedYear);
+            }
+
+            WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
+            WGST.upload.assembly[fileName].metadata.datetime = date; 
+        } // if
+
+        // ---------------------------------------------------------------
+        // Show next assembly metadata block if at least year is provided
+        // ---------------------------------------------------------------
+        if (selectedYear !== '-1') {
+            // Show next metadata form block
+            $input.closest('.assembly-metadata-block').next('.assembly-metadata-block').fadeIn();
+            // Scroll to the next form block
+            $input.closest('.assembly-metadata-block').animate({scrollTop: $input.closest('.assembly-metadata-block').height()}, 400);
+
+            updateMetadataProgressBar();
+        } // if
     });
 
 
@@ -2280,27 +2344,27 @@ $(function(){
                     // + '<label for="assemblySampleDatetimeInput{{fileCounter}}">When this assembly was sampled?</label>'
                     // + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput{{fileCounter}}" placeholder="">'
                     
-                    + '<label for="assemblySampleTimestampInput{{fileCounter}}">When this assembly was sampled?</label>'
+                    + '<label for="assemblyTimestampInput{{fileCounter}}">When this assembly was sampled?</label>'
 
-                    + '<div class="assembly-metadata-sample-timestamp-block">'
-                        //+ '<label for="assemblySampleYearInput{{fileCounter}}">Year</label>'
-                        + '<select name="select" class="form-control assembly-sample-timestamp-input" data-timestamp-input="year" id="assemblySampleTimestampInput{{fileCounter}}">'
+                    // Year
+                    + '<div class="assembly-metadata-timestamp-block assembly-metadata-timestamp-year" data-file-id="{{fileCounter}}">'
+                        + '<select name="select" class="form-control assembly-timestamp-input assembly-timestamp-input-year" data-timestamp-input="year" data-file-id="{{fileCounter}}" data-file-name="' + file.name + '" id="assemblyTimestampInput{{fileCounter}}">'
                             + '<option value="-1">Choose year</option>'
                             + '{{listOfYears}}'
                         + '</select>'
                     + '</div>'
 
-                    + '<div class="assembly-metadata-sample-timestamp-block">'
-                        //+ '<label for="assemblySampleYearInput{{fileCounter}}">Month</label>'
-                        + '<select name="select" class="form-control assembly-sample-timestamp-input" data-timestamp-input="month">'
+                    // Month
+                    + '<div class="assembly-metadata-timestamp-block assembly-metadata-timestamp-month hide-this" data-file-id="{{fileCounter}}">'
+                        + '<select name="select" class="form-control assembly-timestamp-input assembly-timestamp-input-month" data-timestamp-input="month" data-file-id="{{fileCounter}}" data-file-name="' + file.name + '">'
                             + '<option value="-1">Choose month</option>'
                             + '{{listOfMonths}}'
                         + '</select>'
                     + '</div>'
 
-                    + '<div class="assembly-metadata-sample-timestamp-block">'
-                        //+ '<label for="assemblySampleYearInput{{fileCounter}}">Day</label>'
-                        + '<select name="select" class="form-control assembly-sample-timestamp-input" data-timestamp-input="day">'
+                    // Day
+                    + '<div class="assembly-metadata-timestamp-block assembly-metadata-timestamp-day hide-this" data-file-id="{{fileCounter}}">'
+                        + '<select name="select" class="form-control assembly-timestamp-input assembly-timestamp-input-day" data-timestamp-input="day" data-file-id="{{fileCounter}}" data-file-name="' + file.name + '">'
                             + '<option value="-1">Choose day</option>'
                             + '{{listOfDays}}'
                         + '</select>'
@@ -2494,14 +2558,14 @@ $(function(){
                 };
             });
 
-            // On change store datetime in assembly metadata
-            $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-datetime-input').datetimepicker({
-                useCurrent: false,
-                language: 'en-gb'
-            }).on('change', function(){
-                WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
-                WGST.upload.assembly[fileName].metadata.datetime = $(this).val();
-            });
+            // // On change store datetime in assembly metadata
+            // $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-datetime-input').datetimepicker({
+            //     useCurrent: false,
+            //     language: 'en-gb'
+            // }).on('change', function(){
+            //     WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
+            //     WGST.upload.assembly[fileName].metadata.datetime = $(this).val();
+            // });
 
             // On change store source in assembly metadata
             $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-source-input').on('change', function(){
@@ -3027,15 +3091,15 @@ $(function(){
     var updateMetadataProgressBar = function() {
         // Calculate total number of metadata form elements
         var totalNumberOfMetadataItems = 
-            + $('.assembly-sample-datetime-input').length
+            + $('.assembly-timestamp-input-year').length
             + $('.assembly-sample-location-input').length
             + $('.assembly-sample-source-input').length;
 
         // Calculate number of non empty metadata form elements
         var numberOfNonEmptyMetadataItems =
             // Filter out empty datetime inputs
-            + $('.assembly-sample-datetime-input').filter(function(){
-                return this.value.length !== 0;
+            + $('.assembly-timestamp-input-year').filter(function(){
+                return this.value !== '-1';
             }).length
             // Filter out empty location inputs
             + $('.assembly-sample-location-input').filter(function(){
@@ -3084,58 +3148,59 @@ $(function(){
     });
     */
 
+    // // Show next form block when user fills in an input
+    // // http://stackoverflow.com/a/6458946
+    // // Relevant issue: https://github.com/Eonasdan/bootstrap-datetimepicker/issues/83
+    // $('.assembly-metadata-list-container').on('change change.dp', '.assembly-sample-datetime-input', function(){
+    //     // TODO: validate input value
+    //     // Show next form block
+    //     $(this).closest('.form-block').next('.form-block').fadeIn();
+    //     // Scroll to the next form block
+    //     //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
+    //     //$(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
+    //     // Focus on the next input
+    //     $(this).closest('.form-block').next('.form-block').find('.assembly-sample-location-input').focus();
+    //     //$('.assembly-sample-location-input').focus();
+    // });
+    // // Increment metadata progress bar
+    // $('.assembly-metadata-list-container').on('change change.dp', '.assembly-sample-datetime-input', function(){
+    //     // Increment progress bar
+    //     updateMetadataProgressBar();
+    // });
+    // $('.assembly-metadata-list-container').one('hide.dp', '.assembly-sample-datetime-input', function(event){
+    //     var that = $(this);
+    //     setTimeout(function(){
+    //         // Scroll to the next form block
+    //         //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
+    //         that.closest('.assembly-metadata').animate({scrollTop: that.closest('.assembly-metadata').height()}, 400);
+    //     }, 500);
+    // });
+
+    // var handleMetadataInputChange = function(inputElement) {
+
+    //     console.log(inputElement);
+
+    //     // Show next form block if current input has some value
+    //     if (inputElement.val().length > 0) {
+
+    //         // TO DO: Validate input value
+
+    //         // Show next metadata form block
+    //         inputElement.closest('.form-block').next('.form-block').fadeIn();
+
+    //         // Scroll to the next form block
+    //         //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
+    //         inputElement.closest('.assembly-metadata').animate({scrollTop: inputElement.closest('.assembly-metadata').height()}, 400);
+    //     } // if
+
+    //     // Increment metadata progress bar
+    //     updateMetadataProgressBar();
+    //     // Hide progress hint
+    //     $('.adding-metadata-progress-container .progress-hint').fadeOut();
+    // };
+
     // Show next form block when user fills in an input
-    // http://stackoverflow.com/a/6458946
-    // Relevant issue: https://github.com/Eonasdan/bootstrap-datetimepicker/issues/83
-    $('.assembly-metadata-list-container').on('change change.dp', '.assembly-sample-datetime-input', function(){
-        // TODO: validate input value
-        // Show next form block
-        $(this).closest('.form-block').next('.form-block').fadeIn();
-        // Scroll to the next form block
-        //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
-        //$(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
-        // Focus on the next input
-        $(this).closest('.form-block').next('.form-block').find('.assembly-sample-location-input').focus();
-        //$('.assembly-sample-location-input').focus();
-    });
-    // Increment metadata progress bar
-    $('.assembly-metadata-list-container').on('change change.dp', '.assembly-sample-datetime-input', function(){
-        // Increment progress bar
-        updateMetadataProgressBar();
-    });
-    $('.assembly-metadata-list-container').one('hide.dp', '.assembly-sample-datetime-input', function(event){
-        var that = $(this);
-        setTimeout(function(){
-            // Scroll to the next form block
-            //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
-            that.closest('.assembly-metadata').animate({scrollTop: that.closest('.assembly-metadata').height()}, 400);
-        }, 500);
-    });
-
-    var handleMetadataInputChange = function(inputElement) {
-
-        console.log(inputElement);
-
-        // Show next form block if current input has some value
-        if (inputElement.val().length > 0) {
-
-            // TO DO: Validate input value
-
-            // Show next metadata form block
-            inputElement.closest('.form-block').next('.form-block').fadeIn();
-
-            // Scroll to the next form block
-            //$(this).closest('.assembly-metadata').scrollTop($(this).closest('.assembly-metadata').height());
-            inputElement.closest('.assembly-metadata').animate({scrollTop: inputElement.closest('.assembly-metadata').height()}, 400);
-        } // if
-
-        // Increment metadata progress bar
-        updateMetadataProgressBar();
-        // Hide progress hint
-        $('.adding-metadata-progress-container .progress-hint').fadeOut();
-    };
-
-    // Show next form block when user fills in an input
+    // To do: Refactor
     $('.assembly-metadata-list-container').on('change', '.assembly-sample-source-input', function(){
 
         // Show next form block if user selected non default option

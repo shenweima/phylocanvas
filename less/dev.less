@@ -971,13 +971,19 @@ h2, h4 {
                         border-top: 0;
                         padding-top: 0;
                     }
-                    .assembly-metadata-sample-timestamp-block {
+                    .assembly-metadata-timestamp-block {
                         display: inline-block;
                         width: 130px;
                         margin-right: 15px;
                         &:last-child {
                             margin-right: 0;
                         }
+                        &.hide-this {
+                            display: none;
+                        }
+                        // &.assembly-metadata-timestamp-month, &.assembly-metadata-timestamp-day {
+                        //     display: none;
+                        // }
                     }
                     label {
                         font-weight: 400;
