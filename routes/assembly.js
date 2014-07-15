@@ -42,7 +42,7 @@ exports.add = function(req, res) {
 			var readyResults = [];
 
 			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "*.ASSEMBLY." + assemblyId); // binding routing key
-			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "COLLECTION_TREE.COLLECTION." + collectionId);
+			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "CORE_TREE_RESULT_COLLECTION_" + collectionId);
 
 			// Subscribe to response message
 			queue.subscribe(function(message, headers, deliveryInfo){
@@ -113,10 +113,23 @@ exports.add = function(req, res) {
 
 					readyResults.push('COLLECTION_TREE');
 
+				} else if (parsedMessage.taskType === 'CORE') {
+					console.log('[WGST][Socket.io] Emitting CORE message for socketRoomId: ' + socketRoomId);
+					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+						collectionId: collectionId,
+						assemblyId: messageAssemblyId,
+						userAssemblyId: messageUserAssemblyId,
+						status: "CORE ready",
+						result: "CORE",
+						socketRoomId: socketRoomId
+					});
+
+					readyResults.push('CORE');
+
 				} // else if
 
 				// Unbind queue after all results were received
-				if (readyResults.length === 4) {
+				if (readyResults.length === 5) {
 					//queue.unbind(notificationExchange, "*.ASSEMBLY." + assemblyId);
 					//queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
 					queue.destroy();
@@ -139,7 +152,7 @@ exports.add = function(req, res) {
 					source: assemblyMetadata.source
 				};
 
-			console.log('[WGST][Couchbase] Inserting metadata with key: ' + metadataKey);
+			console.log('[WGST][Couchbase] Inserting assembly metadata with key: ' + metadataKey);
 			console.dir(metadata);
 
 			couchbaseDatabaseConnections[testWgstBucket].set(metadataKey, metadata, function(err, result) {
@@ -148,8 +161,7 @@ exports.add = function(req, res) {
 					return;
 				}
 
-				console.log('[WGST][Couchbase] Inserted metadata:');
-				console.dir(result);
+				console.log('[WGST][Couchbase] Inserted assembly metadata');
 
 				console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
 				io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
