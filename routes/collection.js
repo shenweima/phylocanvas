@@ -388,20 +388,42 @@ exports.apiGetCollection = function(req, res) {
 
 				// If got all assemblies
 				if (Object.keys(collection.assemblies).length === assemblyIds.length) {
+
+					var collectionTreeQueryKeys = [];
+
+					collectionTreeQueryKeys.push('CORE_TREE_RESULT_' + collectionId);
+					collectionTreeQueryKeys.push('COLLECTION_TREE_' + collectionId);
+
 					// Get collection tree data
-					couchbaseDatabaseConnections[testWgstBucket].get('CORE_TREE_RESULT_' + collectionId, function(error, collectionTreeData) {
+					couchbaseDatabaseConnections[testWgstBucket].getMulti(collectionTreeQueryKeys, {}, function(error, collectionTreesData) {
 						if (error) {
 							// Ignore this error for now
 							//res.json({});
 							return;
 						}
 
-						var collectionTreeData = collectionTreeData.value.newickTree;
+						collection.tree = {};
 
-						console.log('[WGST] Got collection tree data for ' + collectionId + ' collection:');
-						console.dir(collectionTreeData);
+						for (collectionTreeKey in collectionTreesData) {
+				            // Parsing COLLECTION_TREE
+				            if (collectionTreeKey.indexOf('COLLECTION_TREE_') !== -1) {
+				            	console.log('[WGST] Got COLLECTION_TREE data for ' + collectionId + ' collection');
+								collection.tree['COLLECTION_TREE'] = collectionTreesData[collectionTreeKey].value.newickTree;
 
-						collection.tree = collectionTreeData;
+				            // Parsing CORE_TREE_RESULT
+				            } else if (collectionTreeKey.indexOf('CORE_TREE_RESULT_') !== -1) {
+				            	console.log('[WGST] Got CORE_TREE_RESULT data for ' + collectionId + ' collection');
+								collection.tree['CORE_TREE_RESULT'] = collectionTreesData[collectionTreeKey].value.newickTree;
+							}
+						} // for
+
+
+						// var collectionTreeData = collectionTreeData.value.newickTree;
+
+						// console.log('[WGST] Got collection tree data for ' + collectionId + ' collection:');
+						// console.dir(collectionTreeData);
+
+						// collection.tree = collectionTreeData;
 
 						// Get antibiotics
 						require('./assembly').getAllAntibiotics(function(error, antibiotics){
@@ -411,11 +433,36 @@ exports.apiGetCollection = function(req, res) {
 								return;
 							}
 
+							console.log('[WGST] Finished getting collection ' + collectionId);
+
 							res.json({
 								collection: collection,
 								antibiotics: antibiotics
 							});
 						});
+
+
+
+						// var collectionTreeData = collectionTreeData.value.newickTree;
+
+						// console.log('[WGST] Got collection tree data for ' + collectionId + ' collection:');
+						// console.dir(collectionTreeData);
+
+						// collection.tree = collectionTreeData;
+
+						// // Get antibiotics
+						// require('./assembly').getAllAntibiotics(function(error, antibiotics){
+						// 	if (error) {
+						// 		// Ignore this error for now
+						// 		//res.json({});
+						// 		return;
+						// 	}
+
+						// 	res.json({
+						// 		collection: collection,
+						// 		antibiotics: antibiotics
+						// 	});
+						// });
 					});
 				} // if
 			});
