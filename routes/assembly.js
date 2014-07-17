@@ -441,10 +441,11 @@ exports.getAssembly = function(assemblyId, callback) {
 	var scoresQueryKey = 'FP_COMP_' + assemblyId,
 		metadataQueryKey = 'ASSEMBLY_METADATA_' + assemblyId,
 		resistanceProfileQueryKey = 'PAARSNP_RESULT_' + assemblyId,
-		mlstQueryKey = 'MLST_RESULT_' + assemblyId,
-		coreQueryKey = 'CORE_RESULT_' + assemblyId;	
+		mlstQueryKey = 'MLST_RESULT_' + assemblyId;
+		//coreQueryKey = 'CORE_RESULT_' + assemblyId;	
 
-	var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey, coreQueryKey];
+	//var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey, coreQueryKey];
+	var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey];
 
 	console.log('[WGST] Assembly ' + assemblyId + ' query keys: ');
 	console.dir(assemblyQueryKeys);
@@ -592,7 +593,7 @@ exports.getMlstAllelesData = function(queryKeys, callback) {
 		callback(null, {});
 		return;
 	}
-	
+
 	console.log('[WGST] Getting MLST alleles data');
 	couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(queryKeys, {}, function(error, mlstAllelesData) {
 		if (error) {

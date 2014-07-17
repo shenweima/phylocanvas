@@ -1,7 +1,3 @@
-var getCollectionId = function() {
-	// Do something
-};
-
 exports.add = function(req, res) {
 	var collectionId = req.body.collectionId;
 
@@ -128,221 +124,221 @@ exports.add = function(req, res) {
 	});
 };
 
-exports.apiGetAssemblies = function(req, res) {
-	var assemblyIds = req.body.assemblyIds;
+// exports.apiGetAssemblies = function(req, res) {
+// 	var assemblyIds = req.body.assemblyIds;
 
-	exports.getAssemblies(assemblyIds, function(error, assemblies){
-		if (error) {
-			throw error;
-		}
+// 	exports.getAssemblies(assemblyIds, function(error, assemblies){
+// 		if (error) {
+// 			throw error;
+// 		}
 
-		console.log('RES ASSEMBL:');
-		console.dir(assemblies);
+// 		console.log('RES ASSEMBL:');
+// 		console.dir(assemblies);
 
-		res.json(assemblies);		
-	});
-};
+// 		res.json(assemblies);		
+// 	});
+// };
 
-exports.getAssemblies = function(assemblyIds, callback) {
-	console.log('[WGST] Getting assemblies with ids:');
-	console.dir(assemblyIds);
+// exports.getAssemblies = function(assemblyIds, callback) {
+// 	console.log('[WGST] Getting assemblies with ids:');
+// 	console.dir(assemblyIds);
 
-	// Prepend FP_COMP_ to each assembly id
-	var scoresAssemblyIds = assemblyIds.map(function(assemblyId){
-		return 'FP_COMP_' + assemblyId;
-	});
+// 	// Prepend FP_COMP_ to each assembly id
+// 	var scoresAssemblyIds = assemblyIds.map(function(assemblyId){
+// 		return 'FP_COMP_' + assemblyId;
+// 	});
 
-	// Prepend ASSEMBLY_METADATA_ to each assembly id
-	var metadataAssemblyIds = assemblyIds.map(function(assemblyId){
-		return 'ASSEMBLY_METADATA_' + assemblyId;
-	});
+// 	// Prepend ASSEMBLY_METADATA_ to each assembly id
+// 	var metadataAssemblyIds = assemblyIds.map(function(assemblyId){
+// 		return 'ASSEMBLY_METADATA_' + assemblyId;
+// 	});
 
-	// Prepend PAARSNP_RESULT_ to each assembly id
-	var resistanceProfileAssemblyIds = assemblyIds.map(function(assemblyId){
-		return 'PAARSNP_RESULT_' + assemblyId;
-	});
+// 	// Prepend PAARSNP_RESULT_ to each assembly id
+// 	var resistanceProfileAssemblyIds = assemblyIds.map(function(assemblyId){
+// 		return 'PAARSNP_RESULT_' + assemblyId;
+// 	});
 
-	// Prepend MLST_RESULT_ to each assembly id
-	var mlstAssemblyIds = assemblyIds.map(function(assemblyId){
-		return 'MLST_RESULT_' + assemblyId;
-	});
+// 	// Prepend MLST_RESULT_ to each assembly id
+// 	var mlstAssemblyIds = assemblyIds.map(function(assemblyId){
+// 		return 'MLST_RESULT_' + assemblyId;
+// 	});
 
-	// Merge all assembly ids
-	assemblyIds = scoresAssemblyIds
-						.concat(metadataAssemblyIds)
-						.concat(resistanceProfileAssemblyIds)
-						.concat(mlstAssemblyIds);
+// 	// Merge all assembly ids
+// 	assemblyIds = scoresAssemblyIds
+// 						.concat(metadataAssemblyIds)
+// 						.concat(resistanceProfileAssemblyIds)
+// 						.concat(mlstAssemblyIds);
 
-	console.log('[WGST] Querying keys:');
-	console.dir(assemblyIds);
+// 	console.log('[WGST] Querying keys:');
+// 	console.dir(assemblyIds);
 
-	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIds, {}, function(err, assembliesData) {
-		console.log('[WGST] Got assemblies data');
-		console.dir(assembliesData);
+// 	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIds, {}, function(err, assembliesData) {
+// 		console.log('[WGST] Got assemblies data');
+// 		console.dir(assembliesData);
 
-		if (err) throw err;
+// 		if (err) throw err;
 
-		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
-		var assemblies = {},
-			assemblyId,
-			assemblyKey;
+// 		// Merge FP_COMP and ASSEMBLY_METADATA into one assembly object
+// 		var assemblies = {},
+// 			assemblyId,
+// 			assemblyKey;
 
-		for (assemblyKey in assembliesData) {
-            // Parsing assembly scores
-            if (assemblyKey.indexOf('FP_COMP_') !== -1) {
-            	assemblyId = assemblyKey.replace('FP_COMP_','');
-            	assemblies[assemblyId] = assemblies[assemblyId] || {};
-				assemblies[assemblyId]['FP_COMP'] = assembliesData[assemblyKey].value;
-            // Parsing assembly metadata
-            } else if (assemblyKey.indexOf('ASSEMBLY_METADATA_') !== -1) {
-            	assemblyId = assemblyKey.replace('ASSEMBLY_METADATA_','');
-            	assemblies[assemblyId] = assemblies[assemblyId] || {};
-				assemblies[assemblyId]['ASSEMBLY_METADATA'] = assembliesData[assemblyKey].value;
-            // Parsing assembly resistance profile
-            } else if (assemblyKey.indexOf('PAARSNP_RESULT_') !== -1) {
-            	assemblyId = assemblyKey.replace('PAARSNP_RESULT_','');
-            	assemblies[assemblyId] = assemblies[assemblyId] || {};
-				assemblies[assemblyId]['PAARSNP_RESULT'] = assembliesData[assemblyKey].value;
-            // Parsing MLST
-            } else if (assemblyKey.indexOf('MLST_RESULT_') !== -1) {
-            	assemblyId = assemblyKey.replace('MLST_RESULT_','');
-            	assemblies[assemblyId] = assemblies[assemblyId] || {};
-				assemblies[assemblyId]['MLST_RESULT'] = assembliesData[assemblyKey].value;
-			} // if
-		} // for
+// 		for (assemblyKey in assembliesData) {
+//             // Parsing assembly scores
+//             if (assemblyKey.indexOf('FP_COMP_') !== -1) {
+//             	assemblyId = assemblyKey.replace('FP_COMP_','');
+//             	assemblies[assemblyId] = assemblies[assemblyId] || {};
+// 				assemblies[assemblyId]['FP_COMP'] = assembliesData[assemblyKey].value;
+//             // Parsing assembly metadata
+//             } else if (assemblyKey.indexOf('ASSEMBLY_METADATA_') !== -1) {
+//             	assemblyId = assemblyKey.replace('ASSEMBLY_METADATA_','');
+//             	assemblies[assemblyId] = assemblies[assemblyId] || {};
+// 				assemblies[assemblyId]['ASSEMBLY_METADATA'] = assembliesData[assemblyKey].value;
+//             // Parsing assembly resistance profile
+//             } else if (assemblyKey.indexOf('PAARSNP_RESULT_') !== -1) {
+//             	assemblyId = assemblyKey.replace('PAARSNP_RESULT_','');
+//             	assemblies[assemblyId] = assemblies[assemblyId] || {};
+// 				assemblies[assemblyId]['PAARSNP_RESULT'] = assembliesData[assemblyKey].value;
+//             // Parsing MLST
+//             } else if (assemblyKey.indexOf('MLST_RESULT_') !== -1) {
+//             	assemblyId = assemblyKey.replace('MLST_RESULT_','');
+//             	assemblies[assemblyId] = assemblies[assemblyId] || {};
+// 				assemblies[assemblyId]['MLST_RESULT'] = assembliesData[assemblyKey].value;
+// 			} // if
+// 		} // for
 
-		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data:');
-		console.dir(assemblies);
+// 		console.log('[WGST] Assemblies with merged FP_COMP, ASSEMBLY_METADATA, PAARSNP_RESULT and MLST_RESULT data:');
+// 		console.dir(assemblies);
 
-		//Get ST (Sequence Type) code
-		var assemblyStQueryKeys = {}, // Map assembly id to ST query key
-			stQueryKeys = [],
-			stQueryKey,
-			alleles,
-			alleleId;
+// 		//Get ST (Sequence Type) code
+// 		var assemblyStQueryKeys = {}, // Map assembly id to ST query key
+// 			stQueryKeys = [],
+// 			stQueryKey,
+// 			alleles,
+// 			alleleId;
 
-		for (assemblyId in assemblies) {
-			if (assemblies.hasOwnProperty(assemblyId)) {
-				alleles = assemblies[assemblyId]['MLST_RESULT'].alleles;
-				stQueryKey = 'ST_' + '1280';
+// 		for (assemblyId in assemblies) {
+// 			if (assemblies.hasOwnProperty(assemblyId)) {
+// 				alleles = assemblies[assemblyId]['MLST_RESULT'].alleles;
+// 				stQueryKey = 'ST_' + '1280';
 
-				console.log('alleles:');
-				console.dir(alleles);
+// 				console.log('alleles:');
+// 				console.dir(alleles);
 
-				for (allele in alleles) {
-					if (alleles.hasOwnProperty(allele)) {
-						alleleId = alleles[allele].alleleId;
-						stQueryKey = stQueryKey + '_' + alleleId;
-					}
-				}
+// 				for (allele in alleles) {
+// 					if (alleles.hasOwnProperty(allele)) {
+// 						alleleId = alleles[allele].alleleId;
+// 						stQueryKey = stQueryKey + '_' + alleleId;
+// 					}
+// 				}
 
-				stQueryKeys.push(stQueryKey);
-				assemblyStQueryKeys[assemblyId] = stQueryKey;
-			} // if
-		} // for
+// 				stQueryKeys.push(stQueryKey);
+// 				assemblyStQueryKeys[assemblyId] = stQueryKey;
+// 			} // if
+// 		} // for
 
-		console.log('stQueryKeys:');
-		console.dir(stQueryKeys);
+// 		console.log('stQueryKeys:');
+// 		console.dir(stQueryKeys);
 
-		// couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(stQueryKeys, {}, function(err, stCodes){
-		// 	console.log('[WGST][Couchbase] Got Sequence Type codes');
-		// 	console.dir(stCodes);
-		// });
-
-
-
-
-
-		// 				// If allele id is NEW then don't query ST (Sequence Types) codes
-		// 				alleleId = alleles[allele].alleleId;
-		// 				if (alleleId !== 'NEW') {
-		// 					stQueryKey = stQueryKey + '_' + alleleId;
-
-
-		// 					// If no result > show NEW
-		// 				}
+// 		// couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(stQueryKeys, {}, function(err, stCodes){
+// 		// 	console.log('[WGST][Couchbase] Got Sequence Type codes');
+// 		// 	console.dir(stCodes);
+// 		// });
 
 
 
 
-		// 	// 'ST_' + species id + allele ids
-		// 	stQueryKey = 'ST_' + '1280';
 
-		// 	for (allele in alleles) {
-		// 		if (alleles.hasOwnProperty(allele)) {
-		// 			// If allele id is NEW then don't query ST (Sequence Types) codes
-		// 			alleleId = alleles[allele].alleleId;
-		// 			if (alleleId !== 'NEW') {
-		// 				stQueryKey = stQueryKey + '_' + alleleId;
+// 		// 				// If allele id is NEW then don't query ST (Sequence Types) codes
+// 		// 				alleleId = alleles[allele].alleleId;
+// 		// 				if (alleleId !== 'NEW') {
+// 		// 					stQueryKey = stQueryKey + '_' + alleleId;
 
 
-		// 				// If no result > show NEW
-		// 			}
-		// 		}
-		// 	}
-
-		// 	stQueryKeys.push(stQueryKey);
+// 		// 					// If no result > show NEW
+// 		// 				}
 
 
-		// 	stQueryKey = assemblies[assemblyId]['MLST_RESULT']
+
+
+// 		// 	// 'ST_' + species id + allele ids
+// 		// 	stQueryKey = 'ST_' + '1280';
+
+// 		// 	for (allele in alleles) {
+// 		// 		if (alleles.hasOwnProperty(allele)) {
+// 		// 			// If allele id is NEW then don't query ST (Sequence Types) codes
+// 		// 			alleleId = alleles[allele].alleleId;
+// 		// 			if (alleleId !== 'NEW') {
+// 		// 				stQueryKey = stQueryKey + '_' + alleleId;
+
+
+// 		// 				// If no result > show NEW
+// 		// 			}
+// 		// 		}
+// 		// 	}
+
+// 		// 	stQueryKeys.push(stQueryKey);
+
+
+// 		// 	stQueryKey = assemblies[assemblyId]['MLST_RESULT']
 
 
 
 			
-		// }
+// 		// }
 
-		// var stQueryKeys = '';
-
-
+// 		// var stQueryKeys = '';
 
 
 
-		// If NEW > don't query ST (Sequence Types) codes
-		// If no result > show NEW
 
-		callback(null, assemblies);
-	});
-};
 
-var getCollection = function(collectionId, callback) {
+// 		// If NEW > don't query ST (Sequence Types) codes
+// 		// If no result > show NEW
 
-	var collectionId = req.body.collectionId,
-		collection = {};
+// 		callback(null, assemblies);
+// 	});
+// };
 
-	console.log('[WGST] Getting collection ' + collectionId);
+// var getCollection = function(collectionId, callback) {
 
-	// Get list of assemblies
-	couchbaseDatabaseConnections[testWgstBucket].get('CORE_TREE_RESULT_' + collectionId, function(err, assemblyIdsData) {
-		if (err) throw err;
+// 	var collectionId = req.body.collectionId,
+// 		collection = {};
 
-		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
+// 	console.log('[WGST] Getting collection ' + collectionId);
 
-		console.log('[WGST] Got collection ' + collectionId + ' with assembly ids:');
-		console.log(assemblyIds);
+// 	// Get list of assemblies
+// 	couchbaseDatabaseConnections[testWgstBucket].get('CORE_TREE_RESULT_' + collectionId, function(err, assemblyIdsData) {
+// 		if (err) throw err;
 
-		getAssemblies(assemblyIds, function(error, assemblies){
-			if (error) throw error;
+// 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
 
-			collection.assemblies = assemblies;
+// 		console.log('[WGST] Got collection ' + collectionId + ' with assembly ids:');
+// 		console.log(assemblyIds);
 
-			// Get collection tree data
-			couchbaseDatabaseConnections[testWgstBucket].get('CORE_TREE_RESULT_' + collectionId, function(err, collectionTreeData) {
-				if (err) throw err;
+// 		getAssemblies(assemblyIds, function(error, assemblies){
+// 			if (error) throw error;
 
-				var collectionTreeData = collectionTreeData.value.newickTree;
+// 			collection.assemblies = assemblies;
 
-				console.log('[WGST] Got collection tree data for collection id ' + collectionId + ':');
-				console.log(collectionTreeData);
+// 			// Get collection tree data
+// 			couchbaseDatabaseConnections[testWgstBucket].get('CORE_TREE_RESULT_' + collectionId, function(err, collectionTreeData) {
+// 				if (err) throw err;
 
-				collection.tree = {
-					data: collectionTreeData
-				};
+// 				var collectionTreeData = collectionTreeData.value.newickTree;
 
-				callback(null, collection);
-			});
-		});
-	});
-};
+// 				console.log('[WGST] Got collection tree data for collection id ' + collectionId + ':');
+// 				console.log(collectionTreeData);
+
+// 				collection.tree = {
+// 					data: collectionTreeData
+// 				};
+
+// 				callback(null, collection);
+// 			});
+// 		});
+// 	});
+// };
 
 exports.apiGetCollection = function(req, res) {
 
@@ -352,7 +348,7 @@ exports.apiGetCollection = function(req, res) {
 			tree: {}
 		};
 
-	console.log('[WGST] Getting collection ' + collectionId);
+	console.time('[WGST] Getting collection ' + collectionId);
 
 	// Get list of assemblies
 	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
@@ -405,16 +401,21 @@ exports.apiGetCollection = function(req, res) {
 						collection.tree = {};
 
 						for (collectionTreeKey in collectionTreesData) {
+				            var collectionTreeData = collectionTreesData[collectionTreeKey].value;
 				            // Parsing COLLECTION_TREE
 				            if (collectionTreeKey.indexOf('COLLECTION_TREE_') !== -1) {
-				            	console.log('[WGST] Got COLLECTION_TREE data for ' + collectionId + ' collection');
-								collection.tree['COLLECTION_TREE'] = collectionTreesData[collectionTreeKey].value.newickTree;
+				            	console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
+				            	collection.tree[collectionTreeData.type] = {};
+				            	collection.tree[collectionTreeData.type].name = 'FP Tree';
+								collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
 
 				            // Parsing CORE_TREE_RESULT
 				            } else if (collectionTreeKey.indexOf('CORE_TREE_RESULT_') !== -1) {
-				            	console.log('[WGST] Got CORE_TREE_RESULT data for ' + collectionId + ' collection');
-								collection.tree['CORE_TREE_RESULT'] = collectionTreesData[collectionTreeKey].value.newickTree;
-							}
+				            	console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
+				            	collection.tree[collectionTreeData.type] = {};
+				            	collection.tree[collectionTreeData.type].name = 'Core Mutations Tree';
+								collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
+							} // if
 						} // for
 
 
@@ -574,7 +575,7 @@ exports.apiGetRepresentativeCollection = function(req, res) {
 exports.get = function(req, res) {
 	var collectionId = req.params.id;
 
-	console.log('[WGST] Requested ' + collectionId + ' collection');
+	console.time('[WGST] Requested ' + collectionId + ' collection');
 
 	res.render('index', {
 		appConfig: JSON.stringify(appConfig.client),

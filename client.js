@@ -1,9 +1,6 @@
 // ============================================================
 // App
 // ============================================================
-
-//WGST = {};
-
 $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
@@ -342,13 +339,17 @@ $(function(){
         var activatePanel = function(panelName) {
             var panel = $('[data-panel-name="' + panelName + '"]');
 
+            console.log('@@@ Panel name: ' + panelName);
+            //WGST.panels[collectionTreePanelId]
+
             // Set position
             panel.css('top', WGST.panels[panelName].top);
             panel.css('left', WGST.panels[panelName].left);
 
             // Activate, but don't show
             panel.css('visibility', 'hidden');
-            panel.fadeIn('fast');
+            //panel.fadeIn('fast');
+            panel.show();
             panel.addClass('wgst-panel--active');
         };
 
@@ -903,8 +904,24 @@ $(function(){
         // ----------------------------------------
         // Init panels
         // ----------------------------------------
-        var $collectionPanel = $('.wgst-panel__collection'),
-            $collectionTreePanel = $('.wgst-panel__collection-tree');
+        var $collectionPanel = $('.wgst-panel__collection');
+
+        // // ----------------------------------------
+        // // Render template
+        // // ----------------------------------------
+        // var collectionTreePanelTemplateSource = $('.wgst-template[data-template-id="collectionTreePanel"]').html(),
+        //     collectionTreePanelTemplate = Handlebars.compile(collectionTreePanelTemplateSource),
+        //     collectionTreePanelHtml = collectionTreePanelTemplate({
+        //         attributeCollectionId: collectionId,
+        //         attributeCollectionTreeType: 'CORE_TREE_RESULT',
+        //         collectionTreeTitle: 'Collection Tree'
+        //     }),
+        //     $collectionTreePanel = $(collectionTreePanelHtml);
+
+        // $('body').append($collectionTreePanel);
+
+        //$collectionTreePanel = $('.wgst-template[data-template-id="collectionTreePanel"]').find('.wgst-panel');
+        //$collectionTreePanel = $('.wgst-panel__collection-tree');
 
         // Set panel id
         $collectionPanel.attr('data-panel-id', 'collection_' + collectionId);
@@ -912,18 +929,21 @@ $(function(){
         $collectionPanel.attr('data-collection-id', collectionId);
         // Set collection id
         $collectionPanel.find('.collection-details').attr('data-collection-id', collectionId);
+        $collectionPanel.find('.collection-controls-show-tree').attr('collection-id', collectionId);;
+
+
         // Set collection id to collectionTree panel
-        $collectionTreePanel.attr('data-collection-id', collectionId);
+        //$collectionTreePanel.attr('data-collection-id', collectionId);
         // Set tree type
-        $collectionTreePanel.attr('data-collection-tree-type', 'CORE_TREE_RESULT');
+        //$collectionTreePanel.attr('data-collection-tree-type', 'CORE_TREE_RESULT');
 
         activatePanel('collection', function(){
             startPanelLoadingIndicator('collection');
             showPanel('collection');
         });
-        activatePanel('collectionTree', function(){
-            startPanelLoadingIndicator('collectionTree');
-        });
+        // activatePanel('collectionTree', function(){
+        //     startPanelLoadingIndicator('collectionTree');
+        // });
 
         // Get collection data
         $.ajax({
@@ -940,42 +960,50 @@ $(function(){
 
             if (Object.keys(data).length > 0) {
 
-                //WGST.collection[collectionId].tree = {};
+                // ----------------------------------------
+                // Init collection
+                // ----------------------------------------
+                (function(){
+                    initEmptyCollection(collectionId);
+                    WGST.collection[collectionId].assemblies = data.collection.assemblies;
 
-                initEmptyCollection(collectionId);
+                    // Init all collection trees
+                    var collectionTrees = data.collection.tree,
+                        collectionTreeType;
 
-                var collectionTrees = data.collection.tree,
-                    collectionTreeType;
+                    $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
+                        // Init collection tree
+                        WGST.collection[collectionId].tree[collectionTreeType] = {
+                            type: collectionTreeType,
+                            data: collectionTreeData.data,
+                            name: collectionTreeData.name
+                        };
+                        // Render collection tree
+                        renderCollectionTree(collectionId, collectionTreeType);
+                    });
+                })();
 
-                $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
-                    WGST.collection[collectionId].tree[collectionTreeType] = {
-                        type: collectionTreeType,
-                        data: collectionTreeData
-                    };
-                });
-
-                //WGST.collection[collectionId].tree.data = data.collection.tree;
-                WGST.collection[collectionId].assemblies = data.collection.assemblies;
+                // Update list of antibiotics
                 WGST.antibiotics = data.antibiotics;
 
                 addResistanceProfileToCollection(collectionId);
 
-                // ----------------------------------------
-                // Render collection tree
-                // ----------------------------------------
+                // // ----------------------------------------
+                // // Render collection tree
+                // // ----------------------------------------
 
-                // Remove previosly rendered collection tree
-                $collectionTreePanel.find('.wgst-tree-content').html('');
-                // Attach collection id
-                $collectionTreePanel.find('.wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
-                // Set collection tree type
-                $collectionTreePanel.find('.wgst-tree-content').attr('data-collection-tree-type', 'CORE_TREE_RESULT');
+                // // Remove previosly rendered collection tree
+                // $collectionTreePanel.find('.wgst-tree-content').html('');
+                // // Attach collection id
+                // $collectionTreePanel.find('.wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
+                // // Set collection tree type
+                // $collectionTreePanel.find('.wgst-tree-content').attr('data-collection-tree-type', 'CORE_TREE_RESULT');
 
-                // Render collection tree
-                renderCollectionTree(collectionId, 'CORE_TREE_RESULT');
+                // Render all collection trees
 
-                endPanelLoadingIndicator('collectionTree');
-                //showPanelBodyContent('collectionTree');
+
+                // endPanelLoadingIndicator('collectionTree');
+                // //showPanelBodyContent('collectionTree');
 
                 // ----------------------------------------
                 // Render assembly metadata list
@@ -1071,8 +1099,8 @@ $(function(){
                 }
 
                 // Enable 'Collection' nav item
-                enableNavItem('collection');             
-            }
+                enableNavItem('collection');         
+            } // if
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.log('[WGST][ERROR] Failed to get collection id');
@@ -1324,11 +1352,12 @@ $(function(){
     //     });
     // };
 
-    $('.wgst-tree-control__change-node-label').on('change', function(){
+    $('body').on('change', '.wgst-tree-control__change-node-label', function(){
         var selectedOption = $(this),
-            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id');
+            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
+            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type');
 
-        var tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas,
+        var treeCanvas = WGST.collection[collectionId].tree[collectionTreeType].canvas,
             assemblies = WGST.collection[collectionId].assemblies,
             assemblyId;
 
@@ -1338,8 +1367,8 @@ $(function(){
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
-                        tree.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId;                 
+                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+                        treeCanvas.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId;                 
                     }
                 }
             }
@@ -1350,8 +1379,8 @@ $(function(){
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
-                        tree.branches[assemblyId].label = WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore.referenceId;              
+                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+                        treeCanvas.branches[assemblyId].label = WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore.referenceId;              
                     }
                 }
             }
@@ -1362,8 +1391,8 @@ $(function(){
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
-                        tree.branches[assemblyId].label = (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType);               
+                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+                        treeCanvas.branches[assemblyId].label = (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType);               
                     }
                 }
             }
@@ -1373,9 +1402,6 @@ $(function(){
             var assemblyResistanceProfile,
                 resistanceProfileString;
 
-            console.log('Assemblies:');
-            console.dir(assemblies);
-
             // Set user assembly id as node label
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
@@ -1384,8 +1410,8 @@ $(function(){
                     resistanceProfileString = createAssemblyResistanceProfilePreviewString(assemblyResistanceProfile, WGST.antibiotics);
 
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
-                        tree.branches[assemblyId].label = resistanceProfileString;            
+                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+                        treeCanvas.branches[assemblyId].label = resistanceProfileString;            
                     }
                 }
             }
@@ -1396,22 +1422,22 @@ $(function(){
             for (assemblyId in assemblies) {
                 if (assemblies.hasOwnProperty(assemblyId)) {
                     // Set label only to leaf nodes, filtering out the root node
-                    if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
-                        tree.branches[assemblyId].label = assemblies[assemblyId]['ASSEMBLY_METADATA'].geography.address;              
+                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+                        treeCanvas.branches[assemblyId].label = assemblies[assemblyId]['ASSEMBLY_METADATA'].geography.address;              
                     }
                 }
             }
         }
 
-        WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas.draw();
-
+        treeCanvas.draw();
     });
 
-    $('.wgst-tree-control__change-node-colour').on('change', function(){
+    $('body').on('change', '.wgst-tree-control__change-node-colour', function(){
         var selectedOption = $(this).find('option:selected'),
-            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id');
+            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
+            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type');
 
-        var tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas,
+        var tree = WGST.collection[collectionId].tree[collectionTreeType].canvas,
             assemblies = WGST.collection[collectionId].assemblies,
             assemblyId;
 
@@ -1459,9 +1485,10 @@ $(function(){
         } // if
     });
 
-    $('.wgst-tree-control__change-tree-type').on('change', function(){
+    $('body').on('change', '.wgst-tree-control__change-tree-type', function(){
         var selectedOption = $(this).find('option:selected'),
             collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
+            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type'),
             tree;
 
         // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
@@ -1470,18 +1497,79 @@ $(function(){
         //     tree = WGST.collection[collectionId].tree.canvas;
         // }
         
-        tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
+        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
         tree.setTreeType(selectedOption.val());
     });
 
     var renderCollectionTree = function(collectionId, collectionTreeType) {
         console.log('[WGST] Rendering ' + collectionId + ' collection ' +  collectionTreeType + ' tree');
 
+        // ----------------------------------------
+        // Create new panel from template
+        // ----------------------------------------
+        var collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType,
+            collectionTreePanelTemplateSource = $('.wgst-template[data-template-id="collectionTreePanel"]').html(),
+            collectionTreePanelTemplate = Handlebars.compile(collectionTreePanelTemplateSource),
+            collectionTreePanelHtml = collectionTreePanelTemplate({
+                attributePanelId: collectionTreePanelId,
+                attributeCollectionId: collectionId,
+                attributeCollectionTreeType: collectionTreeType,
+                collectionTreeTitle: 'Collection Tree'
+            }),
+            $collectionTreePanel;
+
+        $('body').prepend(collectionTreePanelHtml);
+
+        $collectionTreePanel = $('.wgst-panel[data-panel-name="' + collectionTreePanelId + '"]');
+
+        // Register new panel
+        WGST.panels[collectionTreePanelId] = WGST.panels.collectionTree;
+        activatePanel(collectionTreePanelId);
+        // Init jQuery UI draggable interaction        
+        $collectionTreePanel.draggable({
+            handle: $collectionTreePanel.find('.wgst-draggable-handle'),
+            appendTo: "body",
+            scroll: false,
+            stop: function(event, ui) {
+                // Store current panel position
+                var panelName = ui.helper.attr('data-panel-name');
+                WGST.panels[panelName].top = ui.position.top;
+                WGST.panels[panelName].left = ui.position.left;
+            }
+        });
+        // Make sure this PhyloCanvas element has unique id
+        var phyloCanvasElementId = 'phylocanvas_' + collectionId + '_' + collectionTreeType;
+        $collectionTreePanel.find('.wgst-tree-content').attr('id', phyloCanvasElementId);
+        // Set collection tree type
+        $collectionTreePanel.find('.wgst-tree-content').attr('data-collection-tree-type', collectionTreeType);
+
+        endPanelLoadingIndicator(collectionTreePanelId);
+
+        // ----------------------------------------
+        // Render collection tree
+        // ----------------------------------------
+
+        // // Remove previosly rendered collection tree
+        // $collectionTreePanel.find('.wgst-tree-content').html('');
+        // // Attach collection id
+        // $collectionTreePanel.find('.wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
+        // // Set collection tree type
+        // $collectionTreePanel.find('.wgst-tree-content').attr('data-collection-tree-type', 'CORE_TREE_RESULT');
+
+        // Render collection tree
+        //renderCollectionTree(collectionId, 'CORE_TREE_RESULT');
+
+        
+        //showPanelBodyContent('collectionTree');
+
+        // ----------------------------------------
+        // Init tree
+        // ----------------------------------------
         var tree = WGST.collection[collectionId].tree[collectionTreeType],
             assemblies = WGST.collection[collectionId].assemblies,
             assemblyId;
 
-        tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId), { history_collapsed: true });
+        tree.canvas = new PhyloCanvas.Tree(document.getElementById(phyloCanvasElementId), { history_collapsed: true });
         tree.canvas.parseNwk(tree.data);
         tree.canvas.treeType = 'rectangular';
 
@@ -1573,7 +1661,13 @@ $(function(){
             
         //     antibioticCounter = antibioticCounter + 1;
         // }
-        populateListOfAntibiotics('#select-tree-node-antibiotic');
+        populateListOfAntibiotics($collectionTreePanel.find('.wgst-tree-control__change-node-colour'));
+
+        // Need to resize to fit it correctly
+        treeCanvas.resizeToContainer();
+        // Need to redraw to actually see it
+        treeCanvas.drawn = false;
+        treeCanvas.draw();
     };
 
     // Init map
@@ -3218,35 +3312,6 @@ $(function(){
         event.preventDefault();
     });
 
-    // var REMOVE_updateAssemblyUploadProgressBar = function(collectionId) {
-    //     // Get total number of assemblies to upload
-    //     var totalNumberOfAssemblies = Object.keys(fastaFilesAndMetadata).length;
-    //     // Calculate number of uploaded assemblies
-    //     var numberOfUploadedAssemblies = 0;
-    //     for (var fastaFileAndMetadata in fastaFilesAndMetadata) {
-    //         if (fastaFilesAndMetadata.hasOwnProperty(fastaFileAndMetadata)) {
-    //             if (fastaFilesAndMetadata[fastaFileAndMetadata].uploaded) {
-    //                 numberOfUploadedAssemblies = numberOfUploadedAssemblies + 1;
-    //             }
-    //         }
-    //     }
-
-    //     // If all assemblies have been uploaded then end progress bar
-    //     if (numberOfUploadedAssemblies === totalNumberOfAssemblies) {
-    //         endAssemblyUploadProgressBar(collectionId);
-    //     } else {
-    //         // Calculate new progress bar percentage value
-    //         var newProgressBarPercentageValue = Math.floor(numberOfUploadedAssemblies * 100 / totalNumberOfAssemblies);
-
-    //         // Update bar's width
-    //         $('.uploading-assembly-progress-container .progress-bar').width(newProgressBarPercentageValue + '%');
-    //         // Update aria-valuenow attribute
-    //         $('.uploading-assembly-progress-container .progress-bar').attr('aria-valuenow', newProgressBarPercentageValue);
-    //         // Update percentage value
-    //         $('.uploading-assembly-progress-container .progress-percentage').text(newProgressBarPercentageValue + '%');
-    //     }
-    // };
-
     var calculateAssemblyTopScore = function(assemblyScores) {
         // Sort data by score
         // http://stackoverflow.com/a/15322129
@@ -3383,8 +3448,8 @@ $(function(){
             resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
             ungroupedResistanceProfile = {};
 
-            console.log('resistanceProfileGroups: ' + resistanceProfileGroups);
-            console.dir(resistanceProfileGroups); // ZZZ
+            // console.log('resistanceProfileGroups: ' + resistanceProfileGroups);
+            // console.dir(resistanceProfileGroups);
 
             for (resistanceProfileGroupName in resistanceProfileGroups) {
                 resistanceProfileGroup = resistanceProfileGroups[resistanceProfileGroupName];
@@ -3401,10 +3466,9 @@ $(function(){
         } // for
     };
 
-    var populateListOfAntibiotics = function(elementSelector) {
+    var populateListOfAntibiotics = function($antibioticSelectElement) {
         // Populate list of antibiotics
-        var selectAntibioticInputElement = $(elementSelector),
-            antibioticGroupName,
+        var antibioticGroupName,
             antibioticName,
             antibioticNames = [],
             antibioticOptionHtmlElements = {};
@@ -3425,7 +3489,7 @@ $(function(){
 
         for (antibioticCounter = 0; antibioticCounter < antibioticNames.length;) {
             antibioticName = antibioticNames[antibioticCounter];
-            selectAntibioticInputElement.append($(antibioticOptionHtmlElements[antibioticName]));
+            $antibioticSelectElement.append($(antibioticOptionHtmlElements[antibioticName]));
             
             antibioticCounter = antibioticCounter + 1;
         }
@@ -3550,7 +3614,7 @@ $(function(){
 
             treeCanvas.draw();
             addResistanceProfileToCollection(collectionId);
-            populateListOfAntibiotics('#select-tree-node-antibiotic-merged');
+            populateListOfAntibiotics($('#select-tree-node-antibiotic-merged'));
 
         // ====================================================================================================================
     
@@ -4233,7 +4297,7 @@ $(function(){
     });
 
     // Bring to front selected panel
-    $('.wgst-panel').on('mousedown', function(){
+    $('body').on('mousedown', '.wgst-panel', function(){
 
         bringPanelToTop($(this).attr('data-panel-name'));
 
@@ -4391,10 +4455,20 @@ $(function(){
     });
 
     $('.wgst-panel__collection .collection-controls-show-tree').on('click', function(){
-        activatePanel('collectionTree');
-        showPanel('collectionTree');
-        showPanelBodyContent('collectionTree');
-        bringPanelToTop('collectionTree');
+        var collectionId = $(this).attr('collection-id'),
+            collectionTreeType = $(this).attr('data-tree-type'),
+            collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType;
+
+        if (collectionTreeType === 'CORE_TREE_RESULT' || collectionTreeType === 'COLLECTION_TREE') {
+            activatePanel(collectionTreePanelId);
+            //activatePanel('collectionTree');
+            showPanel(collectionTreePanelId);
+            //showPanel('collectionTree');
+            showPanelBodyContent(collectionTreePanelId);
+            //showPanelBodyContent('collectionTree');
+            bringPanelToTop(collectionTreePanelId);
+            //bringPanelToTop('collectionTree');
+        }
     });
 
     var openAssemblyPanel = function(assemblyId) {
@@ -4646,32 +4720,35 @@ $(function(){
     //         console.dir(nearestRepresentative);
     // });
 
-    $('.wgst-tree-control__decrease-label-font-size').on('click', function(){
+    $('body').on('click', '.wgst-tree-control__decrease-label-font-size', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
             currentNodeTextSize,
             tree;
 
-        tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
+        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
         currentNodeTextSize = tree.textSize;
         tree.setTextSize(currentNodeTextSize - 3);
     });
 
-    $('.wgst-tree-control__increase-label-font-size').on('click', function(){
+    $('body').on('click', '.wgst-tree-control__increase-label-font-size', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
             currentNodeTextSize,
             tree;
 
-        tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
+        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
         currentNodeTextSize = tree.textSize;
         tree.setTextSize(currentNodeTextSize + 3);
     });
 
-    $('.wgst-tree-control__decrease-node-size').on('click', function(){
+    $('body').on('click', '.wgst-tree-control__decrease-node-size', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
             tree,
             currentNodeSize;
 
-        tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
+        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
         currentNodeSize = tree.baseNodeSize;
 
         if (currentNodeSize > 3) {
@@ -4684,12 +4761,13 @@ $(function(){
             $(this).attr('disabled', true);
         }
     });
-    $('.wgst-tree-control__increase-node-size').on('click', function(){
+    $('body').on('click', '.wgst-tree-control__increase-node-size', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
             tree,
             currentNodeSize;
 
-        tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
+        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
         currentNodeSize = tree.baseNodeSize;
         tree.setNodeSize(currentNodeSize + 3);
 
@@ -4697,14 +4775,15 @@ $(function(){
             $(this).closest('.wgst-tree-control').find('.wgst-tree-control__decrease-node-size').attr('disabled', false);
         }
     });
-    $('.wgst-tree-control__show-node-labels').on('change', function(){
+    $('body').on('change', '.wgst-tree-control__show-node-labels', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
             tree;
         
-        tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
+        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
         tree.toggleLabels();
     });
-    $('.wgst-tree-control__merge-collection-trees').on('click', function(){
+    $('body').on('click', '.wgst-tree-control__merge-collection-trees', function(){
 
         $(this).attr('disabled', true);
         $(this).find('.wgst-spinner-label').hide();
@@ -5298,7 +5377,7 @@ google.maps.event.addDomListener(window, "resize", function() {
     //     treeManipulationHandler(this);
     // });
 
-    $('.tree-controls-match-assembly-list').on('click', function(){
+    $('body').on('click', '.tree-controls-match-assembly-list', function(){
         var $canvas = $(this).closest('.wgst-panel-body-content').find('canvas.phylocanvas');
         treeManipulationHandler($canvas);
     });
