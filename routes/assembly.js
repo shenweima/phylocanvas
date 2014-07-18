@@ -30,7 +30,17 @@ exports.add = function(req, res) {
 	var uploadQueue;
 
 	// Generate queue id
-	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId;
+	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId,
+		tasks = {
+			// Per assembly
+			FP: 'FP',
+			MLST: 'MLST',
+			PAARSNP: 'PAARSNP',
+			CORE: 'CORE',
+			// Per collection
+			CORE_MUTANT_TREE: 'CORE_MUTANT_TREE',
+			COLLECTION_TREE: 'COLLECTION_TREE'
+		};
 
 	// Create queue
 	rabbitMQConnection.queue(notificationQueueId, 
@@ -39,30 +49,27 @@ exports.add = function(req, res) {
 		}, function(queue){
 			console.log('[WGST][RabbitMQ] Notification queue "' + queue.name + '" is open');
 
-			var readyResults = [];
-
 			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "*.ASSEMBLY." + assemblyId); // binding routing key
-			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "CORE_RESULT_ASSEMBLY_" + assemblyId);
-			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "CORE_TREE_RESULT_COLLECTION_" + collectionId);
+			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "CORE_TREE_RESULT.COLLECTION." + collectionId);
+			queue.bind(rabbitMQExchangeNames.NOTIFICATION, "COLLECTION_TREE.COLLECTION." + collectionId);
+
+			var receivedResults = {};
 
 			// Subscribe to response message
 			queue.subscribe(function(message, headers, deliveryInfo){
-				console.log('[WGST][RabbitMQ] Received notification message');
-
 				var buffer = new Buffer(message.data),
 					bufferJSON = buffer.toString(),
-					parsedMessage = JSON.parse(bufferJSON);
-
-				console.dir(parsedMessage);
-
-				var messageAssemblyId = parsedMessage.assemblyId,
+					parsedMessage = JSON.parse(bufferJSON),
+					messageAssemblyId = parsedMessage.assemblyId,
 					messageUserAssemblyId = parsedMessage.userAssemblyId;
 
-				console.log('[WGST] Message assembly id: ' + messageAssemblyId);
-				console.log('[WGST] Message user assembly id: ' + messageUserAssemblyId);
+				console.log('[WGST][RabbitMQ] Received notification message');
+				console.dir(parsedMessage);
 
-				// Check task type
-				if (parsedMessage.taskType === 'FP') {
+				/**
+				* You'll receive only 1 of these per assembly.
+				*/
+				if (parsedMessage.taskType === tasks.FP) {
 					console.log('[WGST][Socket.io] Emitting FP message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
@@ -73,9 +80,12 @@ exports.add = function(req, res) {
 						socketRoomId: socketRoomId
 					});
 
-					readyResults.push('FP_COMP');
+					receivedResults['FP_COMP'] = 'FP_COMP';
 
-				} else if (parsedMessage.taskType === 'MLST') {
+				/**
+				* You'll receive only 1 of these per assembly.
+				*/
+				} else if (parsedMessage.taskType === tasks.MLST) {
 					console.log('[WGST][Socket.io] Emitting MLST message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
@@ -86,9 +96,12 @@ exports.add = function(req, res) {
 						socketRoomId: socketRoomId
 					});
 
-					readyResults.push('MLST_RESULT');
+					receivedResults['MLST_RESULT'] = 'MLST_RESULT';
 
-				} else if (parsedMessage.taskType === 'PAARSNP') {
+				/**
+				* You'll receive only 1 of these per assembly.
+				*/
+				} else if (parsedMessage.taskType === tasks.PAARSNP) {
 					console.log('[WGST][Socket.io] Emitting PAARSNP message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
@@ -99,22 +112,12 @@ exports.add = function(req, res) {
 						socketRoomId: socketRoomId
 					});
 
-					readyResults.push('PAARSNP_RESULT');
+					receivedResults['PAARSNP_RESULT'] = 'PAARSNP_RESULT';
 
-				} else if (parsedMessage.taskType === 'COLLECTION_TREE') {
-					console.log('[WGST][Socket.io] Emitting COLLECTION_TREE message for socketRoomId: ' + socketRoomId);
-					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
-						collectionId: collectionId,
-						assemblyId: messageAssemblyId,
-						userAssemblyId: messageUserAssemblyId,
-						status: "COLLECTION_TREE ready",
-						result: "COLLECTION_TREE",
-						socketRoomId: socketRoomId
-					});
-
-					readyResults.push('COLLECTION_TREE');
-
-				} else if (parsedMessage.taskType === 'CORE') {
+				/**
+				* You'll receive only 1 of these per assembly.
+				*/
+				} else if (parsedMessage.taskType === tasks.CORE) {
 					console.log('[WGST][Socket.io] Emitting CORE message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
 						collectionId: collectionId,
@@ -125,17 +128,48 @@ exports.add = function(req, res) {
 						socketRoomId: socketRoomId
 					});
 
-					readyResults.push('CORE');
+					receivedResults['CORE'] = 'CORE';
 
-				} // else if
+				/**
+				* You'll receive it at least 1 of these per collection,
+				* but sometimes more than 1, but all identical.
+				*/
+				} else if (parsedMessage.taskType === tasks.CORE_MUTANT_TREE) {
+					console.log('[WGST][Socket.io] Emitting CORE_MUTANT_TREE message for socketRoomId: ' + socketRoomId);
+					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+						collectionId: collectionId,
+						assemblyId: messageAssemblyId,
+						userAssemblyId: messageUserAssemblyId,
+						status: "CORE_MUTANT_TREE ready",
+						result: "CORE_MUTANT_TREE",
+						socketRoomId: socketRoomId
+					});
+
+					receivedResults['CORE_MUTANT_TREE'] = 'CORE_MUTANT_TREE';
+
+				/**
+				* You'll receive it at least 1 of these per collection,
+				* but sometimes more than 1, but all identical.
+				*/
+				} else if (parsedMessage.taskType === tasks.COLLECTION_TREE) {
+					console.log('[WGST][Socket.io] Emitting COLLECTION_TREE message for socketRoomId: ' + socketRoomId);
+					io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
+						collectionId: collectionId,
+						assemblyId: messageAssemblyId,
+						userAssemblyId: messageUserAssemblyId,
+						status: "COLLECTION_TREE ready",
+						result: "COLLECTION_TREE",
+						socketRoomId: socketRoomId
+					});
+
+					receivedResults['COLLECTION_TREE'] = 'COLLECTION_TREE';
+				}
 
 				// Unbind queue after all results were received
-				if (readyResults.length === 5) {
+				if (Object.keys(receivedResults).length === Object.keys(tasks).length) {
 					//queue.unbind(notificationExchange, "*.ASSEMBLY." + assemblyId);
 					//queue.unbind(notificationExchange, "COLLECTION_TREE.COLLECTION." + collectionId);
 					queue.destroy();
-					//notificationExchange.destroy();
-					//rabbitMQConnection.end();
 				} // if
 			});
 
