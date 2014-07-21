@@ -348,7 +348,7 @@ exports.apiGetCollection = function(req, res) {
 			tree: {}
 		};
 
-	console.time('[WGST] Getting collection ' + collectionId);
+	console.time('[WGST] Getting list of assemblies for collection ' + collectionId);
 
 	// Get list of assemblies
 	couchbaseDatabaseConnections[testWgstBucket].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
@@ -360,7 +360,7 @@ exports.apiGetCollection = function(req, res) {
 
 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
 
-		console.log('[WGST] Got collection ' + collectionId + ' with assembly ids:');
+		console.log('[WGST] Got list of assemblies for collection ' + collectionId);
 		console.dir(assemblyIds);
 
 		var assemblyCounter = assemblyIds.length;
@@ -389,42 +389,48 @@ exports.apiGetCollection = function(req, res) {
 
 					collectionTreeQueryKeys.push('CORE_TREE_RESULT_' + collectionId);
 					collectionTreeQueryKeys.push('COLLECTION_TREE_' + collectionId);
+					collectionTreeQueryKeys.push('CORE_ALLELE_TREE_' + collectionId);
 
 					// Get collection tree data
 					couchbaseDatabaseConnections[testWgstBucket].getMulti(collectionTreeQueryKeys, {}, function(error, collectionTreesData) {
 						if (error) {
 							// Ignore this error for now
 							//res.json({});
+							console.error('[WGST][Couchbase][Error] ✗ ' + error);
 							return;
 						}
 
 						collection.tree = {};
 
 						for (collectionTreeKey in collectionTreesData) {
-				            var collectionTreeData = collectionTreesData[collectionTreeKey].value;
-				            // Parsing COLLECTION_TREE
-				            if (collectionTreeKey.indexOf('COLLECTION_TREE_') !== -1) {
-				            	console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
-				            	collection.tree[collectionTreeData.type] = {};
-				            	collection.tree[collectionTreeData.type].name = 'FP Tree';
-								collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
+							if (collectionTreesData.hasOwnProperty(collectionTreeKey)) {
+					            var collectionTreeData = collectionTreesData[collectionTreeKey].value;
 
-				            // Parsing CORE_TREE_RESULT
-				            } else if (collectionTreeKey.indexOf('CORE_TREE_RESULT_') !== -1) {
-				            	console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
-				            	collection.tree[collectionTreeData.type] = {};
-				            	collection.tree[collectionTreeData.type].name = 'Core Mutations Tree';
-								collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
+					            console.dir(collectionTreesData);
+
+					            // Parsing COLLECTION_TREE
+					            if (collectionTreeKey.indexOf('COLLECTION_TREE_') !== -1) {
+					            	console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
+					            	collection.tree[collectionTreeData.type] = {};
+					            	collection.tree[collectionTreeData.type].name = 'FP Tree';
+									collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
+
+					            // Parsing CORE_TREE_RESULT
+					            } else if (collectionTreeKey.indexOf('CORE_TREE_RESULT_') !== -1) {
+					            	console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
+					            	collection.tree[collectionTreeData.type] = {};
+					            	collection.tree[collectionTreeData.type].name = 'Core Mutations Tree';
+									collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
+					            
+					            // Parsing CORE_ALLELE_TREE
+					            } else if (collectionTreeKey.indexOf('CORE_ALLELE_TREE_') !== -1) {
+					            	console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
+					            	collection.tree[collectionTreeData.type] = {};
+					            	collection.tree[collectionTreeData.type].name = 'Core Allele Tree';
+									collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
+								} // if
 							} // if
 						} // for
-
-
-						// var collectionTreeData = collectionTreeData.value.newickTree;
-
-						// console.log('[WGST] Got collection tree data for ' + collectionId + ' collection:');
-						// console.dir(collectionTreeData);
-
-						// collection.tree = collectionTreeData;
 
 						// Get antibiotics
 						require('./assembly').getAllAntibiotics(function(error, antibiotics){
@@ -632,7 +638,7 @@ exports.mergeCollectionTrees = function(req, res) {
 			// -----------------------------------------------------------
 			getMergedCollectionTree(mergedTreeId, function(error, mergedTree){
 				if (error) {
-					console.error('✗ [WGST][Couchbase][Error] ' + error);
+					console.error('[WGST][Couchbase][Error] ✗ ' + error);
 					return;
 				}
 
@@ -669,7 +675,7 @@ exports.mergeCollectionTrees = function(req, res) {
 			replyTo: 'noQueueId'
 		}, function(err){
 			if (err) {
-				console.error('✗ [WGST][RabbitMQ][Error] Failed to publish to ' + rabbitMQExchangeNames.TASKS + ' exchange');
+				console.error('[WGST][RabbitMQ][Error] ✗ Failed to publish to ' + rabbitMQExchangeNames.TASKS + ' exchange');
 				return;
 			}
 

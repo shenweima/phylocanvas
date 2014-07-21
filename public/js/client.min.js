@@ -4528,7 +4528,7 @@ $(function(){
             collectionTreeType = $(this).attr('data-tree-type'),
             collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType;
 
-        if (collectionTreeType === 'CORE_TREE_RESULT' || collectionTreeType === 'COLLECTION_TREE') {
+        //if (collectionTreeType === 'CORE_TREE_RESULT' || collectionTreeType === 'COLLECTION_TREE') {
             activatePanel(collectionTreePanelId);
             //activatePanel('collectionTree');
             showPanel(collectionTreePanelId);
@@ -4537,7 +4537,7 @@ $(function(){
             //showPanelBodyContent('collectionTree');
             bringPanelToTop(collectionTreePanelId);
             //bringPanelToTop('collectionTree');
-        }
+        //}
     });
 
     var openAssemblyPanel = function(assemblyId) {
@@ -4860,7 +4860,7 @@ $(function(){
 
         var requestData = {
             collectionId: $(this).closest('.wgst-panel').attr('data-collection-id'),
-            mergeWithCollectionId: '78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+            mergeWithCollectionId: '52a329d3-4ba9-4fa9-b3d9-6eeb86422625', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
             socketRoomId: WGST.socket.roomId
         };
 
