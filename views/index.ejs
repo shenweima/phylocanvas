@@ -255,9 +255,9 @@
               <div class="collection-controls">
                 <label>Show tree:</label>
                 <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-default collection-controls-show-tree" data-tree-type="COLLECTION_TREE">COLLECTION_TREE</button>
                   <button type="button" class="btn btn-sm btn-default collection-controls-show-tree" data-tree-type="CORE_TREE_RESULT">CORE_TREE_RESULT</button>
                   <button type="button" class="btn btn-sm btn-default collection-controls-show-tree" data-tree-type="CORE_ALLELE_TREE">CORE_ALLELE_TREE</button>
-                  <button type="button" class="btn btn-sm btn-default collection-controls-show-tree" data-tree-type="COLLECTION_TREE">COLLECTION_TREE</button>
                   <!-- <button type="button" class="btn btn-sm btn-default collection-view-horizontal-split">Full screen</button> -->
                 </div>
               </div><!-- /.collection-controls -->
@@ -368,7 +368,7 @@
 
 
         <!-- Merged collection tree prototype -->
-        <div class="wgst-panel wgst-panel__merged-collection-tree wgst-panel--active wgst-draggable" data-panel-name="mergedCollectionTree" data-collection-id="">
+        <div class="wgst-panel wgst-panel__merged-collection-tree wgst-panel--active wgst-draggable" data-panel-name="mergedCollectionTree" data-collection-id="" data-collection-tree-type="MERGED_TREE">
           <header class="wgst-panel-header wgst-draggable-handle">
             <h4 class="header-title">Merged Collection Tree</h4>
             <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
@@ -716,14 +716,18 @@
                         <input type="checkbox" class="wgst-tree-control__show-node-labels" checked="checked"> Show labels
                       </label>
 
+                      {{#unless matchAssemblyListButton}}
                       <div class="btn-group wgst-tree-control">
                         <button type="button" class="btn btn-sm btn-default tree-controls-match-assembly-list">Match assembly list</button>
                       </div>
+                      {{/unless}}
 
-                      <button type="button" class="btn btn-sm btn-default wgst-tree-control__merge-collection-trees">
+                      {{#unless mergeWithButton}}
+                      <button type="button" class="btn btn-sm btn-default wgst-tree-control__merge-collection-trees" data-collection-tree-type="{{attributeCollectionTreeType}}">
                         <div class="wgst-spinner hide-this"></div>
                         <span class="wgst-spinner-label">Merge with SRLs</span>
                       </button>
+                      {{/unless}}
 
                     </div><!-- /.wgst-tree-control-row -->
                   </div><!-- /.wgst-tree-controls-container -->

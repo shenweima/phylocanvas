@@ -421,7 +421,7 @@ exports.apiGetCollection = function(req, res) {
 					            	collection.tree[collectionTreeData.type] = {};
 					            	collection.tree[collectionTreeData.type].name = 'Core Mutations Tree';
 									collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
-					            
+		
 					            // Parsing CORE_ALLELE_TREE
 					            } else if (collectionTreeKey.indexOf('CORE_ALLELE_TREE_') !== -1) {
 					            	console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
@@ -437,6 +437,7 @@ exports.apiGetCollection = function(req, res) {
 							if (error) {
 								// Ignore this error for now
 								//res.json({});
+								console.error('[WGST][Couchbase][Error] ✗ ' + error);
 								return;
 							}
 
@@ -597,14 +598,22 @@ exports.mergeCollectionTrees = function(req, res) {
 
 	var socketRoomId = req.body.socketRoomId;
 
+	/**
+	* Each collection tree type needs 
+	* it's own data source flag for merge request.
+	*/
+	var collectionTreeTypeToDataSource = {
+		'COLLECTION_TREE': 'FINGERPRINT',
+		'CORE_TREE_RESULT': 'CORE',
+		'CORE_ALLELE_TREE': ''
+	};
+
 	var mergeRequest = {
 		assemblies: [],
 		targetCollectionId: req.body.collectionId, // Your collection id
 		inputData: [req.body.mergeWithCollectionId], // e.g.: EARSS collection, etc.
-		dataSource: 'CORE'
+		dataSource: collectionTreeTypeToDataSource[req.body.collectionTreeType]
 	};
-
-	console.dir(mergeRequest);
 
 	// Generate queue id
 	// To do: Rename ART to WGST_CLIENT_
@@ -645,6 +654,13 @@ exports.mergeCollectionTrees = function(req, res) {
 				console.log('Thats it?');
 				console.dir(mergedTree);
 
+				var tree = {
+					'MERGED': {
+						name: 'Merged tree',
+						data: mergedTree.newickTree
+					}
+				};
+
 				// -----------------------------------------------------------
 				// Emit socket message
 				// -----------------------------------------------------------
@@ -652,7 +668,8 @@ exports.mergeCollectionTrees = function(req, res) {
 					console.log('[WGST][Socket.io] Emitting ' + parsedMessage.taskType + ' message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("collectionTreeMergeNotification", {
 						mergedCollectionTreeId: parsedMessage.documentId.replace('MERGE_TREE_', ''),
-						tree: mergedTree.newickTree,
+						//tree: mergedTree.newickTree,
+						tree: tree,
 						assemblies: mergedTree.assemblies,
 						targetCollectionId: mergeRequest.targetCollectionId,
 						inputData: mergeRequest.inputData,
