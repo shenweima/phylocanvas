@@ -602,7 +602,7 @@ exports.mergeCollectionTrees = function(req, res) {
 	* Each collection tree type needs 
 	* it's own data source flag for merge request.
 	*/
-	var collectionTreeTypeToDataSource = {
+	var collectionTreeTypeToDataSourceMap = {
 		'COLLECTION_TREE': 'FINGERPRINT',
 		'CORE_TREE_RESULT': 'CORE',
 		'CORE_ALLELE_TREE': ''
@@ -612,7 +612,7 @@ exports.mergeCollectionTrees = function(req, res) {
 		assemblies: [],
 		targetCollectionId: req.body.collectionId, // Your collection id
 		inputData: [req.body.mergeWithCollectionId], // e.g.: EARSS collection, etc.
-		dataSource: collectionTreeTypeToDataSource[req.body.collectionTreeType]
+		dataSource: collectionTreeTypeToDataSourceMap[req.body.collectionTreeType]
 	};
 
 	// Generate queue id
