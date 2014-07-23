@@ -5,6 +5,14 @@ $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
+    // WGSA can speak now!
+    WGST.speak = true;
+
+    if (WGST.speak) {
+        var message = new SpeechSynthesisUtterance('Welcome to WGSA');
+        window.speechSynthesis.speak(message);
+    }
+
     window.onerror = function(error) {
         if (typeof error.message !== 'undefined') {
             console.error('[WGST][Error] ' + error.message);
@@ -340,9 +348,6 @@ $(function(){
         var activatePanel = function(panelName) {
             var panel = $('[data-panel-name="' + panelName + '"]');
 
-            console.log('@@@ Panel name: ' + panelName);
-            //WGST.panels[collectionTreePanelId]
-
             // Set position
             panel.css('top', WGST.panels[panelName].top);
             panel.css('left', WGST.panels[panelName].left);
@@ -474,6 +479,12 @@ $(function(){
 
     var showAlert = function(message, status, hideAfterShow) {
         console.error('✗ [WGST][Error] ' + message);
+
+        if (WGST.speak) {
+            var message = new SpeechSynthesisUtterance(message);
+            window.speechSynthesis.speak(message);
+        }
+
         var alertHtmlElement = $('.wgst-alert');
         // Remove all previous status classes and add the current one
         alertHtmlElement.attr('class', 'wgst-alert').addClass('wgst-alert__' + status);
@@ -921,6 +932,11 @@ $(function(){
 
     var getCollection = function(collectionId) {
         console.log('[WGST] Getting collection ' + collectionId);
+
+        if (WGST.speak) {
+            var message = new SpeechSynthesisUtterance('Loading collection');
+            window.speechSynthesis.speak(message);
+        }
 
         // ----------------------------------------
         // Init collection panel
@@ -1633,6 +1649,8 @@ $(function(){
         console.debug('» [WGST][DEV] Parsed Newick String:');
         console.log('» Uncomment to see.');
         //console.log(newickString);
+
+        WGST.collection[collectionId].tree[collectionTreeType].newickStringWithLabels = newickString;
 
         // ====================================================================================================================
     
@@ -4828,6 +4846,18 @@ $(function(){
 
     //         console.dir(nearestRepresentative);
     // });
+
+    $('body').on('click', '.wgst-tree-control__show-newick', function(){
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
+            newickStringWithLabels,
+            newWindow;
+
+        newickStringWithLabels = WGST.collection[collectionId].tree[collectionTreeType].newickStringWithLabels;
+
+        newWindow = window.open();
+        newWindow.document.write(newickStringWithLabels);
+    });
 
     $('body').on('click', '.wgst-tree-control__decrease-label-font-size', function(){
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
