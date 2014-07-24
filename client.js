@@ -1145,6 +1145,39 @@ $(function(){
         }
     };
 
+    var renderCollectionTreeButtons = function(collectionId) {
+        // Init all collection trees
+        var collectionTrees = WGST.collection[collectionId].tree;
+
+        $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
+            // Render collection tree button
+            renderCollectionTreeButton(collectionId, collectionTreeType);
+        });
+    };
+
+    var renderCollectionTreeButton = function(collectionId, collectionTreeType) {
+        // Init all collection trees
+        var collectionTree = WGST.collection[collectionId].tree[collectionTreeType],
+            collectionTreeName = collectionTree.name,
+            openTreeButton,
+            openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}">{{collectionTreeName}}</button>',
+            $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group');
+
+        // Add "Open tree" button to this collection panel
+        openTreeButton = openTreeButtonTemplate.replace(/{{collectionTreeType}}/g, collectionTreeType);
+        openTreeButton = openTreeButton.replace(/{{collectionId}}/g, collectionId);
+        openTreeButton = openTreeButton.replace(/{{collectionTreeName}}/g, collectionTreeName);
+        $collectionControlsShowTree.append($(openTreeButton));
+    };
+
+    var renderCollectionTrees = function(collectionId, collectionTreeOptions) {
+        var collectionTrees = WGST.collection[collectionId].tree;
+        $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
+            // Render collection tree
+            renderCollectionTree(collectionId, collectionTreeType, collectionTreeOptions);
+        });
+    };
+
     /**
      * Description
      * @method initCollection
@@ -1154,16 +1187,15 @@ $(function(){
      * @param {} treeOptions
      * @return 
      */
-    var initCollection = function(collectionId, assemblies, trees, treeOptions) {
+    var initCollection = function(collectionId, collectionAssemblies, collectionTrees) {
         initEmptyCollection(collectionId);
-        WGST.collection[collectionId].assemblies = assemblies;
+        WGST.collection[collectionId].assemblies = collectionAssemblies;
 
         // Init all collection trees
-        var collectionTrees = trees,
-            collectionTreeType,
-            openTreeButton,
-            openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}">{{collectionTreeName}}</button>',
-            $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group');
+        //var collectionTrees = trees,
+            // openTreeButton,
+            // openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}">{{collectionTreeName}}</button>',
+            // $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group');
 
         $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
             // Init collection tree
@@ -1173,12 +1205,12 @@ $(function(){
                 name: collectionTreeData.name
             };
             // Render collection tree
-            renderCollectionTree(collectionId, collectionTreeType, treeOptions);
+            //renderCollectionTree(collectionId, collectionTreeType, treeOptions);
             // Add "Open tree" button for this tree
-            openTreeButton = openTreeButtonTemplate.replace(/{{collectionTreeType}}/g, collectionTreeType);
-            openTreeButton = openTreeButton.replace(/{{collectionId}}/g, collectionId);
-            openTreeButton = openTreeButton.replace(/{{collectionTreeName}}/g, collectionTreeData.name);
-            $collectionControlsShowTree.append($(openTreeButton));
+            // openTreeButton = openTreeButtonTemplate.replace(/{{collectionTreeType}}/g, collectionTreeType);
+            // openTreeButton = openTreeButton.replace(/{{collectionId}}/g, collectionId);
+            // openTreeButton = openTreeButton.replace(/{{collectionTreeName}}/g, collectionTreeData.name);
+            // $collectionControlsShowTree.append($(openTreeButton));
         });
     };
 
@@ -1232,7 +1264,8 @@ $(function(){
                 WGST.antibiotics = data.antibiotics;
 
                 initCollection(collectionId, data.collection.assemblies, data.collection.tree);
-
+                renderCollectionTrees(collectionId);
+                renderCollectionTreeButtons(collectionId);
                 addResistanceProfileToCollection(collectionId);
 
                 // // ----------------------------------------
@@ -4029,10 +4062,13 @@ $(function(){
             console.log('[WGST] Got merged collection assemblies');
             console.dir(assemblies);
 
-            initCollection(collectionId, assemblies, collectionTree, {
+            initCollection(collectionId, assemblies, collectionTree);
+            renderCollectionTrees(collectionId, {
+                // Show buttons
                 matchAssemblyListButton: true,
                 mergeWithButton: true
             });
+            //renderCollectionTreeButtons(collectionId);
 
             // ------------------------------------------
             // Render tree
