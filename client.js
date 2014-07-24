@@ -13,6 +13,12 @@ $(function(){
         window.speechSynthesis.speak(message);
     }
 
+    /**
+     * Description
+     * @method onerror
+     * @param {} error
+     * @return 
+     */
     window.onerror = function(error) {
         if (typeof error.message !== 'undefined') {
             console.error('[WGST][Error] ' + error.message);
@@ -23,6 +29,10 @@ $(function(){
 
         showNotification(error);
     };
+
+    // WGST.events = {
+    //     renderedCollectionTreeEvent: new CustomEvent('renderedCollectionTree', {})
+    // };
 
     // ============================================================
     // Store application state
@@ -129,6 +139,11 @@ $(function(){
             },
             markerBounds: new google.maps.LatLngBounds(),
             searchBoxBounds: new google.maps.LatLngBounds(),
+            /**
+             * Description
+             * @method init
+             * @return 
+             */
             init: function() {
                 WGST.geo.map.canvas = new google.maps.Map($('.wgst-map')[0], WGST.geo.map.options);
                 WGST.geo.map.markers.metadata = new google.maps.Marker({
@@ -165,6 +180,12 @@ $(function(){
     WGST.dragAndDrop.files = [];
     WGST.dragAndDrop.fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i;
 
+    /**
+     * Description
+     * @method initApp
+     * @param {} loaded
+     * @return 
+     */
     var initApp = function(loaded) {
         WGST.init.loaded.push(loaded);
         if (WGST.init.loaded.length === Object.keys(WGST.init.all).length) {
@@ -182,8 +203,20 @@ $(function(){
     // Panels
     // ============================================================
 
+    /**
+     * Description
+     * @method showPanelBodyContent
+     * @param {} panelNames
+     * @return 
+     */
     var showPanelBodyContent = function(panelNames) {
         // Overwrite function
+        /**
+         * Description
+         * @method showPanelBodyContent
+         * @param {} panelName
+         * @return 
+         */
         var showPanelBodyContent = function(panelName) {
             var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
             panelBodyContent.css('visibility', 'visible');
@@ -209,8 +242,20 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method showPanel
+     * @param {} panelNames
+     * @return 
+     */
     var showPanel = function(panelNames) {
         // Overwrite function
+        /**
+         * Description
+         * @method showPanel
+         * @param {} panelName
+         * @return 
+         */
         var showPanel = function(panelName) {
             $('[data-panel-name="' + panelName + '"]')
                 .addClass('wgst-panel--visible')
@@ -237,8 +282,20 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method hidePanelBodyContent
+     * @param {} panelNames
+     * @return 
+     */
     var hidePanelBodyContent = function(panelNames) {
         // Overwrite function
+        /**
+         * Description
+         * @method hidePanelBodyContent
+         * @param {} panelName
+         * @return 
+         */
         var hidePanelBodyContent = function(panelName) {
             var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
             panelBodyContent.css('visibility', 'hidden');
@@ -264,8 +321,20 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method hidePanel
+     * @param {} panelNames
+     * @return 
+     */
     var hidePanel = function(panelNames) {
         // Overwrite function
+        /**
+         * Description
+         * @method hidePanel
+         * @param {} panelName
+         * @return 
+         */
         var hidePanel = function(panelName) {
             $('[data-panel-name="' + panelName + '"]').css('visibility', 'hidden');
         };
@@ -290,6 +359,12 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method startPanelLoadingIndicator
+     * @param {} panelName
+     * @return 
+     */
     var startPanelLoadingIndicator = function(panelName) {
         // Hide body content
         // var panelBodyContent = $('[data-panel-name="' + panelName + '"] .wgst-panel-body-content');
@@ -299,6 +374,12 @@ $(function(){
         panelLoadingIndicator.show();
     };
 
+    /**
+     * Description
+     * @method endPanelLoadingIndicator
+     * @param {} panelName
+     * @return 
+     */
     var endPanelLoadingIndicator = function(panelName) {
         // Hide animated loading circle
         var panelLoadingIndicator = $('[data-panel-name="' + panelName + '"] .wgst-panel-loading');
@@ -323,6 +404,12 @@ $(function(){
             collectionMetadataPaper = $('.wgst-paper__collection-metadata');
     });
 
+    /**
+     * Description
+     * @method isPanelActive
+     * @param {} panelName
+     * @return 
+     */
     var isPanelActive = function(panelName) {
         var panelElement = $('[data-panel-name="' + panelName + '"]');
 
@@ -333,6 +420,12 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method isPanelVisible
+     * @param {} panelName
+     * @return 
+     */
     var isPanelVisible = function(panelName) {
         var panelElement = $('[data-panel-name="' + panelName + '"]');
 
@@ -343,8 +436,21 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method activatePanel
+     * @param {} panelNames
+     * @param {} callback
+     * @return 
+     */
     var activatePanel = function(panelNames, callback) {
         // Overwrite function
+        /**
+         * Description
+         * @method activatePanel
+         * @param {} panelName
+         * @return 
+         */
         var activatePanel = function(panelName) {
             var panel = $('[data-panel-name="' + panelName + '"]');
 
@@ -383,8 +489,21 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method deactivatePanel
+     * @param {} panelNames
+     * @param {} callback
+     * @return 
+     */
     var deactivatePanel = function(panelNames, callback) {
         // Overwrite function
+        /**
+         * Description
+         * @method deactivatePanel
+         * @param {} panelName
+         * @return 
+         */
         var deactivatePanel = function(panelName) {
             var panel = $('[data-panel-name="' + panelName + '"]'),
                 panelBodyContent = panel.find('.wgst-panel-body-content');
@@ -418,6 +537,12 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method bringPanelToTop
+     * @param {} panelName
+     * @return 
+     */
     var bringPanelToTop = function(panelName) {
         var zIndexHighest = 0;
 
@@ -431,6 +556,12 @@ $(function(){
         $('[data-panel-name="' + panelName + '"]').css('zIndex', zIndexHighest + 1);
     };
 
+    /**
+     * Description
+     * @method openPanel
+     * @param {} panelName
+     * @return 
+     */
     var openPanel = function(panelName) {
         activatePanel(panelName);
         endPanelLoadingIndicator(panelName);
@@ -453,6 +584,12 @@ $(function(){
     // Representative Collection Tree Metadata
     // ============================================================
 
+    /**
+     * Description
+     * @method getRepresentativeCollectionTreeMetadata
+     * @param {} callback
+     * @return 
+     */
     var getRepresentativeCollectionTreeMetadata = function(callback) {
         console.log('[WGST] Getting representative collection tree metadata');
         // Get representative collection metadata
@@ -477,6 +614,14 @@ $(function(){
         });
     };
 
+    /**
+     * Description
+     * @method showAlert
+     * @param {} message
+     * @param {} status
+     * @param {} hideAfterShow
+     * @return 
+     */
     var showAlert = function(message, status, hideAfterShow) {
         console.error('✗ [WGST][Error] ' + message);
 
@@ -499,6 +644,12 @@ $(function(){
         } // if
     };
 
+    /**
+     * Description
+     * @method showNotification
+     * @param {} message
+     * @return 
+     */
     var showNotification = function(message) {
         //console.error('✗ [WGST][Error] ' + message);
         var errorHtmlElement = $('.wgst-notification__error');
@@ -511,6 +662,12 @@ $(function(){
         // }, 5000);
     };
 
+    /**
+     * Description
+     * @method showWarning
+     * @param {} message
+     * @return 
+     */
     var showWarning = function(message) {
         console.log('• [WGST][Warning] ' + message);
         var errorHtmlElement = $('.wgst-notification__warning');
@@ -535,9 +692,21 @@ $(function(){
             appendTo: "body",
             scroll: false,
             //containment: "window",
+            /**
+             * Description
+             * @method start
+             * @return 
+             */
             start: function() {
                 ringDragging = true;
             },
+            /**
+             * Description
+             * @method stop
+             * @param {} event
+             * @param {} ui
+             * @return 
+             */
             stop: function(event, ui) {
                 ringDragging = false;
                 // Store current panel position
@@ -554,6 +723,13 @@ $(function(){
             max: 10,
             value: 1,
             animate: 'fast',
+            /**
+             * Description
+             * @method slide
+             * @param {} event
+             * @param {} ui
+             * @return 
+             */
             slide: function(event, ui) {
                 $('.selected-assembly-counter').text(ui.value);
             }
@@ -663,6 +839,13 @@ $(function(){
 
     })();
 
+    /**
+     * Description
+     * @method createAssemblyResistanceProfilePreviewString
+     * @param {} assemblyResistanceProfile
+     * @param {} antibiotics
+     * @return assemblyResistanceProfileHtml
+     */
     var createAssemblyResistanceProfilePreviewString = function(assemblyResistanceProfile, antibiotics) {
         var assemblyResistanceProfileHtml = '',
             antibioticGroup,
@@ -715,6 +898,13 @@ $(function(){
         return assemblyResistanceProfileHtml;
     };
 
+    /**
+     * Description
+     * @method createAssemblyResistanceProfilePreviewHtml
+     * @param {} assemblyResistanceProfile
+     * @param {} antibiotics
+     * @return assemblyResistanceProfileHtml
+     */
     var createAssemblyResistanceProfilePreviewHtml = function(assemblyResistanceProfile, antibiotics) {
         var assemblyResistanceProfileHtml = '',
             antibioticGroup,
@@ -779,6 +969,13 @@ $(function(){
         return assemblyResistanceProfileHtml;
     };
 
+    /**
+     * Description
+     * @method renderAssemblyAnalysisList
+     * @param {} collectionId
+     * @param {} antibiotics
+     * @return 
+     */
     var renderAssemblyAnalysisList = function(collectionId, antibiotics) {
         console.log('[WGST] Rendering assembly analysis list');
 
@@ -848,6 +1045,12 @@ $(function(){
         $('.antibiotic[data-toggle="tooltip"]').tooltip();
     };
 
+    /**
+     * Description
+     * @method isNavItemEnabled
+     * @param {} navItemName
+     * @return 
+     */
     var isNavItemEnabled = function(navItemName) {
         var navItem = $('.wgst-navigation-item__' + navItemName);
 
@@ -858,6 +1061,12 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method enableNavItem
+     * @param {} navItemName
+     * @return 
+     */
     var enableNavItem = function(navItemName) {
         var navItem = $('.wgst-navigation-item__' + navItemName);
 
@@ -866,6 +1075,12 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method disableNavItem
+     * @param {} navItemName
+     * @return 
+     */
     var disableNavItem = function(navItemName) {
         var navItem = $('.wgst-navigation-item__' + navItemName);
 
@@ -874,12 +1089,24 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method clearCollectionAssemblyList
+     * @param {} collectionId
+     * @return 
+     */
     var clearCollectionAssemblyList = function(collectionId) {
         console.log('[WGST] Clearing ' + collectionId + ' collection assembly list');
 
         $('.wgst-panel__collection .collection-assembly-list').html('');
     };
 
+    /**
+     * Description
+     * @method closeCollection
+     * @param {} collectionId
+     * @return 
+     */
     var closeCollection = function(collectionId) {
         console.log('[WGST] Closing collection ' + collectionId);
 
@@ -897,6 +1124,13 @@ $(function(){
         disableNavItem('collection');
     };
 
+    /**
+     * Description
+     * @method initEmptyCollection
+     * @param {} collectionId
+     * @param {} collectionTreeTypes
+     * @return 
+     */
     var initEmptyCollection = function(collectionId, collectionTreeTypes) {
         WGST.collection[collectionId] = {
             assemblies: {},
@@ -911,13 +1145,25 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method initCollection
+     * @param {} collectionId
+     * @param {} assemblies
+     * @param {} trees
+     * @param {} treeOptions
+     * @return 
+     */
     var initCollection = function(collectionId, assemblies, trees, treeOptions) {
         initEmptyCollection(collectionId);
         WGST.collection[collectionId].assemblies = assemblies;
 
         // Init all collection trees
         var collectionTrees = trees,
-            collectionTreeType;
+            collectionTreeType,
+            openTreeButton,
+            openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}">{{collectionTreeType}}</button>',
+            $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group');
 
         $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
             // Init collection tree
@@ -928,9 +1174,19 @@ $(function(){
             };
             // Render collection tree
             renderCollectionTree(collectionId, collectionTreeType, treeOptions);
+            // Add "Open tree" button for this tree
+            openTreeButton = openTreeButtonTemplate.replace(/{{collectionTreeType}}/g, collectionTreeType);
+            openTreeButton = openTreeButton.replace(/{{collectionId}}/g, collectionId);
+            $collectionControlsShowTree.append($(openTreeButton));
         });
     };
 
+    /**
+     * Description
+     * @method getCollection
+     * @param {} collectionId
+     * @return 
+     */
     var getCollection = function(collectionId) {
         console.log('[WGST] Getting collection ' + collectionId);
 
@@ -949,7 +1205,7 @@ $(function(){
         $collectionPanel.attr('data-collection-id', collectionId);
         // Set collection id
         $collectionPanel.find('.collection-details').attr('data-collection-id', collectionId);
-        $collectionPanel.find('.collection-controls-show-tree').attr('collection-id', collectionId);;
+        $collectionPanel.find('.wgst-collection-control__show-tree').attr('collection-id', collectionId);;
 
         activatePanel('collection', function(){
             startPanelLoadingIndicator('collection');
@@ -974,28 +1230,6 @@ $(function(){
                 // Update list of antibiotics
                 WGST.antibiotics = data.antibiotics;
 
-                // // ----------------------------------------
-                // // Init collection
-                // // ----------------------------------------
-                // (function(){
-                //     initEmptyCollection(collectionId);
-                //     WGST.collection[collectionId].assemblies = data.collection.assemblies;
-
-                //     // Init all collection trees
-                //     var collectionTrees = data.collection.tree,
-                //         collectionTreeType;
-
-                //     $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
-                //         // Init collection tree
-                //         WGST.collection[collectionId].tree[collectionTreeType] = {
-                //             type: collectionTreeType,
-                //             data: collectionTreeData.data,
-                //             name: collectionTreeData.name
-                //         };
-                //         // Render collection tree
-                //         renderCollectionTree(collectionId, collectionTreeType);
-                //     });
-                // })();
                 initCollection(collectionId, data.collection.assemblies, data.collection.tree);
 
                 addResistanceProfileToCollection(collectionId);
@@ -1097,11 +1331,11 @@ $(function(){
 
 
 
-
-                //
-                // If collection has more than 100 assemblies then show fullscreen instead of panel.
-                //
-                // Collection has more than 100 assemblies - show fullscreen, otherwise show panel.
+                /**
+                * If collection has more than 100 assemblies then show fullscreen instead of panel.
+                *
+                * Collection has more than 100 assemblies - show fullscreen, otherwise show panel.
+                */
                 if (Object.keys(WGST.collection[collectionId].assemblies).length > 100) {
                     console.log('[WGST] Collection ' + collectionId + ' will be displayed fullscreen');
                     
@@ -1151,6 +1385,13 @@ $(function(){
     //     WGST.collection[collectionId].displayedAssemblies = [];
     // });
 
+    /**
+     * Description
+     * @method groupAssembliesByPosition
+     * @param {} collectionId
+     * @param {} assemblyIds
+     * @return groupedPositions
+     */
     var groupAssembliesByPosition = function(collectionId, assemblyIds) {
         var groupedPositions = {},
             assemblies = WGST.collection[collectionId].assemblies,
@@ -1178,6 +1419,15 @@ $(function(){
         return groupedPositions;
     };
 
+    /**
+     * Description
+     * @method createGroupMarker
+     * @param {} groupAssemblyIds
+     * @param {} groupMarkerLat
+     * @param {} groupMarkerLng
+     * @param {} groupSize
+     * @return 
+     */
     var createGroupMarker = function(groupAssemblyIds, groupMarkerLat, groupMarkerLng, groupSize) {
         var markerIcon = '//chart.apis.google.com/chart?chst=d_map_pin_letter&chld=' + groupSize + '|00FFFF|000000',
             groupPosition = new google.maps.LatLng(groupMarkerLat, groupMarkerLng),
@@ -1207,6 +1457,11 @@ $(function(){
         });
     };
 
+    /**
+     * Description
+     * @method removeAllGroupMarkers
+     * @return 
+     */
     var removeAllGroupMarkers = function() {
         var allGroupMarkers = WGST.geo.map.markers.group,
             groupPositionString,
@@ -1222,6 +1477,13 @@ $(function(){
         $('.show-all-assemblies-on-map').prop('checked', false);
     };
 
+    /**
+     * Description
+     * @method triggerMapMarkers
+     * @param {} collectionId
+     * @param {} selectedAssemblyIds
+     * @return 
+     */
     var triggerMapMarkers = function(collectionId, selectedAssemblyIds) {
 
         var assemblyMarkerBounds = new google.maps.LatLngBounds();
@@ -1263,6 +1525,13 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method selectTreeNodes
+     * @param {} collectionId
+     * @param {} selectedAssemblyIds
+     * @return 
+     */
     var selectTreeNodes = function(collectionId, selectedAssemblyIds) {
         var assemblies = WGST.collection[collectionId].assemblies;
 
@@ -1513,6 +1782,14 @@ $(function(){
         tree.setTreeType(selectedOption.val());
     });
 
+    /**
+     * Description
+     * @method renderCollectionTree
+     * @param {} collectionId
+     * @param {} collectionTreeType
+     * @param {} options
+     * @return 
+     */
     var renderCollectionTree = function(collectionId, collectionTreeType, options) {
         console.log('[WGST] Rendering ' + collectionId + ' collection ' +  collectionTreeType + ' tree');
 
@@ -1549,6 +1826,13 @@ $(function(){
             handle: $collectionTreePanel.find('.wgst-draggable-handle'),
             appendTo: "body",
             scroll: false,
+            /**
+             * Description
+             * @method stop
+             * @param {} event
+             * @param {} ui
+             * @return 
+             */
             stop: function(event, ui) {
                 // Store current panel position
                 var panelName = ui.helper.attr('data-panel-name');
@@ -1695,6 +1979,12 @@ $(function(){
     // Init map
     WGST.geo.map.init();
 
+    /**
+     * Description
+     * @method deselectAllTreeNodes
+     * @param {} collectionId
+     * @return 
+     */
     var deselectAllTreeNodes = function(collectionId) {
         var tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
 
@@ -1756,6 +2046,13 @@ $(function(){
         showCollectionMetadataOnMap(collectionId, assemblyIds);
     });
 
+    /**
+     * Description
+     * @method showCollectionMetadataOnMap
+     * @param {} collectionId
+     * @param {} assemblyIds
+     * @return 
+     */
     var showCollectionMetadataOnMap = function(collectionId, assemblyIds) {
 
         WGST.collection[collectionId].geo = WGST.collection[collectionId].geo || {};
@@ -1899,6 +2196,13 @@ $(function(){
 
 
 
+    /**
+     * Description
+     * @method generateYearHtmlElements
+     * @param {} startYear
+     * @param {} endYear
+     * @return yearElements
+     */
     var generateYearHtmlElements = function(startYear, endYear) {
         var yearCounter = endYear,
             yearElementTemplate = '<option value="{{year}}">{{year}}</option>',
@@ -1914,6 +2218,11 @@ $(function(){
         return yearElements;
     };
 
+    /**
+     * Description
+     * @method generateMonthHtmlElements
+     * @return monthElements
+     */
     var generateMonthHtmlElements = function() {
         var monthCounter = 0,
             listOfMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
@@ -1931,6 +2240,13 @@ $(function(){
         return monthElements;
     };
 
+    /**
+     * Description
+     * @method generateDayHtmlElements
+     * @param {} year
+     * @param {} month
+     * @return dayElements
+     */
     var generateDayHtmlElements = function(year, month) {
 
         if (typeof year === 'undefined' || typeof month === 'undefined') {
@@ -1952,11 +2268,26 @@ $(function(){
         return dayElements;
     };
 
+    /**
+     * Description
+     * @method getTotalNumberOfDaysInMonth
+     * @param {} year
+     * @param {} month
+     * @return BinaryExpression
+     */
     var getTotalNumberOfDaysInMonth = function(year, month) {
         // http://www.dzone.com/snippets/determining-number-days-month
         return 32 - new Date(year, month, 32).getDate();
     };
 
+    /**
+     * Description
+     * @method populateDaySelect
+     * @param {} $selectElement
+     * @param {} selectedYear
+     * @param {} selectedMonth
+     * @return 
+     */
     var populateDaySelect = function($selectElement, selectedYear, selectedMonth) {
         // Remove previous list of days and append a new one
         $selectElement.html('')
@@ -2057,6 +2388,16 @@ $(function(){
         totalContigsSum = 0;
 
     // Refactor to fastajs.parse()
+    /**
+     * Description
+     * @method parseFastaFile
+     * @param {} e
+     * @param {} fileCounter
+     * @param {} file
+     * @param {} droppedFiles
+     * @param {} collectionId
+     * @return 
+     */
     var parseFastaFile = function(e, fileCounter, file, droppedFiles, collectionId) {
             // Array of contigs
         var contigs = [],
@@ -2673,6 +3014,14 @@ $(function(){
     
     }; // parseFastaFile()
 
+    /**
+     * Description
+     * @method drawN50Chart
+     * @param {} chartData
+     * @param {} assemblyN50
+     * @param {} fileCounter
+     * @return 
+     */
     var drawN50Chart = function(chartData, assemblyN50, fileCounter) {
 
         var chartWidth = 460,
@@ -2871,12 +3220,24 @@ $(function(){
 
     };
 
+    /**
+     * Description
+     * @method handleDragOver
+     * @param {} event
+     * @return 
+     */
     var handleDragOver = function(event) {
         event.stopPropagation();
         event.preventDefault();
         event.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy
     };
 
+    /**
+     * Description
+     * @method handleDrop
+     * @param {} event
+     * @return 
+     */
     var handleDrop = function(event) {
         // Only handle file drops
         if (event.dataTransfer.files.length > 0) {
@@ -3020,6 +3381,12 @@ $(function(){
         Sequence list navigation buttons
     */
     // Disable/enable range navigation buttons
+    /**
+     * Description
+     * @method updateRangeNavigationButtons
+     * @param {} handleValue
+     * @return 
+     */
     var updateRangeNavigationButtons = function(handleValue) {
         // Update sequence navigation buttons
         if (handleValue === 1) { // Reached min limit
@@ -3039,6 +3406,12 @@ $(function(){
         }
     };
     
+    /**
+     * Description
+     * @method updateSelectedFilesUI
+     * @param {} elementCounter
+     * @return 
+     */
     var updateSelectedFilesUI = function(elementCounter) {
         // Update sequence counter label
         $('.selected-assembly-counter').text(elementCounter);
@@ -3076,6 +3449,11 @@ $(function(){
         selectedFastaFileName = selectedFastaFileElement.attr('data-name'); 
     };
 
+    /**
+     * Description
+     * @method resetPanelAssemblyUploadNavigator
+     * @return 
+     */
     var resetPanelAssemblyUploadNavigator = function() {
         var panel = $('.wgst-panel__assembly-upload-navigator');
         // Set average number of contigs per assembly
@@ -3084,6 +3462,11 @@ $(function(){
         panel.find('.assembly-upload-total-number').text('0');
     };
 
+    /**
+     * Description
+     * @method resetPanelAssemblyUploadProgress
+     * @return 
+     */
     var resetPanelAssemblyUploadProgress = function() {
         var panel = $('.wgst-panel__assembly-upload-progress');
         panel.find('.assemblies-upload-progress .progress-bar').attr('class', 'progress-bar').attr('aria-valuenow', '0');
@@ -3093,6 +3476,11 @@ $(function(){
         panel.find('.assembly-list-upload-progress tbody').html('');
     };
 
+    /**
+     * Description
+     * @method resetPanelAssemblyUploadMetadata
+     * @return 
+     */
     var resetPanelAssemblyUploadMetadata = function() {
         var panel = $('.wgst-panel__assembly-upload-metadata');
 
@@ -3114,11 +3502,21 @@ $(function(){
         panel.find('.adding-metadata-progress-container .progress-percentage').text('0%');
     };
 
+    /**
+     * Description
+     * @method resetPanelAssemblyUploadAnalytics
+     * @return 
+     */
     var resetPanelAssemblyUploadAnalytics = function() {
         var panel = $('.wgst-panel__assembly-upload-analytics');
         panel.find('.assembly-list-container ul').html('');
     };
 
+    /**
+     * Description
+     * @method resetAssemlyUpload
+     * @return 
+     */
     var resetAssemlyUpload = function() {
         // Empty list of selected FASTA files and metadata
         fastaFilesAndMetadata = {};
@@ -3128,6 +3526,11 @@ $(function(){
         resetPanelAssemblyUploadMetadata();
     };
 
+    /**
+     * Description
+     * @method updateSelectedFilesSummary
+     * @return 
+     */
     var updateSelectedFilesSummary = function() {
         // Calculate average number of selected contigs
         var contigsTotalNumber = 0;
@@ -3141,6 +3544,13 @@ $(function(){
         $('.assembly-upload-total-number').text(Object.keys(fastaFilesAndMetadata).length);
     };
 
+    /**
+     * Description
+     * @method assemblyListSliderEventHandler
+     * @param {} event
+     * @param {} ui
+     * @return 
+     */
     var assemblyListSliderEventHandler = function(event, ui) {
         updateSelectedFilesUI(ui.value);
         /*
@@ -3189,6 +3599,11 @@ $(function(){
         $(this).closest('label').find('.not-sure-hint').toggleClass('hide-this');
     });
 
+    /**
+     * Description
+     * @method updateMetadataProgressBar
+     * @return 
+     */
     var updateMetadataProgressBar = function() {
         // Calculate total number of metadata form elements
         var totalNumberOfMetadataItems = 
@@ -3344,6 +3759,12 @@ $(function(){
         event.preventDefault();
     });
 
+    /**
+     * Description
+     * @method calculateAssemblyTopScore
+     * @param {} assemblyScores
+     * @return MemberExpression
+     */
     var calculateAssemblyTopScore = function(assemblyScores) {
         // Sort data by score
         // http://stackoverflow.com/a/15322129
@@ -3368,6 +3789,15 @@ $(function(){
         return sortedScores[0];
     };
 
+    /**
+     * Description
+     * @method updateAssemblyUploadProgressUI
+     * @param {} assemblyId
+     * @param {} userAssemblyId
+     * @param {} numberOfAnalysisResultsPerAssembly
+     * @param {} result
+     * @return 
+     */
     var updateAssemblyUploadProgressUI = function(assemblyId, userAssemblyId, numberOfAnalysisResultsPerAssembly, result) {
         // ------------------------------------------
         // Create result element
@@ -3428,6 +3858,16 @@ $(function(){
         } // if
     };
 
+    /**
+     * Description
+     * @method updateCollectionUploadProgressUI
+     * @param {} collectionId
+     * @param {} userAssemblyId
+     * @param {} assemblyId
+     * @param {} totalNumberOfAnalysisResults
+     * @param {} result
+     * @return 
+     */
     var updateCollectionUploadProgressUI = function(collectionId, userAssemblyId, assemblyId, totalNumberOfAnalysisResults, result) {
         // ------------------------------------------
         // Update collection progress
@@ -3460,6 +3900,12 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method addResistanceProfileToCollection
+     * @param {} collectionId
+     * @return 
+     */
     var addResistanceProfileToCollection = function(collectionId) {
         // ----------------------------------------
         // Ungroup antibiotic resistance profile
@@ -3495,6 +3941,12 @@ $(function(){
         } // for
     };
 
+    /**
+     * Description
+     * @method populateListOfAntibiotics
+     * @param {} $antibioticSelectElement
+     * @return 
+     */
     var populateListOfAntibiotics = function($antibioticSelectElement) {
         // Populate list of antibiotics
         var antibioticGroupName,
@@ -3759,6 +4211,12 @@ $(function(){
         } // if
     });
 
+    /**
+     * Description
+     * @method endAssemblyUploadProgressBar
+     * @param {} collectionId
+     * @return 
+     */
     var endAssemblyUploadProgressBar = function(collectionId) {
         // Update bar's width
         $('.uploading-assembly-progress-container .progress-bar').width('100%');
@@ -3801,14 +4259,16 @@ $(function(){
 
     };
 
-    /*
-    $('.wgst-panel__collection-panel .assemblies-summary-table').on('click', 'tr', function(event) {
-        if (event.target.type !== 'radio' && event.target.type !== 'checkbox') {
-            $(':checkbox', this).trigger('click');
-        }
-    });
-    */
-
+    /**
+     * $('.wgst-panel__collection-panel .assemblies-summary-table').on('click', 'tr', function(event) {
+     * if (event.target.type !== 'radio' && event.target.type !== 'checkbox') {
+     * $(':checkbox', this).trigger('click');
+     * }
+     * });
+     * @method isFullscreenActive
+     * @param {} fullscreenName
+     * @return 
+     */
     var isFullscreenActive = function(fullscreenName) {
         var fullscreenElement = $('[data-fullscreen-name="' + fullscreenName + '"]');
 
@@ -3819,6 +4279,12 @@ $(function(){
         }
     };
 
+    /**
+     * Description
+     * @method isFullscreenVisible
+     * @param {} fullscreenName
+     * @return 
+     */
     var isFullscreenVisible = function(fullscreenName) {
         var fullscreenElement = $('[data-fullscreen-name="' + fullscreenName + '"]');
 
@@ -3841,6 +4307,12 @@ $(function(){
         }
     });
 
+    /**
+     * Description
+     * @method getAssembliesWithIdenticalPosition
+     * @param {} markerPositionLatLng
+     * @return assembliesWithIdenticalPosition
+     */
     var getAssembliesWithIdenticalPosition = function(markerPositionLatLng) {
         //------------------------------------------------------
         // Figure out which marker to create
@@ -4124,6 +4596,13 @@ $(function(){
         PARALLEL_UPLOAD_ASSEMBLY_LIMIT = 5,
         ASSEMBLY_UPLOAD_TIMER = 2000;
 
+    /**
+     * Description
+     * @method uploadAssembly
+     * @param {} collectionId
+     * @param {} assemblyId
+     * @return 
+     */
     var uploadAssembly = function(collectionId, assemblyId) {
         // Upload assembly only if you are within parallel assembly upload limit
         if (numberOfFilesProcessing < PARALLEL_UPLOAD_ASSEMBLY_LIMIT) {
@@ -4393,10 +4872,14 @@ $(function(){
         $(this).blur();
     });
 
+    /**
+     * Description
+     * @method setAssemblyMetadataTimestamp
+     * @param {} sourceFileName
+     * @param {} targetFileName
+     * @return 
+     */
     var setAssemblyMetadataTimestamp = function(sourceFileName, targetFileName) {
-
-        console.log('sourceFileName: ' + sourceFileName);
-        console.log('targetFileName: ' + targetFileName);
 
         if (sourceFileName === targetFileName) {
             return;
@@ -4412,10 +4895,6 @@ $(function(){
             $targetTimestampMonthHtml = $('.assembly-metadata-timestamp-month[data-file-id="' + targetFileName + '"]'),
             $targetTimestampDayHtml = $('.assembly-metadata-timestamp-day[data-file-id="' + targetFileName + '"]'),
             $targetTimestampDaySelect = $targetTimestampDayHtml.find('select');
-
-        console.log('sourceTimestampYearValue: ' + sourceTimestampYearValue);
-        console.log('sourceTimestampMonthValue: ' + sourceTimestampMonthValue);
-        console.log('sourceTimestampDayValue: ' + sourceTimestampDayValue);
 
         // ---------------------------------------------------------
         // Sync state between source and target input elements
@@ -4444,8 +4923,6 @@ $(function(){
             $targetTimestampDayHtml.removeClass('hide-this');
         }
     };
-
-
 
     $('.wgst-panel__assembly-upload-metadata').on('click', '.copy-metadata-to-all-empty-assemblies', function() {
         // -------------------------------------------------------
@@ -4603,23 +5080,23 @@ $(function(){
         e.preventDefault();
     });
 
-    $('.wgst-panel__collection .collection-controls-show-tree').on('click', function(){
-        var collectionId = $(this).attr('collection-id'),
+    $('.wgst-panel__collection').on('click', '.wgst-collection-control__show-tree', function(){
+        var collectionId = $(this).attr('data-collection-id'),
             collectionTreeType = $(this).attr('data-tree-type'),
             collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType;
 
-        //if (collectionTreeType === 'CORE_TREE_RESULT' || collectionTreeType === 'COLLECTION_TREE') {
-            activatePanel(collectionTreePanelId);
-            //activatePanel('collectionTree');
-            showPanel(collectionTreePanelId);
-            //showPanel('collectionTree');
-            showPanelBodyContent(collectionTreePanelId);
-            //showPanelBodyContent('collectionTree');
-            bringPanelToTop(collectionTreePanelId);
-            //bringPanelToTop('collectionTree');
-        //}
+        activatePanel(collectionTreePanelId);
+        showPanel(collectionTreePanelId);
+        showPanelBodyContent(collectionTreePanelId);
+        bringPanelToTop(collectionTreePanelId);
     });
 
+    /**
+     * Description
+     * @method openAssemblyPanel
+     * @param {} assemblyId
+     * @return 
+     */
     var openAssemblyPanel = function(assemblyId) {
 
         // ============================================================
@@ -4972,6 +5449,11 @@ $(function(){
             console.log('[WGST] Requested to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
         });
     });
+    /**
+     * Description
+     * @method renderRepresentativeCollectionTree
+     * @return 
+     */
     var renderRepresentativeCollectionTree = function() {
         console.log('[WGST] Rendering representative collection tree');
 
@@ -4996,6 +5478,11 @@ $(function(){
         // WGST.collection.representative.tree.canvas.draw();
     };
 
+    /**
+     * Description
+     * @method openRepresentativeCollectionTree
+     * @return 
+     */
     var openRepresentativeCollectionTree = function() {
         console.log('[WGST] Opening representative collection tree');
 
@@ -5209,6 +5696,12 @@ google.maps.event.addDomListener(window, "resize", function() {
 });
 
 
+    /**
+     * Description
+     * @method maximizeCollection
+     * @param {} collectionId
+     * @return 
+     */
     var maximizeCollection = function(collectionId) {
         console.log('[WGST] Maximizing collection ' + collectionId);
 
@@ -5289,6 +5782,13 @@ google.maps.event.addDomListener(window, "resize", function() {
     // Panel control buttons
     // ============================================================
 
+    /**
+     * Description
+     * @method bringFullscreenToPanel
+     * @param {} andShowPanel
+     * @param {} callback
+     * @return 
+     */
     var bringFullscreenToPanel = function(andShowPanel, callback) {
         var activeFullscreenElement = $('.wgst-fullscreen--active'),
             fullscreenName = activeFullscreenElement.attr('data-fullscreen-name');
@@ -5320,6 +5820,13 @@ google.maps.event.addDomListener(window, "resize", function() {
         }
     };
 
+    /**
+     * Description
+     * @method bringPanelToFullscreen
+     * @param {} panelId
+     * @param {} callback
+     * @return 
+     */
     var bringPanelToFullscreen = function(panelId, callback) {
         var panel = $('[data-panel-id="' + panelId + '"]'),
             panelName = panel.attr('data-panel-name');
@@ -5340,6 +5847,13 @@ google.maps.event.addDomListener(window, "resize", function() {
         }
     };
 
+    /**
+     * Description
+     * @method bringMapPanelToFullscreen
+     * @param {} panelName
+     * @param {} panelId
+     * @return 
+     */
     var bringMapPanelToFullscreen = function(panelName, panelId) {
         if (! isFullscreenActive(panelName)) {
             bringFullscreenToPanel(false);
@@ -5440,6 +5954,12 @@ google.maps.event.addDomListener(window, "resize", function() {
         } // if
     });
 
+    /**
+     * Description
+     * @method treeManipulationHandler
+     * @param {} canvasElement
+     * @return 
+     */
     var treeManipulationHandler = function(canvasElement) {
         var canvas = canvasElement,
             canvasOffset = canvas.offset(),

@@ -179,6 +179,8 @@ var createCouchbaseConnection = function(bucketName) {
 		host: 'http://129.31.26.151:8091/pools',
 		bucket: bucketName,
 		password: '.oneir66',
+		// Set timeout to 1 minute
+		connectionTimeout: 60000,
 		operationTimeout: 60000
 	}, function(error) {
 		if (error) {
