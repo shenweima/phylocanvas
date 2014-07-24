@@ -2922,6 +2922,11 @@ $(function(){
             // Set the highest z index for this panel
             $('.assembly-upload-panel').trigger('mousedown');
 
+            if (WGST.speak) {
+                var message = new SpeechSynthesisUtterance('You have dropped ' +  event.dataTransfer.files.length + ' files');
+                window.speechSynthesis.speak(message);
+            }
+
             // FileList object
             // https://developer.mozilla.org/en-US/docs/Web/API/FileList
             var droppedFiles = event.dataTransfer.files;
@@ -3224,6 +3229,11 @@ $(function(){
             // Show upload buttons
             $('.adding-metadata-progress-container .upload-controls-container').show();
 
+            if (WGST.speak) {
+                var message = new SpeechSynthesisUtterance('Ready to upload');
+                window.speechSynthesis.speak(message);
+            }
+
             // Enable 'Upload' button
             //$('.assemblies-upload-ready-button').removeAttr('disabled');
         }
@@ -3441,6 +3451,11 @@ $(function(){
         // Once 100% reached change progress bar color to green
         if (newProgressBarPercentageValue >= 100) {
             $collectionUploadProgressBar.addClass('progress-bar-success');
+        }
+
+        if (newProgressBarPercentageValue % 30 === 0) {
+            var message = new SpeechSynthesisUtterance('Uploaded over ' + newProgressBarPercentageValue + ' percent');
+            window.speechSynthesis.speak(message);
         }
     };
 
@@ -4315,6 +4330,12 @@ $(function(){
                     });
                 }, GET_COLLECTION_ID_TIMER);
         }); // activatePanel()
+
+        if (WGST.speak) {
+            var message = new SpeechSynthesisUtterance('Uploading...');
+            window.speechSynthesis.speak(message);
+        }
+
     });
 
     $('.cancel-assembly-upload-button').on('click', function(){
