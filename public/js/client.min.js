@@ -1162,7 +1162,7 @@ $(function(){
         var collectionTrees = trees,
             collectionTreeType,
             openTreeButton,
-            openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}">{{collectionTreeType}}</button>',
+            openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}">{{collectionTreeName}}</button>',
             $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group');
 
         $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
@@ -1177,6 +1177,7 @@ $(function(){
             // Add "Open tree" button for this tree
             openTreeButton = openTreeButtonTemplate.replace(/{{collectionTreeType}}/g, collectionTreeType);
             openTreeButton = openTreeButton.replace(/{{collectionId}}/g, collectionId);
+            openTreeButton = openTreeButton.replace(/{{collectionTreeName}}/g, collectionTreeData.name);
             $collectionControlsShowTree.append($(openTreeButton));
         });
     };
@@ -1799,11 +1800,12 @@ $(function(){
         var collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType,
             collectionTreePanelTemplateSource = $('.wgst-template[data-template-id="collectionTreePanel"]').html(),
             collectionTreePanelTemplate = Handlebars.compile(collectionTreePanelTemplateSource),
+            collectionTreeName = WGST.collection[collectionId].tree[collectionTreeType].name,
             templateContext = {
                 attributePanelId: collectionTreePanelId,
                 attributeCollectionId: collectionId,
                 attributeCollectionTreeType: collectionTreeType,
-                collectionTreeTitle: collectionTreeType
+                collectionTreeTitle: collectionTreeName
             },
             collectionTreePanelHtml,
             $collectionTreePanel;
