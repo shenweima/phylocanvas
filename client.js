@@ -483,6 +483,7 @@ $(function(){
         if (WGST.speak) {
             var message = new SpeechSynthesisUtterance(message);
             window.speechSynthesis.speak(message);
+            WGST.speak = false;
         }
 
         var alertHtmlElement = $('.wgst-alert');
@@ -3453,7 +3454,7 @@ $(function(){
             $collectionUploadProgressBar.addClass('progress-bar-success');
         }
 
-        if (newProgressBarPercentageValue % 30 === 0) {
+        if (WGST.speak === true && newProgressBarPercentageValue % 30 === 0) {
             var message = new SpeechSynthesisUtterance('Uploaded over ' + newProgressBarPercentageValue + ' percent');
             window.speechSynthesis.speak(message);
         }
