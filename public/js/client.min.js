@@ -5,8 +5,8 @@ $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
-    // WGSA can speak now!
-    WGST.speak = false;
+    // WGSA now can speak!
+    WGST.speak = true;
 
     if (WGST.speak) {
         var message = new SpeechSynthesisUtterance('Welcome to WGSA');
@@ -1133,7 +1133,7 @@ $(function(){
         }
 
         console.log('[WGST] Closing collection ' + collectionId);
-        console.dir(WGST.collection[collectionId]);
+        //console.dir(WGST.collection[collectionId]);
 
         clearCollectionAssemblyList(collectionId);
 
@@ -1301,23 +1301,6 @@ $(function(){
                 renderCollectionTreeButtons(collectionId);
                 addResistanceProfileToCollection(collectionId);
 
-                // // ----------------------------------------
-                // // Render collection tree
-                // // ----------------------------------------
-
-                // // Remove previosly rendered collection tree
-                // $collectionTreePanel.find('.wgst-tree-content').html('');
-                // // Attach collection id
-                // $collectionTreePanel.find('.wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
-                // // Set collection tree type
-                // $collectionTreePanel.find('.wgst-tree-content').attr('data-collection-tree-type', 'CORE_TREE_RESULT');
-
-                // Render all collection trees
-
-
-                // endPanelLoadingIndicator('collectionTree');
-                // //showPanelBodyContent('collectionTree');
-
                 // ----------------------------------------
                 // Render assembly metadata list
                 // ----------------------------------------
@@ -1333,10 +1316,7 @@ $(function(){
 
                 WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
 
-                //renderAssemblyAnalysisList(sortedAssemblies, antibiotics);
                 renderAssemblyAnalysisList(collectionId, WGST.antibiotics);
-
-                //renderCollectionFamily(collectionId);
 
                 // ----------------------------------------
                 // Prepare collection
@@ -1373,31 +1353,6 @@ $(function(){
                 endPanelLoadingIndicator('collection');
                 showPanelBodyContent('collection');
 
-                // TO DO: Create table with results for each assembly in this collection
-                // TO DO: Highlight parent node on the reference tree
-                // TO DO: Create markers for each assembly in this collection?
-
-                // deactivatePanel('assemblyUploadProgress', function(){
-                //     resetAssemlyUploadPanel();                
-                // });
-
-                //AAA
-                // activatePanel(['collection', 'collectionTree'], function(){
-                //     // Prepare Collection Tree
-                //     $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
-                //     // Init collection tree
-                //     WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
-                //     // Render collection tree
-                //     renderCollectionTree(collectionId);
-                // });
-
-                // var w = window.open();
-                // var html = $(collectionReportHtml).html();
-                // $(w.document.body).html(html);
-
-
-
-
                 /**
                 * If collection has more than 100 assemblies then show fullscreen instead of panel.
                 *
@@ -1407,8 +1362,6 @@ $(function(){
                     console.log('[WGST] Collection ' + collectionId + ' will be displayed fullscreen');
                     
                     maximizeCollection(collectionId);
-
-                    //deactivatePanel('collection');
                 }
 
                 // Enable 'Collection' nav item
