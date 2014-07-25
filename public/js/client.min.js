@@ -6,7 +6,7 @@ $(function(){
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
     // WGSA can speak now!
-    WGST.speak = true;
+    WGST.speak = false;
 
     if (WGST.speak) {
         var message = new SpeechSynthesisUtterance('Welcome to WGSA');
@@ -599,13 +599,13 @@ $(function(){
             datatype: 'json' // http://stackoverflow.com/a/9155217
         })
         .done(function(representativeCollectionMetadata, textStatus, jqXHR) {
-            console.log('[WGST] Got representative collection metadata');
-            //console.dir(representativeCollectionMetadata);
+            console.log('[WGST] Got representative collection tree metadata');
+            console.dir(representativeCollectionMetadata);
 
             callback(null, representativeCollectionMetadata);
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
-            console.error('✗ [WGST][Error] Failed to get representative collection metadata');
+            console.error('[WGST][Error] ✗ Failed to get representative collection tree metadata');
             console.error(textStatus);
             console.error(errorThrown);
             console.error(jqXHR);
@@ -1101,6 +1101,22 @@ $(function(){
         $('.wgst-panel__collection .collection-assembly-list').html('');
     };
 
+    var removeCollectionTreePanel = function(collectionId, collectionTreeType) {
+        var collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType,
+            $collectionTreePanel = $('.wgst-panel[data-panel-name="' + collectionTreePanelId + '"]');
+
+        $collectionTreePanel.remove();
+    };
+
+    var removeCollectionTreePanels = function(collectionId) {
+        var collectionTrees = WGST.collection[collectionId].tree;
+
+        $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
+            // Render collection tree button
+            removeCollectionTreePanel(collectionId, collectionTreeType);
+        });
+    };
+
     /**
      * Description
      * @method closeCollection
@@ -1108,20 +1124,34 @@ $(function(){
      * @return 
      */
     var closeCollection = function(collectionId) {
-        console.log('[WGST] Closing collection ' + collectionId);
+        /*
+        * If collection object doesn't exist then collection was closed previously.
+        * Do nothing in this case.
+        */
+        if (typeof WGST.collection[collectionId] === 'undefined') {
+            return;
+        }
 
-        //$('.wgst-panel__collection .collection-assembly-list').html('');
+        console.log('[WGST] Closing collection ' + collectionId);
+        console.dir(WGST.collection[collectionId]);
+
         clearCollectionAssemblyList(collectionId);
 
         deactivatePanel(['collection', 'collectionTree'], function(){
-            // Delete collection object
-            delete WGST.collection[collectionId];
+            // Remove collection tree panels
+            removeCollectionTreePanels(collectionId);
             // Change URL
             window.history.replaceState('Object', 'WGST Collection', '');
         });
 
+        // Remove all 'Open tree' buttons
+        $('.wgst-collection-controls__show-tree .btn-group').html('');
+
         // Disable 'Collection' nav item
         disableNavItem('collection');
+
+        // Delete collection object
+        delete WGST.collection[collectionId];
     };
 
     /**
@@ -1227,6 +1257,9 @@ $(function(){
             var message = new SpeechSynthesisUtterance('Loading collection');
             window.speechSynthesis.speak(message);
         }
+
+        // When extending current collection, close it and then open it again
+        closeCollection(collectionId);
 
         // ----------------------------------------
         // Init collection panel
@@ -1379,7 +1412,10 @@ $(function(){
                 }
 
                 // Enable 'Collection' nav item
-                enableNavItem('collection');         
+                enableNavItem('collection');
+
+                // Update address bar
+                window.history.replaceState('Object', 'WGST Collection', '/collection/' + collectionId);    
             } // if
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
@@ -3320,7 +3356,16 @@ $(function(){
             $('.assembly-upload-panel').trigger('mousedown');
 
             if (WGST.speak) {
-                var message = new SpeechSynthesisUtterance('You have dropped ' +  event.dataTransfer.files.length + ' files');
+                var messageText = '',
+                    message;
+
+                if (collectionId.length > 0) {
+                    messageText = 'You have dropped ' +  event.dataTransfer.files.length + ' files to the existing collection.';
+                } else {
+                    messageText = 'You have dropped ' +  event.dataTransfer.files.length + ' files';
+                }
+
+                message = new SpeechSynthesisUtterance(messageText);
                 window.speechSynthesis.speak(message);
             }
 
@@ -4240,8 +4285,6 @@ $(function(){
                 setTimeout(function(){
                     deactivatePanel('assemblyUploadProgress', function(){
                         resetAssemlyUpload();
-                        // Update address bar
-                        window.history.replaceState('Object', 'WGST Collection', '/collection/' + collectionId);
                         getCollection(collectionId);         
                     });
                 }, 1000);
