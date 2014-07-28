@@ -3,7 +3,7 @@ require('longjohn');
 //======================================================
 // Read config file
 //======================================================
-console.log('✔ [WGST] Reading app config file');
+console.log('[WGST] ✔ Reading app config file');
 
 var fs = require('fs'),
 	file = __dirname + '/config.json';
@@ -110,7 +110,7 @@ app.get('/dev/canvas', require('./routes/dev').canvas);
 //app.post('/signin', user.signIn);
 var server = http.createServer(app).listen(app.get('port'), function(){
 //var secureServer = https.createServer(sslOptions, app).listen(app.get('port'), function(){
-  console.log('✔ [WGST] Express secure server listening on port ' + app.get('port'));
+  console.log('[WGST] ✔ Express secure server listening on port ' + app.get('port'));
 });
 
 //======================================================
@@ -138,10 +138,10 @@ io = socketio.listen(server);
 //io = socketio.listen(secureServer);
 
 io.sockets.on('connection', function (socketConnection) {
-	console.log('✔ [WGST][Socket.io] Connnected');
+	console.log('[WGST][Socket.io] ✔ Connnected');
 
 	socketConnection.on('disconnect', function() {
-		console.log('✗ [WGST][Socket.io] Disconnnected');
+		console.log('[WGST][Socket.io] ✗ Disconnnected');
 	});
 
 	socketConnection.on('getRoomId', function() {
@@ -184,11 +184,11 @@ var createCouchbaseConnection = function(bucketName) {
 		operationTimeout: 60000
 	}, function(error) {
 		if (error) {
-			console.error('✗ [WGST][Couchbase][ERROR] ' + error);
+			console.error('[WGST][Couchbase][Error] ✗ ' + error);
 			return;
 		}
 
-		console.log('✔ [WGST][Couchbase] Opened Couchbase connection to "' + bucketName + '" bucket');
+		console.log('[WGST][Couchbase] ✔ Opened Couchbase connection to "' + bucketName + '" bucket');
 	});
 };
 
@@ -221,11 +221,11 @@ rabbitMQExchangeNames = {
 rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
 rabbitMQConnection.on('error', function(error) {
-    console.error("✗ [WGST][RabbitMQ][Error] Connection: " + error);
+    console.error("[WGST][RabbitMQ][Error] ✗ Connection: " + error);
 });
 
 rabbitMQConnection.on("ready", function(){
-	console.log('✔ [WGST][RabbitMQ] Connection is ready');
+	console.log('[WGST][RabbitMQ] ✔ Connection is ready');
 
 	// Exchange for uploading assemblies
 	createExchange(rabbitMQExchangeNames.UPLOAD, {
@@ -260,6 +260,6 @@ var createExchange = function(exchangeName, exchangeProperties) {
 		}, function(exchange) {
 			rabbitMQExchanges[exchange.name] = exchange;
 
-			console.log('✔ [WGST][RabbitMQ] Exchange "' + exchange.name + '" is open');
+			console.log('[WGST][RabbitMQ] ✔ Exchange "' + exchange.name + '" is open');
 		});
 };

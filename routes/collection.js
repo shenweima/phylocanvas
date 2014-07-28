@@ -71,7 +71,7 @@ exports.add = function(req, res) {
 		if (isNewCollection) {
 			couchbaseDatabaseConnections[testWgstFrontBucket].set('collection_' + collectionId, userAssemblyIdToAssemblyIdMap, function(err, result) {
 				if (err) {
-					console.error('✗ [WGST][Couchbase][ERROR] ' + err);
+					console.error('[WGST][Couchbase][Error] ✗ ' + err);
 					return;
 				}
 
