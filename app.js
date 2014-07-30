@@ -6,7 +6,7 @@ require('longjohn');
 console.log('[WGST] ✔ Reading app config file');
 
 var fs = require('fs'),
-	file = __dirname + '/config.json';
+	file = __dirname + '/private/config.json';
 
 var appConfigData = fs.readFileSync(file, 'utf8');
 // Global var on purpose
@@ -42,8 +42,6 @@ var express = require('express'),
 	http = require('http'),
 	//https = require('https'),
 	path = require('path'),
-	//passport = require('passport'),
-	//LocalStrategy = require('passport-local').Strategy,
 	socketio = require('socket.io');
 	uuid = require('node-uuid'),
 	app = express();
@@ -52,10 +50,13 @@ app.set('port', process.env.PORT || appConfig.server.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 //app.use(favicon(__dirname + '/favicon.ico'));
-app.use(morgan({ format: 'dev', immediate: true }));
+app.use(morgan('dev', { immediate: true }));
 // http://stackoverflow.com/a/19965089
 app.use(bodyParser.json({limit: '500mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb'}));
+app.use(bodyParser.urlencoded({
+	extended: true,
+	limit: '50mb'
+}));
 //app.use(methodOverride('X-HTTP-Method-Override'));
 //app.use(cookieParser());
 // app.use(session({

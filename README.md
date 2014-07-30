@@ -9,7 +9,7 @@ Install
 
 Run
 ----------------
-`sudo node app`
+`[sudo] npm start`
 
 Open `http://localhost` in your browser.
 
