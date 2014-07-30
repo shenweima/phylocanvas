@@ -6,7 +6,7 @@ require('longjohn');
 console.log('[WGST] ✔ Reading app config file');
 
 var fs = require('fs'),
-	file = __dirname + '/private/config.json';
+	file = __dirname + '/config.json';
 
 var appConfigData = fs.readFileSync(file, 'utf8');
 // Global var on purpose
