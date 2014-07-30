@@ -1,7 +1,10 @@
 # App config #
 ###################
 config.json
-ssl/*
+
+# SSL #
+###################
+private/ssl/*
 
 # Node modules #
 ###################
