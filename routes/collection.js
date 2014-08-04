@@ -105,7 +105,7 @@ exports.add = function(req, res) {
 
 				couchbaseDatabaseConnections[testWgstFrontBucket].set('collection_' + collectionId, updatedUserAssemblyIdToAssemblyIdMap, function(err, result) {
 					if (err) {
-						console.error('✗ [WGST][Couchbase][ERROR] ' + err);
+						console.error('[WGST][Couchbase][Error] ✗ ' + err);
 						return;
 					}
 
@@ -716,6 +716,44 @@ var getMergedCollectionTree = function(mergedTreeId, callback) {
 		//console.dir(treeData);
 
 		callback(null, treeData);
+	});
+};
+
+exports.apiGetAssemblyTableData = function(req, res) {
+	var assemblyIds = req.body.assemblyIds;
+
+	getAssemblyTableData(assemblyIds, function(error, assemblyTableData){
+		if (error) {
+			res.json(500, { error: error });
+			return;
+		}
+
+		res.json(assemblyTableData);
+	});
+};
+
+var getAssemblyTableData = function(assemblyIds, callback) {
+	console.log('[WGST] Getting table data for assemblies: ' + assemblyIds.join(', '));
+
+	var assemblyTableQueryKeys = assemblyIds.map(function(assemblyId){
+		return 'CORE_RESULT_' + assemblyId;
+	});
+
+	console.log('[WGST][Couchbase] Prepared query keys: ' + assemblyTableQueryKeys);
+
+	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyTableQueryKeys, {}, function(error, result) {
+		if (error) {
+			console.error('[WGST][Couchbase][Error] ✗ ' + error);
+			callback(error, null);
+			return;
+		}
+
+		console.log('[WGST] Got table data for assemblies ' + assemblyIds.join(', '));
+
+		var tableData = result.value;
+		console.dir(tableData);
+
+		callback(null, tableData);
 	});
 };
 
