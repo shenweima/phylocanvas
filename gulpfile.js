@@ -9,8 +9,8 @@ var gulp = require('gulp'),
 
 var taskPaths = {
 	react: {
-		src: './private/react-components/**/*.js',
-		dest: './public/js/lib'
+		src: './private/js/react-components/**/*.js',
+		dest: './public/js/react-components'
 	},
 	scripts: {
 		src: './private/js/*.js',
@@ -36,10 +36,10 @@ gulp.task('react', function() {
 
 gulp.task('scripts', function() {
     return gulp.src(taskPaths.scripts.src)
-    	.pipe(sourcemaps.init())
-    	.pipe(uglify())
+    	//.pipe(sourcemaps.init())
+    	//.pipe(uglify())
     	.pipe(rename('wgsa.min.js'))
-    	.pipe(sourcemaps.write())
+    	//.pipe(sourcemaps.write())
         .pipe(gulp.dest(taskPaths.scripts.dest));
 });
 

@@ -1988,8 +1988,8 @@ $(function(){
         treeCanvas.draw();
     };
 
-    // Init map
-    WGST.geo.map.init();
+    // // Init map
+    // WGST.geo.map.init();
 
     /**
      * Description
@@ -3021,6 +3021,18 @@ $(function(){
                 WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
                 WGST.upload.assembly[fileName].metadata.source = $(this).val();
             });
+
+
+
+                numberOfParsedFastaFiles = numberOfParsedFastaFiles + 1;
+
+                console.log('numberOfDroppedFastaFiles: ' + numberOfDroppedFastaFiles);
+                console.log('numberOfParsedFastaFiles: ' + numberOfParsedFastaFiles);
+
+                if (numberOfDroppedFastaFiles === numberOfParsedFastaFiles) {
+                    openAssemblyUploadPanels();
+                }
+
         
         }(file.name));
     
@@ -3254,6 +3266,26 @@ $(function(){
 
     };
 
+    var openAssemblyUploadPanels = function() {
+        if (! isPanelActive('assemblyUploadNavigator')) {
+            activatePanel('assemblyUploadNavigator');
+            showPanel('assemblyUploadNavigator');
+        }
+
+        if (! isPanelActive('assemblyUploadAnalytics')) {
+            activatePanel('assemblyUploadAnalytics');
+            showPanel('assemblyUploadAnalytics');
+        }        
+
+        if (! isPanelActive('assemblyUploadMetadata')) {
+            activatePanel('assemblyUploadMetadata');
+            showPanel('assemblyUploadMetadata');
+        }
+    };
+
+    var numberOfDroppedFastaFiles = 0,
+        numberOfParsedFastaFiles = 0;
+
     /**
      * Description
      * @method handleDrop
@@ -3288,20 +3320,20 @@ $(function(){
 
             }
 
-            if (! isPanelActive('assemblyUploadNavigator')) {
-                activatePanel('assemblyUploadNavigator');
-                showPanel('assemblyUploadNavigator');
-            }
+            // if (! isPanelActive('assemblyUploadNavigator')) {
+            //     activatePanel('assemblyUploadNavigator');
+            //     showPanel('assemblyUploadNavigator');
+            // }
 
-            if (! isPanelActive('assemblyUploadAnalytics')) {
-                activatePanel('assemblyUploadAnalytics');
-                showPanel('assemblyUploadAnalytics');
-            }        
+            // if (! isPanelActive('assemblyUploadAnalytics')) {
+            //     activatePanel('assemblyUploadAnalytics');
+            //     showPanel('assemblyUploadAnalytics');
+            // }        
 
-            if (! isPanelActive('assemblyUploadMetadata')) {
-                activatePanel('assemblyUploadMetadata');
-                showPanel('assemblyUploadMetadata');
-            }
+            // if (! isPanelActive('assemblyUploadMetadata')) {
+            //     activatePanel('assemblyUploadMetadata');
+            //     showPanel('assemblyUploadMetadata');
+            // }
 
             // Set the highest z index for this panel
             $('.assembly-upload-panel').trigger('mousedown');
@@ -3370,6 +3402,8 @@ $(function(){
                 $('.ui-slider-handle').focus();
             }
 
+            numberOfDroppedFastaFiles = Object.keys(allDroppedFiles).length;
+
             $.each(allDroppedFiles, function(fileCounter, file){
                 // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
 
@@ -3378,13 +3412,10 @@ $(function(){
                     console.dir(file);
 
                     handleCsvDrop(file);
-                }
 
-                console.log('Dropped file type: ' + file.type);
-                console.dir(file);
+                } else if (file.name.match(WGST.dragAndDrop.fastaFileNameRegex)) {
+                    console.log('Dropped FASTA file');
 
-                // Validate file name   
-                if (file.name.match(WGST.dragAndDrop.fastaFileNameRegex)) {
                     if ($('.wgst-panel__assembly-upload-analytics .assembly-item[data-name="' + file.name + '"]').length === 0) {
 
                         // Create closure (new scope) to save fileCounter, file variable with it's current value
@@ -3400,11 +3431,69 @@ $(function(){
                         //})();
 
                     } // if
-                // Invalid file name
+
                 } else {
-                    console.log("[WGST] File not supported");
-                }
+                    // ============================================================
+                    // React component
+                    // ============================================================
+                    React.renderComponent(
+                        WorkflowQuestion({
+                            title: 'What type of data have you dropped?',
+                            buttons: [
+                            {
+                                label: 'Assemblies in FASTA format',
+                                value: 'fasta'
+                            },
+                            {
+                                label: 'Metadata in CSV format',
+                                value: 'csv'
+                            }]
+                        }),
+                        document.querySelectorAll(".wgst-react-component__workflow-question")[0]
+                    );
+                } // if
+
+                //console.log('Dropped file type: ' + file.type);
+                //console.dir(file);
+
+                // // Validate file name   
+                // if (file.name.match(WGST.dragAndDrop.fastaFileNameRegex)) {
+                //     if ($('.wgst-panel__assembly-upload-analytics .assembly-item[data-name="' + file.name + '"]').length === 0) {
+
+                //         // Create closure (new scope) to save fileCounter, file variable with it's current value
+                //         //(function(){
+                //             var fileReader = new FileReader();
+
+                //             fileReader.addEventListener('load', function(event){
+                //                 parseFastaFile(event, fileCounter, file, droppedFiles, collectionId);
+                //             });
+
+                //             // Read file as text
+                //             fileReader.readAsText(file);
+                //         //})();
+
+                //     } // if
+                // // Invalid file name
+                // } else {
+                //     console.log("[WGST] File not supported");
+                // }
+
             });
+
+            // if (! isPanelActive('assemblyUploadNavigator')) {
+            //     activatePanel('assemblyUploadNavigator');
+            //     showPanel('assemblyUploadNavigator');
+            // }
+
+            // if (! isPanelActive('assemblyUploadAnalytics')) {
+            //     activatePanel('assemblyUploadAnalytics');
+            //     showPanel('assemblyUploadAnalytics');
+            // }        
+
+            // if (! isPanelActive('assemblyUploadMetadata')) {
+            //     activatePanel('assemblyUploadMetadata');
+            //     showPanel('assemblyUploadMetadata');
+            // }
 
             // Update total number of assemblies to upload
             $('.assembly-upload-total-number').text(allDroppedFiles.length);
@@ -3560,6 +3649,9 @@ $(function(){
     var resetAssemlyUpload = function() {
         // Empty list of selected FASTA files and metadata
         fastaFilesAndMetadata = {};
+
+        numberOfDroppedFastaFiles = 0,
+        numberOfParsedFastaFiles = 0;
 
         resetPanelAssemblyUploadNavigator();
         resetPanelAssemblyUploadAnalytics();
@@ -6016,6 +6108,9 @@ google.maps.event.addDomListener(window, "resize", function() {
         var $canvas = $(this).closest('.wgst-panel-body-content').find('canvas.phylocanvas');
         treeManipulationHandler($canvas);
     });
+
+    // Init map
+    WGST.geo.map.init();
 
 });
 

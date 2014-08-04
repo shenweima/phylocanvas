@@ -78,6 +78,8 @@
           <a href="#" class="wgst-navigation-item wgst-navigation-item__collection">Collection</a>
         </nav>
 
+        <div class="wgst-react-component wgst-react-component__workflow-question"></div>
+
         <div class="wgst-background"></div>
 
         <div class="wgst-ring" data-wgst-js="ring">
@@ -759,7 +761,7 @@
         <!-- Bootstrap -->
         <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
         <!-- Google Maps v3 API with Places library -->
-        <script src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
+        <script src="//maps.googleapis.com/maps/api/js?v=3.16&sensor=false&libraries=places"></script>
         <!-- D3 -->
         <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.9/d3.min.js" charset="utf-8"></script>
         <!-- Modernizr -->
@@ -789,11 +791,15 @@
         <!-- Socket.io -->
         <script src="/socket.io/socket.io.js"></script>
         <!-- The core React library -->
-        <script src="http://fb.me/react-0.11.1.js"></script>
+        <script src="http://fb.me/react-with-addons-0.11.1.min.js"></script>
+        <!-- React componenets-->
+        <script src="/js/react-components/workflow-question.react.js"></script>
         <!-- Init -->
         <script>
           $(function(){
+
             'use strict';
+
             /*
               The name "undefined" is not guaranteed to have the type "undefined".
               It can be assigned other values, like null or 1.
@@ -830,8 +836,6 @@
             })();
           });
         </script>
-        <!-- React componenets-->
-        <script src="/js/lib/workflow-question.js"></script>
         <!-- Client -->
         <script src="/js/wgsa.min.js"></script>
     </body>
