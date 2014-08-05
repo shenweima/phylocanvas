@@ -940,3 +940,56 @@ exports.getAllAntibiotics = function(callback) {
 		callback(null, antibiotics);
 	});
 };
+
+exports.apiGetAssemblyTableData = function(req, res) {
+	var assemblyIds = req.body.assemblyIds;
+
+	getAssemblyTableData(assemblyIds, function(error, assemblyTableData) {
+		if (error) {
+			res.json(500, { error: error });
+			return;
+		}
+
+		res.json(reduceAssemblyTableData(assemblyTableData));
+	});
+};
+
+var reduceAssemblyTableData = function(assemblyDataTable) {
+	var reducedAssemblyDataTable = {},
+		assembly;
+
+	for (assemblyDataTableQueryKey in assemblyDataTable) {
+		if (assemblyDataTable.hasOwnProperty(assemblyDataTableQueryKey)) {
+			assembly = assemblyDataTable[assemblyDataTableQueryKey].value;
+			reducedAssemblyDataTable[assembly.assemblyId] = {
+				assemblyId: assembly.assemblyId,
+				completeAlleles: assembly.completeAlleles
+			};
+		}
+	}
+
+	return reducedAssemblyDataTable;
+}
+
+var getAssemblyTableData = function(assemblyIds, callback) {
+	console.log('[WGST] Getting table data for assemblies: ' + assemblyIds.join(', '));
+
+	var assemblyTableQueryKeys = assemblyIds.map(function(assemblyId){
+		return 'CORE_RESULT_' + assemblyId;
+	});
+
+	console.log('[WGST][Couchbase] Prepared query keys: ' + assemblyTableQueryKeys.join(', '));
+
+	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyTableQueryKeys, {}, function(error, assemblyTableData) {
+		if (error) {
+			console.error('[WGST][Couchbase][Error] ✗ ' + error);
+			callback(error, null);
+			return;
+		}
+
+		console.log('[WGST] Got table data for assemblies ' + assemblyIds.join(', '));
+		console.dir(assemblyTableData);
+
+		callback(null, assemblyTableData);
+	});
+};

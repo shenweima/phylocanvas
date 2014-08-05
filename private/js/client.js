@@ -1192,13 +1192,24 @@ $(function(){
             collectionTreeName = collectionTree.name,
             openTreeButton,
             openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}">{{collectionTreeName}}</button>',
-            $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group');
+            $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group'),
+            $collectionControlsShowDataTable = $('.wgst-collection-controls__show-data-table .btn-group');
 
         // Add "Open tree" button to this collection panel
         openTreeButton = openTreeButtonTemplate.replace(/{{collectionTreeType}}/g, collectionTreeType);
         openTreeButton = openTreeButton.replace(/{{collectionId}}/g, collectionId);
         openTreeButton = openTreeButton.replace(/{{collectionTreeName}}/g, collectionTreeName);
         $collectionControlsShowTree.append($(openTreeButton));
+    };
+
+    var renderCollectionDataButton = function(collectionId) {
+        // Init all collection trees
+        var openCollectionDataTableButton,
+            openCollectionDataTableTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-data-table" data-collection-id="{{collectionId}}">Core Genome Profile</button>',
+            $collectionControlsShowDataTable = $('.wgst-collection-controls__show-data-table .btn-group');
+
+        openCollectionDataTableButton = openCollectionDataTableTemplate.replace(/{{collectionId}}/g, collectionId);
+        $collectionControlsShowDataTable.append($(openCollectionDataTableButton));
     };
 
     var renderCollectionTrees = function(collectionId, collectionTreeOptions) {
@@ -1287,6 +1298,7 @@ $(function(){
                 initCollection(collectionId, data.collection.assemblies, data.collection.tree);
                 renderCollectionTrees(collectionId);
                 renderCollectionTreeButtons(collectionId);
+                renderCollectionDataButton(collectionId);
                 addResistanceProfileToCollection(collectionId);
 
                 // ----------------------------------------
@@ -5132,6 +5144,33 @@ $(function(){
         bringPanelToTop(collectionTreePanelId);
     });
 
+    $('.wgst-panel__collection').on('click', '.wgst-collection-control__show-data-table', function(){
+        var collectionId = $(this).attr('data-collection-id');
+        
+        // Get all assembly ids for this collection
+        var assemblies = WGST.collection[collectionId].assemblies,
+            assemblyIds = Object.keys(assemblies);
+
+        // Request data
+        $.ajax({
+            type: 'POST',
+            url: '/api/assembly/table-data',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: {
+                assemblyIds: assemblyIds
+            }
+        })
+        .done(function(assemblyTableData, textStatus, jqXHR) {
+            console.log('[WGST] Got assembly table data');
+            console.dir(assemblyTableData);
+        });
+
+        // activatePanel(collectionTreePanelId);
+        // showPanel(collectionTreePanelId);
+        // showPanelBodyContent(collectionTreePanelId);
+        // bringPanelToTop(collectionTreePanelId);
+    });
+
     /**
      * Description
      * @method openAssemblyPanel
@@ -6064,7 +6103,7 @@ google.maps.event.addDomListener(window, "resize", function() {
         collectionAssemblyList.find('.antibiotic[data-toggle="tooltip"]').tooltip();
     };
 
-    $('.collection-assembly-list-view-all-assemblies').on('click', function(e){
+    $('.collection-assembly-list-view-all-assemblies').on('click', function(e) {
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
             collectionAssemblyList = $('.collection-assembly-list');
 
