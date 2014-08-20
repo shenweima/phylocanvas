@@ -1,0 +1,79 @@
+// ============================
+// Landing page
+// ============================
+
+@action-color: #8C61D4;
+
+h1, h2, h3, h4, p {
+    margin: 0;
+    padding: 0;
+}
+
+.wgst-page__landing {
+    min-height: 100%;
+    background-color: #232B2D;
+
+    .wgst-page-section {
+        padding: 40px;
+        text-align: center;
+    }
+
+    .wgst-page-section__header {
+        text-align: center;
+        background-color: #fff;
+
+        h1 {
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+        .btn {
+            //margin-bottom: -20px;
+            background-color: @action-color;
+            border-color: #fff;
+            color: #fff;
+            border-width: 2px;
+        }
+    }
+
+    .wgst-page-section__action {
+        background-color: @action-color;
+
+        .action-box {
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #fff;
+            text-align: center;
+            margin-bottom: 60px;
+
+            &:last-of-type {
+                margin-bottom: 0;
+            }
+            h3 {
+                display: block;
+                width: 80px;
+                background-color: @action-color;
+                font-weight: 400;
+                text-align: center;
+                margin: -15px auto 0 auto;
+            }
+            h4 {
+                margin: 20px 0;
+                text-align: center;
+                font-weight: 300;
+            }
+            p, input {
+                margin: 20px 0;
+            }
+            .btn {
+                margin-bottom: -20px;
+                background-color: @action-color;
+                border-color: #fff;
+                color: #fff;
+                border-width: 2px;
+            }
+        }
+    }
+
+    .wgst-page-section__footer {
+        color: #fff;
+    }
+}

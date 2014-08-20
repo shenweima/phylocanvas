@@ -5,6 +5,25 @@ $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
+    //
+    // Which page should you load?
+    //
+    if (typeof window.WGST.requestedCollectionId !== 'undefined') {
+
+        //
+        // Show app page
+        //
+        $('.wgst-page__app').show();
+    } else {
+
+        //
+        // Show default page
+        //
+        $('.wgst-page__landing').show();
+
+        return;
+    }
+
     // WGSA now can speak!
     WGST.speak = false;
 
