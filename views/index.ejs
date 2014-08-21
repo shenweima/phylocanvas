@@ -52,7 +52,9 @@
         
         <header class="wgst-page-section wgst-page-section__header">
           <h1>Whole Genome Sequence Analysis (WGSA)</h1>
-          <a href="/collection/763fcaf5-5dfc-4ad5-86af-1861396c9cb5" class="btn btn-default btn-lg">Explore sample collection</a>
+          <a href="/collection/new" class="btn btn-default btn-lg">Create new collection</a>
+          <br />
+          <a href="/collection/763fcaf5-5dfc-4ad5-86af-1861396c9cb5" class="btn btn-link btn-lg">Explore sample collection</a>
         </header>
 
         <section class="wgst-page-section wgst-page-section__action">
@@ -883,6 +885,14 @@
               <% if (typeof requestedCollectionId !== 'undefined') { %>
                 // Store requested collection id
                 window.WGST.requestedCollectionId = '<%- requestedCollectionId %>';
+              <% } %>
+
+              // If user requested collection, e.g.: /assembly/FINGERPRINT_COMPARISON_154273030677208533352573798127987081488
+              <% if (typeof newCollection !== 'undefined') { %>
+                // Store requested collection id
+                window.WGST.isNewCollection = true;
+              <% } else { %>
+                window.WGST.isNewCollection = false;
               <% } %>
 
               <% if (typeof appConfig !== 'undefined') { %>

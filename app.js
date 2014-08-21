@@ -82,6 +82,8 @@ app.get('/users/name/:name', user.name);
 // Collection routes
 app.post('/collection/', collection.apiGetCollection);
 app.post('/collection/add', collection.add);
+app.get('/collection/new', collection.newCollection);
+
 //app.get('/collection/representative', routes.getRepresentativeTreeMetadata);
 app.get('/api/collection/representative/metadata', collection.apiGetRepresentativeCollection);
 app.get('/collection/:id', collection.get);
@@ -198,6 +200,11 @@ var createCouchbaseBucketConnection = function(bucketName, password) {
 //
 // Global variable on purpose - will store socket connection and will be shared with routes
 couchbaseDatabaseConnections = {};
+COUCHBASE_BUCKETS = {
+	'MAIN': 'main',
+	'RESOURCES': 'resources',
+	'FRONT': 'front'
+};
 
 var bucketName,
 	bucketPassword;
@@ -241,35 +248,35 @@ rabbitMQExchangeNames = {
 //
 // Temporary disabling RabbitMQ
 //
-// rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
+rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
-// rabbitMQConnection.on('error', function(error) {
-//     console.error("[WGST][RabbitMQ][Error] ✗ Connection: " + error);
-// });
+rabbitMQConnection.on('error', function(error) {
+    console.error("[WGST][RabbitMQ][Error] ✗ Connection: " + error);
+});
 
-// rabbitMQConnection.on("ready", function(){
-// 	console.log('[WGST][RabbitMQ] ✔ Connection is ready');
+rabbitMQConnection.on("ready", function(){
+	console.log('[WGST][RabbitMQ] ✔ Connection is ready');
 
-// 	// Exchange for uploading assemblies
-// 	createExchange(rabbitMQExchangeNames.UPLOAD, {
-// 		type: 'direct'
-// 	});
+	// Exchange for uploading assemblies
+	createExchange(rabbitMQExchangeNames.UPLOAD, {
+		type: 'direct'
+	});
 
-// 	// Exchange for getting notifications
-// 	createExchange(rabbitMQExchangeNames.NOTIFICATION, {
-// 		type: 'topic'
-// 	});
+	// Exchange for getting notifications
+	createExchange(rabbitMQExchangeNames.NOTIFICATION, {
+		type: 'topic'
+	});
 
-// 	// Exchange for getting collection id
-// 	createExchange(rabbitMQExchangeNames.COLLECTION_ID, {
-// 		type: 'direct'
-// 	});
+	// Exchange for getting collection id
+	createExchange(rabbitMQExchangeNames.COLLECTION_ID, {
+		type: 'direct'
+	});
 
-// 	// Exchange for getting collection id
-// 	createExchange(rabbitMQExchangeNames.TASKS, {
-// 		type: 'direct'
-// 	});
-// });
+	// Exchange for getting collection id
+	createExchange(rabbitMQExchangeNames.TASKS, {
+		type: 'direct'
+	});
+});
 
 var createExchange = function(exchangeName, exchangeProperties) {
 	rabbitMQConnection.exchange(exchangeName, {

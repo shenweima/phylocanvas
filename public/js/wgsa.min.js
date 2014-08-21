@@ -8,7 +8,11 @@ $(function(){
     //
     // Which page should you load?
     //
-    if (typeof window.WGST.requestedCollectionId !== 'undefined') {
+    if (typeof window.WGST.requestedCollectionId !== 'undefined'
+        || window.WGST.isNewCollection === true) {
+
+        console.log('NEW!!!');
+        console.log(window.WGST.isNewCollection);
 
         //
         // Show app page

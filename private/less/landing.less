@@ -26,7 +26,17 @@ h1, h2, h3, h4, p {
             font-weight: 400;
             margin-bottom: 40px;
         }
-        .btn {
+        a {
+            display: inline-block;
+            clear: both;
+            color: #8c61d4;
+            margin-bottom: 20px;
+
+            &:last-of-type {
+                margin-bottom: 0;
+            }
+        }
+        .btn-default {
             //margin-bottom: -20px;
             background-color: @action-color;
             border-color: #fff;

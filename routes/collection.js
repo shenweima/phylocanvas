@@ -69,7 +69,7 @@ exports.add = function(req, res) {
 			userAssemblyIdToAssemblyIdMap = data.idMap;
 
 		if (isNewCollection) {
-			couchbaseDatabaseConnections[bucketFront].set('collection_' + collectionId, userAssemblyIdToAssemblyIdMap, function(err, result) {
+			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].set('collection_' + collectionId, userAssemblyIdToAssemblyIdMap, function(err, result) {
 				if (err) {
 					console.error('[WGST][Couchbase][Error] ✗ ' + err);
 					return;
@@ -89,7 +89,7 @@ exports.add = function(req, res) {
 			});
 		} else {
 			// Get list of assemblies
-			couchbaseDatabaseConnections[bucketFront].get('collection_' + collectionId, function(err, existingUserAssemblyIdToAssemblyIdMap) {
+			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].get('collection_' + collectionId, function(err, existingUserAssemblyIdToAssemblyIdMap) {
 				if (err) throw err;
 
 				console.log('Does that look correct to you?');
@@ -103,7 +103,7 @@ exports.add = function(req, res) {
 					updatedUserAssemblyIdToAssemblyIdMap[assemblyId] = userAssemblyIdToAssemblyIdMap[assemblyId];
 				}
 
-				couchbaseDatabaseConnections[bucketFront].set('collection_' + collectionId, updatedUserAssemblyIdToAssemblyIdMap, function(err, result) {
+				couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].set('collection_' + collectionId, updatedUserAssemblyIdToAssemblyIdMap, function(err, result) {
 					if (err) {
 						console.error('[WGST][Couchbase][Error] ✗ ' + err);
 						return;
@@ -172,7 +172,7 @@ exports.add = function(req, res) {
 // 	console.log('[WGST] Querying keys:');
 // 	console.dir(assemblyIds);
 
-// 	couchbaseDatabaseConnections[bucketMain].getMulti(assemblyIds, {}, function(err, assembliesData) {
+// 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(assemblyIds, {}, function(err, assembliesData) {
 // 		console.log('[WGST] Got assemblies data');
 // 		console.dir(assembliesData);
 
@@ -308,7 +308,7 @@ exports.add = function(req, res) {
 // 	console.log('[WGST] Getting collection ' + collectionId);
 
 // 	// Get list of assemblies
-// 	couchbaseDatabaseConnections[bucketMain].get('CORE_TREE_RESULT_' + collectionId, function(err, assemblyIdsData) {
+// 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('CORE_TREE_RESULT_' + collectionId, function(err, assemblyIdsData) {
 // 		if (err) throw err;
 
 // 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
@@ -322,7 +322,7 @@ exports.add = function(req, res) {
 // 			collection.assemblies = assemblies;
 
 // 			// Get collection tree data
-// 			couchbaseDatabaseConnections[bucketMain].get('CORE_TREE_RESULT_' + collectionId, function(err, collectionTreeData) {
+// 			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('CORE_TREE_RESULT_' + collectionId, function(err, collectionTreeData) {
 // 				if (err) throw err;
 
 // 				var collectionTreeData = collectionTreeData.value.newickTree;
@@ -351,7 +351,7 @@ exports.apiGetCollection = function(req, res) {
 	console.time('[WGST] Getting list of assemblies for collection ' + collectionId);
 
 	// Get list of assemblies
-	couchbaseDatabaseConnections[bucketMain].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
 		if (error) {
 			// Ignore this error for now
 			res.json({});
@@ -392,7 +392,7 @@ exports.apiGetCollection = function(req, res) {
 					collectionTreeQueryKeys.push('CORE_ALLELE_TREE_' + collectionId);
 
 					// Get collection tree data
-					couchbaseDatabaseConnections[bucketMain].getMulti(collectionTreeQueryKeys, {}, function(error, collectionTreesData) {
+					couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(collectionTreeQueryKeys, {}, function(error, collectionTreesData) {
 						if (error) {
 							// Ignore this error for now
 							//res.json({});
@@ -483,7 +483,7 @@ exports.apiGetCollection = function(req, res) {
 		// 	collection.assemblies = assemblies;
 
 		// 	// Get collection tree data
-		// 	couchbaseDatabaseConnections[bucketMain].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+		// 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
 		// 		if (err) throw err;
 
 		// 		var collectionTreeData = collectionTreeData.value.newickTree;
@@ -513,7 +513,7 @@ exports.apiGetRepresentativeCollection = function(req, res) {
 	console.log('[WGST] Getting representative collection');
 
 	// Get list of assemblies
-	couchbaseDatabaseConnections[bucketResources].get('REP_METADATA_1280', function(err, representativeCollectionMetadata) {
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.RESOURCES].get('REP_METADATA_1280', function(err, representativeCollectionMetadata) {
 		if (err) throw err;
 
 		representativeCollectionMetadata = representativeCollectionMetadata.value;
@@ -533,7 +533,7 @@ exports.apiGetRepresentativeCollection = function(req, res) {
 // 	console.log('[WGST] Getting collection ' + collectionId);
 
 // 	// Get list of assemblies
-// 	couchbaseDatabaseConnections[bucketMain].get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
+// 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function(err, assemblyIdsData) {
 // 		if (err) throw err;
 
 // 		var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
@@ -553,7 +553,7 @@ exports.apiGetRepresentativeCollection = function(req, res) {
 // 			collection.assemblies = assemblies;
 
 // 			// Get collection tree data
-// 			couchbaseDatabaseConnections[bucketMain].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
+// 			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_TREE_' + collectionId, function(err, collectionTreeData) {
 // 				if (err) throw err;
 
 // 				var collectionTreeData = collectionTreeData.value.newickTree;
@@ -587,6 +587,16 @@ exports.get = function(req, res) {
 	res.render('index', {
 		appConfig: JSON.stringify(appConfig.client),
 		requestedCollectionId: collectionId
+	});
+};
+
+exports.newCollection = function(req, res) {
+
+	console.log('!!!NEW!!!');
+
+	res.render('index', {
+		appConfig: JSON.stringify(appConfig.client),
+		newCollection: true
 	});
 };
 
@@ -704,7 +714,7 @@ exports.mergeCollectionTrees = function(req, res) {
 var getMergedCollectionTree = function(mergedTreeId, callback) {
 	console.log('[WGST] Getting merged tree ' + mergedTreeId);
 
-	couchbaseDatabaseConnections[bucketMain].get(mergedTreeId, function(err, result) {
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(mergedTreeId, function(err, result) {
 		if (err) {
 			callback(err, null);
 			return;
