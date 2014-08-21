@@ -251,7 +251,7 @@ rabbitMQExchangeNames = {
 rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
 rabbitMQConnection.on('error', function(error) {
-    console.error("[WGST][RabbitMQ][Error] ✗ Connection: " + error);
+    console.error('[WGST][RabbitMQ][Error] ✗ Connection: ' + error);
 });
 
 rabbitMQConnection.on("ready", function(){

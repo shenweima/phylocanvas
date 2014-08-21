@@ -236,7 +236,7 @@ exports.add = function(req, res) {
 				replyTo: uploadQueueId
 			}, function(err){
 				if (err) {
-					console.error('✗ [WGST][RabbitMQ][ERROR] Error when trying to publish to upload exchange');
+					console.error('[WGST][RabbitMQ][Error] ✗ Error when trying to publish to upload exchange');
 					return;
 				}
 
@@ -270,7 +270,7 @@ exports.add = function(req, res) {
 exports.get = function(req, res) {
 	console.log('[WGST] Requested assembly id: ' + req.params.id);
 
-	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.main].get(req.params.id, function(err, result) {
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(req.params.id, function(err, result) {
 		if (err) throw err;
 
 		var assembly = result.value;
@@ -487,7 +487,7 @@ exports.getAssembly = function(assemblyId, callback) {
 	// ------------------------------------------
 	// Query assembly data
 	// ------------------------------------------
-	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.main].getMulti(assemblyQueryKeys, {}, function(error, assemblyData) {
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(assemblyQueryKeys, {}, function(error, assemblyData) {
 		if (error) {
 			callback(error, assemblyData);
 			return;
@@ -682,7 +682,7 @@ exports.apiGetAssemblies = function(req, res) {
 	// ------------------------------------------
 	// Query assembly data
 	// ------------------------------------------
-	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.main].getMulti(assemblyIdQueryKeys, {}, function(error, results) {
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(assemblyIdQueryKeys, {}, function(error, results) {
 		console.log('[WGST][Couchbase] Got assemblies data:');
 		//console.log(results);
 
@@ -901,7 +901,7 @@ exports.getResistanceProfile = function(callback) {
 	console.log('[WGST] Resistance profile query keys: ');
 	console.log(resistanceProfileQueryKeys);
 
-	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.main].getMulti(resistanceProfileQueryKeys, {}, function(error, results) {
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(resistanceProfileQueryKeys, {}, function(error, results) {
 		console.log('[WGST][Couchbase] Got resistance profile data:');
 		console.dir(results);
 
@@ -980,7 +980,7 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 
 	console.log('[WGST][Couchbase] Prepared query keys: ' + assemblyTableQueryKeys.join(', '));
 
-	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.main].getMulti(assemblyTableQueryKeys, {}, function(error, assemblyTableData) {
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(assemblyTableQueryKeys, {}, function(error, assemblyTableData) {
 		if (error) {
 			console.error('[WGST][Couchbase][Error] ✗ ' + error);
 			callback(error, null);
