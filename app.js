@@ -174,17 +174,12 @@ io.sockets.on('connection', function (socketConnection) {
 
 var couchbase = require('couchbase');
 
-// Global variable on purpose - will store socket connection and will be shared with routes
-couchbaseDatabaseConnections = {};
-testWgstBucket = 'test_wgst';
-testWgstResourcesBucket = 'test_wgst_resources';
-testWgstFrontBucket = 'test_wgst_front';
-
-var createCouchbaseConnection = function(bucketName) {
+var createCouchbaseBucketConnection = function(bucketName, password) {
+	console.log('[WGST][Couchbase] Connecting to bucket: ' + bucketName + ' ' + password);
 	return new couchbase.Connection({
 		host: 'http://' + couchbaseAddress + ':8091/pools',
 		bucket: bucketName,
-		password: '.oneir66',
+		password: password,
 		// Set timeout to 1 minute
 		connectionTimeout: 60000,
 		operationTimeout: 60000
@@ -198,9 +193,28 @@ var createCouchbaseConnection = function(bucketName) {
 	});
 };
 
-couchbaseDatabaseConnections[testWgstBucket] = createCouchbaseConnection(testWgstBucket);
-couchbaseDatabaseConnections[testWgstResourcesBucket] = createCouchbaseConnection(testWgstResourcesBucket);
-couchbaseDatabaseConnections[testWgstFrontBucket] = createCouchbaseConnection(testWgstFrontBucket);
+//
+// Create buckets from config
+//
+// Global variable on purpose - will store socket connection and will be shared with routes
+couchbaseDatabaseConnections = {};
+
+var bucketName,
+	bucketPassword;
+
+Object.keys(appConfig.server.couchbase.buckets).map(function(bucketType){
+	bucketName = appConfig.server.couchbase.buckets[bucketType].name;
+	bucketPassword = appConfig.server.couchbase.buckets[bucketType].password;
+	couchbaseDatabaseConnections[bucketType] = createCouchbaseBucketConnection(bucketName, bucketPassword);
+});
+
+// testWgstBucket = 'wgsa';
+// testWgstResourcesBucket = 'wgsa_resources';
+// testWgstFrontBucket = 'wgsa_front';
+
+// couchbaseDatabaseConnections[testWgstBucket] = createCouchbaseConnection(testWgstBucket);
+// couchbaseDatabaseConnections[testWgstResourcesBucket] = createCouchbaseConnection(testWgstResourcesBucket);
+// couchbaseDatabaseConnections[testWgstFrontBucket] = createCouchbaseConnection(testWgstFrontBucket);
 
 //======================================================
 // RabbitMQ
@@ -224,35 +238,38 @@ rabbitMQExchangeNames = {
 	TASKS: 'wgst-tasks-ex'
 };
 
-rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
+//
+// Temporary disabling RabbitMQ
+//
+// rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
-rabbitMQConnection.on('error', function(error) {
-    console.error("[WGST][RabbitMQ][Error] ✗ Connection: " + error);
-});
+// rabbitMQConnection.on('error', function(error) {
+//     console.error("[WGST][RabbitMQ][Error] ✗ Connection: " + error);
+// });
 
-rabbitMQConnection.on("ready", function(){
-	console.log('[WGST][RabbitMQ] ✔ Connection is ready');
+// rabbitMQConnection.on("ready", function(){
+// 	console.log('[WGST][RabbitMQ] ✔ Connection is ready');
 
-	// Exchange for uploading assemblies
-	createExchange(rabbitMQExchangeNames.UPLOAD, {
-		type: 'direct'
-	});
+// 	// Exchange for uploading assemblies
+// 	createExchange(rabbitMQExchangeNames.UPLOAD, {
+// 		type: 'direct'
+// 	});
 
-	// Exchange for getting notifications
-	createExchange(rabbitMQExchangeNames.NOTIFICATION, {
-		type: 'topic'
-	});
+// 	// Exchange for getting notifications
+// 	createExchange(rabbitMQExchangeNames.NOTIFICATION, {
+// 		type: 'topic'
+// 	});
 
-	// Exchange for getting collection id
-	createExchange(rabbitMQExchangeNames.COLLECTION_ID, {
-		type: 'direct'
-	});
+// 	// Exchange for getting collection id
+// 	createExchange(rabbitMQExchangeNames.COLLECTION_ID, {
+// 		type: 'direct'
+// 	});
 
-	// Exchange for getting collection id
-	createExchange(rabbitMQExchangeNames.TASKS, {
-		type: 'direct'
-	});
-});
+// 	// Exchange for getting collection id
+// 	createExchange(rabbitMQExchangeNames.TASKS, {
+// 		type: 'direct'
+// 	});
+// });
 
 var createExchange = function(exchangeName, exchangeProperties) {
 	rabbitMQConnection.exchange(exchangeName, {

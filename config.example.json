@@ -4,7 +4,21 @@
 			"port": "80"
 		},
 		"couchbase": {
-			"ip": "127.0.0.1"
+			"ip": "127.0.0.1",
+			"buckets": {
+				"main": {
+					"name": "wgsa",
+					"password": ""
+				},
+				"resources": {
+					"name": "wgsa_resources",
+					"password": ""
+				},
+				"front": {
+					"name": "wgsa_front",
+					"password": ""
+				}
+			}
 		}
 	},
 	"client": {

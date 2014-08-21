@@ -190,7 +190,7 @@ exports.add = function(req, res) {
 			console.log('[WGST][Couchbase] Inserting assembly metadata with key: ' + metadataKey);
 			console.dir(metadata);
 
-			couchbaseDatabaseConnections[testWgstBucket].set(metadataKey, metadata, function(err, result) {
+			couchbaseDatabaseConnections[main].set(metadataKey, metadata, function(err, result) {
 				if (err) {
 					console.error('✗ [WGST][Couchbase][ERROR] ' + err);
 					return;
@@ -270,7 +270,7 @@ exports.add = function(req, res) {
 exports.get = function(req, res) {
 	console.log('[WGST] Requested assembly id: ' + req.params.id);
 
-	couchbaseDatabaseConnections[testWgstBucket].get(req.params.id, function(err, result) {
+	couchbaseDatabaseConnections[bucketMain].get(req.params.id, function(err, result) {
 		if (err) throw err;
 
 		var assembly = result.value;
@@ -343,7 +343,7 @@ exports.getST = function(alleles, callback) {
 	// } // for
 
 	// Get ST code
-	couchbaseDatabaseConnections[testWgstResourcesBucket].get(stQueryKey, function(error, stData) {
+	couchbaseDatabaseConnections[bucketResources].get(stQueryKey, function(error, stData) {
 		if (error) {
 			if (error.code === 13) {
 				console.log('! [WGST][Warning] No such ST key found: ' + stQueryKey);
@@ -364,7 +364,7 @@ exports.getSTs = function(stQueryKeys, callback) {
 	//console.dir(alleles);
 
 	// Get ST codes
-	couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(stQueryKeys, {}, function(error, stData) {
+	couchbaseDatabaseConnections[bucketResources].getMulti(stQueryKeys, {}, function(error, stData) {
 
 		// Have to ignore error for now, because this some keys might not be found
 
@@ -487,7 +487,7 @@ exports.getAssembly = function(assemblyId, callback) {
 	// ------------------------------------------
 	// Query assembly data
 	// ------------------------------------------
-	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyQueryKeys, {}, function(error, assemblyData) {
+	couchbaseDatabaseConnections[bucketMain].getMulti(assemblyQueryKeys, {}, function(error, assemblyData) {
 		if (error) {
 			callback(error, assemblyData);
 			return;
@@ -629,7 +629,7 @@ exports.getMlstAllelesData = function(queryKeys, callback) {
 	}
 
 	console.log('[WGST] Getting MLST alleles data');
-	couchbaseDatabaseConnections[testWgstResourcesBucket].getMulti(queryKeys, {}, function(error, mlstAllelesData) {
+	couchbaseDatabaseConnections[bucketResources].getMulti(queryKeys, {}, function(error, mlstAllelesData) {
 		if (error) {
 			callback(error, mlstAllelesData);
 			return;
@@ -682,7 +682,7 @@ exports.apiGetAssemblies = function(req, res) {
 	// ------------------------------------------
 	// Query assembly data
 	// ------------------------------------------
-	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyIdQueryKeys, {}, function(error, results) {
+	couchbaseDatabaseConnections[bucketMain].getMulti(assemblyIdQueryKeys, {}, function(error, results) {
 		console.log('[WGST][Couchbase] Got assemblies data:');
 		//console.log(results);
 
@@ -901,7 +901,7 @@ exports.getResistanceProfile = function(callback) {
 	console.log('[WGST] Resistance profile query keys: ');
 	console.log(resistanceProfileQueryKeys);
 
-	couchbaseDatabaseConnections[testWgstBucket].getMulti(resistanceProfileQueryKeys, {}, function(error, results) {
+	couchbaseDatabaseConnections[bucketMain].getMulti(resistanceProfileQueryKeys, {}, function(error, results) {
 		console.log('[WGST][Couchbase] Got resistance profile data:');
 		console.dir(results);
 
@@ -927,7 +927,7 @@ exports.getAllAntibiotics = function(callback) {
 	console.log('[WGST] Getting list of all antibiotics');
 
 	// Get list of all antibiotics
-	couchbaseDatabaseConnections[testWgstResourcesBucket].get('ANTIMICROBIALS_ALL', function(error, result) {
+	couchbaseDatabaseConnections[bucketResources].get('ANTIMICROBIALS_ALL', function(error, result) {
 		if (error) {
 			callback(error, result);
 			return;
@@ -980,7 +980,7 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 
 	console.log('[WGST][Couchbase] Prepared query keys: ' + assemblyTableQueryKeys.join(', '));
 
-	couchbaseDatabaseConnections[testWgstBucket].getMulti(assemblyTableQueryKeys, {}, function(error, assemblyTableData) {
+	couchbaseDatabaseConnections[bucketMain].getMulti(assemblyTableQueryKeys, {}, function(error, assemblyTableData) {
 		if (error) {
 			console.error('[WGST][Couchbase][Error] ✗ ' + error);
 			callback(error, null);
