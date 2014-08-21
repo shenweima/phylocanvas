@@ -190,9 +190,9 @@ exports.add = function(req, res) {
 			console.log('[WGST][Couchbase] Inserting assembly metadata with key: ' + metadataKey);
 			console.dir(metadata);
 
-			couchbaseDatabaseConnections[main].set(metadataKey, metadata, function(err, result) {
+			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].set(metadataKey, metadata, function(err, result) {
 				if (err) {
-					console.error('✗ [WGST][Couchbase][ERROR] ' + err);
+					console.error('[WGST][Couchbase][Error] ✗ ' + err);
 					return;
 				}
 

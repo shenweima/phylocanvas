@@ -41,7 +41,7 @@ exports.add = function(req, res) {
 		replyTo: queueId
 	}, function(err){
 		if (err) {
-			console.log('✗ [WGST][RabbitMQ][ERROR] Error in trying to publish');
+			console.log('[WGST][RabbitMQ][Error] ✗ Error in trying to publish');
 			return; // return undefined?
 		}
 
