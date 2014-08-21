@@ -1,0 +1,13 @@
+{
+	"server": {
+		"node": {
+			"port": "80"
+		},
+		"couchbase": {
+			"ip": "127.0.0.1"
+		}
+	},
+	"client": {
+		"socketAddress": "//127.0.0.1"
+	}
+}

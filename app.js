@@ -6,12 +6,15 @@ require('longjohn');
 console.log('[WGST] ✔ Reading app config file');
 
 var fs = require('fs'),
-	file = __dirname + '/config.json';
+	file = __dirname + '/config.json',
+	COUCHBASE_DEFAULT_ADDRESS = '127.0.0.1';
 
 var appConfigData = fs.readFileSync(file, 'utf8');
 // Global var on purpose
 appConfig = JSON.parse(appConfigData);
 console.dir(appConfig);
+
+var couchbaseAddress = appConfig.server.couchbase.ip || COUCHBASE_DEFAULT_ADDRESS;
 
 //======================================================
 // SSL
@@ -46,7 +49,7 @@ var express = require('express'),
 	uuid = require('node-uuid'),
 	app = express();
 
-app.set('port', process.env.PORT || appConfig.server.port);
+app.set('port', process.env.PORT || appConfig.server.node.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 //app.use(favicon(__dirname + '/favicon.ico'));
@@ -179,7 +182,7 @@ testWgstFrontBucket = 'test_wgst_front';
 
 var createCouchbaseConnection = function(bucketName) {
 	return new couchbase.Connection({
-		host: 'http://129.31.26.151:8091/pools',
+		host: 'http://' + couchbaseAddress + ':8091/pools',
 		bucket: bucketName,
 		password: '.oneir66',
 		// Set timeout to 1 minute
