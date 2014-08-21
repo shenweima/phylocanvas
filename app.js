@@ -226,11 +226,10 @@ Object.keys(appConfig.server.couchbase.buckets).map(function(bucketType){
 //======================================================
 // RabbitMQ
 //======================================================
-
 var amqp = require('amqp'),
 	rabbitMQConnectionOptions = {
-		host: '129.31.26.152', //'129.31.26.152', //'fi--didewgstcn1.dide.local',
-		port: 5672
+		host: appConfig.server.rabbit.ip, //'129.31.26.152', //'fi--didewgstcn1.dide.local',
+		port: appConfig.server.rabbit.port
 	},
 	rabbitMQConnectionImplementationOptions = {
 		reconnect: false,
