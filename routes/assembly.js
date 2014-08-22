@@ -1,8 +1,5 @@
 exports.add = function(req, res) {
 
-	console.log('!!! Request');
-	console.dir(req.body);
-
 	var collectionId = req.body.collectionId,
 		socketRoomId = req.body.socketRoomId,
 		userAssemblyId = req.body.userAssemblyId,
