@@ -5,7 +5,9 @@ var gulp = require('gulp'),
 	uglify = require('gulp-uglify'),
 	rename = require('gulp-rename'),
 	sourcemaps = require('gulp-sourcemaps'),
-	minify = require('gulp-minify-css');
+	minify = require('gulp-minify-css'),
+	jshint = require('gulp-jshint'),
+	stylish = require('jshint-stylish');
 
 var taskPaths = {
 	react: {
@@ -38,6 +40,8 @@ gulp.task('scripts', function() {
     return gulp.src(taskPaths.scripts.src)
     	//.pipe(sourcemaps.init())
     	//.pipe(uglify())
+    	//.pipe(jshint())
+    	//.pipe(jshint.reporter('jshint-stylish'))
     	.pipe(rename('wgsa.min.js'))
     	//.pipe(sourcemaps.write())
         .pipe(gulp.dest(taskPaths.scripts.dest));
