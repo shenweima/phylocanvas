@@ -37,11 +37,15 @@ h1, h2, h3, h4, p {
             }
         }
         .btn-default {
-            //margin-bottom: -20px;
             background-color: @action-color;
-            border-color: #fff;
             color: #fff;
-            border-width: 2px;
+            border: 2px solid @action-color;
+            -webkit-transition: 0.7s ease;
+
+            &:hover {
+                background-color: #fff;
+                color: @action-color;
+            }
         }
     }
 
@@ -85,5 +89,6 @@ h1, h2, h3, h4, p {
 
     .wgst-page-section__footer {
         color: #fff;
+        font-weight: 200;
     }
 }
