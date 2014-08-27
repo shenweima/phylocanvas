@@ -2689,6 +2689,7 @@ $(function(){
     // Once I will migrate to React.js this function will not be needed anymore
     //
     var showDroppedAssembly = function(fileUid) {
+
         var uid = '';
         if (typeof fileUid === 'undefined') {
             // Show first one
@@ -3175,7 +3176,7 @@ $(function(){
             // UI templates
             assemblyControlsFormBlock = 
             '<div class="form-block assembly-metadata-{{fileCounter}} hide-this">'
-                + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next empty metadata</button>'
+                + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next assembly</button>'
                 + ' <button class="btn btn-default copy-metadata-to-all-empty-assemblies">Copy to all empty metadata</button>'
             + '</div>',
             assemblyMeatadataDoneBlock = 
@@ -3913,18 +3914,18 @@ $(function(){
         $('.selected-assembly-counter').text(elementCounter);
         // Update sequence list item content
         // Hide all sequences
-        $('.assembly-item').hide();
+        //$('.assembly-item').hide();
         // Show selected sequence
         //$('.assembly-item-' + ui.value).show();
         //$('.assembly-item').eq(elementCounter - 1).show(); // Convert one-based index to zero-based index used by .eq()
 
         // Analytics
         var selectedFastaFileElement = $('#assembly-item-' + elementCounter);
-        selectedFastaFileElement.show();
+        // selectedFastaFileElement.show();
 
         // Metadata
-        var selectedFastaFileElementMetadata = $('#assembly-metadata-item-' + elementCounter);
-        selectedFastaFileElementMetadata.show();
+        // var selectedFastaFileElementMetadata = $('#assembly-metadata-item-' + elementCounter);
+        // selectedFastaFileElementMetadata.show();
 
         // Update assembly file name
         var fileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name');
@@ -4043,6 +4044,33 @@ $(function(){
         $('.assembly-upload-total-number').text(Object.keys(fastaFilesAndMetadata).length);
     };
 
+    //
+    // Updates
+    //
+    var getIndexOfDroppedAssemblyCurrentlyDisplayed = function() {
+        var fileUidOfVisibleMetadata = $('.wgst-upload-assembly__metadata:visible').attr('data-file-uid');
+
+        var indexOfDroppedAssemblyCurrentlyDisplayed = 0;
+
+        WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile, index, array) {
+            if (loadedFile.uid === fileUidOfVisibleMetadata) {
+                indexOfDroppedAssemblyCurrentlyDisplayed = index;
+            }
+        });
+
+        return indexOfDroppedAssemblyCurrentlyDisplayed;
+    };
+    var showPreviousAssembly = function() {
+        var currentAssemblyIndex = getIndexOfDroppedAssemblyCurrentlyDisplayed();
+        var previousAssemblyFileUid = WGST.dragAndDrop.loadedFiles[currentAssemblyIndex - 1].uid;
+        showDroppedAssembly(previousAssemblyFileUid);
+    };
+    var showNextAssembly = function() {
+        var currentAssemblyIndex = getIndexOfDroppedAssemblyCurrentlyDisplayed();
+        var nextAssemblyFileUid = WGST.dragAndDrop.loadedFiles[currentAssemblyIndex + 1].uid;
+        showDroppedAssembly(nextAssemblyFileUid);
+    };
+
     /**
      * Description
      * @method assemblyListSliderEventHandler
@@ -4052,6 +4080,7 @@ $(function(){
      */
     var assemblyListSliderEventHandler = function(event, ui) {
         updateSelectedFilesUI(ui.value);
+
         /*
         // Update sequence list item content
         // Hide all sequences
@@ -4077,6 +4106,8 @@ $(function(){
         if ($('.assembly-list-slider').slider('value') > 1) {
             // Decrement slider's value
             $('.assembly-list-slider').slider('value', $('.assembly-list-slider').slider('value') - 1);
+
+            showPreviousAssembly();
         }
         e.preventDefault();
     });
@@ -4086,6 +4117,8 @@ $(function(){
         if ($('.assembly-list-slider').slider('value') < parseInt($('.total-number-of-dropped-assemblies').text(), 10)) {
             // Increment slider's value
             $('.assembly-list-slider').slider('value', $('.assembly-list-slider').slider('value') + 1);
+
+            showNextAssembly();
         }
         e.preventDefault();
     });
