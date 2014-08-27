@@ -5,7 +5,7 @@ $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
-    WGST.version = '0.1.1';
+    WGST.version = '0.1.2';
 
     //
     // Which page should you load?
@@ -2537,48 +2537,9 @@ $(function(){
     };
     var isValidContig = function(contig) {
         var contigParts = splitContigIntoParts(contig);
-        var dnaSequenceString = extractDnaStringFromContig(contig);
+        var dnaString = extractDnaStringFromContig(contig);
 
-        return (contigParts.length > 1 && isValidDnaString(dnaSequenceString));
-    };
-    var validateContigs = function(contigs) {
-
-        var validatedContigs = {
-            valid: [],
-            invalid: []
-        };
-
-        // Parse each contig
-        contigs.forEach(function(contig, index, contigs) {
-
-            var contigParts = splitContigIntoParts(contig);
-            var dnaString = extractDnaStringFromContig(contig);
-            var dnaStringId = extractDnaStringIdFromContig(contig);
-
-            if (isValidContig(contig)) {
-                validatedContigs.valid.push({
-                    id: dnaStringId,
-                    dnaString: dnaString
-                });
-
-                // fastaAnalytics.contigs.valid.push({
-                //     id: dnaStringId,
-                //     dnaString: dnaString
-                // });
-            } else {
-                validatedContigs.invalid.push({
-                    id: dnaStringId,
-                    dnaString: dnaString
-                });
-
-                // fastaAnalytics.contigs.invalid.push({
-                //     id: dnaStringId,
-                //     dnaString: dnaString
-                // });
-            }
-        });
-
-        return validatedContigs;
+        return (contigParts.length > 1 && isValidDnaString(dnaString));
     };
     var calculateN50 = function(dnaSequenceStrings) {
         //
@@ -2760,15 +2721,49 @@ $(function(){
         // Set file name in navigator
         $('.assembly-file-name').text(loadedFile.file.name);
     };
+    var validateContigs = function(contigs) {
+
+        var validatedContigs = {
+            valid: [],
+            invalid: []
+        };
+
+        //
+        // Validate each contig
+        //
+        contigs.forEach(function(contig, index, contigs) {
+
+            var contigParts = splitContigIntoParts(contig);
+            var dnaString = extractDnaStringFromContig(contig);
+            var dnaStringId = extractDnaStringIdFromContig(contig);
+
+            // Valid contig
+            if (isValidContig(contig)) {
+                validatedContigs.valid.push({
+                    id: dnaStringId,
+                    dnaString: dnaString
+                });
+
+            // Invalid contig
+            } else {
+                validatedContigs.invalid.push({
+                    id: dnaStringId,
+                    dnaString: dnaString
+                });
+            }
+        });
+
+        return validatedContigs;
+    };
 
     //
     // Refactor this function
     //
-    var parseFastaFile = function(e, fileCounter, file, droppedFiles, collectionId, fileUid) {
+    var parseFastaFile = function(event, fileCounter, file, droppedFiles, collectionId, fileUid) {
             // Array of contigs
-        var contigs = [],
+        var //contigs = [],
             // Array of sequence parts
-            contigParts = [],
+            //contigParts = [],
             // Count total number of contigs in a single assembly
             contigsSum = 0,
             // Count contigs
@@ -2789,13 +2784,9 @@ $(function(){
             metadata: {}
         };
 
-        var fastaFileString = e.target.result;
-        contigs = extractContigsFromFastaFileString(fastaFileString);
-        // // Trim, and split assembly string into array of individual contigs
-        // // then filter that array by removing empty strings
-        // contigs = e.target.result.trim().split('>').filter(function(element){
-        //     return (element.length > 0);
-        // });
+        var fastaFileString = event.target.result;
+        var contigs = extractContigsFromFastaFileString(fastaFileString);
+        validateContigs(contigs);
 
         // Start counting assemblies from 1, not 0
         fileCounter = fileCounter + 1;
@@ -2810,189 +2801,19 @@ $(function(){
             }
         };
 
-        // Clear this array of DNA sequence strings
-        dnaSequenceStrings = [];
-        // Clear this DNA sequence string
-        dnaSequenceString = '';
-        // Clear this DNA sequence id string
-        dnaSequenceId = '';
-
-        // Parse each contig
-        for (; contigCounter < contigs.length; contigCounter++) {
-
-            var contig = contigs[contigCounter];
-            contigParts = splitContigIntoParts(contig);
-
-            // // Split contig string into parts
-            // contigParts = contigs[contigCounter].split(/\n/)
-            //     // Filter out empty parts
-            //     .filter(function(part){
-            //         return (part.length > 0);
-            //     });
-
-            // // Trim each contig part
-            // var contigPartCounter = 0;
-            // for (; contigPartCounter < contigParts; i++) {
-            //     contigParts[contigPartCounter] = contigParts[contigPartCounter].trim();
-            // }
-
-            /*
-
-            Validate contig parts
-
-            */
-
-            // If there is only one contig part then this contig is invalid
-            if (contigParts.length > 1) {
-
-                // /*
-
-                // DNA sequence can contain:
-                // 1) [CTAGNUX] characters.
-                // 2) White spaces (e.g.: new line characters).
-
-                // The first line of FASTA file contains id and description.
-                // The second line theoretically contains comments (starts with #).
-
-                // To parse FASTA file you need to:
-                // 1. Separate assembly into individual contigs by splitting file's content by > character.
-                //    Note: id and description can contain > character.
-                // 2. For each sequence: split it by a new line character, 
-                //    then convert resulting array to string ignoring the first (and rarely the second) element of that array.
-
-                // */
-
-                // // Parse sequence DNA string
-
-                // // Create sub array of the contig parts array - cut the first element (id and description).
-                // //var sequenceDNAStringArray = contigParts.splice(1, contigParts.length);
-                // var contigPartsNoIdDescription = contigParts.splice(1, contigParts.length);
-
-                // // Very rarely the second line can be a comment
-                // // If the first element won't match regex then assume it is a comment
-                // if (! dnaSequenceRegex.test(contigPartsNoIdDescription[0].trim())) {
-                //     // Remove comment element from the array
-                //     contigPartsNoIdDescription = contigPartsNoIdDescription.splice(1, contigPartsNoIdDescription.length);
-                // }
-
-                // /*
-
-                // Contig string without id, description, comment is only left with DNA sequence string(s)
-
-                // */
-                // // Convert array of DNA sequence substrings into a single string
-                // // Remove whitespace
-                // dnaSequenceString = contigPartsNoIdDescription.join('').replace(/\s/g, '');
-
-                // // Parse sequence id
-                // dnaSequenceId = contigParts[0].trim().replace('>','');
-                dnaSequenceString = extractDnaStringFromContig(contig);
-                dnaSequenceId = extractDnaStringIdFromContig(contig);
-
-                // Validate DNA sequence string
-                if (dnaSequenceRegex.test(dnaSequenceString)) {
-                    // Store it in array
-                    dnaSequenceStrings.push(dnaSequenceString);
-                    // Init sequence object
-                    assemblies[fileCounter]['contigs']['individual'][contigCounter] = {};
-                    // Store sequence id
-                    assemblies[fileCounter]['contigs']['individual'][contigCounter]['id'] = dnaSequenceId;
-                    // Store sequence string
-                    assemblies[fileCounter]['contigs']['individual'][contigCounter]['sequence'] = dnaSequenceString;
-                // Invalid DNA sequence string
-                } else {
-                    // Count as invalid sequence
-                    assemblies[fileCounter]['contigs']['invalid'] = assemblies[fileCounter]['contigs']['invalid'] + 1;
-                }
-            } else {
-                // Count as invalid sequence
-                assemblies[fileCounter]['contigs']['invalid'] = assemblies[fileCounter]['contigs']['invalid'] + 1;
-            }
-
-        } // for
-
         // Store fasta file and metadata
         fastaFilesAndMetadata[file.name] = {
             // Cut FASTA file extension from the file name
             //name: file.name.substr(0, file.name.lastIndexOf('.')),
             name: file.name,
-            assembly: e.target.result,
+            assembly: event.target.result,
             metadata: {}
         };
-        /*
-        fastaFilesAndMetadata.push({
-            // Cut FASTA file extension from the file name
-            name: file.name.substr(0, file.name.lastIndexOf('.')),
-            assembly: e.target.result,
-            metadata: {}
-        });
-        */
 
-        // /*
-
-        // Calculate N50
-        // http://www.nature.com/nrg/journal/v13/n5/box/nrg3174_BX1.html
-
-        // */
-
-        // // Order array by sequence length DESC
-        // var sortedDnaSequenceStrings = dnaSequenceStrings.sort(function(a, b){
-        //     return b.length - a.length;
-        // });
-
-        // // Calculate sums of all nucleotides in this assembly by adding current contig's length to the sum of all previous contig lengths
-        // // Contig length === number of nucleotides in this contig
-        // var assemblyNucleotideSums = [],
-        //     // Count sorted dna sequence strings
-        //     sortedDnaSequenceStringCounter = 0;
-
-        // for (; sortedDnaSequenceStringCounter < sortedDnaSequenceStrings.length; sortedDnaSequenceStringCounter++) {
-        //     if (assemblyNucleotideSums.length > 0) {
-        //         // Add current contig's length to the sum of all previous contig lengths
-        //         assemblyNucleotideSums.push(sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length + assemblyNucleotideSums[assemblyNucleotideSums.length - 1]);
-        //     } else {
-        //         // This is a "sum" of a single contig's length
-        //         assemblyNucleotideSums.push(sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length);
-        //     }
-        // }
-
-        // // Calculate one-half of the total sum of all nucleotides in the assembly
-        // var assemblyNucleotidesHalfSum = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / 2);
-
-        // /*
-
-        // Sum lengths of every contig starting from the longest contig
-        // until this running sum equals one-half of the total length of all contigs in the assembly.
-
-        // */
-
-        //     // Store nucleotides sum
-        // var assemblyNucleotidesSum = 0,
-        //     // N50 object
-        //     assemblyN50 = {},
-        //     // Count again sorted dna sequence strings
-        //     sortedDnaSequenceStringCounter = 0;
-
-        // for (; sortedDnaSequenceStringCounter < sortedDnaSequenceStrings.length; sortedDnaSequenceStringCounter++) {
-        //     // Update nucleotides sum
-        //     assemblyNucleotidesSum = assemblyNucleotidesSum + sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length;
-        //     // Contig N50 of an assembly is the length of the shortest contig in this list
-        //     // Check if current sum of nucleotides is greater or equals to half sum of nucleotides in this assembly
-        //     if (assemblyNucleotidesSum >= assemblyNucleotidesHalfSum) {
-        //         assemblyN50['sequenceNumber'] = sortedDnaSequenceStringCounter + 1;
-        //         assemblyN50['sum'] = assemblyNucleotidesSum;
-        //         assemblyN50['sequenceLength'] = sortedDnaSequenceStrings[sortedDnaSequenceStringCounter].length;
-        //         break;
-        //     }
-        // }
         var dnaStrings = extractDnaStringsFromContigs(contigs);
         var assemblyN50 = calculateN50(dnaStrings);
-
-        // Calculate average nucleotides per sequence
-        //var averageNucleotidesPerSequence = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / dnaSequenceStrings.length);
         var dnaStrings = extractDnaStringsFromContigs(contigs);
         var totalNumberOfNucleotidesInDnaStrings = calculateTotalNumberOfNucleotidesInDnaStrings(dnaStrings);
-        //var averageNucleotidesPerSequence = calculateAverageNumberOfNucleotidesInDnaStrings(dnaStrings);
         var averageNumberOfNucleotidesInDnaStrings = calculateAverageNumberOfNucleotidesInDnaStrings(dnaStrings);
         var smallestNumberOfNucleotidesInDnaStrings = calculateSmallestNumberOfNucleotidesInDnaStrings(dnaStrings);
         var biggestNumberOfNucleotidesInDnaStrings = calculateBiggestNumberOfNucleotidesInDnaStrings(dnaStrings);
@@ -3004,19 +2825,6 @@ $(function(){
         console.log('[WGST] * dev * smallestNumberOfNucleotidesInDnaStrings: ' + smallestNumberOfNucleotidesInDnaStrings);
         console.log('[WGST] * dev * biggestNumberOfNucleotidesInDnaStrings: ' + biggestNumberOfNucleotidesInDnaStrings);
 
-        // Calculate N50 quality
-        // If sequence length is greater than average sequence length then quality is good
-        /*
-        if (assemblyN50['sequenceLength'] > averageNucleotidesPerSequence) {
-            assemblyN50['quality'] = true;
-        } else { // Quality is bad
-            assemblyN50['quality'] = false;
-        }
-        */
-
-        // Update total number of contigs to upload
-        //contigsSum = contigsSum + contigs.length; // TO DO: Depricate contigsSum
-        //totalContigsSum = totalContigsSum + contigs.length;
         totalNumberOfContigsDropped = totalNumberOfContigsDropped + contigs.length;
 
         // Show average number of contigs per assembly
