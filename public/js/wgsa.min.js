@@ -5,6 +5,8 @@ $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
+    WGST.version = '0.1.1';
+
     //
     // Which page should you load?
     //
