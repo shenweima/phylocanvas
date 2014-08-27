@@ -13,8 +13,8 @@ $(function(){
     if (typeof window.WGST.requestedCollectionId !== 'undefined'
         || window.WGST.isNewCollection === true) {
 
-        console.log('NEW!!!');
-        console.log(window.WGST.isNewCollection);
+        //console.log('NEW!!!');
+        //console.log(window.WGST.isNewCollection);
 
         //
         // Show app page
@@ -2638,10 +2638,19 @@ $(function(){
         return assemblyN50;
     };
     var calculateTotalNumberOfNucleotidesInDnaStrings = function(dnaStrings) {
-        var totalNumberOfNucleotidesInDnaStrings = dnaStrings.reduce(function(previousDnaString, currentDnaString, index, array) {
-            return previousDnaString.length + currentDnaString.length;
-        }, '');
+        var totalNumberOfNucleotidesInDnaStrings = 0;
+        dnaStrings.forEach(function(dnaString, index, array){
+            totalNumberOfNucleotidesInDnaStrings = totalNumberOfNucleotidesInDnaStrings + dnaString.length;
+        });
         return totalNumberOfNucleotidesInDnaStrings;
+
+        //
+        // Reduce doesn't seem to work as expected
+        //
+        // var totalNumberOfNucleotidesInDnaStrings = dnaStrings.reduce(function(previousDnaString, currentDnaString, index, array) {
+        //     return previousDnaString.length + currentDnaString.length;
+        // }, '');
+        // return totalNumberOfNucleotidesInDnaStrings;
     };
     var calculateAverageNumberOfNucleotidesInDnaStrings = function(dnaStrings) {
         var totalNumberOfNucleotidesInDnaStrings = calculateTotalNumberOfNucleotidesInDnaStrings(dnaStrings);
@@ -2671,20 +2680,47 @@ $(function(){
         //
         // Get array of sums: [1, 2, 3, 6, 12, etc]
         //
+
+        //
         // Sort dna strings by their length
+        //
         var sortedDnaStrings = dnaStrings.sort(function(a, b){
             return b.length - a.length;
         });
-        var sumsOfNucleotidesInDnaStrings = sortedDnaStrings.map(function(dnaString, index, array){
-            var numberOfNucleotidesInCurrentDnaString = dnaString.length;
-            if (index === 0) {
-                return numberOfNucleotidesInCurrentDnaString;
+
+        //
+        // Calculate sums of all nucleotides in this assembly by adding current contig's length to the sum of all previous contig lengths
+        //
+        var sumsOfNucleotidesInDnaStrings = [];
+        sortedDnaStrings.forEach(function(sortedDnaString, index, array){
+            if (sumsOfNucleotidesInDnaStrings.length === 0) {
+                sumsOfNucleotidesInDnaStrings.push(sortedDnaString.length);
             } else {
-                var numberOfNucleotidesInPreviousDnaStrings = array[index - 1].length;
-                return numberOfNucleotidesInCurrentDnaString + numberOfNucleotidesInPreviousDnaStrings;
+                sumsOfNucleotidesInDnaStrings.push(sortedDnaString.length + sumsOfNucleotidesInDnaStrings[sumsOfNucleotidesInDnaStrings.length - 1]);
             }
         });
+
         return sumsOfNucleotidesInDnaStrings;
+
+        //
+        // Deprecated: previously working solution
+        //
+        // // Calculate sums of all nucleotides in this assembly by adding current contig's length to the sum of all previous contig lengths
+        // // Contig length === number of nucleotides in this contig
+        // var assemblyNucleotideSums = [],
+        //     // Count sorted dna sequence strings
+        //     sortedDnaStringCounter = 0;
+
+        // for (; sortedDnaStringCounter < sortedDnaStrings.length; sortedDnaStringCounter++) {
+        //     if (assemblyNucleotideSums.length > 0) {
+        //         // Add current contig's length to the sum of all previous contig lengths
+        //         assemblyNucleotideSums.push(sortedDnaStrings[sortedDnaStringCounter].length + assemblyNucleotideSums[assemblyNucleotideSums.length - 1]);
+        //     } else {
+        //         // This is a "sum" of a single contig's length
+        //         assemblyNucleotideSums.push(sortedDnaStrings[sortedDnaStringCounter].length);
+        //     }
+        // }
+        // return assemblyNucleotideSums;
     };
 
     //
@@ -2961,6 +2997,13 @@ $(function(){
         var smallestNumberOfNucleotidesInDnaStrings = calculateSmallestNumberOfNucleotidesInDnaStrings(dnaStrings);
         var biggestNumberOfNucleotidesInDnaStrings = calculateBiggestNumberOfNucleotidesInDnaStrings(dnaStrings);
 
+        console.log('[WGST] * dev * dnaStrings:');
+        console.dir(dnaStrings);
+        console.log('[WGST] * dev * totalNumberOfNucleotidesInDnaStrings: ' + totalNumberOfNucleotidesInDnaStrings);
+        console.log('[WGST] * dev * averageNumberOfNucleotidesInDnaStrings: ' + averageNumberOfNucleotidesInDnaStrings);
+        console.log('[WGST] * dev * smallestNumberOfNucleotidesInDnaStrings: ' + smallestNumberOfNucleotidesInDnaStrings);
+        console.log('[WGST] * dev * biggestNumberOfNucleotidesInDnaStrings: ' + biggestNumberOfNucleotidesInDnaStrings);
+
         // Calculate N50 quality
         // If sequence length is greater than average sequence length then quality is good
         /*
@@ -3235,6 +3278,10 @@ $(function(){
 
         // Draw N50 chart
         var sumsOfNucleotidesInDnaStrings = calculateSumsOfNucleotidesInDnaStrings(dnaStrings);
+
+        console.log('[WGST] * dev * assemblyN50:');
+        console.dir(assemblyN50);
+
         drawN50Chart(sumsOfNucleotidesInDnaStrings, assemblyN50, fileCounter);
         //drawN50Chart(assemblyNucleotideSums, assemblyN50, fileCounter);
 
