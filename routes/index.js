@@ -11,7 +11,7 @@ exports.index = function(req, res) {
 
     console.log(appConfig.client);
 
-    res.render('index', {
+    res.render('landing', {
     	//tree: jsonTree,
     	appConfig: JSON.stringify(appConfig.client)
     });

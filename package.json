@@ -6,16 +6,17 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "*",
-    "serve-favicon": "*",
-    "morgan": "*",
-    "body-parser": "*",
-    "ejs": "*",
     "amqp": "*",
+    "body-parser": "*",
     "couchbase": "*",
+    "ejs": "*",
+    "express": "*",
+    "longjohn": "*",
+    "morgan": "*",
     "node-uuid": "*",
+    "serve-favicon": "*",
     "socket.io": "*",
-    "longjohn": "*"
+    "swig": "^1.4.2"
   },
   "devDependencies": {
     "gulp": "^3.8.6",

@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+  <link href="/css/landing.css" rel="stylesheet" type="text/css">
+{% endblock %}
+
+{% block content %}
+
+<section class="wgst-page wgst-page__landing">
+  
+  <header class="wgst-page-section wgst-page-section__header">
+    <h1>Whole Genome Sequence Analysis (WGSA)</h1>
+    <a href="/collection/new" class="btn btn-default btn-lg">Create new collection</a>
+    <br />
+    <a href="/collection/c173b9c2-7b5f-4247-96cf-1598bfe54d01" class="btn btn-link btn-lg">Explore sample collection</a>
+  </header>
+
+  <section class="wgst-page-section wgst-page-section__action">
+    <div class="container">
+      <div class="col-md-4 col-md-offset-4 action-box">
+        <h3>Use</h3>
+        <h4>Interested in using WGSA?</h4>
+        <p>Subscribe to our mailing list and be the first one to find out when WGSA is released.</p>
+        <div>
+          <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+          <button class="btn btn-default">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="wgst-page-section wgst-page-section__footer">
+    <p>Funded by <img src="/images/wellcome_trust_logo.png" class="wgst-supporter-logo wgst-supporter-logo__wellcome-trust" /></p>
+    <p>Developed by <img src="/images/imperial_logo.png" class="wgst-supporter-logo wgst-supporter-logo__imperial" /></p>
+  </footer>
+
+</section>
+    
+{% endblock %}

@@ -584,7 +584,7 @@ exports.get = function(req, res) {
 
 	console.time('[WGST] Requested ' + collectionId + ' collection');
 
-	res.render('index', {
+	res.render('app', {
 		appConfig: JSON.stringify(appConfig.client),
 		requestedCollectionId: collectionId
 	});
@@ -592,9 +592,7 @@ exports.get = function(req, res) {
 
 exports.newCollection = function(req, res) {
 
-	console.log('!!!NEW!!!');
-
-	res.render('index', {
+	res.render('app', {
 		appConfig: JSON.stringify(appConfig.client),
 		newCollection: true
 	});

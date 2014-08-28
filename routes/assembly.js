@@ -277,7 +277,7 @@ exports.get = function(req, res) {
 
 		console.dir(assembly);
 
-		res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
+		res.render('app', { requestedAssemblyObject: JSON.stringify(assembly) });
 	});
 };
 

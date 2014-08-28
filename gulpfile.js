@@ -19,7 +19,7 @@ var taskPaths = {
 		dest: './public/js'
 	},
 	less: {
-		src: './private/less/main.less',
+		src: './private/less/**/*.less',
 		dest: './public/css'
 	}
 };
@@ -52,7 +52,7 @@ gulp.task('less', function() {
 	    .pipe(less())
 	    .pipe(sourcemaps.init())
 	    .pipe(minify())
-	    .pipe(rename('wgsa.min.css'))
+	    //.pipe(rename('wgsa.min.css'))
 	    .pipe(sourcemaps.write())
     	.pipe(gulp.dest(taskPaths.less.dest));
 });

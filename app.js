@@ -47,11 +47,13 @@ var express = require('express'),
 	path = require('path'),
 	socketio = require('socket.io');
 	uuid = require('node-uuid'),
+	swig = require('swig'),
 	app = express();
 
 app.set('port', process.env.PORT || appConfig.server.node.port);
+app.engine('html', swig.renderFile);
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.set('view engine', 'html');
 //app.use(favicon(__dirname + '/favicon.ico'));
 app.use(morgan('dev', { immediate: true }));
 // http://stackoverflow.com/a/19965089
@@ -108,11 +110,11 @@ app.post('/api/assembly/resistance-profile', assembly.apiGetResistanceProfile);
 app.get('/api/all-antibiotics', assembly.apiGetAllAntibiotics);
 
 // Test routes
-app.get('/dev/d3tree', require('./routes/dev').d3tree);
-app.get('/dev/d3test', require('./routes/dev').d3test);
-app.get('/dev/d3dots-svg', require('./routes/dev').d3dotsSVG);
-app.get('/dev/d3dots-canvas', require('./routes/dev').d3dotsCanvas);
-app.get('/dev/canvas', require('./routes/dev').canvas);
+// app.get('/dev/d3tree', require('./routes/dev').d3tree);
+// app.get('/dev/d3test', require('./routes/dev').d3test);
+// app.get('/dev/d3dots-svg', require('./routes/dev').d3dotsSVG);
+// app.get('/dev/d3dots-canvas', require('./routes/dev').d3dotsCanvas);
+// app.get('/dev/canvas', require('./routes/dev').canvas);
 
 //app.post('/join', user.join);
 //app.post('/signin', user.signIn);
