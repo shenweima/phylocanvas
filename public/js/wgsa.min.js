@@ -5472,6 +5472,8 @@ $(function(){
 
     $('.wgst-panel__collection, .wgst-fullscreen__collection').on('click', '.show-on-representative-tree', function(event){
 
+        return false;
+
         openRepresentativeCollectionTree();
 
         // endPanelLoadingIndicator('representativeCollectionTree');
@@ -6130,6 +6132,7 @@ $(function(){
     });
 
     $('.wgst-navigation-item__representative-tree').on('click', function(){
+        return false;
         openRepresentativeCollectionTree();
     });
 
