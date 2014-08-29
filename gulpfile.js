@@ -42,7 +42,7 @@ gulp.task('scripts', function() {
     	//.pipe(uglify())
     	//.pipe(jshint())
     	//.pipe(jshint.reporter('jshint-stylish'))
-    	.pipe(rename('wgsa.min.js'))
+    	//.pipe(rename('wgsa.min.js'))
     	//.pipe(sourcemaps.write())
         .pipe(gulp.dest(taskPaths.scripts.dest));
 });

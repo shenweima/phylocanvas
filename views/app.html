@@ -86,23 +86,23 @@
     <article class="wgst-panel-body">
 
       <div class="assembly-navigator hide-this">
-        <button class="nav-prev-item nav-item-button" disabled="disabled">
-          <span class="glyphicon glyphicon-chevron-left"></span><span class="nav-item-button-label">Previous</span>
-        </button><!-- /.nav-prev-item -->
         <div class="assembly-navigator-controls">
           <div class="assembly-list-header">
-            <div class="assembly-file-name"></div><!-- /.assembly-file-name -->
-            <button type="button" class="btn btn-default btn-xs cancel-assembly-upload-button"><span class="glyphicon glyphicon-remove"></span></button>
-            <div class="assembly-list-counter">
-              Assembly <span class="selected-assembly-counter">1</span> out of <span class="total-number-of-dropped-assemblies"></span>
-            </div><!-- /.assembly-list-counter -->
-          </div><!-- /.assembly-list-header -->
-          <div class="assembly-list-slider" ></div>
-        </div><!-- /.assembly-navigator-controls -->
-        <button class="nav-next-item nav-item-button">
-          <span class="glyphicon glyphicon-chevron-right"></span><span class="nav-item-button-label">Next</span>
-        </button><!-- /.nav-next-item -->
-      </div><!-- /.assembly-navigator -->
+
+            <form class="form-inline" role="form">
+              <div class="form-group">
+                <select class="form-control wgst-dropped-assembly-list">
+                </select>
+              </div>
+              <div class="btn-group">
+                <button type="button" class="btn btn-default wgst-dropped-assembly-list-navigation-button__previous"><i class="fa fa-chevron-left"></i></button>
+                <button type="button" class="btn btn-default wgst-dropped-assembly-list-navigation-button__next"><i class="fa fa-chevron-right"></i></button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
 
     </article><!-- /.wgst-panel-body -->
     <footer class="wgst-panel-footer wgst-draggable-handle">
@@ -714,10 +714,15 @@
 
 {% block script %}
 <script>
+  'use strict';
+  
+  //
+  // WGST namespace
+  //
+  window.WGST = window.WGST || {};
+  window.WGST.exports = {};
+
   $(function(){
-
-    'use strict';
-
     /*
       The name "undefined" is not guaranteed to have the type "undefined".
       It can be assigned other values, like null or 1.
@@ -727,10 +732,6 @@
     */
     (function(undefined){
 
-      //
-      // WGST namespace
-      //
-      window.WGST = window.WGST || {};
       window.WGST.requestedCollectionId = undefined;
 
       //
@@ -755,5 +756,6 @@
     })();
   });
 </script>
-<script src="/js/wgsa.min.js"></script>
+<script src="/js/dropped_assembly_list_navigation.js"></script>
+<script src="/js/client.js"></script>
 {% endblock %}
