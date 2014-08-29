@@ -1,20 +1,22 @@
 @import 'reset';
 
-@action-color: #8C61D4;
-
-// body, html {
-//     height: auto;
-//     overflow: auto;
-// }
+@action-color: #fff;
+.text-shadow {
+    text-shadow: 1px 1px 0 #000;
+}
 
 h1, h2, h3, h4, p {
     margin: 0;
     padding: 0;
 }
 
+section {
+    overflow: hidden;
+}
+
 .wgst-page__landing {
     min-height: 100%;
-    background-color: #232B2D;
+    background-color: #333;
 
     .wgst-page-section {
         padding: 40px;
@@ -23,11 +25,16 @@ h1, h2, h3, h4, p {
 
     .wgst-page-section__header {
         text-align: center;
-        background-color: #fff;
+        //background-color: #fff;
+        color: #fff;
+        background: url(/images/wgsa_cover.jpg) no-repeat center;
+        background-size: cover;
+        padding: 80px;
 
         h1 {
             font-weight: 400;
             margin: 40px 0 60px 0;
+            .text-shadow;
         }
         a {
             display: inline-block;
@@ -38,26 +45,32 @@ h1, h2, h3, h4, p {
             &:last-of-type {
                 margin-bottom: 0;
             }
+            &.btn-link {
+                color: #fff;
+                font-weight: 300;
+            }
         }
         .btn-default {
-            background-color: @action-color;
             color: #fff;
-            border: 2px solid @action-color;
+            background: none;
+            border: 2px solid #fff;
             -webkit-transition: 0.5s ease;
+            .text-shadow;
 
             &:hover {
-                background-color: #fff;
-                color: @action-color;
+                background-color: rgba(0, 0, 0, 0.6);
+                //color: @action-color;
             }
         }
     }
 
     .wgst-page-section__action {
         background-color: @action-color;
+        padding: 60px;
 
         .action-box {
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            color: #fff;
+            border: 1px solid rgba(0, 0, 0, 1);
+            color: #000;
             text-align: center;
             margin-bottom: 60px;
 
@@ -77,20 +90,25 @@ h1, h2, h3, h4, p {
                 text-align: center;
                 font-weight: 300;
             }
+            ::-webkit-input-placeholder {
+               color: #999;
+               font-weight: 300;
+            }
             p, input {
                 margin: 20px 0;
             }
             .btn {
                 margin-bottom: -20px;
-                background-color: @action-color;
-                border-color: #fff;
-                color: #fff;
+                //background-color: #000;
+                border-color: #000;
+                color: #000;
                 border-width: 2px;
                 -webkit-transition: 0.5s ease;
 
                 &:hover {
-                    background-color: #fff;
-                    color: @action-color;
+                    background-color: #333;
+                    border-color: #333;
+                    color: #fff;
                 }
             }
         }
