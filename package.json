@@ -6,25 +6,28 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "*",
-    "serve-favicon": "*",
-    "morgan": "*",
-    "body-parser": "*",
-    "ejs": "*",
     "amqp": "*",
+    "body-parser": "*",
     "couchbase": "*",
+    "ejs": "*",
+    "express": "*",
+    "longjohn": "*",
+    "morgan": "*",
     "node-uuid": "*",
+    "serve-favicon": "*",
     "socket.io": "*",
-    "longjohn": "*"
+    "swig": "^1.4.2"
   },
   "devDependencies": {
     "gulp": "^3.8.6",
-    "gulp-react": "^0.5.0",
-    "gulp-less": "^1.3.3",
-    "gulp-uglify": "^0.3.1",
     "gulp-changed": "^0.4.1",
+    "gulp-jshint": "^1.8.4",
+    "gulp-less": "^1.3.3",
+    "gulp-minify-css": "^0.3.7",
+    "gulp-react": "^0.5.0",
     "gulp-rename": "^1.2.0",
     "gulp-sourcemaps": "^1.1.0",
-    "gulp-minify-css": "^0.3.7"
+    "gulp-uglify": "^0.3.1",
+    "jshint-stylish": "^0.4.0"
   }
 }

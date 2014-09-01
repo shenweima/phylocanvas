@@ -2,7 +2,7 @@ exports.add = function(req, res) {
 
 	var collectionId = req.body.collectionId,
 		socketRoomId = req.body.socketRoomId,
-		userAssemblyId = req.body.name,
+		userAssemblyId = req.body.userAssemblyId,
 		assemblyId = req.body.assemblyId;
 
 	console.log('[WGST] Adding assembly ' + assemblyId + ' to collection ' + collectionId);
@@ -181,7 +181,7 @@ exports.add = function(req, res) {
 				assemblyMetadata = req.body.metadata,
 				metadata = {
 					assemblyId: assemblyId,
-					userAssemblyId: req.body.name,
+					userAssemblyId: req.body.userAssemblyId,
 					datetime: assemblyMetadata.datetime,
 					geography: assemblyMetadata.geography,
 					source: assemblyMetadata.source
@@ -192,7 +192,7 @@ exports.add = function(req, res) {
 
 			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].set(metadataKey, metadata, function(err, result) {
 				if (err) {
-					console.error('✗ [WGST][Couchbase][ERROR] ' + err);
+					console.error('[WGST][Couchbase][Error] ✗ ' + err);
 					return;
 				}
 
@@ -218,7 +218,7 @@ exports.add = function(req, res) {
 			// Prepare object to publish
 			var assembly = {
 				"speciesId" : "1280",
-				"sequences" : req.body.assembly, // Content of FASTA file, might need to rename to sequences
+				"sequences" : req.body.sequences, // Content of FASTA file
 				"assemblyId": assemblyId,
 				"userAssemblyId" : userAssemblyId,
 				"taskId" : "Experiment_1",
@@ -277,7 +277,7 @@ exports.get = function(req, res) {
 
 		console.dir(assembly);
 
-		res.render('index', { requestedAssemblyObject: JSON.stringify(assembly) });
+		res.render('app', { requestedAssemblyObject: JSON.stringify(assembly) });
 	});
 };
 

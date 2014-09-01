@@ -5,14 +5,16 @@ $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
+    WGST.version = '0.1.3';
+
     //
     // Which page should you load?
     //
     if (typeof window.WGST.requestedCollectionId !== 'undefined'
         || window.WGST.isNewCollection === true) {
 
-        console.log('NEW!!!');
-        console.log(window.WGST.isNewCollection);
+        //console.log('NEW!!!');
+        //console.log(window.WGST.isNewCollection);
 
         //
         // Show app page
@@ -137,6 +139,8 @@ $(function(){
     WGST.settings.representativeCollectionId = '1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
 
     WGST.antibioticNameRegex = /[\W]+/g;
+
+    //var socketAddress = '//' + window.WGST.config.socketAddress;
 
     WGST.socket = {
         //connection: io.connect(WGST.config.socketAddress, {secure: true}),
@@ -742,19 +746,12 @@ $(function(){
         // Init jQuery UI slider widget
         $('.assembly-list-slider').slider({
             range: "max",
-            min: 1,
+            min: 0,
             max: 10,
-            value: 1,
+            value: 0,
             animate: 'fast',
-            /**
-             * Description
-             * @method slide
-             * @param {} event
-             * @param {} ui
-             * @return 
-             */
             slide: function(event, ui) {
-                $('.selected-assembly-counter').text(ui.value);
+                //$('.selected-assembly-counter').text(ui.value);
             }
         });
 
@@ -1047,7 +1044,7 @@ $(function(){
                         + '<input type="checkbox" data-reference-id="' + assemblyTopScore.referenceId + '" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" data-latitude="' + assemblyLatitude + '" data-longitude="' + assemblyLongitude + '">'
                     + '</div>'
                     //+ '<div class="assembly-list-generation"></div>'
-                    + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" title="">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['userAssemblyId'] + '</a>' + '</div>'
+                    + '<div class="assembly-list-header-id">' + '<a href="#" class="open-assembly-button" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '" title="' + assemblies[assemblyId]['ASSEMBLY_METADATA']['userAssemblyId'] + '">' + assemblies[assemblyId]['ASSEMBLY_METADATA']['userAssemblyId'] + '</a>' + '</div>'
                     + '<div class="assembly-list-header-nearest-representative">' + '<a href="#" class="show-on-representative-tree" data-assembly-id="' + assemblies[assemblyId]['FP_COMP'].assemblyId + '">' + assemblyTopScore.referenceId + '</a>' + ' (' + Math.round(assemblyTopScore.score.toFixed(2) * 100) + '%)</div>'
                     + '<div class="assembly-list-header-st">' + (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType) + '</div>'
                     + '<div class="assembly-list-header-resistance-profile">'
@@ -2432,182 +2429,116 @@ $(function(){
         // DNA sequence regex
         dnaSequenceRegex = /^[CTAGNUX]+$/i,
         // Count total number of contigs in all selected assemblies
-        totalContigsSum = 0;
+        totalContigsSum = 0,
+        totalNumberOfContigsDropped = 0;
 
-    // Refactor to fastajs.parse()
-    /**
-     * Description
-     * @method parseFastaFile
-     * @param {} e
-     * @param {} fileCounter
-     * @param {} file
-     * @param {} droppedFiles
-     * @param {} collectionId
-     * @return 
-     */
-    var parseFastaFile = function(e, fileCounter, file, droppedFiles, collectionId) {
-            // Array of contigs
-        var contigs = [],
-            // Array of sequence parts
-            contigParts = [],
-            // Count total number of contigs in a single assembly
-            contigsSum = 0,
-            // Count contigs
-            contigCounter = 0,
-            // Array of DNA sequence strings
-            dnaSequenceStrings = [],
-            // Single DNA sequence string
-            dnaSequenceString = '',
-            // Single DNA sequence id
-            dnaSequenceId = '',
-            // Empty jQuery object
-            assemblyListItem = $(),
-            // N50 chart data
-            chartData = [];
 
-        // Init assembly upload metadata
-        WGST.upload.assembly[file.name] = {
-            metadata: {}
-        };
-
+    //
+    // Breaking parseFastaFile function into multiple functions
+    //
+    var extractContigsFromFastaFileString = function(fastaFileString) {
+        var contigs = [];
+        //
         // Trim, and split assembly string into array of individual contigs
         // then filter that array by removing empty strings
-        contigs = e.target.result.trim().split('>').filter(function(element){
+        //
+        contigs = fastaFileString.trim().split('>').filter(function(element) {
             return (element.length > 0);
         });
 
-        // Start counting assemblies from 1, not 0
-        fileCounter = fileCounter + 1;
+        return contigs;
+    };
+    var splitContigIntoParts = function(contig) {
+        var contigParts = [];
 
-        assemblies[fileCounter] = {
-            'name': file.name,
-            'id': '',
-            'contigs': {
-                'total': contigs.length,
-                'invalid': 0,
-                'individual': []
-            }
-        };
+        // Split contig string into parts
+        contigParts = contig.split(/\n/)
+            // Filter out empty parts
+            .filter(function(part){
+                return (part.length > 0);
+            });
 
-        // Clear this array of DNA sequence strings
-        dnaSequenceStrings = [];
-        // Clear this DNA sequence string
-        dnaSequenceString = '';
-        // Clear this DNA sequence id string
-        dnaSequenceId = '';
-
-        // Parse each contig
-        for (; contigCounter < contigs.length; contigCounter++) {
-
-            // Split contig string into parts
-            contigParts = contigs[contigCounter].split(/\n/)
-                // Filter out empty parts
-                .filter(function(part){
-                    return (part.length > 0);
-                });
-
-            // Trim each contig part
-            var contigPartCounter = 0;
-            for (; contigPartCounter < contigParts; i++) {
-                contigParts[contigPartCounter] = contigParts[contigPartCounter].trim();
-            }
-
-            /*
-
-            Validate contig parts
-
-            */
-
-            // If there is only one contig part then this contig is invalid
-            if (contigParts.length > 1) {
-
-                /*
-
-                DNA sequence can contain:
-                1) [CTAGNUX] characters.
-                2) White spaces (e.g.: new line characters).
-
-                The first line of FASTA file contains id and description.
-                The second line theoretically contains comments (starts with #).
-
-                To parse FASTA file you need to:
-                1. Separate assembly into individual contigs by splitting file's content by > character.
-                   Note: id and description can contain > character.
-                2. For each sequence: split it by a new line character, 
-                   then convert resulting array to string ignoring the first (and rarely the second) element of that array.
-
-                */
-
-                // Parse sequence DNA string
-
-                // Create sub array of the contig parts array - cut the first element (id and description).
-                //var sequenceDNAStringArray = contigParts.splice(1, contigParts.length);
-                var contigPartsNoIdDescription = contigParts.splice(1, contigParts.length);
-
-                // Very rarely the second line can be a comment
-                // If the first element won't match regex then assume it is a comment
-                if (! dnaSequenceRegex.test(contigPartsNoIdDescription[0].trim())) {
-                    // Remove comment element from the array
-                    contigPartsNoIdDescription = contigPartsNoIdDescription.splice(1, contigPartsNoIdDescription.length);
-                }
-
-                /*
-
-                Contig string without id, description, comment is only left with DNA sequence string(s)
-
-                */
-                // Convert array of DNA sequence substrings into a single string
-                // Remove whitespace
-                dnaSequenceString = contigPartsNoIdDescription.join('').replace(/\s/g, '');
-
-                // Parse sequence id
-                dnaSequenceId = contigParts[0].trim().replace('>','');
-
-                // Validate DNA sequence string
-                if (dnaSequenceRegex.test(dnaSequenceString)) {
-                    // Store it in array
-                    dnaSequenceStrings.push(dnaSequenceString);
-                    // Init sequence object
-                    assemblies[fileCounter]['contigs']['individual'][contigCounter] = {};
-                    // Store sequence id
-                    assemblies[fileCounter]['contigs']['individual'][contigCounter]['id'] = dnaSequenceId;
-                    // Store sequence string
-                    assemblies[fileCounter]['contigs']['individual'][contigCounter]['sequence'] = dnaSequenceString;
-                // Invalid DNA sequence string
-                } else {
-                    // Count as invalid sequence
-                    assemblies[fileCounter]['contigs']['invalid'] = assemblies[fileCounter]['contigs']['invalid'] + 1;
-                }
-            } else {
-                // Count as invalid sequence
-                assemblies[fileCounter]['contigs']['invalid'] = assemblies[fileCounter]['contigs']['invalid'] + 1;
-            }
-
-        } // for
-
-        // Store fasta file and metadata
-        fastaFilesAndMetadata[file.name] = {
-            // Cut FASTA file extension from the file name
-            //name: file.name.substr(0, file.name.lastIndexOf('.')),
-            name: file.name,
-            assembly: e.target.result,
-            metadata: {}
-        };
-        /*
-        fastaFilesAndMetadata.push({
-            // Cut FASTA file extension from the file name
-            name: file.name.substr(0, file.name.lastIndexOf('.')),
-            assembly: e.target.result,
-            metadata: {}
+        // Trim each contig part
+        contigParts.map(function(contigPart){
+            return contigPart.trim();
         });
-        */
 
-        /*
+        return contigParts;
+    };
+    var extractDnaStringIdFromContig = function(contig) {
+        var contigParts = splitContigIntoParts(contig);
 
-        Calculate N50
-        http://www.nature.com/nrg/journal/v13/n5/box/nrg3174_BX1.html
+        // Parse DNA string id
+        var dnaStringId = contigParts[0].trim().replace('>','');
 
-        */
+        return dnaStringId;
+    };
+    WGST.regex = WGST.regex || {};
+    WGST.regex.DNA_SEQUENCE = /^[CTAGNUX]+$/i;
+    var extractDnaStringFromContig = function(contig) {
+        var contigParts = splitContigIntoParts(contig);
+        //
+        // DNA sequence can contain:
+        // 1) [CTAGNUX] characters.
+        // 2) White spaces (e.g.: new line characters).
+        //
+        // The first line of FASTA file contains id and description.
+        // The second line theoretically contains comments (starts with #).
+        //
+        // To parse FASTA file you need to:
+        // 1. Separate assembly into individual contigs by splitting file's content by > character.
+        //    Note: id and description can contain > character.
+        // 2. For each sequence: split it by a new line character, 
+        //    then convert resulting array to string ignoring the first (and rarely the second) element of that array.
+        //
+        // -----------------------------
+        // Parse DNA sequence string
+        // -----------------------------
+        //
+        // Create sub array of the contig parts array - cut the first element (id and description).
+        var contigPartsWithNoIdAndDescription = contigParts.splice(1, contigParts.length);
+        //
+        // Very rarely the second line can be a comment
+        // If the first element won't match regex then assume it is a comment
+        //
+        if (! WGST.regex.DNA_SEQUENCE.test(contigPartsWithNoIdAndDescription[0].trim())) {
+            // Remove comment element from the array
+            contigPartsWithNoIdAndDescription = contigPartsWithNoIdAndDescription.splice(1, contigPartsWithNoIdAndDescription.length);
+        }
+        //
+        // Contig string without id, description, comment is only left with DNA sequence string(s).
+        //
+        //
+        // Convert array of DNA sequence substrings into a single string
+        // Remove whitespace
+        //
+        var dnaString = contigPartsWithNoIdAndDescription.join('').replace(/\s/g, '');
+
+        return dnaString;
+    };
+    var extractDnaStringsFromContigs = function(contigs) {
+        var dnaStrings = [],
+            dnaString;
+        contigs.forEach(function(contig) {
+            dnaString = extractDnaStringFromContig(contig);
+            dnaStrings.push(dnaString);
+        });
+        return dnaStrings;
+    };
+    var isValidDnaString = function(dnaString) {
+        return WGST.regex.DNA_SEQUENCE.test(dnaString);
+    };
+    var isValidContig = function(contig) {
+        var contigParts = splitContigIntoParts(contig);
+        var dnaString = extractDnaStringFromContig(contig);
+
+        return (contigParts.length > 1 && isValidDnaString(dnaString));
+    };
+    var calculateN50 = function(dnaSequenceStrings) {
+        //
+        // Calculate N50
+        // http://www.nature.com/nrg/journal/v13/n5/box/nrg3174_BX1.html
+        //
 
         // Order array by sequence length DESC
         var sortedDnaSequenceStrings = dnaSequenceStrings.sort(function(a, b){
@@ -2633,14 +2564,12 @@ $(function(){
         // Calculate one-half of the total sum of all nucleotides in the assembly
         var assemblyNucleotidesHalfSum = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / 2);
 
-        /*
+        //
+        // Sum lengths of every contig starting from the longest contig
+        // until this running sum equals one-half of the total length of all contigs in the assembly.
+        //
 
-        Sum lengths of every contig starting from the longest contig
-        until this running sum equals one-half of the total length of all contigs in the assembly.
-
-        */
-
-            // Store nucleotides sum
+        // Store nucleotides sum
         var assemblyNucleotidesSum = 0,
             // N50 object
             assemblyN50 = {},
@@ -2660,31 +2589,245 @@ $(function(){
             }
         }
 
-        // Calculate average nucleotides per sequence
-        var averageNucleotidesPerSequence = Math.floor(assemblyNucleotideSums[assemblyNucleotideSums.length - 1] / dnaSequenceStrings.length);
+        return assemblyN50;
+    };
+    var calculateTotalNumberOfNucleotidesInDnaStrings = function(dnaStrings) {
+        var totalNumberOfNucleotidesInDnaStrings = 0;
+        dnaStrings.forEach(function(dnaString, index, array){
+            totalNumberOfNucleotidesInDnaStrings = totalNumberOfNucleotidesInDnaStrings + dnaString.length;
+        });
+        return totalNumberOfNucleotidesInDnaStrings;
 
-        // Calculate N50 quality
-        // If sequence length is greater than average sequence length then quality is good
-        /*
-        if (assemblyN50['sequenceLength'] > averageNucleotidesPerSequence) {
-            assemblyN50['quality'] = true;
-        } else { // Quality is bad
-            assemblyN50['quality'] = false;
-        }
-        */
+        //
+        // Reduce doesn't seem to work as expected
+        //
+        // var totalNumberOfNucleotidesInDnaStrings = dnaStrings.reduce(function(previousDnaString, currentDnaString, index, array) {
+        //     return previousDnaString.length + currentDnaString.length;
+        // }, '');
+        // return totalNumberOfNucleotidesInDnaStrings;
+    };
+    var calculateAverageNumberOfNucleotidesInDnaStrings = function(dnaStrings) {
+        var totalNumberOfNucleotidesInDnaStrings = calculateTotalNumberOfNucleotidesInDnaStrings(dnaStrings);
+        var numberOfDnaStrings = dnaStrings.length;
+        var averageNumberOfNucleotidesInDnaStrings = Math.floor(totalNumberOfNucleotidesInDnaStrings / numberOfDnaStrings);
+        return averageNumberOfNucleotidesInDnaStrings;
+    };
+    var calculateSmallestNumberOfNucleotidesInDnaStrings = function(dnaStrings) {
+        var numberOfNucleotidesInDnaStrings = dnaStrings.map(function(dnaString){
+            return dnaString.length;
+        });
+        var smallestNumberOfNucleotidesInDnaStrings = numberOfNucleotidesInDnaStrings.reduce(function(previousNumberOfNucleotidesInDnaString, currentNumberOfNucleotidesInDnaString, index, array){
+            return Math.min(previousNumberOfNucleotidesInDnaString, currentNumberOfNucleotidesInDnaString);
+        });
+        return smallestNumberOfNucleotidesInDnaStrings;
+    };
+    var calculateBiggestNumberOfNucleotidesInDnaStrings = function(dnaStrings) {
+        var numberOfNucleotidesInDnaStrings = dnaStrings.map(function(dnaString){
+            return dnaString.length;
+        });
+        var biggestNumberOfNucleotidesInDnaStrings = numberOfNucleotidesInDnaStrings.reduce(function(previousNumberOfNucleotidesInDnaString, currentNumberOfNucleotidesInDnaString, index, array){
+            return Math.max(previousNumberOfNucleotidesInDnaString, currentNumberOfNucleotidesInDnaString);
+        });
+        return biggestNumberOfNucleotidesInDnaStrings;
+    };
+    var calculateSumsOfNucleotidesInDnaStrings = function(dnaStrings) {
+        //
+        // Get array of sums: [1, 2, 3, 6, 12, etc]
+        //
 
-        // Update total number of contigs to upload
-        //contigsSum = contigsSum + contigs.length; // TO DO: Depricate contigsSum
-        totalContigsSum = totalContigsSum + contigs.length;
+        //
+        // Sort dna strings by their length
+        //
+        var sortedDnaStrings = dnaStrings.sort(function(a, b){
+            return b.length - a.length;
+        });
+
+        //
+        // Calculate sums of all nucleotides in this assembly by adding current contig's length to the sum of all previous contig lengths
+        //
+        var sumsOfNucleotidesInDnaStrings = [];
+        sortedDnaStrings.forEach(function(sortedDnaString, index, array){
+            if (sumsOfNucleotidesInDnaStrings.length === 0) {
+                sumsOfNucleotidesInDnaStrings.push(sortedDnaString.length);
+            } else {
+                sumsOfNucleotidesInDnaStrings.push(sortedDnaString.length + sumsOfNucleotidesInDnaStrings[sumsOfNucleotidesInDnaStrings.length - 1]);
+            }
+        });
+
+        return sumsOfNucleotidesInDnaStrings;
+
+        //
+        // Deprecated: previously working solution
+        //
+        // // Calculate sums of all nucleotides in this assembly by adding current contig's length to the sum of all previous contig lengths
+        // // Contig length === number of nucleotides in this contig
+        // var assemblyNucleotideSums = [],
+        //     // Count sorted dna sequence strings
+        //     sortedDnaStringCounter = 0;
+
+        // for (; sortedDnaStringCounter < sortedDnaStrings.length; sortedDnaStringCounter++) {
+        //     if (assemblyNucleotideSums.length > 0) {
+        //         // Add current contig's length to the sum of all previous contig lengths
+        //         assemblyNucleotideSums.push(sortedDnaStrings[sortedDnaStringCounter].length + assemblyNucleotideSums[assemblyNucleotideSums.length - 1]);
+        //     } else {
+        //         // This is a "sum" of a single contig's length
+        //         assemblyNucleotideSums.push(sortedDnaStrings[sortedDnaStringCounter].length);
+        //     }
+        // }
+        // return assemblyNucleotideSums;
+    };
+
+    //
+    // Once I will migrate to React.js this function will not be needed anymore
+    //
+    // var showDroppedAssembly = function(fileUid) {
+
+    //     var uid = '';
+    //     if (typeof fileUid === 'undefined') {
+    //         // Show first one
+    //         uid = WGST.dragAndDrop.loadedFiles[0].uid;
+    //         console.log('A: Showing this dropped assembly: ' + WGST.dragAndDrop.loadedFiles[0].uid);
+    //         //WGST.dragAndDrop.droppedFiles[0].uid
+    //     } else {
+    //         console.log('B: Showing this dropped assembly: ' + fileUid);
+    //         uid = fileUid;
+    //     }
+
+    //     $('.wgst-upload-assembly__analytics').hide();
+    //     $('.wgst-upload-assembly__analytics[data-file-uid="' + uid + '"]').show();
+    //     $('.wgst-upload-assembly__metadata').hide();
+    //     $('.wgst-upload-assembly__metadata[data-file-uid="' + uid + '"]').show();
+
+    //     //
+    //     // Quite an elegant way of finding object by it's property value in array
+    //     //
+    //     var loadedFile = WGST.dragAndDrop.loadedFiles.filter(function(loadedFile) {
+    //         return loadedFile.uid === uid; // filter out appropriate one
+    //     })[0];
+
+    //     // Set file name in metadata panel title
+    //     $('.wgst-panel__assembly-upload-metadata .header-title small').text(loadedFile.file.name);
+
+    //     // Set file name in analytics panel title
+    //     $('.wgst-panel__assembly-upload-analytics .header-title small').text(loadedFile.file.name);
+    
+    //     // Set file name in navigator
+    //     $('.assembly-file-name').text(loadedFile.file.name);
+    // };
+    var validateContigs = function(contigs) {
+
+        var validatedContigs = {
+            valid: [],
+            invalid: []
+        };
+
+        //
+        // Validate each contig
+        //
+        contigs.forEach(function(contig, index, contigs) {
+
+            var contigParts = splitContigIntoParts(contig);
+            var dnaString = extractDnaStringFromContig(contig);
+            var dnaStringId = extractDnaStringIdFromContig(contig);
+
+            // Valid contig
+            if (isValidContig(contig)) {
+                validatedContigs.valid.push({
+                    id: dnaStringId,
+                    dnaString: dnaString
+                });
+
+            // Invalid contig
+            } else {
+                validatedContigs.invalid.push({
+                    id: dnaStringId,
+                    dnaString: dnaString
+                });
+            }
+        });
+
+        return validatedContigs;
+    };
+
+    //
+    // Refactor this function
+    //
+    var parseFastaFile = function(event, fileCounter, file, droppedFiles, collectionId, fileUid) {
+            // Array of contigs
+        var //contigs = [],
+            // Array of sequence parts
+            //contigParts = [],
+            // Count total number of contigs in a single assembly
+            contigsSum = 0,
+            // Count contigs
+            contigCounter = 0,
+            // Array of DNA sequence strings
+            dnaSequenceStrings = [],
+            // Single DNA sequence string
+            dnaSequenceString = '',
+            // Single DNA sequence id
+            dnaSequenceId = '',
+            // Empty jQuery object
+            assemblyAnalyticsHtml = $(),
+            // N50 chart data
+            chartData = [];
+
+        // Init assembly upload metadata
+        WGST.upload.assembly[file.name] = {
+            metadata: {}
+        };
+
+        var fastaFileString = event.target.result;
+        var contigs = extractContigsFromFastaFileString(fastaFileString);
+        validateContigs(contigs);
+
+        // Start counting assemblies from 1, not 0
+        fileCounter = fileCounter + 1;
+
+        assemblies[fileCounter] = {
+            'name': file.name,
+            'id': '',
+            'contigs': {
+                'total': contigs.length,
+                'invalid': 0,
+                'individual': []
+            }
+        };
+
+        // Store fasta file and metadata
+        fastaFilesAndMetadata[file.name] = {
+            // Cut FASTA file extension from the file name
+            //name: file.name.substr(0, file.name.lastIndexOf('.')),
+            name: file.name,
+            assembly: event.target.result,
+            metadata: {}
+        };
+
+        var dnaStrings = extractDnaStringsFromContigs(contigs);
+        var assemblyN50 = calculateN50(dnaStrings);
+        var dnaStrings = extractDnaStringsFromContigs(contigs);
+        var totalNumberOfNucleotidesInDnaStrings = calculateTotalNumberOfNucleotidesInDnaStrings(dnaStrings);
+        var averageNumberOfNucleotidesInDnaStrings = calculateAverageNumberOfNucleotidesInDnaStrings(dnaStrings);
+        var smallestNumberOfNucleotidesInDnaStrings = calculateSmallestNumberOfNucleotidesInDnaStrings(dnaStrings);
+        var biggestNumberOfNucleotidesInDnaStrings = calculateBiggestNumberOfNucleotidesInDnaStrings(dnaStrings);
+
+        console.log('[WGST] * dev * dnaStrings:');
+        console.dir(dnaStrings);
+        console.log('[WGST] * dev * totalNumberOfNucleotidesInDnaStrings: ' + totalNumberOfNucleotidesInDnaStrings);
+        console.log('[WGST] * dev * averageNumberOfNucleotidesInDnaStrings: ' + averageNumberOfNucleotidesInDnaStrings);
+        console.log('[WGST] * dev * smallestNumberOfNucleotidesInDnaStrings: ' + smallestNumberOfNucleotidesInDnaStrings);
+        console.log('[WGST] * dev * biggestNumberOfNucleotidesInDnaStrings: ' + biggestNumberOfNucleotidesInDnaStrings);
+
+        totalNumberOfContigsDropped = totalNumberOfContigsDropped + contigs.length;
 
         // Show average number of contigs per assembly
-        $('.assembly-sequences-average').text(Math.floor(totalContigsSum / droppedFiles.length));
+        $('.assembly-sequences-average').text(Math.floor(totalNumberOfContigsDropped / droppedFiles.length));
 
         // TO DO: Convert multiple strings concatenation to array and use join('')
         // Display current assembly
-        assemblyListItem = $(
+        assemblyAnalyticsHtml = $(
             //'<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
-            '<li class="assembly-item hide-this" data-name="' + assemblies[fileCounter]['name'] + '" data-file-id="' + fileCounter + '" id="assembly-item-' + fileCounter + '">'
+            '<li class="assembly-item wgst-upload-assembly__analytics hide-this" data-name="' + assemblies[fileCounter]['name'] + '" data-file-id="' + fileCounter + '" data-file-uid="' + fileUid + '" id="assembly-item-' + fileCounter + '">'
 
                 // Assembly overview
                 + '<div class="assembly-overview">'
@@ -2699,7 +2842,7 @@ $(function(){
                         // Print a number with commas as thousands separators
                         // http://stackoverflow.com/a/2901298
                         + '<div class="assembly-stats-label">total nt</div>'
-                        + '<div class="assembly-stats-number">' + assemblyNucleotideSums[assemblyNucleotideSums.length - 1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
+                        + '<div class="assembly-stats-number">' + totalNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
                         //+ '<div class="assembly-stats-label">sequences</div>'
                     + '</div>'
 
@@ -2707,7 +2850,7 @@ $(function(){
                         // Print a number with commas as thousands separators
                         // http://stackoverflow.com/a/2901298
                         + '<div class="assembly-stats-label">total contigs</div>'
-                        + '<div class="assembly-stats-number assembly-stats-number-contigs">' + assemblies[fileCounter]['contigs']['total'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
+                        + '<div class="assembly-stats-number assembly-stats-number-contigs">' + contigs.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
                         //+ '<div class="assembly-stats-label">sequences</div>'
                     + '</div>'
 
@@ -2715,7 +2858,7 @@ $(function(){
                         // Print a number with commas as thousands separators
                         // http://stackoverflow.com/a/2901298
                         + '<div class="assembly-stats-label">min contig</div>'
-                        + '<div class="assembly-stats-number">' + sortedDnaSequenceStrings[sortedDnaSequenceStrings.length - 1].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+                        + '<div class="assembly-stats-number">' + smallestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
                         //+ '<div class="assembly-stats-label">sequences</div>'
                     + '</div>'
 
@@ -2723,7 +2866,7 @@ $(function(){
                         // Print a number with commas as thousands separators
                         // http://stackoverflow.com/a/2901298
                         + '<div class="assembly-stats-label">mean contig</div>'
-                        + '<div class="assembly-stats-number">' + averageNucleotidesPerSequence.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+                        + '<div class="assembly-stats-number">' + averageNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
                         //+ '<div class="assembly-stats-label">nucleotides per sequence<br/> on average</div>'
                     + '</div>'
 
@@ -2731,7 +2874,7 @@ $(function(){
                         // Print a number with commas as thousands separators
                         // http://stackoverflow.com/a/2901298
                         + '<div class="assembly-stats-label">max contig</div>'
-                        + '<div class="assembly-stats-number">' + sortedDnaSequenceStrings[0].length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
+                        + '<div class="assembly-stats-number">' + biggestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
                         //+ '<div class="assembly-stats-label">sequences</div>'
                     + '</div>'
 
@@ -2877,11 +3020,21 @@ $(function(){
             + '</div>',
 
             // UI templates
-            assemblyControlsFormBlock = 
+            assemblyControlsFormBlock =
             '<div class="form-block assembly-metadata-{{fileCounter}} hide-this">'
-                + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next empty metadata</button>'
+                + '<div class="btn-group">'
+                + '<button type="button" class="btn btn-default wgst-dropped-assembly-list-navigation-button__previous"><i class="fa fa-chevron-left"></i></button>'
+                + '<button type="button" class="btn btn-default wgst-dropped-assembly-list-navigation-button__next"><i class="fa fa-chevron-right"></i></button>'
+                + '</div>'
                 + ' <button class="btn btn-default copy-metadata-to-all-empty-assemblies">Copy to all empty metadata</button>'
             + '</div>',
+
+
+
+            // '<div class="form-block assembly-metadata-{{fileCounter}} hide-this">'
+            //     + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next assembly</button>'
+            //     + ' <button class="btn btn-default copy-metadata-to-all-empty-assemblies">Copy to all empty metadata</button>'
+            // + '</div>',
             assemblyMeatadataDoneBlock = 
             '<div class="form-block assembly-metadata-{{fileCounter}} hide-this">'
                 + 'Ready? Click "Upload" button to upload your assemblies and metadata.'
@@ -2921,7 +3074,7 @@ $(function(){
         // REFACTOR!
         var $assemblyMetadataListItem = $(
             //'<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
-            '<li class="assembly-item hide-this" data-name="' + assemblies[fileCounter]['name'] + '" data-file-id="' + fileCounter + '" id="assembly-metadata-item-' + fileCounter + '">'
+            '<li class="assembly-item wgst-upload-assembly__metadata hide-this" data-name="' + assemblies[fileCounter]['name'] + '" data-file-id="' + fileCounter + '" data-file-uid="' + fileUid + '" id="assembly-metadata-item-' + fileCounter + '">'
             + '</li>'
         );
 
@@ -2932,22 +3085,31 @@ $(function(){
         //assemblyListItem.append(assemblyMetadataFormContainer);
 
         // Append assembly
-        $('.assembly-list-container ul').append(assemblyListItem);
+        $('.assembly-list-container ul').append(assemblyAnalyticsHtml);
 
         // Draw N50 chart
-        drawN50Chart(assemblyNucleotideSums, assemblyN50, fileCounter);
+        var sumsOfNucleotidesInDnaStrings = calculateSumsOfNucleotidesInDnaStrings(dnaStrings);
+
+        console.log('[WGST] * dev * assemblyN50:');
+        console.dir(assemblyN50);
+
+        drawN50Chart(sumsOfNucleotidesInDnaStrings, assemblyN50, fileCounter);
+        //drawN50Chart(assemblyNucleotideSums, assemblyN50, fileCounter);
 
         // Show first assembly
         //$('.assembly-item-1').removeClass('hide-this');
         //$('.assembly-item').eq('0').show();
-        $('#assembly-item-1').show();
-        $('#assembly-metadata-item-1').show();
+        // $('#assembly-item-1').show();
+        // $('#assembly-metadata-item-1').show();
 
-        // Set file name in metadata panel title
-        $('.wgst-panel__assembly-upload-metadata .header-title small').text($('#assembly-metadata-item-1').attr('data-name'));
+        //showDroppedAssembly();
+        //$('.')
 
-        // Set file name in analytics panel title
-        $('.wgst-panel__assembly-upload-analytics .header-title small').text($('#assembly-item-1').attr('data-name'));
+        // // Set file name in metadata panel title
+        // $('.wgst-panel__assembly-upload-metadata .header-title small').text($('#assembly-metadata-item-1').attr('data-name'));
+
+        // // Set file name in analytics panel title
+        // $('.wgst-panel__assembly-upload-analytics .header-title small').text($('#assembly-item-1').attr('data-name'));
 
         // Store displayed fasta file name
         //selectedFastaFileName = $('.assembly-item-1').attr('data-name');
@@ -3029,6 +3191,9 @@ $(function(){
                 // Show metadata marker
                 WGST.geo.map.markers.metadata.setVisible(true);
 
+                //
+                // Update metadata store
+                //
                 WGST.upload.assembly[fileName] = WGST.upload.assembly[fileName] || {};
                 WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
                 WGST.upload.assembly[fileName].metadata.geography = {
@@ -3040,6 +3205,7 @@ $(function(){
                     // https://developers.google.com/maps/documentation/geocoding/#Types
                     type: place.types[0]
                 };
+
             });
 
             // // On change store datetime in assembly metadata
@@ -3293,13 +3459,9 @@ $(function(){
         event.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy
     };
 
-    var handleFastaDrop = function(file) {
+    var handleFastaDrop = function(file) {};
 
-    };
-
-    var handleCsvDrop = function(file) {
-
-    };
+    var handleCsvDrop = function(file) {};
 
     var openAssemblyUploadPanels = function() {
         if (! isPanelActive('assemblyUploadNavigator')) {
@@ -3392,6 +3554,7 @@ $(function(){
             var droppedFiles = event.dataTransfer.files;
 
             WGST.dragAndDrop.files = $.merge(WGST.dragAndDrop.files, droppedFiles);
+            WGST.dragAndDrop.loadedFiles = [];
 
             var allDroppedFiles = WGST.dragAndDrop.files,
                 // A single file from FileList object
@@ -3424,7 +3587,7 @@ $(function(){
             $('.total-number-of-dropped-assemblies').text(allDroppedFiles.length);
 
             // Update assembly list slider
-            $('.assembly-list-slider').slider("option", "max", allDroppedFiles.length);
+            $('.assembly-list-slider').slider('option', 'max', allDroppedFiles.length - 1);
 
             // Set file name
             $('.assembly-file-name').text(fileName);
@@ -3453,17 +3616,50 @@ $(function(){
 
                     if ($('.wgst-panel__assembly-upload-analytics .assembly-item[data-name="' + file.name + '"]').length === 0) {
 
-                        // Create closure (new scope) to save fileCounter, file variable with it's current value
-                        //(function(){
-                            var fileReader = new FileReader();
+                        var fileReader = new FileReader();
 
-                            fileReader.addEventListener('load', function(event){
-                                parseFastaFile(event, fileCounter, file, droppedFiles, collectionId);
+                        fileReader.addEventListener('load', function(event){
+                            console.log('[WGST] Loaded file ' + event.target.name);
+
+                            // Store loaded file
+                            WGST.dragAndDrop.loadedFiles.push({
+                                // Generate uid for dropped file
+                                uid: uuid.v4(),
+                                event: event,
+                                fileCounter: fileCounter,
+                                file: file,
+                                droppedFiles: droppedFiles,
+                                collectionId: collectionId
                             });
 
-                            // Read file as text
-                            fileReader.readAsText(file);
-                        //})();
+                            // Once all files have been loaded
+                            if (WGST.dragAndDrop.loadedFiles.length === WGST.dragAndDrop.files.length) {
+                                // Sort loaded files by name
+                                WGST.dragAndDrop.loadedFiles.sort(function(a, b){
+                                    if (a.file.name > b.file.name) {
+                                        return 1;
+                                    } else if (a.file.name < b.file.name) {
+                                        return -1;
+                                    } else {
+                                        return 0;
+                                    }
+                                });
+                                // Parse loaded files
+                                WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile){
+                                    parseFastaFile(loadedFile.event, loadedFile.fileCounter, loadedFile.file, loadedFile.droppedFiles, loadedFile.collectionId, loadedFile.uid);
+                                    
+                                    // Add assembly to the drop down select of dropeed assemblies
+                                    $('.wgst-dropped-assembly-list').append(
+                                        '<option value="' + loadedFile.uid + '">' + loadedFile.file.name + '</option>'
+                                    );
+                                });
+                                // Show first assembly
+                                window.WGST.exports.showDroppedAssembly(WGST.dragAndDrop.loadedFiles[0].uid);
+                            }
+                        });
+
+                        // Read file as text
+                        fileReader.readAsText(file);
 
                     } // if
 
@@ -3569,49 +3765,6 @@ $(function(){
             $('.nav-prev-item').removeAttr('disabled', 'disabled');
         }
     };
-    
-    /**
-     * Description
-     * @method updateSelectedFilesUI
-     * @param {} elementCounter
-     * @return 
-     */
-    var updateSelectedFilesUI = function(elementCounter) {
-        // Update sequence counter label
-        $('.selected-assembly-counter').text(elementCounter);
-        // Update sequence list item content
-        // Hide all sequences
-        $('.assembly-item').hide();
-        // Show selected sequence
-        //$('.assembly-item-' + ui.value).show();
-        //$('.assembly-item').eq(elementCounter - 1).show(); // Convert one-based index to zero-based index used by .eq()
-
-        // Analytics
-        var selectedFastaFileElement = $('#assembly-item-' + elementCounter);
-        selectedFastaFileElement.show();
-
-        // Metadata
-        var selectedFastaFileElementMetadata = $('#assembly-metadata-item-' + elementCounter);
-        selectedFastaFileElementMetadata.show();
-
-        // Update assembly file name
-        var fileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name');
-
-        // Update file name in Assembly Upload Navigator
-        $('.wgst-panel__assembly-upload-navigator .assembly-file-name').text(fileName);
-
-        // Update file name in Assembly Upload Metadata panel
-        $('.wgst-panel__assembly-upload-metadata .header-title small').text(fileName);
-
-        // Update file name in Assembly Upload Analytics panel
-        $('.wgst-panel__assembly-upload-analytics .header-title small').text(fileName);
-
-        // Update sequence counter label
-        updateRangeNavigationButtons(elementCounter);
-        // Store displayed fasta file name
-        //selectedFastaFileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name'); 
-        selectedFastaFileName = selectedFastaFileElement.attr('data-name'); 
-    };
 
     /**
      * Description
@@ -3711,51 +3864,133 @@ $(function(){
         $('.assembly-upload-total-number').text(Object.keys(fastaFilesAndMetadata).length);
     };
 
-    /**
-     * Description
-     * @method assemblyListSliderEventHandler
-     * @param {} event
-     * @param {} ui
-     * @return 
-     */
-    var assemblyListSliderEventHandler = function(event, ui) {
-        updateSelectedFilesUI(ui.value);
-        /*
-        // Update sequence list item content
-        // Hide all sequences
-        $('.assembly-item').hide();
-        // Show selected sequence
-        //$('.assembly-item-' + ui.value).show();
-        $('.assembly-item').eq(ui.value-1).show();
-        // Update assembly file name
-        $('.assembly-file-name').text($('.assembly-item-' + ui.value).attr('data-name'));
-        // Store displayed fasta file name
-        selectedFastaFileName = $('.assembly-item-' + ui.value).attr('data-name');
-        */
+    //
+    // Updates
+    //
+    var getIndexOfDroppedAssemblyCurrentlyDisplayed = function() {
+        var fileUidOfVisibleMetadata = $('.wgst-upload-assembly__metadata:visible').attr('data-file-uid');
+
+        var indexOfDroppedAssemblyCurrentlyDisplayed = 0;
+
+        WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile, index, array) {
+            if (loadedFile.uid === fileUidOfVisibleMetadata) {
+                indexOfDroppedAssemblyCurrentlyDisplayed = index;
+            }
+        });
+
+        return indexOfDroppedAssemblyCurrentlyDisplayed;
     };
+
+    // var handleAssemblyListSlide = function(event, ui) {
+    //     var assemblyIndex = ui.value - 1;
+    //     console.log('~~~ assemblyIndex: ' + assemblyIndex);
+    //     updateSelectedFilesUI(assemblyIndex);
+    //     showAssembly(assemblyIndex);
+    // };
+
+    var updateSelectedFilesUI = function(elementCounter) {
+        // Update sequence counter label
+        $('.selected-assembly-counter').text(elementCounter);
+
+        // Update assembly file name
+        var fileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name');
+
+        // Update file name in Assembly Upload Navigator
+        $('.wgst-panel__assembly-upload-navigator .assembly-file-name').text(fileName);
+
+        // Update file name in Assembly Upload Metadata panel
+        $('.wgst-panel__assembly-upload-metadata .header-title small').text(fileName);
+
+        // Update file name in Assembly Upload Analytics panel
+        $('.wgst-panel__assembly-upload-analytics .header-title small').text(fileName);
+
+        // Update sequence counter label
+        updateRangeNavigationButtons(elementCounter);
+    };
+
+    // var assemblyListSliderEventHandler = function(event, ui) {
+    //     updateSelectedFilesUI(ui.value);
+
+        
+    //     // Update sequence list item content
+    //     // Hide all sequences
+    //     $('.assembly-item').hide();
+    //     // Show selected sequence
+    //     //$('.assembly-item-' + ui.value).show();
+    //     $('.assembly-item').eq(ui.value-1).show();
+    //     // Update assembly file name
+    //     $('.assembly-file-name').text($('.assembly-item-' + ui.value).attr('data-name'));
+    //     // Store displayed fasta file name
+    //     selectedFastaFileName = $('.assembly-item-' + ui.value).attr('data-name');
+        
+    // };
+
+    // $('.wgst-dropped-assembly-list-navigation-button__previous').on('click', showNextAssembly);
+    // $('.wgst-dropped-assembly-list-navigation-button__previous').on('click', showPreviousAssembly);
+
+    // var showPreviousAssembly = function() {
+    //     console.debug('::: Showing previous assembly');
+
+    //     var currentAssemblyIndex = getIndexOfDroppedAssemblyCurrentlyDisplayed();
+    //     console.log('~~~ currentAssemblyIndex: ' + currentAssemblyIndex);
+    //     showAssembly(currentAssemblyIndex - 1);
+    //     // var previousAssemblyFileUid = WGST.dragAndDrop.loadedFiles[currentAssemblyIndex - 1].uid;
+    //     // showDroppedAssembly(previousAssemblyFileUid);
+    // };
+    // var showNextAssembly = function() {
+    //     console.debug('::: Showing next assembly');
+
+    //     var currentAssemblyIndex = getIndexOfDroppedAssemblyCurrentlyDisplayed();
+    //     console.log('~~~ currentAssemblyIndex: ' + currentAssemblyIndex);
+    //     showAssembly(currentAssemblyIndex + 1);
+    //     // var nextAssemblyFileUid = WGST.dragAndDrop.loadedFiles[currentAssemblyIndex + 1].uid;
+    //     // showDroppedAssembly(nextAssemblyFileUid);
+    // };
+    // var showAssembly = function(index) {
+    //     console.debug('index: ' + index);
+    //     console.debug('WGST.dragAndDrop.loadedFiles:');
+    //     console.dir(WGST.dragAndDrop.loadedFiles);
+
+    //     var assemblyFileUid = WGST.dragAndDrop.loadedFiles[index].uid;
+    //     showDroppedAssembly(assemblyFileUid);  
+    // };
+
     // Handle slide event
     // Triggered when user moved but didn't release range handle
-    $('.assembly-list-slider').on('slide', assemblyListSliderEventHandler);
+    //$('.assembly-list-slider').on('slide', handleAssemblyListSlide);
     // Handle slidechange event
     // Triggered when user clicks a button or releases range handle
-    $('.assembly-list-slider').on('slidechange', assemblyListSliderEventHandler);
+    //$('.assembly-list-slider').on('slidechange', handleAssemblyListSlide);
+
     // Navigate to the previous sequence
-    $('.nav-prev-item').on('click', function(e){
+    $('.nav-prev-item').on('click', function() {
+        var $slider = $('.assembly-list-slider'),
+            currentSliderValue = $slider.slider('value');
+
+        console.log('@@@ currentSliderValue: ' + currentSliderValue);
+
         // Check if selected sequence counter value is greater than 1
-        if ($('.assembly-list-slider').slider('value') > 1) {
+        if (currentSliderValue > 0) {
             // Decrement slider's value
-            $('.assembly-list-slider').slider('value', $('.assembly-list-slider').slider('value') - 1);
+            $slider.slider('value', currentSliderValue - 1);
+
+            //showPreviousAssembly();
         }
-        e.preventDefault();
     });
     // Navigate to the next sequence
-    $('.nav-next-item').on('click', function(e){
+    $('.nav-next-item').on('click', function() {
+        var $slider = $('.assembly-list-slider'),
+            currentSliderValue = $slider.slider('value');
+
+        console.log('@@@ currentSliderValue: ' + currentSliderValue);
+
         // Check if selected sequence counter value is less than total number of dropped assemblies
-        if ($('.assembly-list-slider').slider('value') < parseInt($('.total-number-of-dropped-assemblies').text(), 10)) {
+        if (currentSliderValue < WGST.dragAndDrop.loadedFiles.length) {
             // Increment slider's value
-            $('.assembly-list-slider').slider('value', $('.assembly-list-slider').slider('value') + 1);
+            $slider.slider('value', currentSliderValue + 1);
+
+            //showNextAssembly();
         }
-        e.preventDefault();
     });
 
     // Assembly metadata from
@@ -4681,30 +4916,32 @@ $(function(){
      * @param {} assemblyId
      * @return 
      */
-    var uploadAssembly = function(collectionId, assemblyId) {
+    var uploadAssembly = function(assembly) {
         // Upload assembly only if you are within parallel assembly upload limit
         if (numberOfFilesProcessing < PARALLEL_UPLOAD_ASSEMBLY_LIMIT) {
-            console.log('[WGST] Uploading ' + assemblyId + ' assembly');
+            console.log('[WGST] Uploading ' + assembly.assemblyId + ' assembly');
 
             // Increment number of assembly upload counter
             numberOfFilesProcessing = numberOfFilesProcessing + 1;
             // Set socket room id
-            fastaFilesAndMetadata[assemblyId].socketRoomId = WGST.socket.roomId;
-            // Set assembly id
-            fastaFilesAndMetadata[assemblyId].assemblyId = assemblyId;
+            assembly.socketRoomId = WGST.socket.roomId;
+
+            console.log('About to upload assembly:');
+            console.dir(assembly);
+
             // Post assembly
             $.ajax({
                 type: 'POST',
                 url: '/assembly/add/',
                 datatype: 'json', // http://stackoverflow.com/a/9155217
-                data: fastaFilesAndMetadata[assemblyId]
+                data: assembly //fastaFilesAndMetadata[assemblyId]
             })
             //.done(assemblyUploadDoneHandler(collectionId, assemblyId))
             .done(function(data, textStatus, jqXHR) {
                 // Do nothing
             })
             .fail(function(jqXHR, textStatus, errorThrown) {
-                console.log('[WGST][ERROR] Failed to send FASTA file object to server or received error message');
+                console.log('[WGST][Error] Failed to send FASTA file object to server or received error message');
                 console.error(textStatus);
                 console.error(errorThrown);
                 console.error(jqXHR);
@@ -4713,9 +4950,45 @@ $(function(){
                 //updateAssemblyUploadProgressBar();
             });
         } else {
-            setTimeout(uploadAssembly, ASSEMBLY_UPLOAD_TIMER, collectionId, assemblyId);
+            setTimeout(uploadAssembly, ASSEMBLY_UPLOAD_TIMER, assembly);
         }
     };
+
+    // var uploadAssembly = function(collectionId, assemblyId) {
+    //     // Upload assembly only if you are within parallel assembly upload limit
+    //     if (numberOfFilesProcessing < PARALLEL_UPLOAD_ASSEMBLY_LIMIT) {
+    //         console.log('[WGST] Uploading ' + assemblyId + ' assembly');
+
+    //         // Increment number of assembly upload counter
+    //         numberOfFilesProcessing = numberOfFilesProcessing + 1;
+    //         // Set socket room id
+    //         fastaFilesAndMetadata[assemblyId].socketRoomId = WGST.socket.roomId;
+    //         // Set assembly id
+    //         fastaFilesAndMetadata[assemblyId].assemblyId = assemblyId;
+    //         // Post assembly
+    //         $.ajax({
+    //             type: 'POST',
+    //             url: '/assembly/add/',
+    //             datatype: 'json', // http://stackoverflow.com/a/9155217
+    //             data: fastaFilesAndMetadata[assemblyId]
+    //         })
+    //         //.done(assemblyUploadDoneHandler(collectionId, assemblyId))
+    //         .done(function(data, textStatus, jqXHR) {
+    //             // Do nothing
+    //         })
+    //         .fail(function(jqXHR, textStatus, errorThrown) {
+    //             console.log('[WGST][ERROR] Failed to send FASTA file object to server or received error message');
+    //             console.error(textStatus);
+    //             console.error(errorThrown);
+    //             console.error(jqXHR);
+
+    //             showNotification(textStatus);
+    //             //updateAssemblyUploadProgressBar();
+    //         });
+    //     } else {
+    //         setTimeout(uploadAssembly, ASSEMBLY_UPLOAD_TIMER, collectionId, assemblyId);
+    //     }
+    // };
 
     var GET_COLLECTION_ID_TIMER = 2000;
 
@@ -4813,7 +5086,8 @@ $(function(){
                         //WGST.upload.collection[collectionId].notifications.tree = false; // Have you received at least 1 COLLECTION_TREE notification
 
                         // Replace user assembly id (fasta file name) with assembly id generated on server side
-                        var fastaFilesAndMetadataWithUpdatedIds = {};
+                        //var fastaFilesAndMetadataWithUpdatedIds = {};
+                        var sortedFastaFilesAndMetadataWithUpdatedIds = [];
                         $.each(userAssemblyIdToAssemblyIdMap, function(assemblyId){
                             console.log('==============================================');
                             console.dir(userAssemblyIdToAssemblyIdMap);
@@ -4822,7 +5096,8 @@ $(function(){
                             var userAssemblyId = userAssemblyIdToAssemblyIdMap[assemblyId];
 
                             if (typeof fastaFilesAndMetadata[userAssemblyId] !== 'undefined') {
-                                fastaFilesAndMetadataWithUpdatedIds[assemblyId] = fastaFilesAndMetadata[userAssemblyId];
+                                //fastaFilesAndMetadataWithUpdatedIds[assemblyId] = fastaFilesAndMetadata[userAssemblyId];
+                                sortedFastaFilesAndMetadataWithUpdatedIds.push([collectionId, assemblyId, fastaFilesAndMetadata[userAssemblyId]]);
                             }
                         });
                         // $.each(fastaFilesAndMetadata, function(userAssemblyId){
@@ -4830,20 +5105,36 @@ $(function(){
                         //     fastaFilesAndMetadataWithUpdatedIds[assemblyId] = fastaFilesAndMetadata[userAssemblyId];
                         // });
 
-                        fastaFilesAndMetadata = fastaFilesAndMetadataWithUpdatedIds;
+                        //fastaFilesAndMetadata = fastaFilesAndMetadataWithUpdatedIds;
 
-                        console.dir(fastaFilesAndMetadata);
+                        // Sort by user assembly id (file name)
+                        sortedFastaFilesAndMetadataWithUpdatedIds.sort(function(a, b){
+                            if (a[2].name > b[2].name) {
+                                return 1;
+                            } else if (a[2].name < b[2].name) {
+                                return -1;
+                            } else {
+                                return 0;
+                            }
+                        });
+
+                        fastaFilesAndMetadata = sortedFastaFilesAndMetadataWithUpdatedIds;
 
                         // Post each FASTA file separately
-                        for (assemblyId in fastaFilesAndMetadata) {
-                            if (fastaFilesAndMetadata.hasOwnProperty(assemblyId)) {                                
+                        fastaFilesAndMetadata.forEach(function(assembly) {
+                            //if (fastaFilesAndMetadata.hasOwnProperty(assemblyId)) {                                
+
+                                var collectionId = assembly[0],
+                                    assemblyId = assembly[1],
+                                    assemblyData = assembly[2],
+                                    readyToUploadAssemblyData = {};
 
                                 //var savedCollectionId = collectionId,
-                                var userAssemblyId = fastaFilesAndMetadata[assemblyId].name;
+                                var userAssemblyId = assemblyData.name;
 
                                 // Add collection id to each FASTA file object
                                 //fastaFilesAndMetadata[assemblyId].collectionId = savedCollectionId;
-                                fastaFilesAndMetadata[assemblyId].collectionId = collectionId;
+                                //assembly[1].collectionId = collectionId;
 
                                 // TO DO: Change 'data-name' to 'data-file-name'
                                 var autocompleteInput = $('li[data-name="' + userAssemblyId + '"] .assembly-sample-location-input');
@@ -4851,8 +5142,14 @@ $(function(){
                                 console.debug('userAssemblyId: ' + userAssemblyId);
                                 console.dir(WGST.upload);
 
-                                // Add metadata to each FASTA file object
-                                fastaFilesAndMetadata[assemblyId].metadata = {
+                                console.debug('assemblyData: ');
+                                console.dir(assemblyData);
+
+                                readyToUploadAssemblyData.collectionId = collectionId;
+                                readyToUploadAssemblyData.assemblyId = assemblyId;
+                                readyToUploadAssemblyData.userAssemblyId = assemblyData.name;
+                                readyToUploadAssemblyData.sequences = assemblyData.assembly;
+                                readyToUploadAssemblyData.metadata = {
                                     datetime: WGST.upload.assembly[userAssemblyId].metadata.datetime,
                                     geography: {
                                         position: {
@@ -4864,19 +5161,66 @@ $(function(){
                                     source: WGST.upload.assembly[userAssemblyId].metadata.source
                                 };
 
-                                console.log('[WGST] Metadata for ' + assemblyId + ':');
-                                console.debug(fastaFilesAndMetadata[assemblyId].metadata);
+                                uploadAssembly(readyToUploadAssemblyData);
 
-                                // Create closure to save collectionId and assemblyId
-                                (function() {
-                                    console.log('===================================================================');
-                                    console.log('collectionId: ' + collectionId + ' assemblyId: ' + assemblyId);
-                                    console.log('===================================================================');
+                                // //console.log('[WGST] Metadata for ' + assemblyId + ':');
+                                // //console.debug(fastaFilesAndMetadata[assemblyId].metadata);
 
-                                    uploadAssembly(collectionId, assemblyId);
-                                })();
-                            } // if
-                        } // for
+                                // // Create closure to save collectionId and assemblyId
+                                // (function() {
+                                //     console.log('===================================================================');
+                                //     console.log('collectionId: ' + collectionId + ' assemblyId: ' + assemblyId);
+                                //     console.log('===================================================================');
+
+                                //     //uploadAssembly(collectionId, assemblyId);
+                                //     uploadAssembly(readyToUploadAssemblyData);
+                                // })();
+                            //} // if
+                        });
+
+                        // // Post each FASTA file separately
+                        // for (assemblyId in fastaFilesAndMetadata) {
+                        //     if (fastaFilesAndMetadata.hasOwnProperty(assemblyId)) {                                
+
+                        //         //var savedCollectionId = collectionId,
+                        //         var userAssemblyId = fastaFilesAndMetadata[assemblyId].name;
+
+                        //         // Add collection id to each FASTA file object
+                        //         //fastaFilesAndMetadata[assemblyId].collectionId = savedCollectionId;
+                        //         fastaFilesAndMetadata[assemblyId].collectionId = collectionId;
+
+                        //         // TO DO: Change 'data-name' to 'data-file-name'
+                        //         var autocompleteInput = $('li[data-name="' + userAssemblyId + '"] .assembly-sample-location-input');
+
+                        //         console.debug('userAssemblyId: ' + userAssemblyId);
+                        //         console.dir(WGST.upload);
+
+                        //         // Add metadata to each FASTA file object
+                        //         fastaFilesAndMetadata[assemblyId].metadata = {
+                        //             datetime: WGST.upload.assembly[userAssemblyId].metadata.datetime,
+                        //             geography: {
+                        //                 position: {
+                        //                     latitude: WGST.upload.assembly[userAssemblyId].metadata.geography.position.latitude,
+                        //                     longitude: WGST.upload.assembly[userAssemblyId].metadata.geography.position.longitude
+                        //                 },
+                        //                 address: WGST.upload.assembly[userAssemblyId].metadata.geography.address
+                        //             },
+                        //             source: WGST.upload.assembly[userAssemblyId].metadata.source
+                        //         };
+
+                        //         console.log('[WGST] Metadata for ' + assemblyId + ':');
+                        //         console.debug(fastaFilesAndMetadata[assemblyId].metadata);
+
+                        //         // Create closure to save collectionId and assemblyId
+                        //         (function() {
+                        //             console.log('===================================================================');
+                        //             console.log('collectionId: ' + collectionId + ' assemblyId: ' + assemblyId);
+                        //             console.log('===================================================================');
+
+                        //             uploadAssembly(collectionId, assemblyId);
+                        //         })();
+                        //     } // if
+                        // } // for
                     })
                     .fail(function(jqXHR, textStatus, errorThrown) {
                         console.log('[WGST][ERROR] Failed to get collection id');
@@ -4905,9 +5249,9 @@ $(function(){
         delete fastaFilesAndMetadata[selectedFastaFileName];
 
         // Update assembly list slider
-        $('.assembly-list-slider').slider("option", "max", Object.keys(fastaFilesAndMetadata).length);
+        $('.assembly-list-slider').slider("option", "max", WGST.dragAndDrop.droppedFiles.length);
         // Recalculate total number of selected files
-        $('.total-number-of-dropped-assemblies').text(Object.keys(fastaFilesAndMetadata).length);
+        $('.total-number-of-dropped-assemblies').text(WGST.dragAndDrop.droppedFiles.length);
 
         updateSelectedFilesUI($('.assembly-list-slider').slider('value'));
 
@@ -5028,7 +5372,30 @@ $(function(){
         $.each(WGST.upload.assembly, function(targetFileName, targetFileMetadata){
             // Only copy metadata to assemblies with no metadata
             if (Object.keys(targetFileMetadata.metadata).length === 0) {
-                WGST.upload.assembly[targetFileName].metadata = source.metadata;
+                //
+                // Important! http://docstore.mik.ua/orelly/webprog/jscript/ch11_02.htm
+                // This is copying by reference (not good for this case):
+                // WGST.upload.assembly[targetFileName].metadata = source.metadata;
+                // We need to copy by value!
+                //
+                // Copy datetime
+                WGST.upload.assembly[targetFileName].metadata.datetime = source.metadata.datetime;
+                // Copy geography
+                WGST.upload.assembly[targetFileName].metadata.geography = {
+                    address: '',
+                    position: {
+                        latitude: '',
+                        longitude: ''
+                    },
+                    type: ''
+                };
+                WGST.upload.assembly[targetFileName].metadata.geography.address = source.metadata.geography.address;
+                WGST.upload.assembly[targetFileName].metadata.geography.position.latitude = source.metadata.geography.position.latitude;
+                WGST.upload.assembly[targetFileName].metadata.geography.position.longitude = source.metadata.geography.position.longitude;
+                WGST.upload.assembly[targetFileName].metadata.geography.type = source.metadata.geography.type;
+                // Copy source
+                WGST.upload.assembly[targetFileName].metadata.source = source.metadata.source;
+
                 // Update UI
                 $assemblyItem = $assemblyUploadMetadataPanel.find('.assembly-item[data-name="' + targetFileName + '"]');
                 targetFileId = $assemblyItem.attr('data-file-id');
@@ -5036,6 +5403,8 @@ $(function(){
                 $assemblyUploadMetadataPanel.find('.assembly-item[data-name="' + targetFileName + '"] .assembly-sample-location-input').val($sourceAssemblyMetadataLocation.val());
                 $assemblyUploadMetadataPanel.find('.assembly-item[data-name="' + targetFileName + '"] .assembly-sample-source-input').val($sourceAssemblyMetadataSource.val());
                 setAssemblyMetadataTimestamp(source.fileId, targetFileId);
+
+                $('.assembly-item[data-name="' + targetFileName + '"] .assembly-metadata .form-block').show();
             } // if
         });
 
@@ -5117,6 +5486,8 @@ $(function(){
     // });
 
     $('.wgst-panel__collection, .wgst-fullscreen__collection').on('click', '.show-on-representative-tree', function(event){
+
+        return false;
 
         openRepresentativeCollectionTree();
 
@@ -5776,6 +6147,7 @@ $(function(){
     });
 
     $('.wgst-navigation-item__representative-tree').on('click', function(){
+        return false;
         openRepresentativeCollectionTree();
     });
 
