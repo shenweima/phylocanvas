@@ -1,12 +1,13 @@
 @import 'reset';
 
 @action-color: #fff;
+@page-background: #444;
 .text-shadow {
     text-shadow: 1px 1px 0 #000;
 }
 
 body {
-    background-color: #333;
+    background-color: @page-background;
 }
 
 h1, h2, h3, h4, p {
@@ -123,7 +124,7 @@ section {
         }
     }
 
-    .wgst-page-section__footer {
+    .wgst-page-section__partners {
         color: #fff;
 
         p {
@@ -140,5 +141,10 @@ section {
             vertical-align: top;
             margin-left: 3px;
         }
+    }
+
+    .wgst-page-section__footer {
+        padding: 20px;
+        background-color: @page-background;
     }
 }
