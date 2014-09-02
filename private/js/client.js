@@ -1201,8 +1201,10 @@ $(function(){
         var collectionTrees = WGST.collection[collectionId].tree;
 
         $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
-            // Render collection tree button
-            renderCollectionTreeButton(collectionId, collectionTreeType);
+            if (collectionTreeType === 'CORE_TREE_RESULT') {
+                // Render collection tree button
+                renderCollectionTreeButton(collectionId, collectionTreeType);    
+            }
         });
     };
 
@@ -5905,7 +5907,7 @@ $(function(){
 
         var requestData = {
             collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
-            mergeWithCollectionId: '52a329d3-4ba9-4fa9-b3d9-6eeb86422625', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+            mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
             collectionTreeType: mergeButton.attr('data-collection-tree-type'),
             socketRoomId: WGST.socket.roomId
         };
