@@ -645,9 +645,6 @@ exports.mergeCollectionTrees = function(req, res) {
 				parsedMessage = JSON.parse(bufferJSON),
 				mergedTreeId = parsedMessage.documentId
 
-			console.log('=== Parsed message');
-			console.dir(parsedMessage);
-
 			queue.destroy();
 
 			// -----------------------------------------------------------

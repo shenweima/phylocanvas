@@ -1,0 +1,102 @@
+<!-- Handlebars template -->
+{% raw %}
+
+<script type="text/x-handlebars-template" class="wgst-template" data-template-id="collectionTreePanel">
+
+  <!-- Collection tree panel template -->
+  <div class="wgst-panel wgst-panel__collection-tree wgst-panel--active wgst-draggable" data-panel-name="{{attributePanelId}}" data-panel-id="{{attributePanelId}}" data-collection-id="{{attributeCollectionId}}" data-collection-tree-type="{{attributeCollectionTreeType}}">
+    <header class="wgst-panel-header wgst-draggable-handle">
+      <h4 class="header-title">{{collectionTreeTitle}}</h4>
+      <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
+      <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
+      <!--
+      <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span>
+      -->
+      <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
+    </header>
+    <article class="wgst-panel-body">
+      <div class="wgst-panel-loading"><div class="loading"></div></div>
+      <div class="wgst-panel-body-content">
+        
+        <div class="wgst-tree-controls">
+          <div class="wgst-tree-controls-container">
+            <div class="wgst-tree-control-row">
+
+              <div class="wgst-tree-control">
+                <label>Tree type:</label>
+                <select class="form-control wgst-tree-control__change-tree-type">
+                  <option value="rectangular">Rectangular</option>
+                  <option value="circular">Circular</option>
+                  <option value="radial">Radial</option>
+                  <option value="diagonal">Diagonal</option>
+                  <option value="hierarchy">Hierarchy</option>
+                </select>
+              </div>
+
+              <div class="wgst-tree-control">
+                <label>Node label:</label>
+                <select class="form-control wgst-tree-control__change-node-label">
+                  <option value="1">Assembly Name</option>
+                  <option value="2">Nearest Representative</option>
+                  <option value="3">MLST</option>
+                  <option value="4">Predicted Resistance Profile</option>
+                  <option value="5">Location</option>
+                </select>
+              </div>
+
+              <div class="wgst-tree-control">
+                <label>Highlighted antibiotic:</label>
+                <select class="form-control wgst-tree-control__change-node-colour">
+                  <option value="0">None</option>
+                </select>
+              </div>
+
+            </div><!-- /.wgst-tree-control-row -->
+
+            <div class="wgst-tree-control-row">
+              <div class="btn-group wgst-tree-control">
+                <button type="button" class="btn btn-sm btn-default wgst-tree-control__decrease-label-font-size"><span class="glyphicon glyphicon-font"></span> -</button>
+                <button type="button" class="btn btn-sm btn-default wgst-tree-control__increase-label-font-size"><span class="glyphicon glyphicon-font"></span> +</button>
+              </div>
+
+              <div class="btn-group wgst-tree-control">
+                <button type="button" class="btn btn-sm btn-default wgst-tree-control__decrease-node-size"><span class="glyphicon glyphicon-leaf"></span> -</button>
+                <button type="button" class="btn btn-sm btn-default wgst-tree-control__increase-node-size"><span class="glyphicon glyphicon-leaf"></span> +</button>
+              </div>
+
+              <label class="checkbox-inline wgst-tree-control">
+                <input type="checkbox" class="wgst-tree-control__show-node-labels" checked="checked"> Show labels
+              </label>
+
+              <div class="btn-group wgst-tree-control">
+                <button type="button" class="btn btn-sm btn-default wgst-tree-control__show-newick">Show Newick</button>
+              </div>
+
+              {{#unless matchAssemblyListButton}}
+              <div class="btn-group wgst-tree-control">
+                <button type="button" class="btn btn-sm btn-default tree-controls-match-assembly-list">Match assembly list</button>
+              </div>
+              {{/unless}}
+
+              {{#unless mergeWithButton}}
+              <button type="button" class="btn btn-sm btn-default wgst-tree-control__merge-collection-trees" data-collection-tree-type="{{attributeCollectionTreeType}}">
+                <div class="wgst-spinner hide-this"></div>
+                <span class="wgst-spinner-label">Merge collections</span>
+              </button>
+              {{/unless}}
+
+            </div><!-- /.wgst-tree-control-row -->
+          </div><!-- /.wgst-tree-controls-container -->
+        </div><!-- /.wgst-tree-controls -->
+
+        <div class="wgst-tree-content"></div>
+
+      </div><!-- /.wgst-panel-body-content --> 
+    </article><!-- /.wgst-panel-body -->
+    <footer class="wgst-panel-footer wgst-draggable-handle">
+    </footer><!-- /.wgst-panel-footer -->
+  </div><!-- /.wgst-panel.tree-panel -->
+
+</script><!-- /.wgst-template -->
+
+{% endraw %}

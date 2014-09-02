@@ -2242,13 +2242,7 @@ $(function(){
 
 
 
-    /**
-     * Description
-     * @method generateYearHtmlElements
-     * @param {} startYear
-     * @param {} endYear
-     * @return yearElements
-     */
+
     var generateYearHtmlElements = function(startYear, endYear) {
         var yearCounter = endYear,
             yearElementTemplate = '<option value="{{year}}">{{year}}</option>',
@@ -2264,11 +2258,18 @@ $(function(){
         return yearElements;
     };
 
-    /**
-     * Description
-     * @method generateMonthHtmlElements
-     * @return monthElements
-     */
+    var generateYears = function(startYear, endYear) {
+        var years = [],
+            yearCounter = endYear;
+
+        for (; yearCounter !== startYear - 1;) {
+            years.push(yearCounter);
+            yearCounter = yearCounter - 1;
+        }
+
+        return years;
+    };
+
     var generateMonthHtmlElements = function() {
         var monthCounter = 0,
             listOfMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
@@ -2286,13 +2287,20 @@ $(function(){
         return monthElements;
     };
 
-    /**
-     * Description
-     * @method generateDayHtmlElements
-     * @param {} year
-     * @param {} month
-     * @return dayElements
-     */
+    var generateMonths = function() {
+        var listOfMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            monthCounter = 0;
+
+        listOfMonths = listOfMonths.map(function(monthName, index, array){
+            return {
+                name: monthName,
+                number: index
+            }
+        });
+
+        return listOfMonths;
+    };
+
     var generateDayHtmlElements = function(year, month) {
 
         if (typeof year === 'undefined' || typeof month === 'undefined') {
@@ -2312,6 +2320,24 @@ $(function(){
         }
 
         return dayElements;
+    };
+
+    var generateDays = function(year, month) {
+
+        if (typeof year === 'undefined' || typeof month === 'undefined') {
+            return '';
+        }
+
+        var days = [],
+            totalNumberOfDays = getTotalNumberOfDaysInMonth(year, month),
+            dayCounter = 0;
+
+        while (dayCounter < totalNumberOfDays) {
+            dayCounter = dayCounter + 1;
+            days.push(dayCounter);
+        }
+
+        return days;
     };
 
     /**
@@ -2341,7 +2367,7 @@ $(function(){
             .append(generateDayHtmlElements(selectedYear, selectedMonth));
     };
 
-    $('.assembly-metadata-list-container').on('change', '.assembly-timestamp-input', function(){
+    $('.wgst-assembly-upload__metadata').on('change', '.assembly-timestamp-input', function(){
 
         var $select = $(this),
             fileId = $select.attr('data-file-id'),
@@ -2756,23 +2782,21 @@ $(function(){
     //
     var parseFastaFile = function(event, fileCounter, file, droppedFiles, collectionId, fileUid) {
             // Array of contigs
-        var //contigs = [],
+        //var //contigs = [],
             // Array of sequence parts
             //contigParts = [],
             // Count total number of contigs in a single assembly
-            contigsSum = 0,
+            //contigsSum = 0,
             // Count contigs
-            contigCounter = 0,
+            //contigCounter = 0,
             // Array of DNA sequence strings
-            dnaSequenceStrings = [],
+            //dnaSequenceStrings = [],
             // Single DNA sequence string
-            dnaSequenceString = '',
+            //dnaSequenceString = '',
             // Single DNA sequence id
-            dnaSequenceId = '',
-            // Empty jQuery object
-            assemblyAnalyticsHtml = $(),
+            //dnaSequenceId = '',
             // N50 chart data
-            chartData = [];
+            //chartData = [];
 
         // Init assembly upload metadata
         WGST.upload.assembly[file.name] = {
@@ -2825,275 +2849,73 @@ $(function(){
         // Show average number of contigs per assembly
         $('.assembly-sequences-average').text(Math.floor(totalNumberOfContigsDropped / droppedFiles.length));
 
-        // TO DO: Convert multiple strings concatenation to array and use join('')
-        // Display current assembly
-        assemblyAnalyticsHtml = $(
-            //'<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
-            '<li class="assembly-item wgst-upload-assembly__analytics hide-this" data-name="' + assemblies[fileCounter]['name'] + '" data-file-id="' + fileCounter + '" data-file-uid="' + fileUid + '" id="assembly-item-' + fileCounter + '">'
-
-                // Assembly overview
-                + '<div class="assembly-overview">'
-
-                    /*
-                    + '<div class="assembly-stats-container assembly-file-name">'
-                        + '<div>' + assemblies[fileCounter]['name'] + '</div>'
-                    + '</div>'
-                    */
-
-                    + '<div class="assembly-stats-container">'
-                        // Print a number with commas as thousands separators
-                        // http://stackoverflow.com/a/2901298
-                        + '<div class="assembly-stats-label">total nt</div>'
-                        + '<div class="assembly-stats-number">' + totalNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
-                        //+ '<div class="assembly-stats-label">sequences</div>'
-                    + '</div>'
-
-                    + '<div class="assembly-stats-container">'
-                        // Print a number with commas as thousands separators
-                        // http://stackoverflow.com/a/2901298
-                        + '<div class="assembly-stats-label">total contigs</div>'
-                        + '<div class="assembly-stats-number assembly-stats-number-contigs">' + contigs.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
-                        //+ '<div class="assembly-stats-label">sequences</div>'
-                    + '</div>'
-
-                    + '<div class="assembly-stats-container">'
-                        // Print a number with commas as thousands separators
-                        // http://stackoverflow.com/a/2901298
-                        + '<div class="assembly-stats-label">min contig</div>'
-                        + '<div class="assembly-stats-number">' + smallestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
-                        //+ '<div class="assembly-stats-label">sequences</div>'
-                    + '</div>'
-
-                    + '<div class="assembly-stats-container">'
-                        // Print a number with commas as thousands separators
-                        // http://stackoverflow.com/a/2901298
-                        + '<div class="assembly-stats-label">mean contig</div>'
-                        + '<div class="assembly-stats-number">' + averageNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
-                        //+ '<div class="assembly-stats-label">nucleotides per sequence<br/> on average</div>'
-                    + '</div>'
-
-                    + '<div class="assembly-stats-container">'
-                        // Print a number with commas as thousands separators
-                        // http://stackoverflow.com/a/2901298
-                        + '<div class="assembly-stats-label">max contig</div>'
-                        + '<div class="assembly-stats-number">' + biggestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
-                        //+ '<div class="assembly-stats-label">sequences</div>'
-                    + '</div>'
-
-                    + '<div class="assembly-stats-container">'
-                        // Print a number with commas as thousands separators
-                        // http://stackoverflow.com/a/2901298
-                        + '<div class="assembly-stats-label">contig N50</div>'
-                        + '<div class="assembly-stats-number assembly-stats-n50-number">' + assemblyN50['sequenceLength'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '<small>nt</small></div>'
-                        //+ '<div class="assembly-stats-label">nucleotides in<br>N50 contig</div>'
-                    + '</div>'
-
-                + '</div>'
-
-                // Summary
-                + '<div class="assembly-content-data">'
-/*
-                    + '<div class="assembly-stats-container">'
-                        + '<div class="assembly-stats-number">' + assemblies[fileCounter]['sequences']['total'] + '</div>'
-                        + '<div class="assembly-stats-label">sequences</div>'
-                    + '</div>'
-
-                    + '<div class="assembly-stats-container">'
-                        // Print a number with commas as thousands separators
-                        // http://stackoverflow.com/a/2901298
-                        + '<div class="assembly-stats-number">' + averageNucleotidesPerSequence.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</div>'
-                        + '<div class="assembly-stats-label">nucleotides per sequence<br/> on average</div>'
-                    + '</div>'
-*/
-                    + '<div class="sequence-length-distribution-chart-' + fileCounter + '"></div>'
-                + '</div>'
-
-                // Metadata form
-                //+ '<div class="assembly-metadata">'
-                    //+ '<h4>Please provide mandatory assembly metadata:</h4>'
-                    /*+ '<form role="form">'
-
-                        + '<div class="form-block assembly-metadata-' + fileCounter + '">'
-                            + '<div class="form-group">'
-                                + '<label for="assemblySampleDatetimeInput' + fileCounter + '">When this assembly was sampled?</label>'
-                                + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput' + fileCounter + '" placeholder="">'
-                            + '</div>'
-                            + '<div class="checkbox">'
-                                + '<label>'
-                                  + '<input type="checkbox" id="assemblySampleDatetimeNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
-                                + '</label>'
-                            + '</div>'
-                        + '</div>'
-
-                        + '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
-                            + '<div class="form-group">'
-                                + '<label for="assemblySampleLocationInput' + fileCounter + '">Where this assembly was sampled?</label>'
-                                + '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput' + fileCounter + '" placeholder="E.g.: London, United Kingdom">'
-                            + '</div>'
-
-                            + '<div class="checkbox">'
-                                + '<label>'
-                                  + '<input type="checkbox" id="assemblySampleLocationNotSure' + fileCounter + '" class="not-sure-checkbox"> I am not sure! <span class="not-sure-hint hide-this">Please provide your best estimate.</span>'
-                                + '</label>'
-                            + '</div>'  
-                        + '</div>'
-
-                        + '<div class="form-block assembly-metadata-' + fileCounter + ' hide-this">'
-                            + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next assembly</button>'
-                            + ' <button class="btn btn-default apply-to-all-assemblies-button">Copy to all assemblies</button>'
-                        + '</div>'
-
-                    + '</form>'*/
-                //+ '</div>'
-
-                //+ '<div class="assembly-total-sequences">' + assemblies[fileCounter]['sequences']['all'] + '</div>'
-
-/*                          + '<div class="assembly-identifier-container">'
-                    + '<span class="assembly-identifier-label">Identifier:</span>'
-                    + '<span class="assembly-identifier">' + assemblyCollection[assemblyCounter].identifier + '</span>'
-                + '</div>'
-                + '<div class="assembly-string-container">'
-                    + '<span class="assembly-string-label">assembly preview:</span>'
-                    + '<span class="assembly-string">' + assemblyCollection[assemblyCounter].assembly.slice(0, 100) + '...</span>'
-                + '</div>'*/
-
-            + '</li>'
-        );
-
-        var $assemblyMetadataFormContainer = $('<div class="assembly-metadata"></div>'),
-            $assemblyMetadataFormHeader = $('<h4>Please provide mandatory assembly metadata:</h4>'),
-            $assemblyMetadataForm = $('<div></div>'),
-
-            // Metadata templates
-            assemblySampleDatetimeFormBlock =
-            '<div class="form-block assembly-metadata-{{fileCounter}} assembly-metadata-block">'
-                + '<div class="form-group form-horizontal">'
-
-                    // + '<label for="assemblySampleDatetimeInput{{fileCounter}}">When this assembly was sampled?</label>'
-                    // + '<input type="text" class="form-control assembly-sample-datetime-input" id="assemblySampleDatetimeInput{{fileCounter}}" placeholder="">'
-                    
-                    + '<label for="assemblyTimestampInput{{fileCounter}}">When this assembly was sampled?</label>'
-
-                    // Year
-                    + '<div class="assembly-metadata-timestamp-block assembly-metadata-timestamp-year" data-file-id="{{fileCounter}}">'
-                        + '<select name="select" class="form-control assembly-timestamp-input assembly-timestamp-input-year" data-timestamp-input="year" data-file-id="{{fileCounter}}" data-file-name="' + file.name + '" id="assemblyTimestampInput{{fileCounter}}">'
-                            + '<option value="-1">Choose year</option>'
-                            + '{{listOfYears}}'
-                        + '</select>'
-                    + '</div>'
-
-                    // Month
-                    + '<div class="assembly-metadata-timestamp-block assembly-metadata-timestamp-month hide-this" data-file-id="{{fileCounter}}">'
-                        + '<select name="select" class="form-control assembly-timestamp-input assembly-timestamp-input-month" data-timestamp-input="month" data-file-id="{{fileCounter}}" data-file-name="' + file.name + '">'
-                            + '<option value="-1">Choose month</option>'
-                            + '{{listOfMonths}}'
-                        + '</select>'
-                    + '</div>'
-
-                    // Day
-                    + '<div class="assembly-metadata-timestamp-block assembly-metadata-timestamp-day hide-this" data-file-id="{{fileCounter}}">'
-                        + '<select name="select" class="form-control assembly-timestamp-input assembly-timestamp-input-day" data-timestamp-input="day" data-file-id="{{fileCounter}}" data-file-name="' + file.name + '">'
-                            + '<option value="-1">Choose day</option>'
-                            + '{{listOfDays}}'
-                        + '</select>'
-                    + '</div>'
-
-                + '</div>'
-            + '</div>',
-            assemblySampleLocationFormBlock =
-            '<div class="form-block assembly-metadata-{{fileCounter}} assembly-metadata-block hide-this">'
-                + '<div class="form-group">'
-                    + '<label for="assemblySampleLocationInput{{fileCounter}}">Where this assembly was sampled?</label>'
-                    + '<input type="text" class="form-control assembly-sample-location-input" id="assemblySampleLocationInput{{fileCounter}}" placeholder="E.g.: London, United Kingdom">'
-                + '</div>'  
-            + '</div>',
-            assemblySampleSourceFormBlock =
-            '<div class="form-block assembly-metadata-{{fileCounter}} assembly-metadata-block hide-this">'
-                + '<div class="form-group">'
-                    + '<label for="assemblySampleSourceInput{{fileCounter}}">What is the source of this sample?</label>'
-                    + '<select name="select" class="form-control assembly-sample-source-input" id="assemblySampleSourceInput{{fileCounter}}">'
-                      + '<option value="0" selected>Choose source</option>'
-                      + '<option value="1">Human</option>'
-                      + '<option value="2">Livestock</option>'
-                      + '<option value="3">Biosphere</option>'
-                      + '<option value="4">Environment</option>'
-                    + '</select>'
-                + '</div>'
-            + '</div>',
-
-            // UI templates
-            assemblyControlsFormBlock =
-            '<div class="form-block assembly-metadata-{{fileCounter}} hide-this">'
-                + '<div class="btn-group">'
-                + '<button type="button" class="btn btn-default wgst-dropped-assembly-list-navigation-button__previous"><i class="fa fa-chevron-left"></i></button>'
-                + '<button type="button" class="btn btn-default wgst-dropped-assembly-list-navigation-button__next"><i class="fa fa-chevron-right"></i></button>'
-                + '</div>'
-                + ' <button class="btn btn-default copy-metadata-to-all-empty-assemblies">Copy to all empty metadata</button>'
-            + '</div>',
 
 
 
-            // '<div class="form-block assembly-metadata-{{fileCounter}} hide-this">'
-            //     + '<button class="btn btn-default next-assembly-button" class="show-next-assembly">Next assembly</button>'
-            //     + ' <button class="btn btn-default copy-metadata-to-all-empty-assemblies">Copy to all empty metadata</button>'
-            // + '</div>',
-            assemblyMeatadataDoneBlock = 
-            '<div class="form-block assembly-metadata-{{fileCounter}} hide-this">'
-                + 'Ready? Click "Upload" button to upload your assemblies and metadata.'
-            + '</div>';
+        //
+        // 
+        // Render dropped assembly analytics
+        //
+        //
+        var droppedAssemblyAnalyticsContext = {
+            name: assemblies[fileCounter]['name'],
+            fileCounter: fileCounter,
+            assemblyFileId: fileUid,
+            // Print a number with commas as thousands separators
+            // http://stackoverflow.com/a/2901298
+            totalNumberOfNucleotidesInDnaStrings: totalNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+            totalNumberOfContigs: contigs.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+            smallestNumberOfNucleotidesInDnaStrings: smallestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+            averageNumberOfNucleotidesInDnaStrings: averageNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+            biggestNumberOfNucleotidesInDnaStrings: biggestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+            contigN50: assemblyN50['sequenceLength'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        };
 
-        // Apply templates
-        assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{listOfYears}}/g, generateYearHtmlElements(1940, 2014));
-        assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{listOfMonths}}/g, generateMonthHtmlElements());
-        assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{listOfDays}}/g, generateDayHtmlElements());
+        //console.debug('droppedAssemblyAnalyticsContext:');
+        //console.dir(droppedAssemblyAnalyticsContext);
 
-        assemblySampleDatetimeFormBlock = assemblySampleDatetimeFormBlock.replace(/{{fileCounter}}/g, fileCounter);
-        assemblySampleLocationFormBlock = assemblySampleLocationFormBlock.replace(/{{fileCounter}}/g, fileCounter);
-        assemblySampleSourceFormBlock = assemblySampleSourceFormBlock.replace(/{{fileCounter}}/g, fileCounter);
-        assemblyControlsFormBlock = assemblyControlsFormBlock.replace(/{{fileCounter}}/g, fileCounter);
-        assemblyMeatadataDoneBlock = assemblyMeatadataDoneBlock.replace(/{{fileCounter}}/g, fileCounter);
+        var droppedAssemblyAnalyticsTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyAnalytics"]').html();
+        var droppedAssemblyAnalyticsTemplate = Handlebars.compile(droppedAssemblyAnalyticsTemplateHtml);
+        var droppedAssemblyAnalyticsHtml = droppedAssemblyAnalyticsTemplate(droppedAssemblyAnalyticsContext);
 
-        var $assemblySampleDatetimeFormBlock = $(assemblySampleDatetimeFormBlock),
-            $assemblySampleLocationFormBlock = $(assemblySampleLocationFormBlock),
-            $assemblySampleSourceFormBlock = $(assemblySampleSourceFormBlock),
-            $assemblyControlsFormBlock = $(assemblyControlsFormBlock),
-            $assemblyMeatadataDoneBlock = $(assemblyMeatadataDoneBlock);
-
-        $assemblyMetadataForm.append($assemblySampleDatetimeFormBlock);
-        $assemblyMetadataForm.append($assemblySampleLocationFormBlock);
-        $assemblyMetadataForm.append($assemblySampleSourceFormBlock);
-
-        // Show form navigation buttons only when you're at the last assembly
-        // TO DO: Append to .assembly-metadata instead of the classless div
-        if (fileCounter < droppedFiles.length) {
-            $assemblyMetadataForm.append($assemblyControlsFormBlock);
-        } else {
-            //assemblyMetadataForm.append(assemblyMeatadataDoneBlock);
-        }
-        $assemblyMetadataFormContainer.append($assemblyMetadataFormHeader);
-        $assemblyMetadataFormContainer.append($assemblyMetadataForm);
-
-        // REFACTOR!
-        var $assemblyMetadataListItem = $(
-            //'<li class="assembly-item assembly-item-' + fileCounter + ' hide-this" data-name="' + assemblies[fileCounter]['name'] + '" id="assembly-item-' + fileCounter + '">'
-            '<li class="assembly-item wgst-upload-assembly__metadata hide-this" data-name="' + assemblies[fileCounter]['name'] + '" data-file-id="' + fileCounter + '" data-file-uid="' + fileUid + '" id="assembly-metadata-item-' + fileCounter + '">'
-            + '</li>'
-        );
-
-        $assemblyMetadataListItem.append($assemblyMetadataFormContainer);
-        $('.assembly-metadata-list-container ul').append($assemblyMetadataListItem);
+        $('.wgst-assembly-upload__analytics ul').append($(droppedAssemblyAnalyticsHtml));
 
 
-        //assemblyListItem.append(assemblyMetadataFormContainer);
 
-        // Append assembly
-        $('.assembly-list-container ul').append(assemblyAnalyticsHtml);
+
+        //
+        // 
+        // Render dropped assembly metadata form
+        //
+        //
+        var droppedAssemblyMetadataFormContext = {
+            name: assemblies[fileCounter]['name'],
+            fileCounter: fileCounter,
+            assemblyFileId: fileUid,
+            listOfYears: generateYears(1940, 2014),
+            listOfMonths: generateMonths(),
+            listOfDays: generateDays()
+        };
+
+        //console.debug('droppedAssemblyMetadataFormContext:');
+        //console.dir(droppedAssemblyMetadataFormContext);
+
+        var droppedAssemblyMetadataFormTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyMetadataForm"]').html();
+        var droppedAssemblyMetadataFormTemplate = Handlebars.compile(droppedAssemblyMetadataFormTemplateHtml);
+        var droppedAssemblyMetadataFormHtml = droppedAssemblyMetadataFormTemplate(droppedAssemblyMetadataFormContext);
+
+        $('.wgst-assembly-upload__metadata ul').append($(droppedAssemblyMetadataFormHtml));
+
+
+
+
+
 
         // Draw N50 chart
         var sumsOfNucleotidesInDnaStrings = calculateSumsOfNucleotidesInDnaStrings(dnaStrings);
 
-        console.log('[WGST] * dev * assemblyN50:');
-        console.dir(assemblyN50);
+        //console.log('[WGST] * dev * assemblyN50:');
+        //console.dir(assemblyN50);
 
         drawN50Chart(sumsOfNucleotidesInDnaStrings, assemblyN50, fileCounter);
         //drawN50Chart(assemblyNucleotideSums, assemblyN50, fileCounter);
@@ -3127,7 +2949,7 @@ $(function(){
         (function(fileName){
 
             // Get autocomplete input (jQuery) element
-            var autocompleteInput = $('.assembly-metadata-list-container li[data-name="' + fileName + '"] .assembly-sample-location-input');
+            var autocompleteInput = $('.wgst-assembly-upload__metadata li[data-name="' + fileName + '"] .assembly-sample-location-input');
 
             // Init Goolge Maps API Places Autocomplete
             // TO DO: This creates new Autocomplete object for each drag and drop file - possibly needs refactoring/performance optimization
@@ -3804,7 +3626,7 @@ $(function(){
         var panel = $('.wgst-panel__assembly-upload-metadata');
 
         // Clear metadata list of assembly items
-        panel.find('.assembly-metadata-list-container ul').html('');
+        panel.find('.wgst-assembly-upload__metadata ul').html('');
 
         // Show metadata progress bar
         panel.find('.adding-metadata-progress-container .progress-container').show();
@@ -3828,7 +3650,7 @@ $(function(){
      */
     var resetPanelAssemblyUploadAnalytics = function() {
         var panel = $('.wgst-panel__assembly-upload-analytics');
-        panel.find('.assembly-list-container ul').html('');
+        panel.find('.wgst-assembly-upload__analytics ul').html('');
     };
 
     /**
@@ -3998,7 +3820,7 @@ $(function(){
     // Assembly metadata from
 
     // Show hint message when 'I am not sure' checkbox is checkec
-    $('.assembly-metadata-list-container').on('click', '.not-sure-checkbox', function(){
+    $('.wgst-assembly-upload__metadata').on('click', '.not-sure-checkbox', function(){
         // Show 'I am not sure' message
         $(this).closest('label').find('.not-sure-hint').toggleClass('hide-this');
     });
@@ -4126,14 +3948,15 @@ $(function(){
 
     // Show next form block when user fills in an input
     // To do: Refactor
-    $('.assembly-metadata-list-container').on('change', '.assembly-sample-source-input', function(){
+    $('.wgst-assembly-upload__metadata').on('change', '.assembly-sample-source-input', function(){
+        var $input = $(this);
 
         // Show next form block if user selected non default option
-        if ($(this).val() !== 0) {
+        if ($input.val() !== 0) {
             // Show next metadata form block
-            $(this).closest('.form-block').next('.form-block').fadeIn();
+            $input.closest('.form-block').next('.form-block').fadeIn();
             // Scroll to the next form block
-            $(this).closest('.assembly-metadata').animate({scrollTop: $(this).closest('.assembly-metadata').height()}, 400);
+            $input.closest('.assembly-metadata').animate({scrollTop: $input.closest('.assembly-metadata').height()}, 400);
         } // if
 
         // Increment metadata progress bar
@@ -4144,7 +3967,7 @@ $(function(){
 
     // TO DO: Refactor
     // When 'Next empty assembly' button is pressed
-    $('.assembly-metadata-list-container').on('click', '.assembly-metadata button.next-assembly-button', function(event){
+    $('.wgst-assembly-upload__metadata').on('click', '.assembly-metadata button.next-assembly-button', function(event){
         // Show assembly with empty metadata input field
 
         // Trigger to show next assembly
@@ -4158,7 +3981,7 @@ $(function(){
 
         var currentAssemblyIdCounter = $(this).closest('.assembly-item').attr('id').replace('assembly-metadata-item-', '');
 
-        $(this).closest('.assembly-metadata-list-container').find('.assembly-metadata-block input:text[value=""]').focus();
+        $(this).closest('.wgst-assembly-upload__metadata').find('.assembly-metadata-block input:text[value=""]').focus();
 
         event.preventDefault();
     });
@@ -4379,7 +4202,6 @@ $(function(){
             antibioticCounter = antibioticCounter + 1;
         }
     };
-
 
     WGST.socket.connection.on('collectionTreeMergeNotification', function(mergedCollectionTreeData) {
         console.log('[WGST] Received merged tree notification');
@@ -4878,9 +4700,9 @@ $(function(){
         // Remove stored selected FASTA file
         selectedFastaFileName = '';
         // Remove analytics HTML element
-        $('.assembly-list-container ul').html('');
+        $('.wgst-assembly-upload__analytics ul').html('');
         // Remove metadata HTML element
-        $('.assembly-metadata-list-container ul').html('');
+        $('.wgst-assembly-upload__metadata ul').html('');
         // Reset progress bar
         // Update bar's width
         $('.adding-metadata-progress-container .progress-bar').width('0%');

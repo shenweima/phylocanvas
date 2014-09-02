@@ -1,0 +1,41 @@
+<!-- Handlebars template -->
+{% raw %}
+    
+    <div class="form-block assembly-metadata-{{fileCounter}} assembly-metadata-block">
+        <div class="form-group form-horizontal">
+
+            <label for="assemblyTimestampInput{{fileCounter}}">When this assembly was sampled?</label>
+
+            {{!-- Year --}}
+            <div class="assembly-metadata-timestamp-block assembly-metadata-timestamp-year" data-file-id="{{fileCounter}}">
+                <select name="select" class="form-control assembly-timestamp-input assembly-timestamp-input-year" data-timestamp-input="year" data-file-id="{{fileCounter}}" data-file-name="{{name}}" id="assemblyTimestampInput{{fileCounter}}">
+                    <option value="-1">Choose year</option>
+                    {{#each listOfYears}}
+                    <option value="{{this}}">{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            {{!-- Month --}}
+            <div class="assembly-metadata-timestamp-block assembly-metadata-timestamp-month hide-this" data-file-id="{{fileCounter}}">
+                <select name="select" class="form-control assembly-timestamp-input assembly-timestamp-input-month" data-timestamp-input="month" data-file-id="{{fileCounter}}" data-file-name="{{name}}">
+                    <option value="-1">Choose month</option>
+                    {{#each listOfMonths}}
+                    <option value="{{number}}">{{name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            {{!-- Day --}}
+            <div class="assembly-metadata-timestamp-block assembly-metadata-timestamp-day hide-this" data-file-id="{{fileCounter}}">
+                <select name="select" class="form-control assembly-timestamp-input assembly-timestamp-input-day" data-timestamp-input="day" data-file-id="{{fileCounter}}" data-file-name="{{name}}">
+                    <option value="-1">Choose day</option>
+                    {{#each listOfDays}}
+                    <option value="{{this}}">{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+        </div>
+    </div>
+
+{% endraw %}
