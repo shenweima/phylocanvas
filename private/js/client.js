@@ -1318,7 +1318,7 @@ $(function(){
                 initCollection(collectionId, data.collection.assemblies, data.collection.tree);
                 renderCollectionTrees(collectionId);
                 renderCollectionTreeButtons(collectionId);
-                renderCollectionDataButton(collectionId);
+                //renderCollectionDataButton(collectionId);
                 addResistanceProfileToCollection(collectionId);
 
                 // ----------------------------------------
