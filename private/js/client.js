@@ -1181,7 +1181,12 @@ $(function(){
         // Delete collection object
         delete WGST.collection[collectionId];
 
+        // Remove stored collection id
         WGST.collection.opened = '';
+
+        // Hide collection navigation
+        //$('.wgst-navigation__collection').show();
+        $('.wgst-navigation__collection').toggleClass('hide-this');
     };
 
     /**
@@ -1403,6 +1408,10 @@ $(function(){
 
                 // Store open collection id
                 WGST.collection.opened = collectionId;
+
+                // Show collection navigation
+                //$('.wgst-navigation__collection').show();
+                $('.wgst-navigation__collection').toggleClass('hide-this');
 
             } // if
         })
