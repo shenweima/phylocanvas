@@ -589,7 +589,11 @@ $(function(){
      * @param {} panelName
      * @return 
      */
-    var openPanel = function(panelName) {
+    window.WGST.openPanel = function(panelName) {
+        if (isFullscreenActive(panelName)) {
+            bringFullscreenToPanel(true);
+        }
+
         activatePanel(panelName);
         endPanelLoadingIndicator(panelName);
         showPanelBodyContent(panelName);
@@ -1176,6 +1180,8 @@ $(function(){
 
         // Delete collection object
         delete WGST.collection[collectionId];
+
+        WGST.collection.opened = '';
     };
 
     /**
@@ -1393,7 +1399,11 @@ $(function(){
                 enableNavItem('collection');
 
                 // Update address bar
-                window.history.replaceState('Object', 'WGST Collection', '/collection/' + collectionId);    
+                window.history.replaceState('Object', 'WGST Collection', '/collection/' + collectionId);
+
+                // Store open collection id
+                WGST.collection.opened = collectionId;
+
             } // if
         })
         .fail(function(jqXHR, textStatus, errorThrown) {

@@ -52,12 +52,7 @@
     <div class="wgst-notification wgst-notification__warning hide-this"></div>
     <div class="wgst-alert hide-this"></div>
 
-    <nav class="wgst-navigation">
-      <div class="wgst-navigation-logo">WGSA</div>
-      <a href="#" class="wgst-navigation-item wgst-navigation-item__map wgst-navigation-item--active">Map</a>
-      <a href="#" class="wgst-navigation-item wgst-navigation-item__representative-tree wgst-navigation-item--active">Representative tree</a>
-      <a href="#" class="wgst-navigation-item wgst-navigation-item__collection">Collection</a>
-    </nav>
+    {% include "partials/header.html" %}
 
     <div class="wgst-react-component wgst-react-component__workflow-question"></div>
 
@@ -666,4 +661,5 @@
 </script>
 <script src="/js/dropped_assembly_list_navigation.js"></script>
 <script src="/js/client.js"></script>
+<script src="/js/navigation.js"></script>
 {% endblock %}
