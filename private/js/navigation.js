@@ -1,6 +1,6 @@
 $(function(){
 
-	$('.wgst-navigation__collection').on('click', function(event) {
+	$('.wgst-navigation__collection-panels').on('click', function(event) {
 		event.preventDefault();
 	});
 

@@ -1186,7 +1186,7 @@ $(function(){
 
         // Hide collection navigation
         //$('.wgst-navigation__collection').show();
-        $('.wgst-navigation__collection').toggleClass('hide-this');
+        $('.wgst-navigation__collection-panels').toggleClass('hide-this');
     };
 
     /**
@@ -1411,7 +1411,7 @@ $(function(){
 
                 // Show collection navigation
                 //$('.wgst-navigation__collection').show();
-                $('.wgst-navigation__collection').toggleClass('hide-this');
+                $('.wgst-navigation__collection-panels').toggleClass('hide-this');
 
             } // if
         })
