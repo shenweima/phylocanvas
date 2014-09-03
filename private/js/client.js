@@ -1019,8 +1019,8 @@ $(function(){
 
             assemblyId = sortedAssemblyIds[assemblyCounter];
              
-            console.log('[?] Assembly resistance profile:');
-            console.dir(assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile);
+            //console.log('[?] Assembly resistance profile:');
+            //console.dir(assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile);
 
             // Create assembly resistance profile preview html
             assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile;
@@ -1063,6 +1063,9 @@ $(function(){
         collectionAssemblyListFull[0].appendChild(assemblyListItems.cloneNode(true));
 
         $('.antibiotic[data-toggle="tooltip"]').tooltip();
+
+        // Check checkboxes
+        $('.show-on-map-checkbox input[type="checkbox"]').prop('checked', true).change();
     };
 
     /**
@@ -2781,22 +2784,6 @@ $(function(){
     // Refactor this function
     //
     var parseFastaFile = function(event, fileCounter, file, droppedFiles, collectionId, fileUid) {
-            // Array of contigs
-        //var //contigs = [],
-            // Array of sequence parts
-            //contigParts = [],
-            // Count total number of contigs in a single assembly
-            //contigsSum = 0,
-            // Count contigs
-            //contigCounter = 0,
-            // Array of DNA sequence strings
-            //dnaSequenceStrings = [],
-            // Single DNA sequence string
-            //dnaSequenceString = '',
-            // Single DNA sequence id
-            //dnaSequenceId = '',
-            // N50 chart data
-            //chartData = [];
 
         // Init assembly upload metadata
         WGST.upload.assembly[file.name] = {
