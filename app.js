@@ -146,15 +146,18 @@ socket = undefined;
 io = socketio.listen(server);
 //io = socketio.listen(secureServer);
 
-io.sockets.on('connection', function (socketConnection) {
-	console.log('[WGST][Socket.io] ✔ Connnected');
+io.sockets.on('connection', function(socketConnection) {
+
+	//console.dir(socketConnection);
+
+	console.log('[WGST][Socket.io] Client connected: ' + socketConnection.handshake.headers.host);
 
 	socketConnection.on('disconnect', function() {
-		console.log('[WGST][Socket.io] ✗ Disconnnected');
+		console.log('[WGST][Socket.io] Client disconnnected: ' + socketConnection.handshake.headers.host);
 	});
 
 	socketConnection.on('getRoomId', function() {
-		console.log('[WGST][Socket.io] Received request for room id');
+		console.log('[WGST][Socket.io] Received request for room id from client: ' + socketConnection.handshake.headers.host);
 
 		// Generate new room id
 		var roomId = uuid.v4();

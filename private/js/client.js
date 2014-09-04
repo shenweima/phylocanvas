@@ -800,7 +800,7 @@ $(function(){
         
         // Set socket room id
         WGST.socket.connection.on('roomId', function(roomId) {
-            console.log('[WGST][Socket.io] Received room uuid');
+            console.log('[WGST][Socket.io] Received room id: ' + roomId);
             console.log('[WGST][Socket.io] Ready');
 
             // Set room id for this client

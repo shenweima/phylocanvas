@@ -92,8 +92,8 @@ exports.add = function(req, res) {
 			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].get('collection_' + collectionId, function(err, existingUserAssemblyIdToAssemblyIdMap) {
 				if (err) throw err;
 
-				console.log('Does that look correct to you?');
-				console.dir(existingUserAssemblyIdToAssemblyIdMap);
+				//console.log('Does that look correct to you?');
+				//console.dir(existingUserAssemblyIdToAssemblyIdMap);
 
 				// Merge exisinting user assembly id to assembly id map with a new one
 				var updatedUserAssemblyIdToAssemblyIdMap = existingUserAssemblyIdToAssemblyIdMap.value,
@@ -382,6 +382,8 @@ exports.apiGetCollection = function(req, res) {
 
 				collection.assemblies[assemblyId] = assembly;
 
+				console.log('[WGST] ' + parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) + ' assemblies left');
+
 				// If got all assemblies
 				if (Object.keys(collection.assemblies).length === assemblyIds.length) {
 
@@ -406,7 +408,7 @@ exports.apiGetCollection = function(req, res) {
 							if (collectionTreesData.hasOwnProperty(collectionTreeKey)) {
 					            var collectionTreeData = collectionTreesData[collectionTreeKey].value;
 
-					            console.dir(collectionTreesData);
+					            //console.dir(collectionTreesData);
 
 					            // Parsing COLLECTION_TREE
 					            if (collectionTreeKey.indexOf('COLLECTION_TREE_') !== -1) {
