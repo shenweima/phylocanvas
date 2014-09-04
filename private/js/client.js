@@ -5,7 +5,7 @@ $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
 
-    WGST.version = '0.1.3';
+    window.WGST.version = '0.1.4';
 
     //
     // Which page should you load?
@@ -31,9 +31,9 @@ $(function(){
     }
 
     // WGSA now can speak!
-    WGST.speak = false;
+    window.WGST.speak = false;
 
-    if (WGST.speak) {
+    if (window.WGST.speak) {
         var message = new SpeechSynthesisUtterance('Welcome to WGSA');
         window.speechSynthesis.speak(message);
     }
@@ -136,7 +136,7 @@ $(function(){
     };
 
     WGST.settings = WGST.settings || {};
-    WGST.settings.representativeCollectionId = '1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
+    WGST.settings.representativeCollectionId = window.WGST.config.referenceCollectionId; //'1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
 
     WGST.antibioticNameRegex = /[\W]+/g;
 
@@ -3320,6 +3320,12 @@ $(function(){
      * @return 
      */
     var handleDrop = function(event) {
+
+        // Check if file upload is on
+        if (! window.WGST.config.allowUpload) {
+            return;
+        }
+
         // Only handle file drops
         if (event.dataTransfer.files.length > 0) {
 
@@ -4647,8 +4653,12 @@ $(function(){
     });
 
     // User wants to select representative tree branch
-    //$('.wgst-panel__collection .collection-assembly-list').on('change', 'input[type="radio"]', function(e) {
     $('.collection-assembly-list').on('change', 'input[type="radio"]', function(e) {
+
+        //
+        // Temporary disable this functionality until representative collection is reuploaded
+        //
+        return;
 
         var selectedAssemblyId = $(this).attr('data-assembly-id'),
             collectionId = $(this).closest('.wgst-collection-info').attr('data-collection-id');
@@ -5725,6 +5735,37 @@ $(function(){
         tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
         tree.toggleLabels();
     });
+
+    // $('body').on('click', '.wgst-tree-control__merge-collection-trees', function(){
+
+    //     var mergeButton = $(this);
+
+    //     mergeButton.attr('disabled', true);
+    //     mergeButton.find('.wgst-spinner-label').hide();
+    //     mergeButton.find('.wgst-spinner').show();
+
+    //     var requestData = {
+    //         collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
+    //         mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+    //         collectionTreeType: mergeButton.attr('data-collection-tree-type'),
+    //         socketRoomId: WGST.socket.roomId
+    //     };
+
+    //     console.log('[WGST] Requesting to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
+
+    //     // Merge collection trees
+    //     $.ajax({
+    //         type: 'POST',
+    //         url: '/api/collection/tree/merge',
+    //         datatype: 'json', // http://stackoverflow.com/a/9155217
+    //         data: requestData
+    //     })
+    //     .done(function(mergeRequestSent, textStatus, jqXHR) {
+    //         console.log('[WGST] Requested to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
+    //     });
+
+    // });
+
     $('body').on('click', '.wgst-tree-control__merge-collection-trees', function(){
 
         var mergeButton = $(this);
@@ -5732,6 +5773,19 @@ $(function(){
         mergeButton.attr('disabled', true);
         mergeButton.find('.wgst-spinner-label').hide();
         mergeButton.find('.wgst-spinner').show();
+
+        //-----------------------------
+        // Remove after demo
+        //
+        var mapCollectionIdToMergedTreeId = {
+            '5324c298-4cd0-4329-848b-30d7fe28a560': 'ab66c759-2242-42c2-a245-d364fcbc7c4f'
+        };
+        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+        if (collectionId === '5324c298-4cd0-4329-848b-30d7fe28a560') {
+            demoMergeCollectionTrees(mapCollectionIdToMergedTreeId[collectionId]);
+            return;
+        }
+        //-----------------------------
 
         var requestData = {
             collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
@@ -5752,7 +5806,38 @@ $(function(){
         .done(function(mergeRequestSent, textStatus, jqXHR) {
             console.log('[WGST] Requested to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
         });
+
     });
+
+    var demoMergeCollectionTrees = function(mergeTreeId) {
+        var mergeButton = $(this);
+
+        mergeButton.attr('disabled', true);
+        mergeButton.find('.wgst-spinner-label').hide();
+        mergeButton.find('.wgst-spinner').show();
+
+        var requestData = {
+            mergeTreeId: mergeTreeId,
+            //collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
+            //mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+            //collectionTreeType: mergeButton.attr('data-collection-tree-type'),
+            socketRoomId: WGST.socket.roomId
+        };
+
+        console.log('[WGST] Requesting merge tree');
+
+        // Merge collection trees
+        $.ajax({
+            type: 'POST',
+            url: '/api/collection/merged',
+            datatype: 'json', // http://stackoverflow.com/a/9155217
+            data: requestData
+        })
+        .done(function(mergeRequestSent, textStatus, jqXHR) {
+            console.log('[WGST] Requested merge tree');
+        });
+    };
+
     /**
      * Description
      * @method renderRepresentativeCollectionTree

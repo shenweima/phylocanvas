@@ -656,9 +656,6 @@ exports.mergeCollectionTrees = function(req, res) {
 					return;
 				}
 
-				console.log('Thats it?');
-				console.dir(mergedTree);
-
 				var tree = {
 					'MERGED': {
 						name: 'Merged tree',
@@ -703,6 +700,48 @@ exports.mergeCollectionTrees = function(req, res) {
 
 			console.log('[WGST][RabbitMQ] Message was published to ' + rabbitMQExchangeNames.TASKS + ' exchange');
 		});
+	});
+};
+
+exports.apiGetMergeTree = function(req, res) {
+	var mergeTreeId = req.body.mergeTreeId,
+		socketRoomId = req.body.socketRoomId;
+
+	res.json({});
+
+	// -----------------------------------------------------------
+	// Get merged tree
+	// -----------------------------------------------------------
+	getMergedCollectionTree('MERGE_TREE_' + mergeTreeId, function(error, mergeTree){
+		if (error) {
+			console.error('[WGST][Couchbase][Error] ✗ ' + error);
+			return;
+		}
+
+		var tree = {
+			'MERGED': {
+				name: 'Merged tree',
+				data: mergeTree.newickTree
+			}
+		};
+
+		// -----------------------------------------------------------
+		// Emit socket message
+		// -----------------------------------------------------------
+		//if (parsedMessage.taskType === 'MERGE') {
+			console.log('[WGST][Socket.io] Emitting MERGE_TREE message for socketRoomId: ' + socketRoomId);
+			io.sockets.in(socketRoomId).emit("collectionTreeMergeNotification", {
+				mergedCollectionTreeId: mergeTreeId,
+				//tree: mergedTree.newickTree,
+				tree: tree,
+				assemblies: mergeTree.assemblies,
+				//targetCollectionId: mergeRequest.targetCollectionId,
+				//inputData: mergeRequest.inputData,
+				status: "MERGE ready",
+				result: "MERGE",
+				socketRoomId: socketRoomId
+			});
+		//} // if
 	});
 };
 

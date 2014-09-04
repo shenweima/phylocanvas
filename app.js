@@ -14,8 +14,6 @@ var appConfigData = fs.readFileSync(file, 'utf8');
 appConfig = JSON.parse(appConfigData);
 console.dir(appConfig);
 
-var couchbaseAddress = appConfig.server.couchbase.ip || COUCHBASE_DEFAULT_ADDRESS;
-
 //======================================================
 // SSL
 //======================================================
@@ -91,6 +89,7 @@ app.get('/api/collection/representative/metadata', collection.apiGetRepresentati
 app.get('/collection/:id', collection.get);
 
 app.post('/api/collection/tree/merge', collection.mergeCollectionTrees);
+app.post('/api/collection/merged', collection.apiGetMergeTree);
 
 // Assembly routes
 app.get('/assembly/:id', assembly.get);
@@ -120,7 +119,7 @@ app.get('/api/all-antibiotics', assembly.apiGetAllAntibiotics);
 //app.post('/signin', user.signIn);
 var server = http.createServer(app).listen(app.get('port'), function(){
 //var secureServer = https.createServer(sslOptions, app).listen(app.get('port'), function(){
-  console.log('[WGST] ✔ Express secure server listening on port ' + app.get('port'));
+  console.log('[WGST] ✔ Express server listening on port ' + app.get('port'));
 });
 
 //======================================================
@@ -177,6 +176,7 @@ io.sockets.on('connection', function (socketConnection) {
 //======================================================
 
 var couchbase = require('couchbase');
+var couchbaseAddress = appConfig.server.couchbase.ip || COUCHBASE_DEFAULT_ADDRESS;
 
 var createCouchbaseBucketConnection = function(bucketName, password) {
 	console.log('[WGST][Couchbase] Connecting to bucket: ' + bucketName + ' ' + password);
@@ -193,7 +193,7 @@ var createCouchbaseBucketConnection = function(bucketName, password) {
 			return;
 		}
 
-		console.log('[WGST][Couchbase] ✔ Opened Couchbase connection to "' + bucketName + '" bucket');
+		console.log('[WGST][Couchbase] ✔ Connected to "' + bucketName + '" bucket');
 	});
 };
 
@@ -228,8 +228,7 @@ Object.keys(appConfig.server.couchbase.buckets).map(function(bucketType){
 //======================================================
 // RabbitMQ
 //======================================================
-var amqp = require('amqp'),
-	rabbitMQConnectionOptions = {
+var rabbitMQConnectionOptions = {
 		host: appConfig.server.rabbit.ip, //'129.31.26.152', //'fi--didewgstcn1.dide.local',
 		port: appConfig.server.rabbit.port
 	},
@@ -246,38 +245,39 @@ rabbitMQExchangeNames = {
 	TASKS: 'wgst-tasks-ex'
 };
 
-//
-// Temporary disabling RabbitMQ
-//
-rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
+if (appConfig.server.rabbit.on) {
+	var amqp = require('amqp');
 
-rabbitMQConnection.on('error', function(error) {
-    console.error('[WGST][RabbitMQ][Error] ✗ Connection: ' + error);
-});
+	rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
-rabbitMQConnection.on("ready", function(){
-	console.log('[WGST][RabbitMQ] ✔ Connection is ready');
-
-	// Exchange for uploading assemblies
-	createExchange(rabbitMQExchangeNames.UPLOAD, {
-		type: 'direct'
+	rabbitMQConnection.on('error', function(error) {
+	    console.error('[WGST][RabbitMQ][Error] ✗ Connection: ' + error);
 	});
 
-	// Exchange for getting notifications
-	createExchange(rabbitMQExchangeNames.NOTIFICATION, {
-		type: 'topic'
-	});
+	rabbitMQConnection.on("ready", function(){
+		console.log('[WGST][RabbitMQ] ✔ Connection is ready');
 
-	// Exchange for getting collection id
-	createExchange(rabbitMQExchangeNames.COLLECTION_ID, {
-		type: 'direct'
-	});
+		// Exchange for uploading assemblies
+		createExchange(rabbitMQExchangeNames.UPLOAD, {
+			type: 'direct'
+		});
 
-	// Exchange for getting collection id
-	createExchange(rabbitMQExchangeNames.TASKS, {
-		type: 'direct'
+		// Exchange for getting notifications
+		createExchange(rabbitMQExchangeNames.NOTIFICATION, {
+			type: 'topic'
+		});
+
+		// Exchange for getting collection id
+		createExchange(rabbitMQExchangeNames.COLLECTION_ID, {
+			type: 'direct'
+		});
+
+		// Exchange for getting collection id
+		createExchange(rabbitMQExchangeNames.TASKS, {
+			type: 'direct'
+		});
 	});
-});
+}
 
 var createExchange = function(exchangeName, exchangeProperties) {
 	rabbitMQConnection.exchange(exchangeName, {

@@ -635,25 +635,27 @@
     */
     (function(undefined){
 
-      window.WGST.requestedCollectionId = undefined;
+      //window.WGST.requestedCollectionId = undefined;
+
+
+      {% if appConfig %}
+        window.WGST.config = {{appConfig | safe}};
+      {% endif %}
 
       //
       // If user requested collection, e.g.: /collection/<collection_id>
       //
       {% if requestedCollectionId %}
-        // Store requested collection id
         window.WGST.requestedCollectionId = '{{requestedCollectionId}}';
       {% endif %}
 
+      //
+      // /collection/new
+      //
       {% if newCollection %}
-        // Store requested collection id
         window.WGST.isNewCollection = true;
       {% else %}
         window.WGST.isNewCollection = false;
-      {% endif %}
-
-      {% if appConfig %}
-        window.WGST.config = window.location.protocol + window.location.hostname;
       {% endif %}
 
     })();
