@@ -371,6 +371,7 @@ exports.apiGetCollection = function(req, res) {
 
 			require('./assembly').getAssembly(assemblyId, function(error, assembly){
 				if (error) {
+					console.error('[WGST][Error] ✗ Failed to get assembly: ' + error);
 					// Ignore this error for now
 					//res.json({});
 					return;
