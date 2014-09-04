@@ -481,7 +481,7 @@ exports.getAssembly = function(assemblyId, callback) {
 	//var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey, coreQueryKey];
 	var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey];
 
-	console.log('[WGST] Assembly ' + assemblyId + ' query keys: ');
+	console.log('[WGST] Assembly ' + assemblyId + ' query keys:');
 	console.dir(assemblyQueryKeys);
 
 	// ------------------------------------------
@@ -502,8 +502,6 @@ exports.getAssembly = function(assemblyId, callback) {
 		var assembly = {};
 
 		for (assemblyKey in assemblyData) {
-
-			console.log('>>>> assemblyKey: ' + assemblyKey);
 
             // Parsing assembly scores
             if (assemblyKey.indexOf('FP_COMP_') !== -1) {
@@ -558,8 +556,9 @@ exports.getAssembly = function(assemblyId, callback) {
 				callback(error, mlstAlleles);
 				return;
 			}
-			console.log('[WGST] Got assembly ' + assemblyId + ' MLST alleles data');
 
+			console.log('[WGST] Got assembly ' + assemblyId + ' MLST alleles data');
+	
 			// var mlstAlleleValue,
 			// 	mlstAllele,
 			// 	locusId;
@@ -579,9 +578,6 @@ exports.getAssembly = function(assemblyId, callback) {
 			// 	} // for				
 			// } // if
 			addMlstAlleleToAssembly(assembly, mlstAlleles);
-
-			// console.log('Looking for this');
-			// console.log(assembly.MLST_RESULT.alleles);
 
 			// Get ST
 			console.log('[WGST] Getting assembly ' + assemblyId + ' ST data');

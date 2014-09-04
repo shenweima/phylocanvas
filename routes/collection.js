@@ -353,8 +353,9 @@ exports.apiGetCollection = function(req, res) {
 	// Get list of assemblies
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
 		if (error) {
+			console.error('[WGST][Error] ✗ Failed to get list of assemblies: ' + error);
 			// Ignore this error for now
-			res.json({});
+			//res.json({});
 			return;
 		}
 
@@ -372,6 +373,7 @@ exports.apiGetCollection = function(req, res) {
 			require('./assembly').getAssembly(assemblyId, function(error, assembly){
 				if (error) {
 					console.error('[WGST][Error] ✗ Failed to get assembly: ' + error);
+					console.dir(assembly);
 					// Ignore this error for now
 					//res.json({});
 					return;
@@ -402,6 +404,7 @@ exports.apiGetCollection = function(req, res) {
 						})
 					);
 				}
+
 
 
 
