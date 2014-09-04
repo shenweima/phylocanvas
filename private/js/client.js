@@ -842,24 +842,25 @@ $(function(){
             showAlert('Failed to reconnect to the server.', WGST.alert.status.FAILURE, false);
         });
 
-        // Get representative collection tree metadata
-        getRepresentativeCollectionTreeMetadata(function(error, representativeCollectionTreeMatadata){
-            if (error) {
-                // Show notification
-                showNotification(error);
-                return;
-            }
+        // // Get representative collection tree metadata
+        // getRepresentativeCollectionTreeMetadata(function(error, representativeCollectionTreeMatadata){
+        //     if (error) {
+        //         // Show notification
+        //         showNotification(error);
+        //         return;
+        //     }
 
-            WGST.collection.representative.metadata = representativeCollectionTreeMatadata;
+        //     WGST.collection.representative.metadata = representativeCollectionTreeMatadata;
 
-            activatePanel('representativeCollectionTree', function(){
-                startPanelLoadingIndicator('representativeCollectionTree');
+        //     activatePanel('representativeCollectionTree', function(){
+        //         startPanelLoadingIndicator('representativeCollectionTree');
 
-                renderRepresentativeCollectionTree();
-            });
+        //         renderRepresentativeCollectionTree();
+        //     });
 
-            initApp(WGST.init.all.REPRESENTATIVE_COLLECTION_TREE_METADATA);
-        });
+        //     initApp(WGST.init.all.REPRESENTATIVE_COLLECTION_TREE_METADATA);
+        // });
+        initApp(WGST.init.all.REPRESENTATIVE_COLLECTION_TREE_METADATA);
 
     })();
 
