@@ -4503,7 +4503,7 @@ $(function(){
         // Open map panel if it's not displayed and map is not in fullscreen mode
         if ($('.wgst-fullscreen--active').attr('data-fullscreen-name') !== 'map') {
             if (! $('.wgst-panel__map').hasClass('wgst-panel--active')) {
-                openPanel('map');
+                window.WGST.openPanel('map');
             }
         }
 
@@ -5971,7 +5971,7 @@ $(function(){
             bringFullscreenToPanel(false); 
         }
 
-        openPanel('map');
+        window.WGST.openPanel('map');
 
         google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
     });
@@ -5989,7 +5989,7 @@ $(function(){
                 bringFullscreenToPanel(false); 
             }
 
-            openPanel('collection');
+            window.WGST.openPanel('collection');
         }
     });
 
@@ -6020,7 +6020,7 @@ google.maps.event.addDomListener(window, "resize", function() {
             // Trigger Twitter Bootstrap tooltip
             $('[data-toggle="tooltip"]').tooltip();
             // Open Map panel
-            openPanel('map');
+            window.WGST.openPanel('map');
         });
 
         google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
