@@ -383,7 +383,28 @@ exports.apiGetCollection = function(req, res) {
 
 				collection.assemblies[assemblyId] = assembly;
 
-				console.log('[WGST] ' + parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) + ' assemblies left');
+				
+
+
+
+				//
+				// Log assemblies that you have received
+				// 
+				// Log how many assemblies left to receive
+				console.log('[WGST] ' + parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) + ' assemblies left:');
+				if (parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) > 0) {
+					// Log which assemblies left to receive
+					console.dir(
+						assemblyIds.filter(function(assemblyId, index, array){
+							if (typeof collection.assemblies[assemblyId] === 'undefined') {
+								return assemblyId;
+							}
+						})
+					);
+				}
+
+
+
 
 				// If got all assemblies
 				if (Object.keys(collection.assemblies).length === assemblyIds.length) {

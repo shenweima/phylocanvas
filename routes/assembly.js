@@ -503,7 +503,7 @@ exports.getAssembly = function(assemblyId, callback) {
 
 		for (assemblyKey in assemblyData) {
 
-			console.log('>>>> assemblyKey: ' + assemblyKey); //LLL
+			console.log('>>>> assemblyKey: ' + assemblyKey);
 
             // Parsing assembly scores
             if (assemblyKey.indexOf('FP_COMP_') !== -1) {
