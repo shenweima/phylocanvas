@@ -1881,6 +1881,13 @@ $(function(){
             $.extend(templateContext, options);
         }
 
+        //
+        // Do not allow reference collection to merge with itself
+        //
+        if (collectionId === window.WGST.config.referenceCollectionId) {
+            templateContext.mergeWithButton = true;
+        }
+
         collectionTreePanelHtml = collectionTreePanelTemplate(templateContext),
 
         $('body').prepend(collectionTreePanelHtml);
@@ -1895,13 +1902,6 @@ $(function(){
             handle: $collectionTreePanel.find('.wgst-draggable-handle'),
             appendTo: "body",
             scroll: false,
-            /**
-             * Description
-             * @method stop
-             * @param {} event
-             * @param {} ui
-             * @return 
-             */
             stop: function(event, ui) {
                 // Store current panel position
                 var panelName = ui.helper.attr('data-panel-name');
@@ -5778,12 +5778,13 @@ $(function(){
         //-----------------------------
         // Remove after demo
         //
-        var mapCollectionIdToMergedTreeId = {
-            '5324c298-4cd0-4329-848b-30d7fe28a560': 'ab66c759-2242-42c2-a245-d364fcbc7c4f'
+        var mapCollectionIdToMergeTreeId = {
+            '5324c298-4cd0-4329-848b-30d7fe28a560': 'ab66c759-2242-42c2-a245-d364fcbc7c4f',
+            'c0ca8c57-11b9-4e27-93a5-6ffe841e7768': '2b3ad477-323c-4c54-b6f2-abc420ba0399'
         };
         var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
-        if (collectionId === '5324c298-4cd0-4329-848b-30d7fe28a560') {
-            demoMergeCollectionTrees(mapCollectionIdToMergedTreeId[collectionId]);
+        if (mapCollectionIdToMergeTreeId.hasOwnProperty(collectionId)) {
+            demoMergeCollectionTrees(mapCollectionIdToMergeTreeId[collectionId]);
             return;
         }
         //-----------------------------

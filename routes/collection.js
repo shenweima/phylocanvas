@@ -392,9 +392,9 @@ exports.apiGetCollection = function(req, res) {
 				//
 				// Log assemblies that you have received
 				// 
-				// Log how many assemblies left to receive
-				console.log('[WGST] ' + parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) + ' assemblies left:');
 				if (parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) > 0) {
+					// Log how many assemblies left to receive
+					console.log('[WGST] ' + parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) + ' assemblies left:');
 					// Log which assemblies left to receive
 					console.dir(
 						assemblyIds.filter(function(assemblyId, index, array){
@@ -403,6 +403,8 @@ exports.apiGetCollection = function(req, res) {
 							}
 						})
 					);
+				} else {
+					console.log('[WGST] 0 assemblies left');
 				}
 
 
