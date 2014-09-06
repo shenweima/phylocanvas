@@ -71,4 +71,35 @@ $(function(){
 		event.preventDefault();
 	});
 
+
+
+
+
+
+    window.WGST.exports.isNavItemEnabled = function(navItemName) {
+        var navItem = $('.wgst-navigation-item__' + navItemName);
+
+        if (navItem.hasClass('wgst-navigation-item--active')) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    window.WGST.exports.disableNavItem = function(navItemName) {
+        var navItem = $('.wgst-navigation-item__' + navItemName);
+
+        if (window.WGST.exports.isNavItemEnabled(navItemName)) {
+            navItem.removeClass('wgst-navigation-item--active');
+        }
+    };
+
+    window.WGST.exports.enableNavItem = function(navItemName) {
+        var navItem = $('.wgst-navigation-item__' + navItemName);
+
+        if (! window.WGST.exports.isNavItemEnabled(navItemName)) {
+            navItem.addClass('wgst-navigation-item--active');
+        }
+    };
+
 });

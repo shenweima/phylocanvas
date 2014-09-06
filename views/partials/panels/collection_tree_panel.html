@@ -1,21 +1,22 @@
 <!-- Handlebars template -->
 {% raw %}
 
-<script type="text/x-handlebars-template" class="wgst-template" data-template-id="collectionTreePanel">
+<script type="text/x-handlebars-template" class="wgst-template" data-template-id="collection-tree-panel">
 
-  <!-- Collection tree panel template -->
-  <div class="wgst-panel wgst-panel__collection-tree wgst-panel--active wgst-draggable" data-panel-name="{{attributePanelId}}" data-panel-id="{{attributePanelId}}" data-collection-id="{{attributeCollectionId}}" data-collection-tree-type="{{attributeCollectionTreeType}}">
+  <section class="wgst-panel wgst-panel__collection-tree wgst-draggable hide-this"
+        data-panel-type="{{panelType}}"
+        data-panel-id="{{panelId}}"
+        data-collection-id="{{collectionId}}"
+        data-collection-tree-type="{{collectionTreeType}}">
+
     <header class="wgst-panel-header wgst-draggable-handle">
       <h4 class="header-title">{{collectionTreeTitle}}</h4>
       <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
       <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
-      <!--
-      <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span>
-      -->
       <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
     </header>
     <article class="wgst-panel-body">
-      <div class="wgst-panel-loading"><div class="loading"></div></div>
+      <!-- <div class="wgst-panel-loading"><div class="loading"></div></div> -->
       <div class="wgst-panel-body-content">
         
         <div class="wgst-tree-controls">
@@ -89,14 +90,16 @@
           </div><!-- /.wgst-tree-controls-container -->
         </div><!-- /.wgst-tree-controls -->
 
-        <div class="wgst-tree-content"></div>
+        <div class="wgst-tree-content"
+            data-collection-tree-type={{collectionTreeType}}
+            data-phylocanvas-id="{{phylocanvasId}}"></div>
 
       </div><!-- /.wgst-panel-body-content --> 
     </article><!-- /.wgst-panel-body -->
     <footer class="wgst-panel-footer wgst-draggable-handle">
     </footer><!-- /.wgst-panel-footer -->
-  </div><!-- /.wgst-panel.tree-panel -->
+  </section><!-- /.wgst-panel.tree-panel -->
 
-</script><!-- /.wgst-template -->
+</script>
 
 {% endraw %}

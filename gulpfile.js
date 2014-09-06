@@ -11,11 +11,11 @@ var gulp = require('gulp'),
 
 var taskPaths = {
 	react: {
-		src: './private/js/react-components/**/*.js',
-		dest: './public/js/react-components'
+		src: './private/js/lib/react-components/**/*.jsx',
+		dest: './public/js/lib/react-components'
 	},
 	scripts: {
-		src: './private/js/*.js',
+		src: './private/js/**/*.js',
 		dest: './public/js'
 	},
 	less: {
@@ -39,7 +39,7 @@ gulp.task('react', function() {
 gulp.task('scripts', function() {
     return gulp.src(taskPaths.scripts.src)
     	//.pipe(sourcemaps.init())
-    	.pipe(uglify())
+    	//.pipe(uglify())
     	//.pipe(jshint())
     	//.pipe(jshint.reporter('jshint-stylish'))
     	//.pipe(rename('wgsa.min.js'))

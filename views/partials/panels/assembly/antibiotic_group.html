@@ -1,0 +1,27 @@
+<!-- Handlebars template -->
+{% raw %}
+
+    <table class="antibiotic-group" data-antibiotic-group-name="{{antibioticGroupName}}">
+    	<thead>
+        	<tr>
+            	<th>{{antibioticGroupName}}</th>
+        	</tr>
+    	</thead>
+    	<tbody>
+        	<tr>
+            	<td>
+                	<table>
+                    	<tbody>
+                        	<tr>
+			                    {{#each antibioticGroupResistanceData}}
+			                    	{% include "antibiotic_resistance.html" %}
+			                    {{/each}}
+                        	</tr>
+                    	</tbody>
+                	</table>
+            	</td>
+        	</tr>
+    	</tbody>
+    </table>
+
+{% endraw %}

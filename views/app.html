@@ -70,44 +70,6 @@
 
 
 
-    <!-- Assembly upload navigator -->
-    <section class="wgst-panel wgst-panel__assembly-upload-navigator wgst-draggable" data-panel-name="assemblyUploadNavigator" data-collection-id="">
-      <header class="wgst-panel-header wgst-draggable-handle">
-
-        <div class="assembly-upload-summary">
-          You have selected 
-          <span class="assembly-upload-total-number"></span> <span class="assembly-upload-total-number-label"></span><!--
-          --><span class="upload-single-assembly-label">:</span> <span class="upload-single-assembly-label upload-single-assembly-file-name"></span>
-          <span class="upload-multiple-assemblies-label"> in total.</span>
-          <span class="upload-multiple-assemblies-label"> On average <span class="assembly-sequences-average"></span> <strong>contigs</strong> per assembly.</span>
-        </div><!-- /.assembly-upload-summary -->
-
-      </header><!-- /.wgst-draggable-handle -->
-      <article class="wgst-panel-body">
-
-        <div class="assembly-navigator hide-this">
-          <div class="assembly-navigator-controls">
-            <div class="assembly-list-header">
-
-              <form class="form-inline" role="form">
-                <div class="form-group">
-                  <select class="form-control wgst-dropped-assembly-list">
-                  </select>
-                </div>
-                <div class="btn-group">
-                  <button type="button" class="btn btn-default wgst-dropped-assembly-list-navigation-button__previous"><i class="fa fa-chevron-left"></i></button>
-                  <button type="button" class="btn btn-default wgst-dropped-assembly-list-navigation-button__next"><i class="fa fa-chevron-right"></i></button>
-                </div>
-              </form>
-
-            </div>
-          </div>
-        </div>
-
-      </article><!-- /.wgst-panel-body -->
-      <footer class="wgst-panel-footer wgst-draggable-handle">
-      </footer><!-- /.wgst-panel-footer -->
-    </section><!-- /.wgst-panel.assembly-list-panel -->
 
 
 
@@ -115,21 +77,6 @@
 
 
 
-    <!-- Assembly upload analytics -->
-    <section class="wgst-panel wgst-panel__assembly-upload-analytics wgst-draggable" data-panel-name="assemblyUploadAnalytics">
-      <header class="wgst-panel-header wgst-draggable-handle">
-        <h4 class="header-title">Analytics: <small></small></h4>
-      </header><!-- /.wgst-draggable-handle -->
-      <article class="wgst-panel-body">
-
-        <div class="wgst-assembly-upload__analytics">
-          <ul></ul>
-        </div><!-- /.wgst-assembly-upload__analytics -->
-
-      </article><!-- /.wgst-panel-body -->
-      <footer class="wgst-panel-footer wgst-draggable-handle">
-      </footer><!-- /.wgst-panel-footer -->
-    </section>
 
 
 
@@ -137,77 +84,8 @@
 
 
 
-    <!-- Assembly upload metadata -->
-    <section class="wgst-panel wgst-panel__assembly-upload-metadata wgst-draggable" data-panel-name="assemblyUploadMetadata">
-      <header class="wgst-panel-header wgst-draggable-handle">
-        <h4 class="header-title">Metadata: <small></small></h4>
-      </header><!-- /.wgst-draggable-handle -->
-      <article class="wgst-panel-body">
 
-        <div class="wgst-assembly-upload__metadata">
-          <ul></ul>
-        </div><!-- /.wgst-assembly-upload__metadata -->
 
-        <div class="adding-metadata-progress-container">
-
-          <div class="progress-container">
-            <div class="progress-label">
-              <span class="progress-percentage-label">Your progress is </span>
-              <span class="progress-percentage">0%</span>
-              <span class="progress-hint">(Hint: fill in metadata for this assembly.)</span>
-            </div>
-            <div class="progress progress-striped">
-              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-                <span class="sr-only">0% Complete (success)</span>
-              </div>
-            </div>
-          </div><!-- /.progress-container -->
-
-          <div class="upload-controls-container">
-            Ready?
-            <button type="button" class="btn btn-success assemblies-upload-ready-button">Upload sequences and metadata</button>
-            <button type="button" class="btn btn-success assemblies-upload-metadata-ready-button">Upload metadata only</button>
-          </div>
-
-          <!--
-          <div class="upload-controls-container">
-            <button type="button" class="btn btn-success assemblies-upload-ready-button" disabled="disabled">Upload</button>
-            <button type="button" class="btn btn-default assemblies-upload-cancel-button">Cancel</button>
-          </div>
-          -->
-          <!-- /.upload-controls-container -->
-
-        </div><!-- /.adding-metadata-progress-container -->
-
-        <!--
-        <div class="uploading-assembly-progress-container">
-
-          <div class="uploading-progress-container">
-            <div class="progress-label">
-              <span class="progress-percentage-label">Uploading progress is </span>
-              <span class="progress-percentage">2%</span>
-              <span class="progress-hint"></span>
-            </div>
-            <div class="uploaded-assembly-url">
-              <div class="uploaded-assembly-url-label">
-                <span class="uploaded-assembly-process-status">Processing</span> your assemblies.
-              </div>
-              <input type="text" class="form-control uploaded-assembly-url-input" val="">
-            </div>
-            <div class="progress progress-striped active">
-              <div class="progress-bar" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 2%">
-                <span class="sr-only">2% Complete (success)</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-        -->
-
-      </article><!-- /.wgst-panel-body -->
-      <footer class="wgst-panel-footer wgst-draggable-handle">
-      </footer><!-- /.wgst-panel-footer -->
-    </section>
 
 
 
@@ -216,105 +94,6 @@
     <!-- Collection -->
     <div class="wgst-fullscreen wgst-fullscreen__collection" data-fullscreen-name="collection" data-fullscreen-id="collection">
     </div><!-- /.wgst-fullscreen__collection -->
-
-    <!-- Collection -->
-    <section class="wgst-panel wgst-panel__collection wgst-draggable" data-panel-name="collection" data-panel-id="" data-collection-id="">
-      <header class="wgst-panel-header wgst-draggable-handle">
-        <h4 class="header-title">Collection</h4>
-        <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
-      </header>
-      <article class="wgst-panel-body">
-        <div class="wgst-panel-loading"><div class="loading"></div></div>
-        <div class="wgst-panel-body-content">
-
-          <div class="wgst-collection-controls">
-            <div class="wgst-collection-controls__show-tree">
-              <!-- <label>Show tree:</label> -->
-              <div class="btn-group"></div>
-            </div><!-- /.collection-control -->
-            <div class="wgst-collection-controls__show-data-table">
-              <div class="btn-group"></div>
-            </div><!-- /.collection-control -->
-          </div><!-- /.collection-controls -->
-
-          <div class="collection-stats">
-            <div class="wgst-stats wgst-stats--horizontal wgst-stats__collection">
-              <div class="wgst-stats-block">
-                <div class="wgst-stats-label">Created on</div>
-                <div class="wgst-stats-value wgst-stats-value--small wgst-stats-value__created-on"></div>
-              </div><!-- /.wgst-stats-block -->
-              <div class="wgst-stats-block">
-                <div class="wgst-stats-label">Author</div>
-                <div class="wgst-stats-value wgst-stats-value--small wgst-stats-value__author"></div>
-              </div><!-- /.wgst-stats-block -->
-              <div class="wgst-stats-block">
-                <div class="wgst-stats-label">Privacy</div>
-                <div class="wgst-stats-value wgst-stats-value--small wgst-stats-value__privacy"></div>
-              </div><!-- /.wgst-stats-block -->
-            </div>
-
-            <div class="wgst-stats wgst-stats__collection">
-              <div class="wgst-stats-label">Total assemblies</div>
-              <div class="wgst-stats-value wgst-stats-value__total-number-of-assemblies"></div>
-            </div>
-          </div><!-- /.collection-stats -->
-
-          <!--
-          <div class="wgst-stats wgst-stats__collection">
-            <div class="wgst-stats-label">Displayed assemblies</div>
-            <div class="wgst-stats-value wgst-stats-value__number-of-displayed-assemblies"></div>
-          </div>
-
-          <div class="wgst-stats wgst-stats__collection">
-            <div class="wgst-stats-label">Selected assemblies</div>
-            <div class="wgst-stats-value wgst-stats-value__number-of-selected-assemblies"></div>
-          </div>
-          -->
-
-  <!--               <div class="wgst-stats wgst-stats--horizontal wgst-stats__collection">
-            <div class="wgst-stats-label">Author</div>
-            <div class="wgst-stats-value wgst-stats-value--small wgst-stats-value__created-author"></div>
-          </div> -->
-
-          <div class="collection-details wgst-collection wgst-collection-info" data-collection-id="">
-
-            <div class="collection-assembly-list-headers">
-              <div class="assembly-list-header assembly-list-header-tree">Tree</div>
-              <div class="assembly-list-header assembly-list-header-map">
-                Map
-                <input type="checkbox" class="show-all-assemblies-on-map">
-              </div>
-              <!-- <div class="assembly-list-header assembly-list-generation">Generation</div> -->
-              <div class="assembly-list-header assembly-list-header-id">Assembly</div>
-              <div class="assembly-list-header assembly-list-header-nearest-representative">Nearest Representative</div>
-              <div class="assembly-list-header assembly-list-header-st">MLST</div>
-              <div class="assembly-list-header assembly-list-header-resistance-profile">Predicted Resistance Profile</div>
-            </div>
-
-            <div class="collection-assembly-list"></div>
-            <div class="collection-assembly-list-full hide-this"></div>
-
-            <!--
-            <div class="collection-assembly-list-more-assemblies">
-              <span class="glyphicon glyphicon-chevron-up"></span> Scroll inside to see more assemblies <span class="glyphicon glyphicon-chevron-up"></span>
-            </div>
-            -->
-
-            <div class="collection-assembly-list-all-assemblies">
-              <span class="glyphicon glyphicon-filter"></span> Some assemblies are filtered out. <a href="#" class="collection-assembly-list-view-all-assemblies">View all assemblies</a>
-            </div>
-
-          </div><!-- /.collection-details -->
-
-        </div><!-- /.wgst-panel-body-content -->      
-      </article><!-- /.wgst-panel-body -->
-      <footer class="wgst-panel-footer wgst-draggable-handle">
-      </footer><!-- /.wgst-panel-footer -->
-    </section><!-- /.wgst-panel.assembly-list-panel -->
-
 
 
 
@@ -345,90 +124,6 @@
 
 
 
-    <!-- Merged collection tree prototype -->
-    <div class="wgst-panel wgst-panel__merged-collection-tree wgst-panel--active wgst-draggable" data-panel-name="mergedCollectionTree" data-collection-id="" data-collection-tree-type="MERGED_TREE">
-      <header class="wgst-panel-header wgst-draggable-handle">
-        <h4 class="header-title">Merged Collection Tree</h4>
-        <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
-        <!-- <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span> -->
-        <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
-      </header>
-      <article class="wgst-panel-body">
-        <div class="wgst-panel-loading"><div class="loading"></div></div>
-        <div class="wgst-panel-body-content">
-          
-          <div class="wgst-tree-controls">
-            <div class="wgst-tree-controls-container">
-              <div class="wgst-tree-control-row">
-
-                <div class="wgst-tree-control">
-                  <label for="select-tree-type">Tree type:</label>
-                  <select class="form-control wgst-tree-control__change-tree-type" id="select-tree-type">
-                    <option value="rectangular">Rectangular</option>
-                    <option value="circular">Circular</option>
-                    <option value="radial">Radial</option>
-                    <option value="diagonal">Diagonal</option>
-                    <option value="hierarchy">Hierarchy</option>
-                  </select>
-                </div>
-
-                <div class="wgst-tree-control">
-                  <label for="select-tree-node-label-input">Node label:</label>
-                  <select class="form-control wgst-tree-control__change-node-label" id="select-tree-node-label-input">
-                    <option value="1">Assembly Name</option>
-                    <option value="2">Nearest Representative</option>
-                    <option value="3">MLST</option>
-                    <option value="4">Predicted Resistance Profile</option>
-                    <option value="5">Location</option>
-                  </select>
-                </div>
-
-                <div class="wgst-tree-control">
-                  <label for="select-tree-node-antibiotic-merged">Highlighted antibiotic:</label>
-                  <select class="form-control wgst-tree-control__change-node-colour" id="select-tree-node-antibiotic-merged">
-                    <option value="0">None</option>
-                  </select>
-                </div>
-
-              </div><!-- /.wgst-tree-control-row -->
-
-              <div class="wgst-tree-control-row">
-                <div class="btn-group wgst-tree-control">
-                  <button type="button" class="btn btn-sm btn-default wgst-tree-control__decrease-label-font-size"><span class="glyphicon glyphicon-font"></span> -</button>
-                  <button type="button" class="btn btn-sm btn-default wgst-tree-control__increase-label-font-size"><span class="glyphicon glyphicon-font"></span> +</button>
-                </div>
-
-                <div class="btn-group wgst-tree-control">
-                  <button type="button" class="btn btn-sm btn-default wgst-tree-control__decrease-node-size"><span class="glyphicon glyphicon-leaf"></span> -</button>
-                  <button type="button" class="btn btn-sm btn-default wgst-tree-control__increase-node-size"><span class="glyphicon glyphicon-leaf"></span> +</button>
-                </div>
-
-                <label class="checkbox-inline wgst-tree-control">
-                  <input type="checkbox" class="wgst-tree-control__show-node-labels" checked="checked"> Show labels
-                </label>
-
-                <!--
-                <div class="btn-group wgst-tree-control">
-                  <button type="button" class="btn btn-sm btn-default tree-controls-match-assembly-list">Match assembly list</button>
-                </div>
-
-                <div class="btn-group wgst-tree-control">
-                  <button type="button" class="btn btn-sm btn-default wgst-tree-control__merge-collection-trees">Merge with SRLs</button>
-                </div>
-                -->
-
-              </div><!-- /.wgst-tree-control-row -->
-            </div><!-- /.wgst-tree-controls-container -->
-          </div><!-- /.wgst-tree-controls -->
-
-          <div class="wgst-tree-content"></div>
-
-        </div><!-- /.wgst-panel-body-content --> 
-      </article><!-- /.wgst-panel-body -->
-      <footer class="wgst-panel-footer wgst-draggable-handle">
-      </footer><!-- /.wgst-panel-footer -->
-    </div><!-- /.wgst-panel.tree-panel -->
 
 
 
@@ -438,51 +133,6 @@
 
 
 
-    <!-- Representative collection tree -->
-    <div class="wgst-fullscreen wgst-fullscreen__representative-collection-tree" data-fullscreen-name="representativeCollectionTree" data-fullscreen-id="representativeCollectionTree">
-    </div><!-- /.wgst-fullscreen__representative-collection-tree -->
-
-    <!-- Representative collection tree -->
-    <div class="wgst-panel wgst-panel__representative-collection-tree wgst-panel--active wgst-draggable" data-panel-name="representativeCollectionTree" data-panel-id="representativeCollectionTree" data-collection-id="">
-      <header class="wgst-panel-header wgst-draggable-handle">
-        <h4 class="header-title">Staphylococcus Aureus Representative Tree</h4>
-        <!-- <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span> -->
-        <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
-      </header>
-      <article class="wgst-panel-body">
-        <div class="wgst-panel-loading"><div class="loading"></div></div>
-        <div class="wgst-panel-body-content">
-          
-          <div class="wgst-tree-controls">
-
-            <!--                 
-            <div class="btn-group">
-              <button type="button" class="btn btn-sm btn-default tree-controls-show-labels">Show labels</button>
-              <button type="button" class="btn btn-sm btn-default tree-controls-hide-labels">Hide labels</button>
-            </div>
-            -->
-
-            <div class="btn-group">
-              <button type="button" class="btn btn-sm btn-default tree-controls-decrease-node"><span class="glyphicon glyphicon-font"></span> -</button>
-              <button type="button" class="btn btn-sm btn-default tree-controls-increase-node"><span class="glyphicon glyphicon-font"></span> +</button>
-            </div>
-
-            <!--
-            <div class="btn-group">
-              <button type="button" class="btn btn-sm btn-default tree-controls-match-assembly-list">Match assembly list</button>
-            </div>
-            -->
-
-          </div>
-          <div class="wgst-tree-content"></div>
-
-        </div><!-- /.wgst-panel-body-content --> 
-      </article><!-- /.wgst-panel-body -->
-      <footer class="wgst-panel-footer wgst-draggable-handle">
-      </footer><!-- /.wgst-panel-footer -->
-    </div><!-- /.wgst-panel.tree-panel -->
 
 
 
@@ -491,47 +141,6 @@
 
 
 
-    <!-- Assembly -->
-    <section class="wgst-panel wgst-panel__assembly wgst-draggable" data-panel-name="assembly">
-      <header class="wgst-panel-header wgst-draggable-handle">
-        <h4 class="header-title">Assembly: <small></small></h4>
-        <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
-      </header>
-      <article class="wgst-panel-body">
-        <div class="assembly-details">
-          <div class="wgst-panel-loading"><div class="loading"></div></div>
-
-          <div class="assembly-detail assembly-detail__nearest-representative">
-            <h4>Nearest Representative</h4>
-            <div class="assembly-detail-content"></div>
-          </div> 
-
-          <div class="assembly-detail assembly-detail__score">
-            <h4>Score</h4>
-            <div class="assembly-detail-content"></div>
-          </div>
-
-          <div class="assembly-detail assembly-detail__st-type">
-            <h4>Sequence Type</h4>
-            <div class="assembly-detail-content"></div>
-          </div> 
-
-          <div class="assembly-detail assembly-detail__mlst">
-            <h4>MLST</h4>
-            <div class="assembly-detail-content"></div>
-          </div>              
-
-          <div class="assembly-detail assembly-detail__resistance-profile">
-            <h4>Predicted Resistance Profile</h4>
-            <div class="assembly-detail-content"></div>
-          </div>
-        </div><!-- /.assembly-details -->
-      </article><!-- /.wgst-panel-body -->
-      <footer class="wgst-panel-footer wgst-draggable-handle">
-      </footer><!-- /.wgst-panel-footer -->
-    </section>
 
 
 
@@ -539,43 +148,9 @@
 
 
 
-    <!-- Assembly Upload Progress -->
-    <section class="wgst-panel wgst-panel__assembly-upload-progress wgst-draggable" data-panel-name="assemblyUploadProgress">
-      <header class="wgst-panel-header wgst-draggable-handle">
-        <h4 class="header-title">Processing <small></small> assemblies</h4>
-        <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__close glyphicon glyphicon-remove"></span>
-      </header>
-      <article class="wgst-panel-body">
 
-        <div class="assemblies-upload-progress">
-          Processed <span class="assemblies-upload-processed">0</span> out of <span class="assemblies-upload-total"></span> assemblies
-          <div class="progress progress-striped active">
-            <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-            </div>
-          </div>
-        </div>
 
-        <table class="table-striped assembly-list-upload-progress">
-          <thead>
-            <tr>
-              <th>Assembly</th>
-              <th>Progress</th>
-              <th class="assembly-processing-result-header">Uploaded</th>
-              <th class="assembly-processing-result-header">MLST</th>
-              <th class="assembly-processing-result-header">FP</th>
-              <th class="assembly-processing-result-header">PAARSNP</th>
-              <th class="assembly-processing-result-header">CORE</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
 
-      </article><!-- /.wgst-panel-body -->
-      <footer class="wgst-panel-footer wgst-draggable-handle">
-      </footer><!-- /.wgst-panel-footer -->
-    </section>
 
 
 
@@ -584,32 +159,19 @@
       <div class="wgst-map"></div>
     </div><!-- /.wgst-fullscreen__map -->
 
-    <!-- Map -->
-    <div class="wgst-panel wgst-panel__map wgst-draggable" data-panel-name="map" data-panel-id="map">
-      <header class="wgst-panel-header wgst-draggable-handle">
-        <h4 class="header-title">Map</h4>
-  <!--             
-        <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
-  -->
-        <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__maximize wgst-panel-control-button--active glyphicon glyphicon-fullscreen"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
-        <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
-      </header>
-      <article class="wgst-panel-body">
-        <div class="wgst-panel-loading"><div class="loading"></div></div>
-        <div class="wgst-panel-body-content">
-        </div><!-- /.wgst-panel-body-content --> 
-      </article><!-- /.wgst-panel-body -->
-      <footer class="wgst-panel-footer wgst-draggable-handle">
-      </footer><!-- /.wgst-panel-footer -->
-    </div><!-- /.wgst-panel__map -->
+
     
   </section>
 
-  {% include "partials/collection_tree_panel.html" %}
+  {% include "partials/panels/assembly_panel.html" %}
+
+  {% include "partials/panels/assembly_upload_navigation_panel.html" %}
+  {% include "partials/panels/assembly_upload_analytics_panel.html" %}
+  {% include "partials/panels/assembly_upload_metadata_panel.html" %}
+
+  {% include "partials/panels/collection_data_panel.html" %}
+  {% include "partials/panels/collection_tree_panel.html" %}
+
   {% include "partials/upload/assembly_analytics.html" %}
   {% include "partials/upload/assembly_metadata_form.html" %}
 
@@ -624,6 +186,9 @@
   //
   window.WGST = window.WGST || {};
   window.WGST.exports = {};
+  window.WGST.state = {
+    panels: {}
+  };
 
   $(function(){
     /*
@@ -658,7 +223,14 @@
     })();
   });
 </script>
-<script src="/js/dropped_assembly_list_navigation.js"></script>
+<script src="/js/lib/unsorted.js"></script>
+<script src="/js/lib/panel.js"></script>
+<script src="/js/lib/tree.js"></script>
+<script src="/js/lib/map.js"></script>
+<script src="/js/lib/assembly.js"></script>
+<script src="/js/lib/collection_data_panel.js"></script>
+<script src="/js/lib/collection.js"></script>
+<script src="/js/lib/dropped_assembly_list_navigation.js"></script>
+<script src="/js/lib/navigation.js"></script>
 <script src="/js/client.js"></script>
-<script src="/js/navigation.js"></script>
 {% endblock %}
