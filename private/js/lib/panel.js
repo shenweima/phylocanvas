@@ -25,6 +25,9 @@ $(function(){
 
             $('.wgst-page__app').prepend(panelHtml);
 
+            console.debug('templateContext:');
+            console.dir(templateContext);
+
         	var $panel = $('.wgst-panel[data-panel-id="' + templateContext.panelId + '"]');
 
         	//

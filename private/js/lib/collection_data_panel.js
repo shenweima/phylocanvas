@@ -230,7 +230,7 @@ $(function(){
         // }
 
         //openAssemblyPanel(assemblyId);
-        window.WGST.exports.openAssemblyPanel(assemblyId);
+        window.WGST.exports.getAssembly(assemblyId);
 
         event.preventDefault();
     });

@@ -112,8 +112,6 @@ $(function(){
 		                            	// Resistance: RESISTANT
 		                            	//
 	                            		antibioticResistanceData = 'RESISTANT';
-
-                                        //antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-fail" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
                                     
                                     //
                                     // Assembly is sensitive to this antibiotic (aka success)
@@ -124,8 +122,6 @@ $(function(){
 		                            	// Resistance: SENSITIVE
 		                            	//
 	                            		antibioticResistanceData = 'SENSITIVE';
-
-                                        //antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-success" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
                                     
                                     //
                                     // Resistance is unknown
@@ -137,7 +133,6 @@ $(function(){
 		                            	//
 	                            		antibioticResistanceData = 'UNKNOWN';
 
-                                        //antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
                                     }
 
 	                            //
@@ -150,8 +145,6 @@ $(function(){
 	                            	//
                             		antibioticResistanceData = 'UNKNOWN';
 
-                                    //antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
-                                    //console.log('>>> Assembly resistance profile has no antibiotic: ' + antibioticName);
                                 }
 
                             //
@@ -164,8 +157,6 @@ $(function(){
                             	//
                         		antibioticResistanceData = 'UNKNOWN';
 
-                                //antibioticResistancesHtml = antibioticResistancesHtml + '<td><div class="antibiotic resistance-unknown" data-antibiotic-name="' + antibioticName + '" data-antibiotic-resistance-state="' + assemblyAntibioticResistanceState + '" data-toggle="tooltip" data-placement="top" title="' + antibioticName + '">' + antibioticName +'</div></td>';
-                                //console.log('>>> Assembly resistance profile has no antibiotic group: ' + antibioticGroupName);
                             }
 
                             groupResistanceData.push({
@@ -191,8 +182,7 @@ $(function(){
 
         	var mlstData = [];
 
-			var //assemblyAlleles = assembly.MLST_RESULT.alleles,
-                assemblyAllele,
+			var assemblyAllele,
                 assemblyAlleleData,
                 assemblyAlleleName;
 
@@ -208,8 +198,6 @@ $(function(){
                     		alleleId: assemblyAlleleName
                     	};
 
-                        //locusDataHtml = locusDataHtml + '<td>' + 'None' + '</td>';
-                        //alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleleName + '</td>';
                     } else {
 
                     	assemblyAlleleData = {
@@ -217,8 +205,6 @@ $(function(){
                     		alleleId: assemblyAlleles[assemblyAlleleName].alleleId
                     	};
 
-                        //locusDataHtml = locusDataHtml + '<td>' + assemblyAlleles[assemblyAlleleName].locusId + '</td>';
-                        //alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAlleleName].alleleId + '</td>';
                     }
 
                     mlstData.push(assemblyAlleleData);
@@ -231,14 +217,11 @@ $(function(){
 
         var getAssemblyNearestRepresentativeData = function(assemblyScores) {
 
-            var //assemblyScores = assembly['FP_COMP'].scores,
-                assemblyTopScore = window.WGST.exports.calculateAssemblyTopScore(assemblyScores);
+            var assemblyTopScore = window.WGST.exports.calculateAssemblyTopScore(assemblyScores);
 
             var nearestRepresentative = assemblyTopScore.referenceId;
 
             return nearestRepresentative;
-
-            //$('.wgst-panel__assembly .assembly-detail__nearest-representative .assembly-detail-content').text(assemblyTopScore.referenceId);
         };
 
         var getAssemblyScoresData = function(fingerprintSize, assemblyScores) {
@@ -265,30 +248,9 @@ $(function(){
             } // for
 
             return assemblyScoresData;
-
-            //assemblyScoresHtml = assemblyScoresHtml.replace('{{assemblyScoresDataHtml}}', assemblyScoresDataHtml);
-
-            //$('.wgst-panel__assembly .assembly-detail__score .assembly-detail-content').html(assemblyScoresHtml);
-
         };
 
-	    window.WGST.exports.openAssemblyPanel = function(assemblyId) {
-
-	        // ============================================================
-	        // Open panel
-	        // ============================================================
-
-	        // Show animated loading circle
-	        //$('.wgst-panel__assembly .wgst-panel-loading').show();
-
-	        // activatePanel('assembly');
-	        // bringPanelToTop('assembly');
-	        // startPanelLoadingIndicator('assembly');
-	        // showPanel('assembly');
-
-	        // ============================================================
-	        // Get assembly data
-	        // ============================================================
+	    window.WGST.exports.getAssembly = function(assemblyId) {
 
 	        // Get assembly data
 	        $.ajax({
@@ -306,24 +268,6 @@ $(function(){
 
 	            var assembly = data.assembly,
 	            	assemblyUserId = assembly.ASSEMBLY_METADATA.userAssemblyId;
-
-	            // ============================================================
-	            // Prepare assembly panel
-	            // ============================================================
-
-	            // var assembly = data.assembly,
-	            //     assemblyPanel = $('.wgst-panel__assembly');
-
-	            // Set assembly name
-	            //assemblyPanel.find('.header-title small').text(assembly.ASSEMBLY_METADATA.userAssemblyId);
-
-
-
-
-
-
-
-
 
 	            //
 	            // Resistance profile
@@ -344,67 +288,6 @@ $(function(){
 
 	            console.debug('assemblySequenceTypeData:');
 	            console.log(assemblySequenceTypeData);
-
-	            //
-	            // MLST
-	            //
-
-	            //$('.wgst-panel__assembly .assembly-detail__resistance-profile .assembly-detail-content').html($(assemblyResistanceProfileHtml));
-
-	            // ============================================================
-	            // Prepare ST type
-	            // ============================================================
-
-	            // if (assembly.MLST_RESULT.stType.length === 0) {
-	            //     $('.wgst-panel__assembly .assembly-detail__st-type .assembly-detail-content').html('Not found');
-	            // } else {
-	            //     $('.wgst-panel__assembly .assembly-detail__st-type .assembly-detail-content').html(assembly.MLST_RESULT.stType);
-	            // } 
-
-	            // ============================================================
-	            // Prepare MLST
-	            // ============================================================
-
-	            // var assemblyAlleles = assembly.MLST_RESULT.alleles,
-	            //     assemblyAllele,
-	            //     assemblyAlleleName,
-	            //     assemblyMlstHtml =
-	            //     '<table>'
-	            //         + '<tbody>'
-	            //             + '<tr>'
-	            //                 + '<td class="row-title">Locus Id</td>'
-	            //                 + '{{locusIds}}'
-	            //             + '</tr>'
-	            //             + '<tr>'
-	            //                 + '<td class="row-title">Allele Id</td>'
-	            //                 + '{{alleleIds}}'
-	            //             + '</tr>'
-	            //         + '</tbody>'
-	            //     + '</table>',
-	            //     locusDataHtml = '',
-	            //     alleleDataHtml = '';
-
-	            // console.debug('assemblyAlleles:');
-	            // console.dir(assemblyAlleles);
-
-	            // for (assemblyAlleleName in assemblyAlleles) {
-	            //     if (assemblyAlleles.hasOwnProperty(assemblyAlleleName)) {
-	            //         assemblyAllele = assemblyAlleles[assemblyAlleleName];
-	            //         if (assemblyAllele === null) {
-	            //             locusDataHtml = locusDataHtml + '<td>' + 'None' + '</td>';
-	            //             alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleleName + '</td>';
-	            //         } else {
-	            //             locusDataHtml = locusDataHtml + '<td>' + assemblyAlleles[assemblyAlleleName].locusId + '</td>';
-	            //             alleleDataHtml = alleleDataHtml + '<td>' + assemblyAlleles[assemblyAlleleName].alleleId + '</td>';
-	            //         }
-	            //     } // if
-	            // } // for
-
-	            // assemblyMlstHtml = assemblyMlstHtml.replace('{{locusIds}}', locusDataHtml);
-	            // assemblyMlstHtml = assemblyMlstHtml.replace('{{alleleIds}}', alleleDataHtml);
-
-	            // $('.wgst-panel__assembly .assembly-detail__mlst .assembly-detail-content').html($(assemblyMlstHtml));
-
 
 	            //
 	            // MLST
@@ -459,62 +342,6 @@ $(function(){
                 // Show panel
                 //
                 window.WGST.exports.togglePanel(assemblyPanelId);
-
-
-	            // // ============================================================
-	            // // Prepare nearest representative
-	            // // ============================================================
-
-	            // var assemblyScores = assembly['FP_COMP'].scores,
-	            //     assemblyTopScore = calculateAssemblyTopScore(assemblyScores);
-
-	            // $('.wgst-panel__assembly .assembly-detail__nearest-representative .assembly-detail-content').text(assemblyTopScore.referenceId);
-
-	            // // ============================================================
-	            // // Prepare scores
-	            // // ============================================================
-
-	            // var assemblyScoresHtml =
-	            //     '<table>'
-	            //         + '<thead>'
-	            //             + '<tr>'
-	            //                 + '<th>Reference Id</th>'
-	            //                 + '<th>Score</th>'
-	            //             + '</tr>'
-	            //         + '</thead>'
-	            //         + '<tbody>'
-	            //             + '{{assemblyScoresDataHtml}}'
-	            //         + '</tbody>'
-	            //     + '</table>',
-	            //     assemblyScoresDataHtml = '',
-	            //     scoreText;
-
-	            // // Sort scores
-	            // var sortedAssemblyScores = Object.keys(assemblyScores).sort(function(assemblyScoreReferenceId1, assemblyScoreReferenceId2){
-	            //     return assemblyScores[assemblyScoreReferenceId1] - assemblyScores[assemblyScoreReferenceId2];
-	            // });
-
-	            // var assemblyScoreCounter = sortedAssemblyScores.length;
-	            // for (; assemblyScoreCounter !== 0;) {
-	            //     assemblyScoreCounter = assemblyScoreCounter - 1;
-
-	            //         var referenceId = sortedAssemblyScores[assemblyScoreCounter],
-	            //             scoreData = assemblyScores[referenceId],
-	            //             scoreText = scoreData.score.toFixed(2) + ' = ' + Math.round(scoreData.score * parseInt(assembly['FP_COMP']['fingerprintSize'], 10)) + '/' + assembly['FP_COMP']['fingerprintSize'];
-
-	            //         assemblyScoresDataHtml = assemblyScoresDataHtml 
-	            //             + '<tr>' 
-	            //                 + '<td>' + scoreData.referenceId + '</td>'
-	            //                 + '<td>' + scoreText + '</td>'
-	            //             + '</tr>';
-	            // } // for
-
-	            // assemblyScoresHtml = assemblyScoresHtml.replace('{{assemblyScoresDataHtml}}', assemblyScoresDataHtml);
-
-	            // $('.wgst-panel__assembly .assembly-detail__score .assembly-detail-content').html(assemblyScoresHtml);
-
-	            // Hide animated loading circle
-	            //$('.wgst-panel__assembly .wgst-panel-loading').hide();
 
 	        })
 	        .fail(function(jqXHR, textStatus, errorThrown) {

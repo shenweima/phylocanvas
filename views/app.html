@@ -172,8 +172,8 @@
   {% include "partials/panels/collection_data_panel.html" %}
   {% include "partials/panels/collection_tree_panel.html" %}
 
-  {% include "partials/upload/assembly_analytics.html" %}
-  {% include "partials/upload/assembly_metadata_form.html" %}
+  {% include "partials/panels/upload/assembly_analytics.html" %}
+  {% include "partials/panels/upload/assembly_metadata_form.html" %}
 
 {% endblock %}
 
@@ -224,13 +224,22 @@
   });
 </script>
 <script src="/js/lib/unsorted.js"></script>
+<script src="/js/lib/upload.js"></script>
 <script src="/js/lib/panel.js"></script>
 <script src="/js/lib/tree.js"></script>
 <script src="/js/lib/map.js"></script>
-<script src="/js/lib/assembly.js"></script>
+<script src="/js/lib/fasta.js"></script>
+
 <script src="/js/lib/collection_data_panel.js"></script>
+
+<script src="/js/lib/assembly_upload_analytics_panel.js"></script>
+<script src="/js/lib/assembly_upload_metadata_panel.js"></script>
+<script src="/js/lib/assembly_upload_navigation_panel.js"></script>
+
+<script src="/js/lib/assembly.js"></script>
 <script src="/js/lib/collection.js"></script>
-<script src="/js/lib/dropped_assembly_list_navigation.js"></script>
+
 <script src="/js/lib/navigation.js"></script>
+
 <script src="/js/client.js"></script>
 {% endblock %}

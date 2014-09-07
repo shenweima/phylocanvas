@@ -3,7 +3,8 @@
 
 <script type="text/x-handlebars-template" class="wgst-template" data-template-id="droppedAssemblyAnalytics">
 
-  <li class="assembly-item wgst-upload-assembly__analytics hide-this" data-name="{{name}}" data-file-id="{{fileCounter}}" data-file-uid="{{assemblyFileId}}" id="assembly-item-{{fileCounter}}">
+  <li class="assembly-item wgst-upload-assembly__analytics hide-this"
+        data-assembly-file-id="{{assemblyFileId}}">
 
     <div class="assembly-overview">
         <div class="assembly-stats-container">
@@ -33,7 +34,7 @@
     </div>
 
     <div class="assembly-content-data">
-        <div class="sequence-length-distribution-chart-{{fileCounter}}"></div>
+        <div class="sequence-length-distribution-chart" data-assembly-file-id="{{assemblyFileId}}"></div>
     </div>
   </li>
 

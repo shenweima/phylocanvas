@@ -24,7 +24,7 @@
 
           <div class="assembly-detail assembly-detail__score">
             <h4>Score</h4>
-            <div class="assembly-detail-content">{% include "assembly/socres.html" %}</div>
+            <div class="assembly-detail-content">{% endraw %}{% include "assembly/scores.html" %}{% raw %}</div>
           </div>
 
           <div class="assembly-detail assembly-detail__st-type">
@@ -34,14 +34,14 @@
 
           <div class="assembly-detail assembly-detail__mlst">
             <h4>MLST</h4>
-            <div class="assembly-detail-content">{% include "assembly/mlst.html" %}</div>
+            <div class="assembly-detail-content">{% endraw %}{% include "assembly/mlst.html" %}{% raw %}</div>
           </div>              
 
           <div class="assembly-detail assembly-detail__resistance-profile">
             <h4>Predicted Resistance Profile</h4>
             <div class="assembly-detail-content">
               {{#each antibioticResistanceData}}
-                {% include "assembly/antibiotic_group.html" %}
+                {% endraw %}{% include "assembly/antibiotic_group.html" %}{% raw %}
               {{/each}}
             </div>
           </div>
