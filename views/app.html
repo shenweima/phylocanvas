@@ -168,6 +168,7 @@
   {% include "partials/panels/assembly_upload_navigation_panel.html" %}
   {% include "partials/panels/assembly_upload_analytics_panel.html" %}
   {% include "partials/panels/assembly_upload_metadata_panel.html" %}
+  {% include "partials/panels/assembly_upload_progress_panel.html" %}
 
   {% include "partials/panels/collection_data_panel.html" %}
   {% include "partials/panels/collection_tree_panel.html" %}
@@ -190,38 +191,25 @@
     panels: {}
   };
 
-  $(function(){
-    /*
-      The name "undefined" is not guaranteed to have the type "undefined".
-      It can be assigned other values, like null or 1.
-      To make sure that undefined is undefined in that context, use anonymous self-invoking function.
+  {% if appConfig %}
+  window.WGST.config = {{appConfig | safe}};
+  {% endif %}
 
-      However in modern browsers "undefined" is read-only.
-    */
-    (function(undefined){
+  //
+  // /collection/new
+  //
+  {% if newCollection %}
+    window.WGST.isNewCollection = true;
+  {% else %}
+    window.WGST.isNewCollection = false;
+  {% endif %}
 
-      {% if appConfig %}
-        window.WGST.config = {{appConfig | safe}};
-      {% endif %}
-
-      //
-      // If user requested collection, e.g.: /collection/<collection_id>
-      //
-      {% if requestedCollectionId %}
-        window.WGST.requestedCollectionId = '{{requestedCollectionId}}';
-      {% endif %}
-
-      //
-      // /collection/new
-      //
-      {% if newCollection %}
-        window.WGST.isNewCollection = true;
-      {% else %}
-        window.WGST.isNewCollection = false;
-      {% endif %}
-
-    })();
-  });
+  //
+  // If user requested collection, e.g.: /collection/<collection_id>
+  //
+  {% if requestedCollectionId %}
+    window.WGST.requestedCollectionId = '{{requestedCollectionId}}';
+  {% endif %}
 </script>
 <script src="/js/lib/unsorted.js"></script>
 <script src="/js/lib/upload.js"></script>
@@ -235,6 +223,7 @@
 <script src="/js/lib/assembly_upload_analytics_panel.js"></script>
 <script src="/js/lib/assembly_upload_metadata_panel.js"></script>
 <script src="/js/lib/assembly_upload_navigation_panel.js"></script>
+<script src="/js/lib/assembly_upload_progress_panel.js"></script>
 
 <script src="/js/lib/assembly.js"></script>
 <script src="/js/lib/collection.js"></script>

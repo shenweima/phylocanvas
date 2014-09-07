@@ -514,6 +514,40 @@ $(function(){
 	        //     console.log('Datetime changed');
 	        // });
 
+
+			window.WGST.exports.initAssemblyUploadMetadataLocation(assemblyFileId);
+
+
+            // // On change store datetime in assembly metadata
+            // $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-datetime-input').datetimepicker({
+            //     useCurrent: false,
+            //     language: 'en-gb'
+            // }).on('change', function(){
+            //     WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
+            //     WGST.upload.assembly[fileName].metadata.datetime = $(this).val();
+            // });
+
+
+
+
+
+                // numberOfParsedFastaFiles = numberOfParsedFastaFiles + 1;
+
+                // console.log('numberOfDroppedFastaFiles: ' + numberOfDroppedFastaFiles);
+                // console.log('numberOfParsedFastaFiles: ' + numberOfParsedFastaFiles);
+
+                // if (numberOfDroppedFastaFiles === numberOfParsedFastaFiles) {
+                //     //openAssemblyUploadPanels();
+
+                //     //YYY
+                // }
+
+	        
+
+
+
+
+
 	        // // Create closure to save value of fileName
 	        // (function(fileName){
 

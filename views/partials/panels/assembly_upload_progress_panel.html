@@ -5,18 +5,17 @@
 
     <section class="wgst-panel wgst-panel__assembly-upload-progress wgst-draggable hide-this" 
           data-panel-type="{{panelType}}"
-          data-panel-id="{{panelId}}"
-          data-collection-id="{{collectionId}}">
+          data-panel-id="{{panelId}}">
 
       <header class="wgst-panel-header wgst-draggable-handle">
-        <h4 class="header-title">Processing <small></small> assemblies</h4>
+        <h4 class="header-title">Processing <small>{{totalNumberOfAssembliesUploading}}</small> assemblies</h4>
         <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
         <span class="wgst-panel-control-button wgst-panel-control-button__close glyphicon glyphicon-remove"></span>
       </header>
       <article class="wgst-panel-body">
 
         <div class="assemblies-upload-progress">
-          Processed <span class="assemblies-upload-processed">0</span> out of <span class="assemblies-upload-total"></span> assemblies
+          Processed <span class="assemblies-upload-processed">0</span> out of <span class="assemblies-upload-total">{{totalNumberOfAssembliesUploading}}</span> assemblies
           <div class="progress progress-striped active">
             <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
             </div>
@@ -36,6 +35,9 @@
             </tr>
           </thead>
           <tbody>
+              {{#each assemblyFileIds}}
+                {% endraw %}{% include "upload/assembly_upload_progress.html" %}{% raw %}
+              {{/each}}
           </tbody>
         </table>
 

@@ -11,7 +11,8 @@ $(function(){
             'collection-map': 'collection-map-panel',
             'assembly-upload-navigation': 'assembly-upload-navigation-panel',
             'assembly-upload-metadata': 'assembly-upload-metadata-panel',
-            'assembly-upload-analytics': 'assembly-upload-analytics-panel'
+            'assembly-upload-analytics': 'assembly-upload-analytics-panel',
+            'assembly-upload-progress': 'assembly-upload-progress-panel'
         };
 
         window.WGST.exports.createPanel = function(panelType, templateContext) {
@@ -44,6 +45,10 @@ $(function(){
 	                // WGST.panels[panelName].left = ui.position.left;
 	            }
 	        });
+        };
+
+        window.WGST.exports.removePanel = function(panelId) {
+        	var $panel = $('.wgst-panel[data-panel-id="' + panelId + '"]').remove();
         };
 
 	    window.WGST.exports.bringPanelToTop = function(panelId) {
