@@ -3,7 +3,7 @@
 
 <script type="text/x-handlebars-template" class="wgst-template" data-template-id="collection-tree-panel">
 
-  <section class="wgst-panel wgst-panel__collection-tree wgst-draggable hide-this"
+  <section class="wgst-panel wgst-panel__collection-tree wgst-draggable invisible-this"
         data-panel-type="{{panelType}}"
         data-panel-id="{{panelId}}"
         data-collection-id="{{collectionId}}"
@@ -16,7 +16,6 @@
       <span class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active glyphicon glyphicon-remove"></span>
     </header>
     <article class="wgst-panel-body">
-      <!-- <div class="wgst-panel-loading"><div class="loading"></div></div> -->
       <div class="wgst-panel-body-content">
         
         <div class="wgst-tree-controls">
@@ -80,7 +79,10 @@
               {{/unless}}
 
               {{#unless mergeWithButton}}
-              <button type="button" class="btn btn-sm btn-default wgst-tree-control__merge-collection-trees" data-collection-tree-type="{{attributeCollectionTreeType}}">
+              <button type="button" 
+                      class="btn btn-sm btn-default wgst-tree-control__merge-collection-trees"
+                      data-collection-tree-type="{{collectionTreeType}}">
+                      
                 <div class="wgst-spinner hide-this"></div>
                 <span class="wgst-spinner-label">Merge collections</span>
               </button>

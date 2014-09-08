@@ -341,7 +341,7 @@ $(function(){
                 //
                 // Show panel
                 //
-                window.WGST.exports.togglePanel(assemblyPanelId);
+                window.WGST.exports.showPanel(assemblyPanelId);
 
 	        })
 	        .fail(function(jqXHR, textStatus, errorThrown) {

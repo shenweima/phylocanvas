@@ -1,17 +1,104 @@
-// ============================================================
-// App
-// ============================================================
+//
+// App version
+//
+window.WGST.version = '0.1.4';
+
+//
+// Setup socket
+//
 window.WGST.socket = {
     //connection: io.connect(WGST.config.socketAddress, {secure: true}),
     connection: io.connect(window.WGST.config.socketAddress),
     roomId: ''
 };
 
+//
+// WGSA now can speak!
+//
+window.WGST.speak = false;
+
+window.WGST.panels = {
+    assembly: {
+        top: 80,
+        left: 90
+    },
+    collection: {
+        top: 80,
+        left: 90
+    },
+    collectionTree: {
+        top: 120,
+        left: 180  
+    },
+    mergedCollectionTree: {
+        top: 120,
+        left: 180
+    },
+    representativeCollectionTree: {
+        top: 80,
+        left: 90
+    },
+    assemblyUploadNavigator: {
+        top: 70,
+        left: 110
+    },
+    assemblyUploadAnalytics: {
+        top: 70,
+        left: 726
+    },
+    assemblyUploadMetadata: {
+        top: 225,
+        left: 110
+    },
+    assemblyUploadProgress: {
+        top: 80,
+        left: 90
+    },
+    map: {
+        top: '15%',
+        left: '20%'
+    }
+};
+
+window.WGST.assembly = {
+    analysis: {
+        UPLOAD_OK: 'UPLOAD_OK',
+        METADATA_OK: 'METADATA_OK',
+        MLST_RESULT: 'MLST_RESULT',
+        PAARSNP_RESULT: 'PAARSNP_RESULT',
+        FP_COMP: 'FP_COMP',
+        CORE: 'CORE'
+    }
+};
+
+window.WGST.collection = {
+    analysis: {
+        COLLECTION_TREE: 'COLLECTION_TREE',
+        CORE_MUTANT_TREE: 'CORE_MUTANT_TREE'
+    },
+    representative: {
+        tree: {},
+        metadata: {}
+    }
+};
+
+window.WGST.upload = {
+    collection: {},
+    assembly: {},
+    fastaAndMetadata: {},
+    stats: {
+        totalNumberOfContigs: 0
+    }
+};
+
+window.WGST.settings = window.WGST.settings || {};
+window.WGST.settings.representativeCollectionId = window.WGST.config.referenceCollectionId; //'1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
+
+window.WGST.antibioticNameRegex = /[\W]+/g;
+
 $(function(){
 
     'use strict'; // Available in ECMAScript 5 and ignored in older versions. Future ECMAScript versions will enforce it by default.
-
-    window.WGST.version = '0.1.4';
 
     //
     // Which page should you load?
@@ -35,9 +122,6 @@ $(function(){
 
         return;
     }
-
-    // WGSA now can speak!
-    window.WGST.speak = false;
 
     if (window.WGST.speak) {
         var message = new SpeechSynthesisUtterance('Welcome to WGSA');
@@ -70,85 +154,6 @@ $(function(){
     // ============================================================
 
     //var WGST = window.WGST || {};
-
-    WGST.panels = {
-        assembly: {
-            top: 80,
-            left: 90
-        },
-        collection: {
-            top: 80,
-            left: 90
-        },
-        collectionTree: {
-            top: 120,
-            left: 180  
-        },
-        mergedCollectionTree: {
-            top: 120,
-            left: 180
-        },
-        representativeCollectionTree: {
-            top: 80,
-            left: 90
-        },
-        assemblyUploadNavigator: {
-            top: 70,
-            left: 110
-        },
-        assemblyUploadAnalytics: {
-            top: 70,
-            left: 726
-        },
-        assemblyUploadMetadata: {
-            top: 225,
-            left: 110
-        },
-        assemblyUploadProgress: {
-            top: 80,
-            left: 90
-        },
-        map: {
-            top: '15%',
-            left: '20%'
-        }
-    };
-
-    WGST.assembly = {
-        analysis: {
-            UPLOAD_OK: 'UPLOAD_OK',
-            METADATA_OK: 'METADATA_OK',
-            MLST_RESULT: 'MLST_RESULT',
-            PAARSNP_RESULT: 'PAARSNP_RESULT',
-            FP_COMP: 'FP_COMP',
-            CORE: 'CORE'
-        }
-    };
-
-    WGST.collection = {
-        analysis: {
-            COLLECTION_TREE: 'COLLECTION_TREE',
-            CORE_MUTANT_TREE: 'CORE_MUTANT_TREE'
-        },
-        representative: {
-            tree: {},
-            metadata: {}
-        }
-    };
-
-    WGST.upload = {
-        collection: {},
-        assembly: {},
-        fastaAndMetadata: {},
-        stats: {
-            totalNumberOfContigs: 0
-        }
-    };
-
-    WGST.settings = WGST.settings || {};
-    WGST.settings.representativeCollectionId = window.WGST.config.referenceCollectionId; //'1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
-
-    WGST.antibioticNameRegex = /[\W]+/g;
 
     //var socketAddress = '//' + window.WGST.config.socketAddress;
 
@@ -382,55 +387,55 @@ $(function(){
         });
 
         // Init jQuery UI slider widget
-        $('.assembly-list-slider').slider({
-            range: "max",
-            min: 0,
-            max: 10,
-            value: 0,
-            animate: 'fast',
-            slide: function(event, ui) {
-                //$('.selected-assembly-counter').text(ui.value);
-            }
-        });
+        // $('.assembly-list-slider').slider({
+        //     range: "max",
+        //     min: 0,
+        //     max: 10,
+        //     value: 0,
+        //     animate: 'fast',
+        //     slide: function(event, ui) {
+        //         //$('.selected-assembly-counter').text(ui.value);
+        //     }
+        // });
 
         // Popover
-        $('.add-data button').popover({
-            html: true,
-            placement: 'bottom',
-            title: 'Add your data',
-            content: '<div class="upload-data"><span>You can drag and drop your CSV files anywhere on the map.</span><input type="file" id="exampleInputFile"></div>'
-        });
+        // $('.add-data button').popover({
+        //     html: true,
+        //     placement: 'bottom',
+        //     title: 'Add your data',
+        //     content: '<div class="upload-data"><span>You can drag and drop your CSV files anywhere on the map.</span><input type="file" id="exampleInputFile"></div>'
+        // });
 
         // Toggle timeline
-        $('.timeline-toggle-button').on('click', function(){
-            if ($(this).hasClass('active')) {
-                $('#timeline').hide();
-            } else {
-                $('#timeline').css('bottom', '0');
-                $('#timeline').show();
-            }
-        });
+        // $('.timeline-toggle-button').on('click', function(){
+        //     if ($(this).hasClass('active')) {
+        //         $('#timeline').hide();
+        //     } else {
+        //         $('#timeline').css('bottom', '0');
+        //         $('#timeline').show();
+        //     }
+        // });
 
         // Toggle graph
-        $('.graph-toggle-button').on('click', function(){
-            if ($(this).hasClass('active')) {
-                $('.tree-panel').hide();
-            } else {
-                $('.tree-panel').show();
-            }
-        });
+        // $('.graph-toggle-button').on('click', function(){
+        //     if ($(this).hasClass('active')) {
+        //         $('.tree-panel').hide();
+        //     } else {
+        //         $('.tree-panel').show();
+        //     }
+        // });
 
         // Toggle all panels
-        $('.all-panels-toggle-button').on('click', function(){
-            if ($(this).hasClass('active')) {
-                $('.wgst-panel--active').hide();
-            } else {
-                $('.wgst-panel--active').show();
-            }
-        });
+        // $('.all-panels-toggle-button').on('click', function(){
+        //     if ($(this).hasClass('active')) {
+        //         $('.wgst-panel--active').hide();
+        //     } else {
+        //         $('.wgst-panel--active').show();
+        //     }
+        // });
 
         // Show graph
-        $('.graph-toggle-button').trigger('click');
+        //$('.graph-toggle-button').trigger('click');
         
         // Set socket room id
         WGST.socket.connection.on('roomId', function(roomId) {
@@ -559,21 +564,21 @@ $(function(){
 
 
 
-    var removeCollectionTreePanel = function(collectionId, collectionTreeType) {
-        var collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType,
-            $collectionTreePanel = $('.wgst-panel[data-panel-name="' + collectionTreePanelId + '"]');
+    // var removeCollectionTreePanel = function(collectionId, collectionTreeType) {
+    //     var collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType,
+    //         $collectionTreePanel = $('.wgst-panel[data-panel-name="' + collectionTreePanelId + '"]');
 
-        $collectionTreePanel.remove();
-    };
+    //     $collectionTreePanel.remove();
+    // };
 
-    var removeCollectionTreePanels = function(collectionId) {
-        var collectionTrees = WGST.collection[collectionId].tree;
+    // var removeCollectionTreePanels = function(collectionId) {
+    //     var collectionTrees = WGST.collection[collectionId].tree;
 
-        $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
-            // Render collection tree button
-            removeCollectionTreePanel(collectionId, collectionTreeType);
-        });
-    };
+    //     $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
+    //         // Render collection tree button
+    //         removeCollectionTreePanel(collectionId, collectionTreeType);
+    //     });
+    // };
 
 
 
@@ -588,19 +593,7 @@ $(function(){
         window.WGST.exports.getCollection(WGST.requestedCollectionId);
     }
 
-    $('.tree-controls-show-labels').on('click', function(){
-        // Get collection id
-        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
 
-        WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas.displayLabels();
-    });
-
-    $('.tree-controls-hide-labels').on('click', function(){
-        // Get collection id
-        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
-
-        WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas.hideLabels();
-    });
 
     // $('.collection-assembly-list').on('scroll', function(){
     //     console.log('Scrolling...');
@@ -616,51 +609,7 @@ $(function(){
 
 
 
-    /**
-     * Description
-     * @method selectTreeNodes
-     * @param {} collectionId
-     * @param {} selectedAssemblyIds
-     * @return 
-     */
-    var selectTreeNodes = function(collectionId, selectedAssemblyIds) {
-        var assemblies = WGST.collection[collectionId].assemblies;
 
-        // if (selectedAssemblyIds.length > 0) {
-        //     selectedAssemblyIds = selectedAssemblyIds.split(',');
-        // } else {
-        //     selectedAssemblyIds = [];
-        // }
-
-        // Uncheck all radio buttons
-        $('.collection-assembly-list .assembly-list-item [type="radio"]').prop('checked', false);
-
-        // Add/Remove row highlight
-        $.each(assemblies, function(assemblyId, assembly) {
-            if ($.inArray(assemblyId, selectedAssemblyIds) !== -1) {
-                // Select row
-                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').addClass('row-selected');
-                // Check checkbox
-                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="checkbox"]').prop('checked', true);
-            } else {
-                // Deselect row
-                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"]').removeClass('row-selected');
-                // Check checkbox
-                $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + assemblyId + '"] [type="checkbox"]').prop('checked', false);
-            }
-        });
-
-        triggerMapMarkers(collectionId, selectedAssemblyIds);
-
-        // If only one assembly was selected then check radiobox
-        if (selectedAssemblyIds.length === 1) {
-            $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + selectedAssemblyIds + '"] [type="radio"]').prop('checked', true);
-        }
-
-        // if (selectedAssemblyIds.split(',').length > 2) {
-        //     $('.tree-controls-draw-subtree').attr('data-selected-node', selectedAssemblyIds.split(',')[0]);
-        // }
-    };
 
     // $('body').on('mouseenter', '.glyphicon-leaf', function(){
     //     var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
@@ -724,154 +673,7 @@ $(function(){
     //     });
     // };
 
-    $('body').on('change', '.wgst-tree-control__change-node-label', function(){
-        var selectedOption = $(this),
-            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
-            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type');
 
-        var treeCanvas = WGST.collection[collectionId].tree[collectionTreeType].canvas,
-            assemblies = WGST.collection[collectionId].assemblies,
-            assemblyId;
-
-        if (selectedOption.val() === '1') {
-
-            // Set user assembly id as node label
-            for (assemblyId in assemblies) {
-                if (assemblies.hasOwnProperty(assemblyId)) {
-                    // Set label only to leaf nodes, filtering out the root node
-                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
-                        treeCanvas.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId;                 
-                    }
-                }
-            }
-            
-        } else if (selectedOption.val() === '2') {
-
-            // Set user assembly id as node label
-            for (assemblyId in assemblies) {
-                if (assemblies.hasOwnProperty(assemblyId)) {
-                    // Set label only to leaf nodes, filtering out the root node
-                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
-                        treeCanvas.branches[assemblyId].label = WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore.referenceId;              
-                    }
-                }
-            }
-
-        } else if (selectedOption.val() === '3') {
-
-            // Set user assembly id as node label
-            for (assemblyId in assemblies) {
-                if (assemblies.hasOwnProperty(assemblyId)) {
-                    // Set label only to leaf nodes, filtering out the root node
-                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
-                        treeCanvas.branches[assemblyId].label = (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType);               
-                    }
-                }
-            }
-
-        } else if (selectedOption.val() === '4') {
-
-            var assemblyResistanceProfile,
-                resistanceProfileString;
-
-            // Set user assembly id as node label
-            for (assemblyId in assemblies) {
-                if (assemblies.hasOwnProperty(assemblyId)) {
-
-                    assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile,
-                    resistanceProfileString = createAssemblyResistanceProfilePreviewString(assemblyResistanceProfile, WGST.antibiotics);
-
-                    // Set label only to leaf nodes, filtering out the root node
-                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
-                        treeCanvas.branches[assemblyId].label = resistanceProfileString;            
-                    }
-                }
-            }
-
-        } else if (selectedOption.val() === '5') {
-
-            // Set user assembly id as node label
-            for (assemblyId in assemblies) {
-                if (assemblies.hasOwnProperty(assemblyId)) {
-                    // Set label only to leaf nodes, filtering out the root node
-                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
-                        treeCanvas.branches[assemblyId].label = assemblies[assemblyId]['ASSEMBLY_METADATA'].geography.address;              
-                    }
-                }
-            }
-        }
-
-        treeCanvas.draw();
-    });
-
-    $('body').on('change', '.wgst-tree-control__change-node-colour', function(){
-        var selectedOption = $(this).find('option:selected'),
-            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
-            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type');
-
-        var tree = WGST.collection[collectionId].tree[collectionTreeType].canvas,
-            assemblies = WGST.collection[collectionId].assemblies,
-            assemblyId;
-
-        if (selectedOption.val() === '0') {
-            // Colour assembly nodes according to default colour
-            for (assemblyId in assemblies) {
-                if (assemblies.hasOwnProperty(assemblyId)) {
-                    tree.setNodeColourAndShape(assemblyId, '#ffffff');
-                }
-            } // for
-        } else {
-            var ungroupedResistanceProfile,
-                antibioticResistance;
-
-            // Colour assembly nodes according to resistance profile of selected antibiotic
-            for (assemblyId in assemblies) {
-                if (assemblies.hasOwnProperty(assemblyId)) {
-
-                    ungroupedResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile;
-                    antibioticResistance = ungroupedResistanceProfile[selectedOption.text()];
-
-                    // Check assembly has resistance profile for this antibiotic
-                    if (typeof antibioticResistance !== 'undefined') {
-                        if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
-                            if (antibioticResistance.resistanceState === 'RESISTANT') {
-                                // Red
-                                tree.setNodeColourAndShape(assemblyId, '#ff0000');                 
-                            } else if (antibioticResistance.resistanceState === 'SENSITIVE') {
-                                // Green
-                                tree.setNodeColourAndShape(assemblyId, '#4dbd33');                 
-                            } else if (antibioticResistance.resistanceState === 'UNKNOWN') {
-                                // White
-                                tree.setNodeColourAndShape(assemblyId, '#ffffff');
-                            }
-                        }                        
-                    } else {
-                    // Assembly has no resistance profile for this antibiotic
-                        if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
-                            // Black
-                            tree.setNodeColourAndShape(assemblyId, '#ffffff');
-                        }
-                    }
-                } // if
-            } // for
-        } // if
-    });
-
-    $('body').on('change', '.wgst-tree-control__change-tree-type', function(){
-        var selectedOption = $(this).find('option:selected'),
-            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
-            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type'),
-            tree;
-
-        // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
-        //     tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
-        // } else {
-        //     tree = WGST.collection[collectionId].tree.canvas;
-        // }
-
-        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
-        tree.setTreeType(selectedOption.val());
-    });
 
     // // Init map
     // WGST.geo.map.init();
@@ -890,58 +692,58 @@ $(function(){
         tree.selectNodes('');
     };
 
-    $('.tree-controls-select-none').on('click', function() {
+    // $('.tree-controls-select-none').on('click', function() {
 
-        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
-            //tree = WGST.collection[collectionId].tree.canvas;
+    //     var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+    //         //tree = WGST.collection[collectionId].tree.canvas;
 
-        deselectAllTreeNodes(collectionId);
+    //     deselectAllTreeNodes(collectionId);
 
-        // This is a workaround
-        // TO DO: Refactor using official API
-        //tree.selectNodes('');
+    //     // This is a workaround
+    //     // TO DO: Refactor using official API
+    //     //tree.selectNodes('');
 
-        //showRepresentativeTreeNodesOnMap('');
-    });
+    //     //showRepresentativeTreeNodesOnMap('');
+    // });
 
-    $('.tree-controls-select-all').on('click', function() {
+    // $('.tree-controls-select-all').on('click', function() {
 
-        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
-            tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
+    //     var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+    //         tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
         
-        //console.debug(WGST.collection[collectionId]);
-        //console.debug(tree);
+    //     //console.debug(WGST.collection[collectionId]);
+    //     //console.debug(tree);
 
-        // Get all assembly ids in this tree
+    //     // Get all assembly ids in this tree
 
-        var leaves = tree.leaves,
-            leafCounter = leaves.length,
-            assemblyIds = [],
-            assemblyId;
+    //     var leaves = tree.leaves,
+    //         leafCounter = leaves.length,
+    //         assemblyIds = [],
+    //         assemblyId;
 
-        // Concatenate all assembly ids into one string
-        for (; leafCounter !== 0;) {
-            leafCounter = leafCounter - 1;
+    //     // Concatenate all assembly ids into one string
+    //     for (; leafCounter !== 0;) {
+    //         leafCounter = leafCounter - 1;
 
-            assemblyId = leaves[leafCounter].id;
-            assemblyIds.push(assemblyId);
+    //         assemblyId = leaves[leafCounter].id;
+    //         assemblyIds.push(assemblyId);
 
-            // if (assemblyIds.length > 0) {
-            //     assemblyIds = assemblyIds + ',' + leaves[leafCounter].id;
-            // } else {
-            //     assemblyIds = leaves[leafCounter].id;
-            // }
-        }
+    //         // if (assemblyIds.length > 0) {
+    //         //     assemblyIds = assemblyIds + ',' + leaves[leafCounter].id;
+    //         // } else {
+    //         //     assemblyIds = leaves[leafCounter].id;
+    //         // }
+    //     }
 
-        // This is a workaround
-        // TO DO: Refactor using official API
-        tree.root.setSelected(true, true);
-        tree.draw();
+    //     // This is a workaround
+    //     // TO DO: Refactor using official API
+    //     tree.root.setSelected(true, true);
+    //     tree.draw();
 
-        //showRepresentativeTreeNodesOnMap(nodeIds);
+    //     //showRepresentativeTreeNodesOnMap(nodeIds);
 
-        showCollectionMetadataOnMap(collectionId, assemblyIds);
-    });
+    //     showCollectionMetadataOnMap(collectionId, assemblyIds);
+    // });
 
     /**
      * Description
@@ -1018,75 +820,75 @@ $(function(){
         }
     };
 
-    // --------------------------------------------------------------------------------------
-    // WGSA Ring
-    // To do: add WGSA namespace
-    // To do: rename WGST to WGSA
-    // --------------------------------------------------------------------------------------
-    var ringTimeout,
-        // Are you dragging it?
-        ringDragging = false,
-        // Have you clicked on it?
-        ringFixed = false;
+    // // --------------------------------------------------------------------------------------
+    // // WGSA Ring
+    // // To do: add WGSA namespace
+    // // To do: rename WGST to WGSA
+    // // --------------------------------------------------------------------------------------
+    // var ringTimeout,
+    //     // Are you dragging it?
+    //     ringDragging = false,
+    //     // Have you clicked on it?
+    //     ringFixed = false;
 
-    (function(){
+    // (function(){
 
-        // Init jQuery UI draggable interaction
-        $('[data-wgst-js="ring"]').draggable({
-            //handle: '.wgst-ring',
-            appendTo: 'body',
-            scroll: false,
-            containment: "window"
-        });
+    //     // Init jQuery UI draggable interaction
+    //     $('[data-wgst-js="ring"]').draggable({
+    //         //handle: '.wgst-ring',
+    //         appendTo: 'body',
+    //         scroll: false,
+    //         containment: "window"
+    //     });
 
-        $('.wgst-ring-content').on('mouseover', function(){
-            if (ringDragging === false) {
-                ringTimeout = setTimeout(function(){
-                    if (typeof ringTimeout !== 'undefined' && ringDragging === false) {
-                        ringTimeout = undefined;
-                        $('.wgst-panel--visible').fadeOut();
-                    }
-                }, 300);
-            }
-        });
-        $('.wgst-ring-content').on('mouseout', function(){
-            if (ringDragging === false && ringFixed === false) {
-                ringTimeout = undefined;
-                $('.wgst-panel--visible').fadeIn();
-            }
-        });
-        $('[data-wgst-js="ring"]').on('mousedown', function(){
-            console.log('mouse down');
-            ringTimeout = undefined;
-            ringDragging = true;
-            if (ringFixed === false) {
-                $('.wgst-ring-content').css('background-color', '#999');                
-            }
-        });
-        $('[data-wgst-js="ring"]').on('mouseup', function(){
-            console.log('mouse up');
-            ringTimeout = undefined;
-            ringDragging = false;
-            if (ringFixed === false) {
-                $('.wgst-ring-content').css('background-color', '');                
-            }
-        });
-        $('.wgst-ring-content').on('click', function(){
-            console.log('ring click');
-            if (ringFixed === false) {
-                ringFixed = true;
-                $(this).addClass('wgst-ring-fixed');
-                $('.wgst-panel--visible').fadeOut();
-            } else {
-                ringFixed = false;
-                $(this).removeClass('wgst-ring-fixed');
-            }
-        });
-        $('.wgst-ring-content').on('mousedown', function(event){
-            console.log('mouse down');
-            event.stopPropagation();
-        });        
-    }());
+    //     $('.wgst-ring-content').on('mouseover', function(){
+    //         if (ringDragging === false) {
+    //             ringTimeout = setTimeout(function(){
+    //                 if (typeof ringTimeout !== 'undefined' && ringDragging === false) {
+    //                     ringTimeout = undefined;
+    //                     $('.wgst-panel--visible').fadeOut();
+    //                 }
+    //             }, 300);
+    //         }
+    //     });
+    //     $('.wgst-ring-content').on('mouseout', function(){
+    //         if (ringDragging === false && ringFixed === false) {
+    //             ringTimeout = undefined;
+    //             $('.wgst-panel--visible').fadeIn();
+    //         }
+    //     });
+    //     $('[data-wgst-js="ring"]').on('mousedown', function(){
+    //         console.log('mouse down');
+    //         ringTimeout = undefined;
+    //         ringDragging = true;
+    //         if (ringFixed === false) {
+    //             $('.wgst-ring-content').css('background-color', '#999');                
+    //         }
+    //     });
+    //     $('[data-wgst-js="ring"]').on('mouseup', function(){
+    //         console.log('mouse up');
+    //         ringTimeout = undefined;
+    //         ringDragging = false;
+    //         if (ringFixed === false) {
+    //             $('.wgst-ring-content').css('background-color', '');                
+    //         }
+    //     });
+    //     $('.wgst-ring-content').on('click', function(){
+    //         console.log('ring click');
+    //         if (ringFixed === false) {
+    //             ringFixed = true;
+    //             $(this).addClass('wgst-ring-fixed');
+    //             $('.wgst-panel--visible').fadeOut();
+    //         } else {
+    //             ringFixed = false;
+    //             $(this).removeClass('wgst-ring-fixed');
+    //         }
+    //     });
+    //     $('.wgst-ring-content').on('mousedown', function(event){
+    //         console.log('mouse down');
+    //         event.stopPropagation();
+    //     });        
+    // }());
 
 
 
@@ -1128,9 +930,9 @@ $(function(){
 
 
 
-    var handleFastaDrop = function(file) {};
+    // var handleFastaDrop = function(file) {};
 
-    var handleCsvDrop = function(file) {};
+    // var handleCsvDrop = function(file) {};
 
     // var openAssemblyUploadPanels = function() {
     //     if (! isPanelActive('assemblyUploadNavigator')) {
@@ -1155,60 +957,60 @@ $(function(){
 
 
 
-    /*
-        Sequence list navigation buttons
-    */
-    // Disable/enable range navigation buttons
-    /**
-     * Description
-     * @method updateRangeNavigationButtons
-     * @param {} handleValue
-     * @return 
-     */
-    var updateRangeNavigationButtons = function(handleValue) {
-        // Update sequence navigation buttons
-        if (handleValue === 1) { // Reached min limit
-            // Disable prev sequence button
-            $('.nav-prev-item').attr('disabled', 'disabled');
-            // Enable next sequence button (if disabled)
-            $('.nav-next-item').removeAttr('disabled', 'disabled');
-        } else if (handleValue === parseInt($('.total-number-of-dropped-assemblies').text())) { // Reached max limit
-            // Disable next sequence button
-            $('.nav-next-item').attr('disabled', 'disabled');
-            // Enable prev sequence button (if disabled)
-            $('.nav-prev-item').removeAttr('disabled', 'disabled');
-        } else {
-            // Enable both buttons (if any disabled)
-            $('.nav-next-item').removeAttr('disabled', 'disabled');
-            $('.nav-prev-item').removeAttr('disabled', 'disabled');
-        }
-    };
+    // /*
+    //     Sequence list navigation buttons
+    // */
+    // // Disable/enable range navigation buttons
+    // /**
+    //  * Description
+    //  * @method updateRangeNavigationButtons
+    //  * @param {} handleValue
+    //  * @return 
+    //  */
+    // var updateRangeNavigationButtons = function(handleValue) {
+    //     // Update sequence navigation buttons
+    //     if (handleValue === 1) { // Reached min limit
+    //         // Disable prev sequence button
+    //         $('.nav-prev-item').attr('disabled', 'disabled');
+    //         // Enable next sequence button (if disabled)
+    //         $('.nav-next-item').removeAttr('disabled', 'disabled');
+    //     } else if (handleValue === parseInt($('.total-number-of-dropped-assemblies').text())) { // Reached max limit
+    //         // Disable next sequence button
+    //         $('.nav-next-item').attr('disabled', 'disabled');
+    //         // Enable prev sequence button (if disabled)
+    //         $('.nav-prev-item').removeAttr('disabled', 'disabled');
+    //     } else {
+    //         // Enable both buttons (if any disabled)
+    //         $('.nav-next-item').removeAttr('disabled', 'disabled');
+    //         $('.nav-prev-item').removeAttr('disabled', 'disabled');
+    //     }
+    // };
 
-    /**
-     * Description
-     * @method resetPanelAssemblyUploadNavigator
-     * @return 
-     */
-    var resetPanelAssemblyUploadNavigator = function() {
-        var panel = $('.wgst-panel__assembly-upload-navigator');
-        // Set average number of contigs per assembly
-        panel.find('.assembly-sequences-average').text('0');
-        // Set total number of selected assemblies/files
-        panel.find('.assembly-upload-total-number').text('0');
-    };
-
-
+    // /**
+    //  * Description
+    //  * @method resetPanelAssemblyUploadNavigator
+    //  * @return 
+    //  */
+    // var resetPanelAssemblyUploadNavigator = function() {
+    //     var panel = $('.wgst-panel__assembly-upload-navigator');
+    //     // Set average number of contigs per assembly
+    //     panel.find('.assembly-sequences-average').text('0');
+    //     // Set total number of selected assemblies/files
+    //     panel.find('.assembly-upload-total-number').text('0');
+    // };
 
 
-    /**
-     * Description
-     * @method resetPanelAssemblyUploadAnalytics
-     * @return 
-     */
-    var resetPanelAssemblyUploadAnalytics = function() {
-        var panel = $('.wgst-panel__assembly-upload-analytics');
-        panel.find('.wgst-assembly-upload__analytics ul').html('');
-    };
+
+
+    // /**
+    //  * Description
+    //  * @method resetPanelAssemblyUploadAnalytics
+    //  * @return 
+    //  */
+    // var resetPanelAssemblyUploadAnalytics = function() {
+    //     var panel = $('.wgst-panel__assembly-upload-analytics');
+    //     panel.find('.wgst-assembly-upload__analytics ul').html('');
+    // };
 
 
 
@@ -1254,25 +1056,25 @@ $(function(){
     //     showAssembly(assemblyIndex);
     // };
 
-    var updateSelectedFilesUI = function(elementCounter) {
-        // Update sequence counter label
-        $('.selected-assembly-counter').text(elementCounter);
+    // var updateSelectedFilesUI = function(elementCounter) {
+    //     // Update sequence counter label
+    //     $('.selected-assembly-counter').text(elementCounter);
 
-        // Update assembly file name
-        var fileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name');
+    //     // Update assembly file name
+    //     var fileName = $('.assembly-item').eq(elementCounter - 1).attr('data-name');
 
-        // Update file name in Assembly Upload Navigator
-        $('.wgst-panel__assembly-upload-navigator .assembly-file-name').text(fileName);
+    //     // Update file name in Assembly Upload Navigator
+    //     $('.wgst-panel__assembly-upload-navigator .assembly-file-name').text(fileName);
 
-        // Update file name in Assembly Upload Metadata panel
-        $('.wgst-panel__assembly-upload-metadata .header-title small').text(fileName);
+    //     // Update file name in Assembly Upload Metadata panel
+    //     $('.wgst-panel__assembly-upload-metadata .header-title small').text(fileName);
 
-        // Update file name in Assembly Upload Analytics panel
-        $('.wgst-panel__assembly-upload-analytics .header-title small').text(fileName);
+    //     // Update file name in Assembly Upload Analytics panel
+    //     $('.wgst-panel__assembly-upload-analytics .header-title small').text(fileName);
 
-        // Update sequence counter label
-        updateRangeNavigationButtons(elementCounter);
-    };
+    //     // Update sequence counter label
+    //     updateRangeNavigationButtons(elementCounter);
+    // };
 
     // var assemblyListSliderEventHandler = function(event, ui) {
     //     updateSelectedFilesUI(ui.value);
@@ -1328,44 +1130,44 @@ $(function(){
     // Triggered when user clicks a button or releases range handle
     //$('.assembly-list-slider').on('slidechange', handleAssemblyListSlide);
 
-    // Navigate to the previous sequence
-    $('.nav-prev-item').on('click', function() {
-        var $slider = $('.assembly-list-slider'),
-            currentSliderValue = $slider.slider('value');
+    // // Navigate to the previous sequence
+    // $('.nav-prev-item').on('click', function() {
+    //     var $slider = $('.assembly-list-slider'),
+    //         currentSliderValue = $slider.slider('value');
 
-        console.log('@@@ currentSliderValue: ' + currentSliderValue);
+    //     console.log('@@@ currentSliderValue: ' + currentSliderValue);
 
-        // Check if selected sequence counter value is greater than 1
-        if (currentSliderValue > 0) {
-            // Decrement slider's value
-            $slider.slider('value', currentSliderValue - 1);
+    //     // Check if selected sequence counter value is greater than 1
+    //     if (currentSliderValue > 0) {
+    //         // Decrement slider's value
+    //         $slider.slider('value', currentSliderValue - 1);
 
-            //showPreviousAssembly();
-        }
-    });
-    // Navigate to the next sequence
-    $('.nav-next-item').on('click', function() {
-        var $slider = $('.assembly-list-slider'),
-            currentSliderValue = $slider.slider('value');
+    //         //showPreviousAssembly();
+    //     }
+    // });
+    // // Navigate to the next sequence
+    // $('.nav-next-item').on('click', function() {
+    //     var $slider = $('.assembly-list-slider'),
+    //         currentSliderValue = $slider.slider('value');
 
-        console.log('@@@ currentSliderValue: ' + currentSliderValue);
+    //     console.log('@@@ currentSliderValue: ' + currentSliderValue);
 
-        // Check if selected sequence counter value is less than total number of dropped assemblies
-        if (currentSliderValue < WGST.dragAndDrop.loadedFiles.length) {
-            // Increment slider's value
-            $slider.slider('value', currentSliderValue + 1);
+    //     // Check if selected sequence counter value is less than total number of dropped assemblies
+    //     if (currentSliderValue < WGST.dragAndDrop.loadedFiles.length) {
+    //         // Increment slider's value
+    //         $slider.slider('value', currentSliderValue + 1);
 
-            //showNextAssembly();
-        }
-    });
+    //         //showNextAssembly();
+    //     }
+    // });
 
     // Assembly metadata from
 
-    // Show hint message when 'I am not sure' checkbox is checkec
-    $('.wgst-assembly-upload__metadata').on('click', '.not-sure-checkbox', function(){
-        // Show 'I am not sure' message
-        $(this).closest('label').find('.not-sure-hint').toggleClass('hide-this');
-    });
+    // // Show hint message when 'I am not sure' checkbox is checkec
+    // $('.wgst-assembly-upload__metadata').on('click', '.not-sure-checkbox', function(){
+    //     // Show 'I am not sure' message
+    //     $(this).closest('label').find('.not-sure-hint').toggleClass('hide-this');
+    // });
 
 
 
@@ -1453,181 +1255,84 @@ $(function(){
         $('.adding-metadata-progress-container .progress-hint').fadeOut();
     });
 
-    // TO DO: Refactor
-    // When 'Next empty assembly' button is pressed
-    $('.wgst-assembly-upload__metadata').on('click', '.assembly-metadata button.next-assembly-button', function(event){
-        // Show assembly with empty metadata input field
+    // // TO DO: Refactor
+    // // When 'Next empty assembly' button is pressed
+    // $('.wgst-assembly-upload__metadata').on('click', '.assembly-metadata button.next-assembly-button', function(event){
+    //     // Show assembly with empty metadata input field
 
-        // Trigger to show next assembly
-        $('.nav-next-item').trigger('click');
+    //     // Trigger to show next assembly
+    //     $('.nav-next-item').trigger('click');
 
-        //$('#assembly-item-' + (+currentAssemblyIdCounter + 1)).find('input:first').focus();
+    //     //$('#assembly-item-' + (+currentAssemblyIdCounter + 1)).find('input:first').focus();
 
-        // Focus on the next empty input field
-        //$(this).closest('.assembly-metadata-list-container').find('.assembly-metadata-item input:text[value=""]').focus();
-        //console.log($(this).closest('.assembly-metadata-list-container').find('.assembly-metadata-item input:text[value=""]'));
+    //     // Focus on the next empty input field
+    //     //$(this).closest('.assembly-metadata-list-container').find('.assembly-metadata-item input:text[value=""]').focus();
+    //     //console.log($(this).closest('.assembly-metadata-list-container').find('.assembly-metadata-item input:text[value=""]'));
 
-        var currentAssemblyIdCounter = $(this).closest('.assembly-item').attr('id').replace('assembly-metadata-item-', '');
+    //     var currentAssemblyIdCounter = $(this).closest('.assembly-item').attr('id').replace('assembly-metadata-item-', '');
 
-        $(this).closest('.wgst-assembly-upload__metadata').find('.assembly-metadata-block input:text[value=""]').focus();
+    //     $(this).closest('.wgst-assembly-upload__metadata').find('.assembly-metadata-block input:text[value=""]').focus();
 
-        event.preventDefault();
-    });
-
-
+    //     event.preventDefault();
+    // });
 
 
 
 
 
-    WGST.socket.connection.on('collectionTreeMergeNotification', function(mergedCollectionTreeData) {
-        console.log('[WGST] Received merged tree notification');
-
-        if (WGST.speak) {
-            var message = new SpeechSynthesisUtterance('Merged collections');
-            window.speechSynthesis.speak(message);
-        }
-
-        var collectionId = mergedCollectionTreeData.mergedCollectionTreeId,
-            collectionTree = mergedCollectionTreeData.tree,
-            assemblyIdsData = mergedCollectionTreeData.assemblies,
-            assemblyIds = [];
-
-        assemblyIds = assemblyIdsData.map(function(assembly){
-            return assembly.assemblyId;
-        });
-
-        // ------------------------------------------
-        // Get assemblies
-        // ------------------------------------------
-        console.log('[WGST] Getting merged collection assemblies');
-        console.dir(assemblyIds);
-
-        $.ajax({
-            type: 'POST',
-            url: '/api/assemblies/',
-            datatype: 'json', // http://stackoverflow.com/a/9155217
-            data: {
-                assemblyIds: assemblyIds
-            }
-        })
-        .done(function(assemblies, textStatus, jqXHR) {
-            console.log('[WGST] Got merged collection assemblies');
-            console.dir(assemblies);
-
-            initCollection(collectionId, assemblies, collectionTree);
-            renderCollectionTrees(collectionId, {
-                // Show buttons
-                matchAssemblyListButton: true,
-                mergeWithButton: true
-            });
-
-            // ------------------------------------------
-            // Prepare nearest representative
-            // ------------------------------------------
-            var assemblyId,
-                assembly,
-                assemblyScores;
-
-            for (assemblyId in WGST.collection[collectionId].assemblies) {
-                if (WGST.collection[collectionId].assemblies.hasOwnProperty(assemblyId)) {
-                    assembly = WGST.collection[collectionId].assemblies[assemblyId];
-                    assemblyScores = assembly['FP_COMP'].scores;
-                    // Set top score
-                    WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore = calculateAssemblyTopScore(assemblyScores);
-                } // if
-            } // for
-
-            addResistanceProfileToCollection(collectionId);
-            populateListOfAntibiotics($('#select-tree-node-antibiotic-merged'));
-
-            // ------------------------------------------
-            // Enable Merge Collections button
-            // ------------------------------------------
-            (function() {
-                var mergeCollectionTreesButton = $('.wgst-tree-control__merge-collection-trees');
-                mergeCollectionTreesButton.find('.wgst-spinner').hide();
-                mergeCollectionTreesButton.find('.wgst-spinner-label').show();
-                mergeCollectionTreesButton.attr('disabled', false);
-            }());
-
-            // ------------------------------------------
-            // Close panels
-            // ------------------------------------------
-            // Close Collection panel
-            $('.wgst-panel__collection .wgst-panel-control-button__close').trigger('click');
-            // Close Collection Tree panel
-            $('.wgst-panel__collection-tree .wgst-panel-control-button__close').trigger('click');
-
-            // ------------------------------------------
-            // Open collection tree panel
-            // ------------------------------------------
-            var collectionTreeType = 'MERGED',
-                collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType;
-
-            activatePanel(collectionTreePanelId);
-            showPanel(collectionTreePanelId);
-            showPanelBodyContent(collectionTreePanelId);
-            bringPanelToTop(collectionTreePanelId);
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.error('[WGST][Error] ✗ Failed to get assemblies');
-            console.error(textStatus);
-            console.error(errorThrown);
-            console.error(jqXHR);
-
-        });
-    });
 
 
 
-    /**
-     * Description
-     * @method endAssemblyUploadProgressBar
-     * @param {} collectionId
-     * @return 
-     */
-    var endAssemblyUploadProgressBar = function(collectionId) {
-        // Update bar's width
-        $('.uploading-assembly-progress-container .progress-bar').width('100%');
-        // Update aria-valuenow attribute
-        $('.uploading-assembly-progress-container .progress-bar').attr('aria-valuenow', 100);
-        // Update percentage value
-        $('.uploading-assembly-progress-container .progress-percentage').text('100%');
 
-        //$('.uploading-assembly-progress-container .progress').removeClass('active');
 
-        // Allow smooth visual transition of elements
-        setTimeout(function(){
-            $('.uploading-assembly-progress-container .progress-percentage').text('All done!');
-            $('.uploading-assembly-progress-container .progress').slideUp(function(){
 
-                /*
-                // Allow smooth visual transition of elements
-                setTimeout(function(){
-                    $('.uploaded-assembly-url').slideDown(function(){
-                        $('.uploading-assembly-progress-container .progress-label').slideUp();
-                    });
-                }, 500);
-                */
+    // /**
+    //  * Description
+    //  * @method endAssemblyUploadProgressBar
+    //  * @param {} collectionId
+    //  * @return 
+    //  */
+    // var endAssemblyUploadProgressBar = function(collectionId) {
+    //     // Update bar's width
+    //     $('.uploading-assembly-progress-container .progress-bar').width('100%');
+    //     // Update aria-valuenow attribute
+    //     $('.uploading-assembly-progress-container .progress-bar').attr('aria-valuenow', 100);
+    //     // Update percentage value
+    //     $('.uploading-assembly-progress-container .progress-percentage').text('100%');
 
-            });
-        }, 500);
+    //     //$('.uploading-assembly-progress-container .progress').removeClass('active');
 
-        // It takes less than 30 seconds to process one assembly
-        //var seconds = 30 * Object.keys(fastaFilesAndMetadata).length;
-            //function() {
-                //$('.visit-url-seconds-number').text(seconds);
-                //seconds = seconds - 1;
-                //if (seconds === 0) {
-                    // Hide processing assembly seconds countdown
-                    //$('.uploaded-assembly-process-countdown-label').fadeOut(function(){
-                        // Update status
-                        //$('.uploaded-assembly-process-status').text('finished processing');
-                    //});
-                //}
+    //     // Allow smooth visual transition of elements
+    //     setTimeout(function(){
+    //         $('.uploading-assembly-progress-container .progress-percentage').text('All done!');
+    //         $('.uploading-assembly-progress-container .progress').slideUp(function(){
 
-    };
+                
+    //             // Allow smooth visual transition of elements
+    //             // setTimeout(function(){
+    //             //     $('.uploaded-assembly-url').slideDown(function(){
+    //             //         $('.uploading-assembly-progress-container .progress-label').slideUp();
+    //             //     });
+    //             // }, 500);
+                
+
+    //         });
+    //     }, 500);
+
+    //     // It takes less than 30 seconds to process one assembly
+    //     //var seconds = 30 * Object.keys(fastaFilesAndMetadata).length;
+    //         //function() {
+    //             //$('.visit-url-seconds-number').text(seconds);
+    //             //seconds = seconds - 1;
+    //             //if (seconds === 0) {
+    //                 // Hide processing assembly seconds countdown
+    //                 //$('.uploaded-assembly-process-countdown-label').fadeOut(function(){
+    //                     // Update status
+    //                     //$('.uploaded-assembly-process-status').text('finished processing');
+    //                 //});
+    //             //}
+
+    // };
 
     /**
      * $('.wgst-panel__collection-panel .assemblies-summary-table').on('click', 'tr', function(event) {

@@ -79,7 +79,7 @@ $(function(){
             //
             // Show panel
             //
-            window.WGST.exports.togglePanel('assembly-upload-progress');
+            window.WGST.exports.showPanel('assembly-upload-progress');
 
 
 
@@ -551,7 +551,10 @@ $(function(){
 	    };
 
 	    var resetAssemlyUpload = function() {
+	    	
+	    	//
 	        // Empty list of selected FASTA files and metadata
+	        //
 	        window.WGST.upload.fastaAndMetadata = {};
 
 	        //numberOfDroppedFastaFiles = 0,

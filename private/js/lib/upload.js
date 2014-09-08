@@ -214,9 +214,11 @@ $(function(){
 					                //
 					                // Show panel
 					                //
-					                window.WGST.exports.togglePanel('assembly-upload-navigation');
+					                window.WGST.exports.showPanel('assembly-upload-navigation');
 
-									//createAssemblyUploadNavigationPanel();
+
+
+
 	                                window.WGST.exports.createPanel('assembly-upload-metadata', {
 	                                	panelType: 'assembly-upload-metadata',
 	                                	panelId: 'assembly-upload-metadata'
@@ -224,7 +226,10 @@ $(function(){
 					                //
 					                // Show panel
 					                //
-					                window.WGST.exports.togglePanel('assembly-upload-metadata');
+					                window.WGST.exports.showPanel('assembly-upload-metadata');
+
+
+
 
 	                                window.WGST.exports.createPanel('assembly-upload-analytics', {
 	                                	panelType: 'assembly-upload-analytics',
@@ -233,7 +238,7 @@ $(function(){
 					                //
 					                // Show panel
 					                //
-					                window.WGST.exports.togglePanel('assembly-upload-analytics');
+					                window.WGST.exports.showPanel('assembly-upload-analytics');
 	                                
 	                                // Parse loaded files
 	                                WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile){

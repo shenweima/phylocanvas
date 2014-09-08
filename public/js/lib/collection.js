@@ -5,7 +5,7 @@ $(function(){
 		//
 		// Init collection data structure
 		//
-	    var initCollectionDataStructure = function(collectionId, collectionTreeTypes) {
+	    window.WGST.exports.initCollectionDataStructure = function(collectionId, collectionTreeTypes) {
 	        WGST.collection[collectionId] = {
 	            assemblies: {},
 	            tree: {}
@@ -19,9 +19,11 @@ $(function(){
 	        }
 	    };
 
-	    var setCollectionData = function(collectionId, collectionAssemblies, collectionTrees) {
+	    window.WGST.exports.setCollectionData = function(collectionId, collectionAssemblies, collectionTrees) {
+	    	//
 	    	// Init collection data structure
-	        initCollectionDataStructure(collectionId);
+	        //
+	        window.WGST.exports.initCollectionDataStructure(collectionId);
 	        
 	        //
 	        // Put in data
@@ -46,7 +48,7 @@ $(function(){
                 sortedAssemblyIds = [];
 
             // Sort assemblies in order in which they are displayed on tree
-            $.each(WGST.collection[collectionId].tree['CORE_TREE_RESULT'].leavesOrder, function(leafCounter, leaf){
+            $.each(window.WGST.collection[collectionId].tree['CORE_TREE_RESULT'].leavesOrder, function(leafCounter, leaf){
                 sortedAssemblies.push(assemblies[leaf.id]);
                 sortedAssemblyIds.push(leaf.id);
             });
@@ -93,7 +95,10 @@ $(function(){
 	                //
 	                // Set collection data
 	                //
-	                setCollectionData(collectionId, data.collection.assemblies, data.collection.tree);
+	                window.WGST.exports.setCollectionData(collectionId, data.collection.assemblies, data.collection.tree);
+
+	                console.debug('[IMPORTANT]');
+	                console.dir(window.WGST.collection[collectionId]);
 
 	                //
 	                // Create collection data panel
@@ -131,7 +136,8 @@ $(function(){
 	                //
 	                // Show panel
 	                //
-	                window.WGST.exports.togglePanel(collectionPanelId);
+	               	// window.WGST.exports.togglePanel(collectionPanelId);
+	                window.WGST.exports.showPanel(collectionPanelId);
 
 	        // ----------------------------------------
 	        // Init collection panel
