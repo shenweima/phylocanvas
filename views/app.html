@@ -64,10 +64,6 @@
     </div>
     -->
 
-    <!-- Collection -->
-    <div class="wgst-fullscreen wgst-fullscreen__collection" data-fullscreen-name="collection" data-fullscreen-id="collection">
-    </div><!-- /.wgst-fullscreen__collection -->
-
     <!-- 
     
     Templates
@@ -81,12 +77,10 @@
     -->
     <!-- /.wgst-fullscreen__collection-tree -->
 
-    <!-- Map -->
-    <div class="wgst-fullscreen wgst-fullscreen__map wgst-fullscreen--active wgst-fullscreen--visible" data-fullscreen-name="map" data-fullscreen-id="map">
-      <div class="wgst-map"></div>
-    </div><!-- /.wgst-fullscreen__map -->
-
   </section>
+
+  {% include "partials/fullscreens/collection_map_fullscreen.html" %}
+  {% include "partials/fullscreens/collection_data_fullscreen.html" %}
 
   {% include "partials/panels/assembly_panel.html" %}
 
@@ -97,6 +91,7 @@
 
   {% include "partials/panels/collection_data_panel.html" %}
   {% include "partials/panels/collection_tree_panel.html" %}
+  {% include "partials/panels/collection_map_panel.html" %}
 
   {% include "partials/panels/upload/assembly_analytics.html" %}
   {% include "partials/panels/upload/assembly_metadata_form.html" %}
@@ -142,6 +137,7 @@
 <script src="/js/lib/unsorted.js"></script>
 <script src="/js/lib/upload.js"></script>
 <script src="/js/lib/panel.js"></script>
+<script src="/js/lib/fullscreen.js"></script>
 <script src="/js/lib/tree.js"></script>
 <script src="/js/lib/map.js"></script>
 <script src="/js/lib/fasta.js"></script>

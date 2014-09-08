@@ -196,12 +196,10 @@ $(function(){
 	                // window.WGST.exports.endPanelLoadingIndicator('collection');
 	                // window.WGST.exports.showPanelBodyContent('collection');
 
-	                /**
-	                * If collection has more than 100 assemblies then show fullscreen instead of panel.
-	                *
-	                * Collection has more than 100 assemblies - show fullscreen, otherwise show panel.
-	                */
-	                if (Object.keys(WGST.collection[collectionId].assemblies).length > 100) {
+	                //
+	                // If collection has more than 100 assemblies then show fullscreen instead of a panel.
+	                //
+	                if (Object.keys(window.WGST.collection[collectionId].assemblies).length > 100) {
 	                    console.log('[WGST] Collection ' + collectionId + ' will be displayed fullscreen');
 	                    
 	                    maximizeCollection(collectionId);
@@ -459,7 +457,50 @@ $(function(){
 	        return assemblyResistanceProfileHtml;
 	    };
 
-	    //window.WGST.exports.showDroppedAssembly = showDroppedAssembly;
+	    var maximizeCollection = function(collectionId) {
+	        console.log('[WGST] Maximizing collection ' + collectionId);
+
+	        //
+	        // Put map into panel
+	        //
+	        var fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
+
+
+	        console.log('L: ' + $('.wgst-fullscreen').length);
+
+	        //var panelId = $('.wgst-panel[data-panel-type="collection-data"][data-collection-id="' + collectionId + '"]').attr('data-panel-id');
+	        var panelId = fullscreenId;
+	        
+	        //console.debug($('.wgst-panel[data-panel-type="collection-data"][data-collection-id="' + collectionId + '"]').length);
+
+	        console.debug('fullscreenId: ' + fullscreenId);
+	        console.debug('panelId: ' + panelId);
+
+	        window.WGST.exports.bringFullscreenToPanel(fullscreenId, panelId);
+	        //bringFullscreenToPanel('map');
+
+	        //
+	        // Put collection data into fullscreen
+	        //
+	        var panelId = 'collection-data__' + collectionId,
+	        	fullscreenId = 'collection-data';
+
+	        window.WGST.exports.bringPanelToFullscreen(panelId, fullscreenId);
+
+	        // Destroy all Twitter Bootstrap Tooltips
+	        //$('[data-toggle="tooltip"]').tooltip('destroy');
+
+	        // bringPanelToFullscreen('collection_' + collectionId, function(){
+	        //     // Trigger Twitter Bootstrap tooltip
+	        //     $('[data-toggle="tooltip"]').tooltip();
+	        //     // Open Map panel
+	        //     window.WGST.openPanel('map');
+	        // });
+
+	        google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
+
+	    };
+
 	})();
 
 });

@@ -46,7 +46,7 @@ $(function(){
             // Open map panel if it's not displayed and map is not in fullscreen mode
             if ($('.wgst-fullscreen--active').attr('data-fullscreen-name') !== 'map') {
                 if (! $('.wgst-panel__map').hasClass('wgst-panel--active')) {
-                    window.WGST.openPanel('map');
+                    window.WGST.exports.showPanel('map');
                 }
             }
 

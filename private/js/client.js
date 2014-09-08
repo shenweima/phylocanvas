@@ -17,6 +17,9 @@ window.WGST.socket = {
 //
 window.WGST.speak = false;
 
+//
+// Store panels position
+//
 window.WGST.panels = {
     assembly: {
         top: 80,
@@ -60,6 +63,9 @@ window.WGST.panels = {
     }
 };
 
+//
+// Store assembly
+//
 window.WGST.assembly = {
     analysis: {
         UPLOAD_OK: 'UPLOAD_OK',
@@ -71,6 +77,9 @@ window.WGST.assembly = {
     }
 };
 
+//
+// Store collection
+//
 window.WGST.collection = {
     analysis: {
         COLLECTION_TREE: 'COLLECTION_TREE',
@@ -82,6 +91,9 @@ window.WGST.collection = {
     }
 };
 
+//
+// Store upload
+//
 window.WGST.upload = {
     collection: {},
     assembly: {},
@@ -91,10 +103,28 @@ window.WGST.upload = {
     }
 };
 
+//
+// Settings
+//
 window.WGST.settings = window.WGST.settings || {};
 window.WGST.settings.representativeCollectionId = window.WGST.config.referenceCollectionId; //'1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
 
+//
+// Regexes
+//
 window.WGST.antibioticNameRegex = /[\W]+/g;
+
+
+
+
+
+
+
+
+
+
+
+
 
 $(function(){
 
@@ -128,6 +158,32 @@ $(function(){
         window.speechSynthesis.speak(message);
     }
 
+    //
+    // Create default fullscreen
+    //
+    //window.WGST.exports.createFullscreen('collection-map');
+    window.WGST.exports.createFullscreen('collection-map', {
+        fullscreenType: 'collection-map',
+        fullscreenId: 'collection-map__' + window.WGST.requestedCollectionId || 'new'
+    });
+
+    //
+    // Show fullscreen
+    //
+    window.WGST.exports.showFullscreen('map');
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Description
      * @method onerror
@@ -144,6 +200,10 @@ $(function(){
 
         showNotification(error);
     };
+
+
+
+
 
     // WGST.events = {
     //     renderedCollectionTreeEvent: new CustomEvent('renderedCollectionTree', {})
@@ -2084,156 +2144,11 @@ google.maps.event.addDomListener(window, "resize", function() {
 });
 
 
-    /**
-     * Description
-     * @method maximizeCollection
-     * @param {} collectionId
-     * @return 
-     */
-    var maximizeCollection = function(collectionId) {
-        console.log('[WGST] Maximizing collection ' + collectionId);
-
-        // Put map into panel
-        bringFullscreenToPanel('map');
-
-        // Destroy all Twitter Bootstrap Tooltips
-        $('[data-toggle="tooltip"]').tooltip('destroy');
-
-        bringPanelToFullscreen('collection_' + collectionId, function(){
-            // Trigger Twitter Bootstrap tooltip
-            $('[data-toggle="tooltip"]').tooltip();
-            // Open Map panel
-            window.WGST.openPanel('map');
-        });
-
-        google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
-
-        // $('.wgst-fullscreen__collection')
-        // .append($('.collection-details').clone(true))
-        // .addClass('wgst-fullscreen--active')
-        // .addClass('wgst-fullscreen--visible');
-
-        // deactivatePanel('collection');
-
-        //google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-        // var activeFullscreenElement = $('.wgst-fullscreen--active'),
-        //     fullscreentName = activeFullscreenElement.attr('data-fullscreen-name'),
-        //     fullscreenContentFragment = document.createDocumentFragment();
-
-        // $('.wgst-panel[data-panel-name="' + fullscreenName + '"] .wgst-panel-body-content')
-        //     .html('')
-        //     .append(WGST.geo.map.canvas.getDiv());
-
-        //.html(activeFullscreenElement.html());
-
-        // activeFullscreenElement
-        //     .removeClass('wgst-fullscreen--active')
-        //     .removeClass('wgst-fullscreen--visible');
-
-        //$('.wgst-fullscreen--active').removeClass('.wgst-fullscreen--active');
-
-        // endPanelLoadingIndicator(fullscreenName);
-        // showPanelBodyContent(fullscreenName);
-
-        //$('.wgst-fullscreen__collection').html($('.collection-details').html());
-        
-        //$('.wgst-fullscreen__collection').append($('.collection-details').clone(true)).addClass('wgst-fullscreen--active').addClass('wgst-fullscreen--visible');
-        // $('.wgst-fullscreen__collection')
-        //     .html($('<div/>').append($('.collection-details')).html())
-        //     .addClass('wgst-fullscreen--active')
-        //     .addClass('wgst-fullscreen--visible');
-
-        // activatePanel('map');
-        // showPanel('map');
-        // bringPanelToTop('map');
-
-        //EEE
-        // Put collection content into background
-
-    };
-
-    // ============================================================
-    // Panel control buttons
-    // ============================================================
-
-    /**
-     * Description
-     * @method bringFullscreenToPanel
-     * @param {} andShowPanel
-     * @param {} callback
-     * @return 
-     */
-    var bringFullscreenToPanel = function(andShowPanel, callback) {
-        var activeFullscreenElement = $('.wgst-fullscreen--active'),
-            fullscreenName = activeFullscreenElement.attr('data-fullscreen-name');
-
-        activeFullscreenElement
-            .removeClass('wgst-fullscreen--active')
-            .removeClass('wgst-fullscreen--visible');
-
-        if (typeof fullscreenName !== 'undefined') {
-            if (andShowPanel) {
-                showPanelBodyContent(fullscreenName);
-                showPanel(fullscreenName);
-            }
-        }
-
-        if (fullscreenName === 'map') {
-            $('.wgst-panel[data-panel-name="' + fullscreenName + '"] .wgst-panel-body-content')
-                .html('')
-                .append(WGST.geo.map.canvas.getDiv());
-
-            //google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
-        } // if
-
-        // Remove fullscreen content
-        activeFullscreenElement.html('');
-
-        if (typeof callback === 'function') {
-            callback();
-        }
-    };
-
-    /**
-     * Description
-     * @method bringPanelToFullscreen
-     * @param {} panelId
-     * @param {} callback
-     * @return 
-     */
-    var bringPanelToFullscreen = function(panelId, callback) {
-        var panel = $('[data-panel-id="' + panelId + '"]'),
-            panelName = panel.attr('data-panel-name');
-
-        //$('.wgst-fullscreen__' + panelName)
-        var fullscreen = $('[data-fullscreen-name="' + panelName + '"]')
-            .addClass('wgst-fullscreen--active')
-            .addClass('wgst-fullscreen--visible');
-
-        if (panelName === 'collection') {
-            fullscreen.append($('.collection-details').clone(true));
-        }
-
-        deactivatePanel(panelName); // or closePanel() ?
-
-        if (typeof callback === 'function') {
-            callback();
-        }
-    };
 
     /**
      * Description
@@ -2255,63 +2170,6 @@ google.maps.event.addDomListener(window, "resize", function() {
             });
         } 
     };
-
-    $('body').on('click', '.wgst-panel-control-button__maximize', function(){
-        if ($(this).hasClass('wgst-panel-control-button--active')) {
-            var panel = $(this).closest('.wgst-panel'),
-                panelName = panel.attr('data-panel-name'),
-                panelId = panel.attr('data-panel-id');
-
-            if (panelName === 'collection') {
-
-                // Destroy Twitter Bootstrap tooltip
-                $('[data-toggle="tooltip"]').tooltip('destroy');
-                
-                bringFullscreenToPanel(false);
-
-                bringPanelToFullscreen(panelId, function(){
-                    $('[data-fullscreen-name="' + panelName + '"]')
-                        .html('')
-                        .append($('.collection-details').clone(true))
-
-                    // Trigger Twitter Bootstrap tooltip
-                    $('[data-toggle="tooltip"]').tooltip();
-                });
-            } else if (panelName === 'map') {
-
-                bringMapPanelToFullscreen(panelName, panelId);
-
-                // bringFullscreenToPanel(false);
-
-                // bringPanelToFullscreen(panelId, function(){
-                //     $('[data-fullscreen-name="' + panelName + '"]')
-                //         .html('')
-                //         .append(WGST.geo.map.canvas.getDiv());
-
-                //     google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
-                // });
-
-            } else if (panelName === 'collectionTree') {
-
-                bringPanelToFullscreen(panelName, function(){
-
-                    var treeHtmlElement = $('.wgst-panel__collection-tree').find('.wgst-tree-content'),
-                        collectionTreeFullscreen = $('.wgst-fullscreen__collection-tree');
-
-                    //collectionTreeFullscreen.append(treeHtmlElement.cloneNode(true));
-                    collectionTreeFullscreen.append(treeHtmlElement.clone(true));
-
-                    var collectionId = $('.wgst-panel__collection-tree').attr('data-collection-id');
-
-                    $('.wgst-panel__collection-tree').html('');
-
-                    console.log(collectionId);
-
-                    WGST.collection[collectionId].tree.canvas.draw();
-                });
-            }
-        } // if
-    });
 
     $('body').on('click', '.wgst-panel-control-button__opacity', function(){
         if ($(this).hasClass('wgst-panel-control-button--active')) {

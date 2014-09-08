@@ -15,6 +15,9 @@ $(function(){
 
         window.WGST.exports.createPanel = function(panelType, templateContext) {
 
+            console.debug('$$$ panelType: ' + panelType);
+            console.dir(templateContext);
+
         	//
         	// Check if panel already exists
         	//
@@ -48,15 +51,15 @@ $(function(){
         };
 
         window.WGST.exports.removePanel = function(panelId) {
-        	var $panel = $('.wgst-panel[data-panel-id="' + panelId + '"]').remove();
+        	$('.wgst-panel[data-panel-id="' + panelId + '"]').remove();
         };
 
         window.WGST.exports.showPanel = function(panelId) {
-        	var $panel = $('.wgst-panel[data-panel-id="' + panelId + '"]').removeClass('hide-this invisible-this');
+        	$('.wgst-panel[data-panel-id="' + panelId + '"]').removeClass('hide-this invisible-this');
         };
 
         window.WGST.exports.hidePanel = function(panelId) {
-        	var $panel = $('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('hide-this');
+        	$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('hide-this');
         };
 
 	    window.WGST.exports.bringPanelToTop = function(panelId) {
@@ -85,6 +88,96 @@ $(function(){
 	    $('body').on('mousedown', '.wgst-panel', function(){
 	        window.WGST.exports.bringPanelToTop($(this).attr('data-panel-id'));
 	    });
+
+        $('body').on('click', '.wgst-panel-control-button__maximize', function(){
+
+            //
+            // Bring panel to fullscreen
+            //
+            var panelId = $(this).closest('.wgst-panel').attr('data-panel-id'),
+                fullscreenId = panelId,
+                fullscreenType = panelId.split('__')[0];
+
+                //fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
+
+            console.debug('))) panelId: ' + panelId);
+            console.debug('))) fullscreenId: ' + fullscreenId);
+
+            window.WGST.exports.bringPanelToFullscreen(panelId);
+
+
+
+
+            // //
+            // // Bring fullscreen to panel
+            // //
+            // var fullscreenId = $('.wgst-fullscreen').attr(); panelId.split('__')[0],
+            //     panelId = 
+                
+
+            // window.WGST.exports.bringFullscreenToPanel(fullscreenId, panelId);
+
+
+
+
+
+
+
+            // if ($(this).hasClass('wgst-panel-control-button--active')) {
+            //     var panel = $(this).closest('.wgst-panel'),
+            //         panelName = panel.attr('data-panel-name'),
+            //         panelId = panel.attr('data-panel-id');
+
+            //     if (panelName === 'collection') {
+
+            //         // Destroy Twitter Bootstrap tooltip
+            //         $('[data-toggle="tooltip"]').tooltip('destroy');
+                    
+            //         bringFullscreenToPanel(false);
+
+            //         bringPanelToFullscreen(panelId, function(){
+            //             $('[data-fullscreen-name="' + panelName + '"]')
+            //                 .html('')
+            //                 .append($('.collection-details').clone(true))
+
+            //             // Trigger Twitter Bootstrap tooltip
+            //             $('[data-toggle="tooltip"]').tooltip();
+            //         });
+            //     } else if (panelName === 'map') {
+
+            //         bringMapPanelToFullscreen(panelName, panelId);
+
+            //         // bringFullscreenToPanel(false);
+
+            //         // bringPanelToFullscreen(panelId, function(){
+            //         //     $('[data-fullscreen-name="' + panelName + '"]')
+            //         //         .html('')
+            //         //         .append(WGST.geo.map.canvas.getDiv());
+
+            //         //     google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+            //         // });
+
+            //     } else if (panelName === 'collectionTree') {
+
+            //         bringPanelToFullscreen(panelName, function(){
+
+            //             var treeHtmlElement = $('.wgst-panel__collection-tree').find('.wgst-tree-content'),
+            //                 collectionTreeFullscreen = $('.wgst-fullscreen__collection-tree');
+
+            //             //collectionTreeFullscreen.append(treeHtmlElement.cloneNode(true));
+            //             collectionTreeFullscreen.append(treeHtmlElement.clone(true));
+
+            //             var collectionId = $('.wgst-panel__collection-tree').attr('data-collection-id');
+
+            //             $('.wgst-panel__collection-tree').html('');
+
+            //             console.log(collectionId);
+
+            //             WGST.collection[collectionId].tree.canvas.draw();
+            //         });
+            //     }
+            // } // if
+        });
 
 	})();
 
