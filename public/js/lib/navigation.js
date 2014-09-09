@@ -1,5 +1,26 @@
 $(function(){
 
+	$('[data-navigation-id="feedback"]').on('click', function(event){
+
+		window.WGST.exports.createOverlay('feedback');
+
+		event.preventDefault();
+	});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	$('.wgst-navigation__collection-panels').on('click', function(event) {
 		event.preventDefault();
 	});

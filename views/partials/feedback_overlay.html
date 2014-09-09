@@ -1,0 +1,55 @@
+<!-- Handlebars template -->
+{% raw %}
+
+<script type="text/x-handlebars-template" class="wgst-template" data-template-id="feedback-overlay">
+
+<div class="wgst-overlay wgst-overlay__feedback"
+		data-overlay-id="feedback">
+
+	<a href="#" class="wgst-close-overlay"><i class="fa fa-close"></i></a>
+
+	<div class="wgst-overlay-content container-fluid">
+
+
+		<div class="row">
+			<div class="col-md-8 col-md-offset-2">
+
+				<h3>So. What do you think?</h3>
+
+				<form role="form" data-form="feedback">
+
+					<p>
+					Tell us about your experience with WGSA.net so far and what would you like to see in future versions?
+					</p>
+
+				  <div class="form-group">
+				    <label for="feedback-name">Name</label>
+				    <input type="text" class="form-control input-lg" id="feedback-name" data-input="name" required>
+				  </div>
+
+				  <div class="form-group">
+				    <label for="feedback-email">Email address</label>
+				    <input type="email" class="form-control input-lg" id="feedback-email" data-input="email" required>
+				  </div>
+
+				  <div class="form-group">
+				    <label for="feedback-textarea">Feedback</label>
+				    <textarea class="form-control input-lg" rows="3" id="feedback-textarea" data-input="feedback" required></textarea>
+				  </div>
+
+				  <button type="submit" class="btn btn-default">
+				  	<div class="wgst-spinner hide-this"></div>
+				  	<span>Send feedback</span>
+				  </button>
+
+				  <p class="wgst-send-feedback-success-message hide-this">We received your feedback. Thank you!</p>
+
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+</script>
+
+{% endraw %}

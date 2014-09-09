@@ -75,6 +75,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // App home route
 app.get('/', routes.index);
 
+app.post('/feedback', routes.feedback);
+
 // User routes
 app.get('/users', user.list);
 app.get('/users/name/:name', user.name);
@@ -208,7 +210,8 @@ couchbaseDatabaseConnections = {};
 COUCHBASE_BUCKETS = {
 	'MAIN': 'main',
 	'RESOURCES': 'resources',
-	'FRONT': 'front'
+	'FRONT': 'front',
+	'FEEDBACK': 'feedback'
 };
 
 var bucketName,

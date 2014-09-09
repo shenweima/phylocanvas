@@ -96,6 +96,8 @@
   {% include "partials/panels/upload/assembly_analytics.html" %}
   {% include "partials/panels/upload/assembly_metadata_form.html" %}
 
+  {% include "partials/feedback_overlay.html" %}
+
 {% endblock %}
 
 {% block script %}
@@ -137,6 +139,7 @@
 <script src="/js/lib/unsorted.js"></script>
 <script src="/js/lib/upload.js"></script>
 <script src="/js/lib/panel.js"></script>
+<script src="/js/lib/overlay.js"></script>
 <script src="/js/lib/fullscreen.js"></script>
 <script src="/js/lib/map.js"></script>
 <script src="/js/lib/fasta.js"></script>
@@ -153,6 +156,8 @@
 <script src="/js/lib/collection.js"></script>
 
 <script src="/js/lib/navigation.js"></script>
+
+<script src="/js/lib/feedback.js"></script>
 
 <script src="/js/client.js"></script>
 {% endblock %}

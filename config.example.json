@@ -17,6 +17,10 @@
 				"front": {
 					"name": "wgsa_front",
 					"password": ""
+				},
+				"feedback": {
+					"name": "feedback",
+					"password": ""
 				}
 			}
 		},

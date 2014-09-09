@@ -21,3 +21,34 @@ exports.index = function(req, res) {
     // http://raphaeljs.com/
     // http://coding.smashingmagazine.com/2013/10/29/get-up-running-grunt/
 };
+
+exports.feedback = function(req, res) {
+    console.log('[WGST] Received feedback:');
+    console.dir(req.body);
+
+    var feedback = {
+        name: req.body.name,
+        email: req.body.email,
+        feedback: req.body.feedback
+    };
+
+    //
+    // Insert feedback into Couchbase
+    //
+    var feedbackKey = 'FEEDBACK_' + uuid.v4();
+
+    console.log('[WGST][Couchbase] Inserting feedback with key: ' + feedbackKey);
+    console.dir(feedback);
+
+    couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FEEDBACK].set(feedbackKey, feedback, function(err, result) {
+        if (err) {
+            console.error('[WGST][Couchbase][Error] ✗ ' + err);
+            res.status(500).json({ error: 'Could not save provided feedback' });
+            return;
+        }
+
+        console.log('[WGST][Couchbase] Inserted feedback');
+
+        res.json({});
+    });
+};
