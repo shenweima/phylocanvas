@@ -526,6 +526,29 @@ $(function(){
             // }
         };
 
+        //
+        // User wants to toggle all assemblies on map
+        //
+        $('body').on('change', 'input[type="checkbox"].show-all-assemblies-on-map', function(e) {
+
+            var showOnMapCheckboxes = $(this).closest('.collection-details').find('.collection-assembly-list .assembly-list-header-map input[type="checkbox"]');
+            
+            if ($(this).prop('checked')) {
+
+                //
+                // Check all
+                //
+                showOnMapCheckboxes.prop('checked', true).trigger('change');
+
+            } else {
+                
+                //
+                // Uncheck all
+                //
+                showOnMapCheckboxes.prop('checked', false).trigger('change');
+            }
+        });
+
 	})();
 
 });

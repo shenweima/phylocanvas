@@ -91,92 +91,24 @@ $(function(){
 
         $('body').on('click', '.wgst-panel-control-button__maximize', function(){
 
-            //
-            // Bring panel to fullscreen
-            //
-            var panelId = $(this).closest('.wgst-panel').attr('data-panel-id'),
-                fullscreenId = panelId,
-                fullscreenType = panelId.split('__')[0];
+	        //
+	        // Bring fullscreen to panel
+	        //
+	        var $fullscreen = $('.wgst-fullscreen');
+	        var fullscreenId = $fullscreen.attr('data-fullscreen-id');
+	        var panelId = fullscreenId;
 
-                //fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
+	        window.WGST.exports.bringFullscreenToPanel(fullscreenId, panelId);
 
-            console.debug('))) panelId: ' + panelId);
-            console.debug('))) fullscreenId: ' + fullscreenId);
+	        //
+	        // Bring panel to fullscreen
+	        //
+	        var $panel = $(this).closest('.wgst-panel');
+	        var panelId = $panel.attr('data-panel-id');
+	        var fullscreenId = panelId;
 
-            window.WGST.exports.bringPanelToFullscreen(panelId);
+	        window.WGST.exports.bringPanelToFullscreen(panelId, fullscreenId);
 
-
-
-
-            // //
-            // // Bring fullscreen to panel
-            // //
-            // var fullscreenId = $('.wgst-fullscreen').attr(); panelId.split('__')[0],
-            //     panelId = 
-                
-
-            // window.WGST.exports.bringFullscreenToPanel(fullscreenId, panelId);
-
-
-
-
-
-
-
-            // if ($(this).hasClass('wgst-panel-control-button--active')) {
-            //     var panel = $(this).closest('.wgst-panel'),
-            //         panelName = panel.attr('data-panel-name'),
-            //         panelId = panel.attr('data-panel-id');
-
-            //     if (panelName === 'collection') {
-
-            //         // Destroy Twitter Bootstrap tooltip
-            //         $('[data-toggle="tooltip"]').tooltip('destroy');
-                    
-            //         bringFullscreenToPanel(false);
-
-            //         bringPanelToFullscreen(panelId, function(){
-            //             $('[data-fullscreen-name="' + panelName + '"]')
-            //                 .html('')
-            //                 .append($('.collection-details').clone(true))
-
-            //             // Trigger Twitter Bootstrap tooltip
-            //             $('[data-toggle="tooltip"]').tooltip();
-            //         });
-            //     } else if (panelName === 'map') {
-
-            //         bringMapPanelToFullscreen(panelName, panelId);
-
-            //         // bringFullscreenToPanel(false);
-
-            //         // bringPanelToFullscreen(panelId, function(){
-            //         //     $('[data-fullscreen-name="' + panelName + '"]')
-            //         //         .html('')
-            //         //         .append(WGST.geo.map.canvas.getDiv());
-
-            //         //     google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
-            //         // });
-
-            //     } else if (panelName === 'collectionTree') {
-
-            //         bringPanelToFullscreen(panelName, function(){
-
-            //             var treeHtmlElement = $('.wgst-panel__collection-tree').find('.wgst-tree-content'),
-            //                 collectionTreeFullscreen = $('.wgst-fullscreen__collection-tree');
-
-            //             //collectionTreeFullscreen.append(treeHtmlElement.cloneNode(true));
-            //             collectionTreeFullscreen.append(treeHtmlElement.clone(true));
-
-            //             var collectionId = $('.wgst-panel__collection-tree').attr('data-collection-id');
-
-            //             $('.wgst-panel__collection-tree').html('');
-
-            //             console.log(collectionId);
-
-            //             WGST.collection[collectionId].tree.canvas.draw();
-            //         });
-            //     }
-            // } // if
         });
 
 	})();

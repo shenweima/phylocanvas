@@ -56,11 +56,11 @@ $(function(){
                 collectionId = panelId.split('__')[1],
                 fullscreenType = panelType;
 
-            console.debug('bringFullscreenToPanel | fullscreenType: ' + fullscreenType);
-            console.debug('bringFullscreenToPanel | fullscreenId: ' + fullscreenId);
-            console.debug('bringFullscreenToPanel | panelId: ' + panelId);
-            console.debug('bringFullscreenToPanel | panelType: ' + panelType);
-            console.debug('bringFullscreenToPanel | collectionID: ' + collectionId);
+            console.debug('[WGST][Debug] bringFullscreenToPanel | fullscreenType: ' + fullscreenType);
+            console.debug('[WGST][Debug] bringFullscreenToPanel | fullscreenId: ' + fullscreenId);
+            console.debug('[WGST][Debug] bringFullscreenToPanel | panelId: ' + panelId);
+            console.debug('[WGST][Debug] bringFullscreenToPanel | panelType: ' + panelType);
+            console.debug('[WGST][Debug] bringFullscreenToPanel | collectionID: ' + collectionId);
 
             window.WGST.exports.createPanel(panelType, {
                 panelId: panelId,
@@ -76,16 +76,33 @@ $(function(){
             }
 
             //
-            // If fullscreen is map
+            // Copy panel specific content
             //
-            if (fullscreenType === 'collection-map') {
+
+            //
+            // Data fullscreen
+            //
+            if (fullscreenType === 'collection-data') {
+
+                var $fullscreenContent = $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').find('.wgst-panel-body');
+                var $panel = $('.wgst-panel[data-panel-id="' + panelId + '"]');
+
+                $panel.find('.wgst-panel-body').replaceWith($fullscreenContent.clone(true));
+
+                $panel.find('.wgst-collection-controls').removeClass('hide-this');
+
+//$('[data-toggle="tooltip"]').tooltip('destroy');
+
+            //
+            // Map fullscreen
+            //
+            } else if (fullscreenType === 'collection-map') {
 
                 //
                 // Copy map content to panel
                 //
                 $('.wgst-panel[data-panel-id="' + panelId + '"]')
                     .find('.wgst-panel-body-content')
-                    .html('')
                     .append(window.WGST.geo.map.canvas.getDiv());
             }
 
@@ -100,9 +117,24 @@ $(function(){
             window.WGST.exports.showPanel(panelId);
             
             //
+            // Resize map
+            //
+            if (fullscreenType === 'collection-map') {
+
+                google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
+
+            }
+
+            //
             // Bring panel to front
             //
             window.WGST.exports.bringPanelToTop(panelId);
+
+            //
+            // Trigger Twitter Bootstrap tooltip
+            //
+            //$('[data-toggle="tooltip"]').tooltip();
+
         };
 
         window.WGST.exports.bringPanelToFullscreen = function(panelId, fullscreenWasCreated) {
@@ -110,9 +142,9 @@ $(function(){
             var fullscreenType = panelId.split('__')[0];
             var fullscreenId = panelId;
 
-            console.debug('[WGST] >>> Debug <<< fullscreenType: ' + fullscreenType);
-            console.debug('[WGST] >>> Debug <<< fullscreenId: ' + fullscreenId);
-            console.debug('[WGST] >>> Debug <<< panelId: ' + panelId);
+            console.debug('[WGST][Debug] bringPanelToFullscreen | fullscreenType: ' + fullscreenType);
+            console.debug('[WGST][Debug] bringPanelToFullscreen | fullscreenId: ' + fullscreenId);
+            console.debug('[WGST][Debug] bringPanelToFullscreen | panelId: ' + panelId);
 
             //
             // Check if fullscreen exists
@@ -146,9 +178,18 @@ $(function(){
             // Data panel
             //
             if (panelType === 'collection-data') {
-                var $collectionDataContent = $('.wgst-panel[data-panel-id="' + panelId + '"]').find('.collection-details');
-                $fullscreen.append($collectionDataContent.clone(true));
-            
+                var $collectionDataContent = $('.wgst-panel[data-panel-id="' + panelId + '"]').find('.wgst-panel-body');
+                //$fullscreen.append($collectionDataContent.clone(true));
+
+                $collectionDataContent.clone(true).appendTo($fullscreen);
+
+                //
+                // Hide controls
+                //
+                $fullscreen.find('.wgst-collection-controls').addClass('hide-this');
+
+//$('[data-toggle="tooltip"]').tooltip('destroy');
+
             //
             // Map panel
             //
@@ -159,16 +200,8 @@ $(function(){
                 //
                 $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
                     .find('.wgst-map')
-                    .append(window.WGST.geo.map.canvas.getDiv());
+                    .replaceWith(window.WGST.geo.map.canvas.getDiv());
 
-                // $('.wgst-panel[data-panel-id="' + panelId + '"]')
-                //     .find('.wgst-panel-body-content')
-                //     .html('')
-                //     .append(window.WGST.geo.map.canvas.getDiv());
-
-
-                // var $collectionDataContent = $('.wgst-panel[data-panel-id="' + panelId + '"]').find('.collection-details');
-                // $fullscreen.append($collectionDataContent.clone(true));
             }
 
             //
@@ -177,9 +210,26 @@ $(function(){
             window.WGST.exports.showFullscreen(fullscreenId);
 
             //
+            // Resize map
+            //
+            if (panelType === 'collection-map') {
+
+                google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
+
+            }
+
+            //
             // Remove panel
             //
             window.WGST.exports.removePanel(panelId);
+
+            //
+            // Trigger Twitter Bootstrap tooltip
+            //
+            console.debug('>>>> WATCH this one: ' + $('[data-toggle="tooltip"]').length);
+
+            //$('[data-toggle="tooltip"]').tooltip();
+
         };
 
 

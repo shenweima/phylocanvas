@@ -142,13 +142,13 @@ $(function(){
         //
         // Show app page
         //
-        $('.wgst-page__app').show();
+        $('.wgst-page__app').removeClass('hide-this');
     } else {
 
         //
         // Show default page
         //
-        $('.wgst-page__landing').show();
+        $('.wgst-page__landing').removeClass('hide-this');
 
         return;
     }
@@ -159,18 +159,31 @@ $(function(){
     }
 
     //
-    // Create default fullscreen
+    // Init Bootstrap Tooltip
     //
-    //window.WGST.exports.createFullscreen('collection-map');
-    window.WGST.exports.createFullscreen('collection-map', {
-        fullscreenType: 'collection-map',
-        fullscreenId: 'collection-map__' + window.WGST.requestedCollectionId || 'new'
+    $('body').tooltip({
+        selector: '[data-toggle="tooltip"]'
     });
 
     //
-    // Show fullscreen
+    // Create default fullscreen
     //
-    window.WGST.exports.showFullscreen('map');
+    var defaultFullscreenType = 'collection-map';
+    var defaultFullscreenId = defaultFullscreenType + '__' + 'NEW';
+
+    if (window.WGST.requestedCollectionId !== 'undefined') {
+        var defaultFullscreenId = defaultFullscreenType + '__' + window.WGST.requestedCollectionId;
+    }
+
+    window.WGST.exports.createFullscreen(defaultFullscreenType, {
+        fullscreenType: defaultFullscreenType,
+        fullscreenId: defaultFullscreenId
+    });
+
+    //
+    // Show default fullscreen
+    //
+    window.WGST.exports.showFullscreen(defaultFullscreenId);
 
 
 
@@ -563,64 +576,7 @@ $(function(){
 
     })();
 
-    /**
-     * Description
-     * @method createAssemblyResistanceProfilePreviewString
-     * @param {} assemblyResistanceProfile
-     * @param {} antibiotics
-     * @return assemblyResistanceProfileHtml
-     */
-    var createAssemblyResistanceProfilePreviewString = function(assemblyResistanceProfile, antibiotics) {
-        var assemblyResistanceProfileHtml = '',
-            antibioticGroup,
-            antibioticGroupName,
-            antibioticGroupHtml,
-            antibioticName,
-            // Store single antibiotic HTML string
-            antibioticHtml,
-            // Store all antibiotic HTML strings
-            antibioticsHtml,
-            antibioticResistanceState;
 
-        // Parse each antibiotic group
-        for (antibioticGroupName in antibiotics) {
-            if (antibiotics.hasOwnProperty(antibioticGroupName)) {
-                antibioticGroup = antibiotics[antibioticGroupName];
-                antibioticGroupHtml = '  ';
-                antibioticsHtml = '';
-                // Parse each antibiotic
-                for (antibioticName in antibioticGroup) {
-                    if (antibioticGroup.hasOwnProperty(antibioticName)) {
-                        // Store single antibiotic HTML string
-                        antibioticHtml = '';
-                        // Antibiotic found in Resistance Profile for this assembly
-                        if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
-                            if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
-                                antibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
-                                if (antibioticResistanceState === 'RESISTANT') {
-                                    antibioticHtml = antibioticHtml + '⦿';
-                                } else if (antibioticResistanceState === 'SENSITIVE') {
-                                    antibioticHtml = antibioticHtml + '○';
-                                } else {
-                                    antibioticHtml = antibioticHtml + '○';
-                                }
-                            } else {
-                                antibioticHtml = antibioticHtml + '○';
-                            }
-                        } else {
-                            antibioticHtml = antibioticHtml + '○';
-                        }
-                        // Concatenate all antibiotic HTML strings into a single string
-                        antibioticsHtml = antibioticsHtml + antibioticHtml;
-                    } // if
-                } // for
-                antibioticGroupHtml = antibioticGroupHtml + antibioticsHtml;
-                assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
-            } // if
-        } // for
-
-        return assemblyResistanceProfileHtml;
-    };
 
 
 
@@ -1430,17 +1386,7 @@ $(function(){
         }
     };
 
-    // User wants to show/hide all assemblies on map
-    $('input[type="checkbox"].show-all-assemblies-on-map').on('change', function(e) {
-        var showOnMapCheckboxes = $(this).closest('.collection-details').find('.collection-assembly-list .assembly-list-header-map input[type="checkbox"]');
-        if ($(this).prop('checked')) {
-            // Check all
-            showOnMapCheckboxes.prop('checked', true).trigger('change');
-        } else {
-            // Uncheck all
-            showOnMapCheckboxes.prop('checked', false).trigger('change');
-        }
-    });
+
 
     /**
      * Description
@@ -1823,78 +1769,7 @@ $(function(){
 
     // });
 
-    $('body').on('click', '.wgst-tree-control__merge-collection-trees', function(){
 
-        var mergeButton = $(this);
-
-        mergeButton.attr('disabled', true);
-        mergeButton.find('.wgst-spinner-label').hide();
-        mergeButton.find('.wgst-spinner').show();
-
-        //-----------------------------
-        // Remove after demo
-        //
-        var mapCollectionIdToMergeTreeId = {
-            '5324c298-4cd0-4329-848b-30d7fe28a560': 'ab66c759-2242-42c2-a245-d364fcbc7c4f',
-            'c0ca8c57-11b9-4e27-93a5-6ffe841e7768': '2b3ad477-323c-4c54-b6f2-abc420ba0399'
-        };
-        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
-        if (mapCollectionIdToMergeTreeId.hasOwnProperty(collectionId)) {
-            demoMergeCollectionTrees(mapCollectionIdToMergeTreeId[collectionId]);
-            return;
-        }
-        //-----------------------------
-
-        var requestData = {
-            collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
-            mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
-            collectionTreeType: mergeButton.attr('data-collection-tree-type'),
-            socketRoomId: WGST.socket.roomId
-        };
-
-        console.log('[WGST] Requesting to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
-
-        // Merge collection trees
-        $.ajax({
-            type: 'POST',
-            url: '/api/collection/tree/merge',
-            datatype: 'json', // http://stackoverflow.com/a/9155217
-            data: requestData
-        })
-        .done(function(mergeRequestSent, textStatus, jqXHR) {
-            console.log('[WGST] Requested to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
-        });
-
-    });
-
-    var demoMergeCollectionTrees = function(mergeTreeId) {
-        var mergeButton = $(this);
-
-        mergeButton.attr('disabled', true);
-        mergeButton.find('.wgst-spinner-label').hide();
-        mergeButton.find('.wgst-spinner').show();
-
-        var requestData = {
-            mergeTreeId: mergeTreeId,
-            //collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
-            //mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
-            //collectionTreeType: mergeButton.attr('data-collection-tree-type'),
-            socketRoomId: WGST.socket.roomId
-        };
-
-        console.log('[WGST] Requesting merge tree');
-
-        // Merge collection trees
-        $.ajax({
-            type: 'POST',
-            url: '/api/collection/merged',
-            datatype: 'json', // http://stackoverflow.com/a/9155217
-            data: requestData
-        })
-        .done(function(mergeRequestSent, textStatus, jqXHR) {
-            console.log('[WGST] Requested merge tree');
-        });
-    };
 
     /**
      * Description

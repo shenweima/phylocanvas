@@ -387,7 +387,7 @@ $(function(){
 	        collectionAssemblyList[0].appendChild(assemblyListItems.cloneNode(true));
 	        collectionAssemblyListFull[0].appendChild(assemblyListItems.cloneNode(true));
 
-	        $('.antibiotic[data-toggle="tooltip"]').tooltip();
+	        //$('.antibiotic[data-toggle="tooltip"]').tooltip();
 
 	        // Check checkboxes
 	        $('.show-on-map-checkbox input[type="checkbox"]').prop('checked', true).change();
@@ -461,26 +461,18 @@ $(function(){
 	        console.log('[WGST] Maximizing collection ' + collectionId);
 
 	        //
-	        // Put map into panel
+	        // Bring fullscreen into panel
 	        //
 	        var fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
-
-
-	        console.log('L: ' + $('.wgst-fullscreen').length);
-
-	        //var panelId = $('.wgst-panel[data-panel-type="collection-data"][data-collection-id="' + collectionId + '"]').attr('data-panel-id');
 	        var panelId = fullscreenId;
 	        
-	        //console.debug($('.wgst-panel[data-panel-type="collection-data"][data-collection-id="' + collectionId + '"]').length);
-
 	        console.debug('fullscreenId: ' + fullscreenId);
 	        console.debug('panelId: ' + panelId);
 
 	        window.WGST.exports.bringFullscreenToPanel(fullscreenId, panelId);
-	        //bringFullscreenToPanel('map');
 
 	        //
-	        // Put collection data into fullscreen
+	        // Bring panel into fullscreen
 	        //
 	        var panelId = 'collection-data__' + collectionId,
 	        	fullscreenId = 'collection-data';
