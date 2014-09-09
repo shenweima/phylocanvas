@@ -1,8 +1,8 @@
 $(function() {
 
 	if (! window.chrome) {
-		$('.wgst-landing-buttons').hide();
-		$('.wgst-chrome-only').show();
+		//$('.wgst-landing-buttons').hide();
+		$('.wgst-chrome-only').removeClass('hide-this');
 	}
 
 	$('.wgst-button__create-new-collection').on('click', function(){
