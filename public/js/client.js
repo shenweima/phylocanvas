@@ -607,6 +607,8 @@ $(function(){
     // If user provided collection id in url then load requested collection
     if (typeof WGST.requestedCollectionId !== 'undefined') {
         window.WGST.exports.getCollection(WGST.requestedCollectionId);
+    } else {
+        $('.wgst-header-collection-name').text('New');
     }
 
 

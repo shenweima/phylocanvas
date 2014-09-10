@@ -3,6 +3,14 @@ $(function(){
 	(function(){
 
 		//
+		// Map collection id to collection name
+		//
+		window.WGST.exports.mapCollectionIdToCollectionName = {
+			'5324c298-4cd0-4329-848b-30d7fe28a560': 'EMRSA15',
+			'c0ca8c57-11b9-4e27-93a5-6ffe841e7768': 'ST239'
+		};
+
+		//
 		// Init collection data structure
 		//
 	    window.WGST.exports.initCollectionDataStructure = function(collectionId, collectionTreeTypes) {
@@ -145,6 +153,15 @@ $(function(){
 	                //
 	               	// window.WGST.exports.togglePanel(collectionPanelId);
 	                window.WGST.exports.showPanel(collectionPanelId);
+
+	                //
+	                // Set collection name in header
+	                //
+	                if (typeof window.WGST.exports.mapCollectionIdToCollectionName[collectionId] !== 'undefined') {
+	                	$('.wgst-header-collection-name').text(window.WGST.exports.mapCollectionIdToCollectionName[collectionId]);
+	                } else {
+	                	$('.wgst-header-collection-name').text(collectionId);
+	                }
 
 	        // ----------------------------------------
 	        // Init collection panel
