@@ -71,6 +71,18 @@ $(function(){
             }
 
             //
+            // Filter out assembly upload panels
+            //
+            else if (hidableId === 'assembly-upload-navigation'
+                    || hidableId === 'assembly-upload-analytics'
+                    || hidableId === 'assembly-upload-metadata'
+                    || hidableId === 'assembly-upload-progress') {
+
+                templateContext.noFullscreen = true;
+                templateContext.close = false;
+            }
+
+            //
             // Render
             //
             var hidableTemplateSource = $('.wgst-template[data-template-id="' + templateId + '"]').html(),
@@ -117,7 +129,22 @@ $(function(){
         };
 
         window.WGST.exports.hidablePanelRemoved = function(panelId) {
-            window.WGST.exports.hidablePanelHidden(panelId);
+
+            //
+            // Handle special case: assembly upload panels
+            //
+            if (panelId === 'assembly-upload-analytics'
+                || panelId === 'assembly-upload-metadata'
+                || panelId === 'assembly-upload-navigation'
+                || panelId === 'assembly-upload-progress') {
+
+                window.WGST.exports.removeHidable(panelId);
+
+            } else {
+
+                window.WGST.exports.hidablePanelHidden(panelId);
+
+            }
         };
 
         window.WGST.exports.hidableFullscreenShown = function(panelId) {

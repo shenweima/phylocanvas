@@ -17,9 +17,9 @@ $(function(){
 	        // Remove metadata marker
 	        window.WGST.geo.map.markers.metadata.setMap(null);
 
-	        //
-	        // Remove panels
-	        //
+            //
+            // Remove assembly upload panels
+            //
 	        window.WGST.exports.removePanel('assembly-upload-navigation');
 	        window.WGST.exports.removePanel('assembly-upload-metadata');
 	        window.WGST.exports.removePanel('assembly-upload-analytics');
