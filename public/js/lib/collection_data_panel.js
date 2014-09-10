@@ -23,8 +23,10 @@ $(function(){
             $('.wgst-panel__collection .collection-assembly-list').html('');
         };
 
+        //
         // User wants to show assembly on a map
-        $('body').on('change', '.wgst-panel__collection .collection-assembly-list input[type="checkbox"]', function(e) {
+        //
+        $('body').on('change', '.collection-assembly-list input[type="checkbox"]', function(e) {
 
             //======================================================
             // Map
@@ -531,21 +533,21 @@ $(function(){
         //
         $('body').on('change', 'input[type="checkbox"].show-all-assemblies-on-map', function(e) {
 
-            var showOnMapCheckboxes = $(this).closest('.collection-details').find('.collection-assembly-list .assembly-list-header-map input[type="checkbox"]');
+            var $showOnMapCheckboxes = $(this).closest('.collection-details').find('.collection-assembly-list .assembly-list-header-map input[type="checkbox"]');
             
             if ($(this).prop('checked')) {
 
                 //
                 // Check all
                 //
-                showOnMapCheckboxes.prop('checked', true).trigger('change');
+                $showOnMapCheckboxes.prop('checked', true).trigger('change');
 
             } else {
                 
                 //
                 // Uncheck all
                 //
-                showOnMapCheckboxes.prop('checked', false).trigger('change');
+                $showOnMapCheckboxes.prop('checked', false).trigger('change');
             }
         });
 
