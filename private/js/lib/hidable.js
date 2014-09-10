@@ -16,10 +16,10 @@ $(function(){
             if (typeof hidableId.split('__')[2] !== 'undefined') {
                 if (hidableId.split('__')[2] === 'COLLECTION_TREE' || hidableId.split('__')[2] === 'CORE_ALLELE_TREE') {
                     return;
-                    
+
                 } else if (hidableId.split('__')[2] === 'CORE_TREE_RESULT') {
                     var options = options || {};
-                    options.hidableLabel = "Core Mutations Tree";
+                    options.hidableLabel = "Tree";
                 }
             }
 
