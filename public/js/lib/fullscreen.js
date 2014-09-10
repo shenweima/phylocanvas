@@ -73,7 +73,7 @@ $(function(){
             window.WGST.exports.hidableFullscreenShown(fullscreenId);
         };
 
-        window.WGST.exports.bringFullscreenToTop = function(fullscreenId) {
+        window.WGST.exports.bringFullscreenToFront = function(fullscreenId) {
 
             $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').css('z-index', '9999');
         
@@ -84,7 +84,7 @@ $(function(){
         };
 
         window.WGST.exports.bringFullscreenToBack = function(fullscreenId) {
-            
+
             $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').css('z-index', 'auto');
         
             //

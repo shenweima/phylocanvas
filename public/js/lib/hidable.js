@@ -183,7 +183,7 @@ $(function(){
             //
             } else {
 
-                window.WGST.exports.bringFullscreenToTop(hidableId);
+                window.WGST.exports.bringFullscreenToFront(hidableId);
 
             }
 
