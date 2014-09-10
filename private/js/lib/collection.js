@@ -7,7 +7,8 @@ $(function(){
 		//
 		window.WGST.exports.mapCollectionIdToCollectionName = {
 			'5324c298-4cd0-4329-848b-30d7fe28a560': 'EMRSA15',
-			'c0ca8c57-11b9-4e27-93a5-6ffe841e7768': 'ST239'
+			'c0ca8c57-11b9-4e27-93a5-6ffe841e7768': 'ST239',
+			'b8d3aab1-625f-49aa-9857-a5e97f5d6be5': 'Reference'
 		};
 
 		//
@@ -104,9 +105,6 @@ $(function(){
 	                // Set collection data
 	                //
 	                window.WGST.exports.setCollectionData(collectionId, data.collection.assemblies, data.collection.tree);
-
-	                console.debug('[IMPORTANT]');
-	                console.dir(window.WGST.collection[collectionId]);
 
 	                //
 	                // Create collection data panel
