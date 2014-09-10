@@ -15,22 +15,37 @@ $(function(){
 
         window.WGST.exports.createPanel = function(panelType, templateContext) {
 
-            console.debug('$$$ panelType: ' + panelType);
-            console.dir(templateContext);
-
         	//
         	// Check if panel already exists
         	//
         	if ($('.wgst-panel[data-panel-id="' + templateContext.panelId + '"]').length > 0) {
+
+        		//
+        		// Show panel
+        		//
+        		window.WGST.exports.showPanel(templateContext.panelId);
+
         		return;
         	}
 
+        	//
+        	// Get panel's label
+        	//
+        	templateContext.panelLabel = window.WGST.exports.getContainerLabel({
+        		containerName: 'panel', 
+        		containerType: panelType,
+        		containerId: templateContext.panelId
+        	});
+
+        	//
+        	// Render
+        	//
             var templateId = window.WGST.exports.mapPanelTypeToTemplateId[panelType],
                 panelTemplateSource = $('.wgst-template[data-template-id="' + templateId + '"]').html(),
                 panelTemplate = Handlebars.compile(panelTemplateSource),
                 panelHtml = panelTemplate(templateContext);
 
-            $('.wgst-page__app').prepend(panelHtml);
+            $('.wgst-workspace').prepend(panelHtml);
 
         	var $panel = $('.wgst-panel[data-panel-id="' + templateContext.panelId + '"]');
 
@@ -48,21 +63,64 @@ $(function(){
 	                // WGST.panels[panelName].left = ui.position.left;
 	            }
 	        });
+
+	        //
+	        // Create hidable
+	        //
+	        window.WGST.exports.createHidable(templateContext.panelId, templateContext.panelLabel);
         };
 
         window.WGST.exports.removePanel = function(panelId) {
         	$('.wgst-panel[data-panel-id="' + panelId + '"]').remove();
+
+        	//
+        	// Update hidable state
+        	//
+        	window.WGST.exports.hidablePanelRemoved(panelId);
         };
 
         window.WGST.exports.showPanel = function(panelId) {
         	$('.wgst-panel[data-panel-id="' + panelId + '"]').removeClass('hide-this invisible-this');
+
+        	//
+        	// Update hidable state
+        	//
+        	window.WGST.exports.hidablePanelShown(panelId);
         };
 
         window.WGST.exports.hidePanel = function(panelId) {
         	$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('hide-this');
+
+        	//
+        	// Update hidable state
+        	//
+        	window.WGST.exports.hidablePanelHidden(panelId);
         };
 
-	    window.WGST.exports.bringPanelToTop = function(panelId) {
+        window.WGST.exports.togglePanel = function(panelId) {
+        	var $panel = $('.wgst-panel[data-panel-id="' + panelId + '"]');
+
+    		//
+    		// Toggle panel
+    		//
+    		if ($panel.is('.hide-this, .invisible-this')) {
+
+        		//
+        		// Show panel
+        		//
+        		window.WGST.exports.showPanel(panelId);
+
+    		} else {
+
+        		//
+        		// Hide panel
+        		//
+        		window.WGST.exports.hidePanel(panelId);
+
+    		}
+        };
+
+	    window.WGST.exports.bringPanelToFront = function(panelId) {
 	        var zIndexHighest = 0;
 
 	        $('.wgst-panel').each(function(){
@@ -73,6 +131,65 @@ $(function(){
 	        });
 
 	        $('[data-panel-id="' + panelId + '"]').css('zIndex', zIndexHighest + 1);
+	    };
+
+	    window.WGST.exports.maximizePanel = function(panelId) {
+
+	        var fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
+
+	        //
+	        // Bring fullscreen into panel
+	        //
+	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
+
+	        //
+	        // Bring panel into fullscreen
+	        //
+	        window.WGST.exports.bringPanelToFullscreen(panelId);
+
+	    };
+
+	    window.WGST.exports.getContainerLabel = function(options) {
+
+	    	//
+	    	// Options:
+	    	//
+	    	// containerName: "panel" or "fullscreen"
+	    	// containerType: panelType or fullscreenType
+	    	// containerId: panelId or fullscreenId
+	    	//
+	    	//
+	    	//
+
+	    	console.debug('getContainerLabel:');
+        	console.dir(options);
+
+        	var containerLabel = 'Anonymous';
+
+        	//
+        	// Prepare container's label
+        	//
+        	if (options.containerType === 'collection-data') {
+
+        		containerLabel = 'Data';
+
+        	} else if (options.containerType === 'collection-map') {
+
+        		containerLabel = 'Map';
+
+        	} else if (options.containerType === 'collection-tree') {
+
+        		var treeType = options.containerId.split('__')[2];
+
+        		containerLabel = treeType.replace(/[_]/g, ' ').toLowerCase().capitalize();
+
+        	} else if (options.containerType === 'assembly') {
+
+        		containerLabel = 'Assembly';
+
+        	}
+
+        	return containerLabel;
 	    };
 
 		$('body').on('click', '.wgst-panel-control-button__close', function(){
@@ -86,7 +203,7 @@ $(function(){
 	    // Bring to front selected panel
 	    //
 	    $('body').on('mousedown', '.wgst-panel', function(){
-	        window.WGST.exports.bringPanelToTop($(this).attr('data-panel-id'));
+	        window.WGST.exports.bringPanelToFront($(this).attr('data-panel-id'));
 	    });
 
         $('body').on('click', '.wgst-panel-control-button__maximize', function(){
@@ -98,7 +215,7 @@ $(function(){
 	        var fullscreenId = $fullscreen.attr('data-fullscreen-id');
 	        var panelId = fullscreenId;
 
-	        window.WGST.exports.bringFullscreenToPanel(fullscreenId, panelId);
+	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
 
 	        //
 	        // Bring panel to fullscreen

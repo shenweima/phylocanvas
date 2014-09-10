@@ -1,1 +1,401 @@
-$(function(){!function(){$(".tree-controls-show-labels").on("click",function(){var e=$(this).closest(".wgst-panel").attr("data-collection-id");WGST.collection[e].tree.CORE_TREE_RESULT.canvas.displayLabels()}),$(".tree-controls-hide-labels").on("click",function(){var e=$(this).closest(".wgst-panel").attr("data-collection-id");WGST.collection[e].tree.CORE_TREE_RESULT.canvas.hideLabels()}),$("body").on("change",".wgst-tree-control__change-node-label",function(){var e,t=$(this),n=t.closest(".wgst-panel").attr("data-collection-id"),s=t.closest(".wgst-panel").attr("data-collection-tree-type"),a=WGST.collection[n].tree[s].canvas,l=WGST.collection[n].assemblies;if("1"===t.val())for(e in l)l.hasOwnProperty(e)&&a.branches[e]&&a.branches[e].leaf&&(a.branches[e].label=l[e].ASSEMBLY_METADATA.userAssemblyId);else if("2"===t.val())for(e in l)l.hasOwnProperty(e)&&a.branches[e]&&a.branches[e].leaf&&(a.branches[e].label=WGST.collection[n].assemblies[e].FP_COMP.topScore.referenceId);else if("3"===t.val())for(e in l)l.hasOwnProperty(e)&&a.branches[e]&&a.branches[e].leaf&&(a.branches[e].label=0===l[e].MLST_RESULT.stType.length?"Not found":l[e].MLST_RESULT.stType);else if("4"===t.val()){var r,c;for(e in l)l.hasOwnProperty(e)&&(r=l[e].PAARSNP_RESULT.paarResult.resistanceProfile,c=o(r,WGST.antibiotics),a.branches[e]&&a.branches[e].leaf&&(a.branches[e].label=c))}else if("5"===t.val())for(e in l)l.hasOwnProperty(e)&&a.branches[e]&&a.branches[e].leaf&&(a.branches[e].label=l[e].ASSEMBLY_METADATA.geography.address);a.draw()}),$("body").on("change",".wgst-tree-control__change-node-colour",function(){var e,o=$(this).find("option:selected"),t=o.closest(".wgst-panel").attr("data-collection-id"),n=o.closest(".wgst-panel").attr("data-collection-tree-type"),s=WGST.collection[t].tree[n].canvas,a=WGST.collection[t].assemblies;if("0"===o.val())for(e in a)a.hasOwnProperty(e)&&s.setNodeColourAndShape(e,"#ffffff");else{var l,r;for(e in a)a.hasOwnProperty(e)&&(l=a[e].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile,r=l[o.text()],"undefined"!=typeof r?s.branches[e]&&s.branches[e].leaf&&("RESISTANT"===r.resistanceState?s.setNodeColourAndShape(e,"#ff0000"):"SENSITIVE"===r.resistanceState?s.setNodeColourAndShape(e,"#4dbd33"):"UNKNOWN"===r.resistanceState&&s.setNodeColourAndShape(e,"#ffffff")):s.branches[e]&&s.branches[e].leaf&&s.setNodeColourAndShape(e,"#ffffff"))}}),$("body").on("change",".wgst-tree-control__change-tree-type",function(){var e,o=$(this).find("option:selected"),t=o.closest(".wgst-panel").attr("data-collection-id"),n=o.closest(".wgst-panel").attr("data-collection-tree-type");e=WGST.collection[t].tree[n].canvas,e.setTreeType(o.val())}),window.WGST.socket.connection.on("collectionTreeMergeNotification",function(e){if(console.log("[WGST] Received merged tree notification"),WGST.speak){var o=new SpeechSynthesisUtterance("Merged collections");window.speechSynthesis.speak(o)}console.debug("mergedCollectionTreeData:"),console.dir(e);var t=e.mergedCollectionTreeId,n=e.tree,s=e.assemblies,a=[];a=s.map(function(e){return e.assemblyId}),console.log("[WGST] Getting merged collection assemblies"),console.dir(a),$.ajax({type:"POST",url:"/api/assemblies/",datatype:"json",data:{assemblyIds:a}}).done(function(e){console.log("[WGST] Got merged collection assemblies"),console.dir(e),window.WGST.exports.setCollectionData(t,e,n),window.WGST.exports.renderCollectionTrees(t,{matchAssemblyListButton:!0,mergeWithButton:!0});var o,s,a;for(o in window.WGST.collection[t].assemblies)WGST.collection[t].assemblies.hasOwnProperty(o)&&(s=window.WGST.collection[t].assemblies[o],a=s.FP_COMP.scores,window.WGST.collection[t].assemblies[o].FP_COMP.topScore=window.WGST.exports.calculateAssemblyTopScore(a));window.WGST.exports.addResistanceProfileDataToCollection(t),window.WGST.exports.populateListOfAntibiotics($("#select-tree-node-antibiotic-merged")),function(){var e=$(".wgst-tree-control__merge-collection-trees");e.find(".wgst-spinner").addClass("hide-this"),e.find(".wgst-spinner-label").removeClass("hide-this"),e.attr("disabled",!1)}();var l="MERGED",r="collection-tree__"+t+"__"+l;window.WGST.exports.showPanel(r),window.WGST.exports.bringPanelToTop(r)}).fail(function(e,o,t){console.error("[WGST][Error] ✗ Failed to get assemblies"),console.error(o),console.error(t),console.error(e)})}),$("body").on("click",".wgst-tree-control__merge-collection-trees",function(){var o=$(this);o.attr("disabled",!0),o.find(".wgst-spinner-label").addClass("hide-this"),o.find(".wgst-spinner").removeClass("hide-this");var t={"5324c298-4cd0-4329-848b-30d7fe28a560":"ab66c759-2242-42c2-a245-d364fcbc7c4f","c0ca8c57-11b9-4e27-93a5-6ffe841e7768":"2b3ad477-323c-4c54-b6f2-abc420ba0399"},n=$(this).closest(".wgst-panel").attr("data-collection-id");if(t.hasOwnProperty(n))return e(t[n]),void 0;var s={collectionId:o.closest(".wgst-panel").attr("data-collection-id"),mergeWithCollectionId:"b8d3aab1-625f-49aa-9857-a5e97f5d6be5",collectionTreeType:o.attr("data-collection-tree-type"),socketRoomId:WGST.socket.roomId};console.log("[WGST] Requesting to merge collection trees: "+s.collectionId+", "+s.mergeWithCollectionId),$.ajax({type:"POST",url:"/api/collection/tree/merge",datatype:"json",data:s}).done(function(){console.log("[WGST] Requested to merge collection trees: "+s.collectionId+", "+s.mergeWithCollectionId)})});var e=function(e){var o=$(this);o.attr("disabled",!0),o.find(".wgst-spinner-label").addClass("hide-this"),o.find(".wgst-spinner").removeClass("hide-this");var t={mergeTreeId:e,socketRoomId:WGST.socket.roomId};console.log("[WGST] Requesting merge tree"),$.ajax({type:"POST",url:"/api/collection/merged",datatype:"json",data:t}).done(function(){console.log("[WGST] Requested merge tree")})},o=function(e,o){var t,n,s,a,l,r,c,i="";for(n in o)if(o.hasOwnProperty(n)){t=o[n],s="  ",r="";for(a in t)t.hasOwnProperty(a)&&(l="","undefined"!=typeof e[n]?"undefined"!=typeof e[n][a]?(c=e[n][a].resistanceState,l+="RESISTANT"===c?"⦿":"SENSITIVE"===c?"○":"○"):l+="○":l+="○",r+=l);s+=r,i+=s}return i}}()});
+$(function(){
+
+	(function(){
+
+	    $('.tree-controls-show-labels').on('click', function(){
+	        // Get collection id
+	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+
+	        WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas.displayLabels();
+	    });
+
+	    $('.tree-controls-hide-labels').on('click', function(){
+	        // Get collection id
+	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+
+	        WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas.hideLabels();
+	    });
+
+	    $('body').on('change', '.wgst-tree-control__change-node-label', function(){
+	        var selectedOption = $(this),
+	            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
+	            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type');
+
+	        var treeCanvas = WGST.collection[collectionId].tree[collectionTreeType].canvas,
+	            assemblies = WGST.collection[collectionId].assemblies,
+	            assemblyId;
+
+	        if (selectedOption.val() === '1') {
+
+	            // Set user assembly id as node label
+	            for (assemblyId in assemblies) {
+	                if (assemblies.hasOwnProperty(assemblyId)) {
+	                    // Set label only to leaf nodes, filtering out the root node
+	                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+	                        treeCanvas.branches[assemblyId].label = assemblies[assemblyId].ASSEMBLY_METADATA.userAssemblyId;                 
+	                    }
+	                }
+	            }
+	            
+	        } else if (selectedOption.val() === '2') {
+
+	            // Set user assembly id as node label
+	            for (assemblyId in assemblies) {
+	                if (assemblies.hasOwnProperty(assemblyId)) {
+	                    // Set label only to leaf nodes, filtering out the root node
+	                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+	                        treeCanvas.branches[assemblyId].label = WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore.referenceId;              
+	                    }
+	                }
+	            }
+
+	        } else if (selectedOption.val() === '3') {
+
+	            // Set user assembly id as node label
+	            for (assemblyId in assemblies) {
+	                if (assemblies.hasOwnProperty(assemblyId)) {
+	                    // Set label only to leaf nodes, filtering out the root node
+	                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+	                        treeCanvas.branches[assemblyId].label = (assemblies[assemblyId]['MLST_RESULT'].stType.length === 0 ? 'Not found': assemblies[assemblyId]['MLST_RESULT'].stType);               
+	                    }
+	                }
+	            }
+
+	        } else if (selectedOption.val() === '4') {
+
+	            var assemblyResistanceProfile,
+	                resistanceProfileString;
+
+	            // Set user assembly id as node label
+	            for (assemblyId in assemblies) {
+	                if (assemblies.hasOwnProperty(assemblyId)) {
+
+	                    assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile,
+	                    resistanceProfileString = createAssemblyResistanceProfilePreviewString(assemblyResistanceProfile, WGST.antibiotics);
+
+	                    // Set label only to leaf nodes, filtering out the root node
+	                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+	                        treeCanvas.branches[assemblyId].label = resistanceProfileString;            
+	                    }
+	                }
+	            }
+
+	        } else if (selectedOption.val() === '5') {
+
+	            // Set user assembly id as node label
+	            for (assemblyId in assemblies) {
+	                if (assemblies.hasOwnProperty(assemblyId)) {
+	                    // Set label only to leaf nodes, filtering out the root node
+	                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
+	                        treeCanvas.branches[assemblyId].label = assemblies[assemblyId]['ASSEMBLY_METADATA'].geography.address;              
+	                    }
+	                }
+	            }
+	        }
+
+	        treeCanvas.draw();
+	    });
+
+	    $('body').on('change', '.wgst-tree-control__change-node-colour', function(){
+	        var selectedOption = $(this).find('option:selected'),
+	            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
+	            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type');
+
+	        var tree = WGST.collection[collectionId].tree[collectionTreeType].canvas,
+	            assemblies = WGST.collection[collectionId].assemblies,
+	            assemblyId;
+
+	        if (selectedOption.val() === '0') {
+	            // Colour assembly nodes according to default colour
+	            for (assemblyId in assemblies) {
+	                if (assemblies.hasOwnProperty(assemblyId)) {
+	                    tree.setNodeColourAndShape(assemblyId, '#ffffff');
+	                }
+	            } // for
+	        } else {
+	            var ungroupedResistanceProfile,
+	                antibioticResistance;
+
+	            // Colour assembly nodes according to resistance profile of selected antibiotic
+	            for (assemblyId in assemblies) {
+	                if (assemblies.hasOwnProperty(assemblyId)) {
+
+	                    ungroupedResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.ungroupedResistanceProfile;
+	                    antibioticResistance = ungroupedResistanceProfile[selectedOption.text()];
+
+	                    // Check assembly has resistance profile for this antibiotic
+	                    if (typeof antibioticResistance !== 'undefined') {
+	                        if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
+	                            if (antibioticResistance.resistanceState === 'RESISTANT') {
+	                                // Red
+	                                tree.setNodeColourAndShape(assemblyId, '#ff0000');                 
+	                            } else if (antibioticResistance.resistanceState === 'SENSITIVE') {
+	                                // Green
+	                                tree.setNodeColourAndShape(assemblyId, '#4dbd33');                 
+	                            } else if (antibioticResistance.resistanceState === 'UNKNOWN') {
+	                                // White
+	                                tree.setNodeColourAndShape(assemblyId, '#ffffff');
+	                            }
+	                        }                        
+	                    } else {
+	                    // Assembly has no resistance profile for this antibiotic
+	                        if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
+	                            // Black
+	                            tree.setNodeColourAndShape(assemblyId, '#ffffff');
+	                        }
+	                    }
+	                } // if
+	            } // for
+	        } // if
+	    });
+
+	    $('body').on('change', '.wgst-tree-control__change-tree-type', function(){
+	        var selectedOption = $(this).find('option:selected'),
+	            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
+	            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type'),
+	            tree;
+
+	        // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
+	        //     tree = WGST.mergedCollectionTree[collectionId].tree.canvas;
+	        // } else {
+	        //     tree = WGST.collection[collectionId].tree.canvas;
+	        // }
+
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        tree.setTreeType(selectedOption.val());
+	    });
+
+	    window.WGST.socket.connection.on('collectionTreeMergeNotification', function(mergedCollectionTreeData) {
+	        console.log('[WGST] Received merged tree notification');
+
+	        if (WGST.speak) {
+	            var message = new SpeechSynthesisUtterance('Merged collections');
+	            window.speechSynthesis.speak(message);
+	        }
+
+	        console.debug('mergedCollectionTreeData:');
+	        console.dir(mergedCollectionTreeData);
+
+	        var collectionId = mergedCollectionTreeData.mergedCollectionTreeId,
+	            collectionTree = mergedCollectionTreeData.tree,
+	            assemblyIdsData = mergedCollectionTreeData.assemblies,
+	            assemblyIds = [];
+
+	        assemblyIds = assemblyIdsData.map(function(assembly){
+	            return assembly.assemblyId;
+	        });
+
+	        // ------------------------------------------
+	        // Get assemblies
+	        // ------------------------------------------
+	        console.log('[WGST] Getting merged collection assemblies');
+	        console.dir(assemblyIds);
+
+	        $.ajax({
+	            type: 'POST',
+	            url: '/api/assemblies/',
+	            datatype: 'json', // http://stackoverflow.com/a/9155217
+	            data: {
+	                assemblyIds: assemblyIds
+	            }
+	        })
+	        .done(function(assemblies, textStatus, jqXHR) {
+	            console.log('[WGST] Got merged collection assemblies');
+	            console.dir(assemblies);
+
+                //
+                // Set collection data
+                //
+                window.WGST.exports.setCollectionData(collectionId, assemblies, collectionTree);
+
+	            //window.WGST.exports.initCollectionDataStructure(collectionId, assemblies, collectionTree);
+	            window.WGST.exports.renderCollectionTrees(collectionId, {
+	                // Show buttons
+	                matchAssemblyListButton: true,
+	                mergeWithButton: true
+	            });
+
+	            // ------------------------------------------
+	            // Prepare nearest representative
+	            // ------------------------------------------
+	            var assemblyId,
+	                assembly,
+	                assemblyScores;
+
+	            for (assemblyId in window.WGST.collection[collectionId].assemblies) {
+	                if (WGST.collection[collectionId].assemblies.hasOwnProperty(assemblyId)) {
+	                    assembly = window.WGST.collection[collectionId].assemblies[assemblyId];
+	                    assemblyScores = assembly['FP_COMP'].scores;
+	                    // Set top score
+	                    window.WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore = window.WGST.exports.calculateAssemblyTopScore(assemblyScores);
+	                } // if
+	            } // for
+
+	            //window.WGST.exports.addResistanceProfileToCollection(collectionId);
+	            window.WGST.exports.addResistanceProfileDataToCollection(collectionId);
+	            window.WGST.exports.populateListOfAntibiotics($('#select-tree-node-antibiotic-merged'));
+
+	            // ------------------------------------------
+	            // Enable Merge Collections button
+	            // ------------------------------------------
+	            (function() {
+	                var mergeCollectionTreesButton = $('.wgst-tree-control__merge-collection-trees');
+	                mergeCollectionTreesButton.find('.wgst-spinner').addClass('hide-this');
+	                mergeCollectionTreesButton.find('.wgst-spinner-label').removeClass('hide-this');
+	                mergeCollectionTreesButton.attr('disabled', false);
+	            }());
+
+
+
+
+
+	            //
+	            // Show tree panel
+	            //
+	            var collectionTreeType = 'MERGED',
+	                collectionTreePanelId = 'collection-tree' + '__' + collectionId + '__' + collectionTreeType;
+
+	            window.WGST.exports.showPanel(collectionTreePanelId);
+	            
+	            //
+	            // Bring to front
+	            //
+	            window.WGST.exports.bringPanelToFront(collectionTreePanelId);
+
+	        })
+	        .fail(function(jqXHR, textStatus, errorThrown) {
+	            console.error('[WGST][Error] ✗ Failed to get assemblies');
+	            console.error(textStatus);
+	            console.error(errorThrown);
+	            console.error(jqXHR);
+
+	        });
+	    });
+
+	    $('body').on('click', '.wgst-tree-control__merge-collection-trees', function(){
+
+	        var mergeButton = $(this);
+
+	        mergeButton.attr('disabled', true);
+	        mergeButton.find('.wgst-spinner-label').addClass('hide-this');
+	        mergeButton.find('.wgst-spinner').removeClass('hide-this');
+
+	        //-----------------------------
+	        // Remove after demo
+	        //
+	        var mapCollectionIdToMergeTreeId = {
+	            '5324c298-4cd0-4329-848b-30d7fe28a560': 'ab66c759-2242-42c2-a245-d364fcbc7c4f',
+	            'c0ca8c57-11b9-4e27-93a5-6ffe841e7768': '2b3ad477-323c-4c54-b6f2-abc420ba0399'
+	        };
+	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+	        if (mapCollectionIdToMergeTreeId.hasOwnProperty(collectionId)) {
+	            demoMergeCollectionTrees(mapCollectionIdToMergeTreeId[collectionId]);
+	            return;
+	        }
+	        //-----------------------------
+
+	        var requestData = {
+	            collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
+	            mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+	            collectionTreeType: mergeButton.attr('data-collection-tree-type'),
+	            socketRoomId: WGST.socket.roomId
+	        };
+
+	        console.log('[WGST] Requesting to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
+
+	        // Merge collection trees
+	        $.ajax({
+	            type: 'POST',
+	            url: '/api/collection/tree/merge',
+	            datatype: 'json', // http://stackoverflow.com/a/9155217
+	            data: requestData
+	        })
+	        .done(function(mergeRequestSent, textStatus, jqXHR) {
+	            console.log('[WGST] Requested to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
+	        });
+
+	    });
+
+	    var demoMergeCollectionTrees = function(mergeTreeId) {
+	        var mergeButton = $(this);
+
+	        mergeButton.attr('disabled', true);
+	        mergeButton.find('.wgst-spinner-label').addClass('hide-this');
+	        mergeButton.find('.wgst-spinner').removeClass('hide-this');
+
+	        var requestData = {
+	            mergeTreeId: mergeTreeId,
+	            //collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
+	            //mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+	            //collectionTreeType: mergeButton.attr('data-collection-tree-type'),
+	            socketRoomId: WGST.socket.roomId
+	        };
+
+	        console.log('[WGST] Requesting merge tree');
+
+	        // Merge collection trees
+	        $.ajax({
+	            type: 'POST',
+	            url: '/api/collection/merged',
+	            datatype: 'json', // http://stackoverflow.com/a/9155217
+	            data: requestData
+	        })
+	        .done(function(mergeRequestSent, textStatus, jqXHR) {
+	            console.log('[WGST] Requested merge tree');
+	        });
+	    };
+
+	    var createAssemblyResistanceProfilePreviewString = function(assemblyResistanceProfile, antibiotics) {
+	        var assemblyResistanceProfileHtml = '',
+	            antibioticGroup,
+	            antibioticGroupName,
+	            antibioticGroupHtml,
+	            antibioticName,
+	            // Store single antibiotic HTML string
+	            antibioticHtml,
+	            // Store all antibiotic HTML strings
+	            antibioticsHtml,
+	            antibioticResistanceState;
+
+	        // Parse each antibiotic group
+	        for (antibioticGroupName in antibiotics) {
+	            if (antibiotics.hasOwnProperty(antibioticGroupName)) {
+	                antibioticGroup = antibiotics[antibioticGroupName];
+	                antibioticGroupHtml = '  ';
+	                antibioticsHtml = '';
+	                // Parse each antibiotic
+	                for (antibioticName in antibioticGroup) {
+	                    if (antibioticGroup.hasOwnProperty(antibioticName)) {
+	                        // Store single antibiotic HTML string
+	                        antibioticHtml = '';
+	                        // Antibiotic found in Resistance Profile for this assembly
+	                        if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
+	                            if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
+	                                antibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
+	                                if (antibioticResistanceState === 'RESISTANT') {
+	                                    antibioticHtml = antibioticHtml + '⦿';
+	                                } else if (antibioticResistanceState === 'SENSITIVE') {
+	                                    antibioticHtml = antibioticHtml + '○';
+	                                } else {
+	                                    antibioticHtml = antibioticHtml + '○';
+	                                }
+	                            } else {
+	                                antibioticHtml = antibioticHtml + '○';
+	                            }
+	                        } else {
+	                            antibioticHtml = antibioticHtml + '○';
+	                        }
+	                        // Concatenate all antibiotic HTML strings into a single string
+	                        antibioticsHtml = antibioticsHtml + antibioticHtml;
+	                    } // if
+	                } // for
+	                antibioticGroupHtml = antibioticGroupHtml + antibioticsHtml;
+	                assemblyResistanceProfileHtml = assemblyResistanceProfileHtml + antibioticGroupHtml;
+	            } // if
+	        } // for
+
+	        return assemblyResistanceProfileHtml;
+	    };
+
+	})();
+});

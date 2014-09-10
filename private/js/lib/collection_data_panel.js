@@ -244,7 +244,7 @@ $(function(){
             //$('[data-panel-id="' + collectionTreePanelId + '"]').css('visibility', 'visible');
 
             window.WGST.exports.showPanel(collectionTreePanelId);
-            window.WGST.exports.bringPanelToTop(collectionTreePanelId);
+            window.WGST.exports.bringPanelToFront(collectionTreePanelId);
 
             // window.WGST.exports.activatePanel(collectionTreePanelId);
             // window.WGST.exports.showPanel(collectionTreePanelId);

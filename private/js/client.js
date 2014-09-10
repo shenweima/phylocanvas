@@ -166,24 +166,24 @@ $(function(){
     });
 
     //
-    // Create default fullscreen
+    // Create fullscreen
     //
-    var defaultFullscreenType = 'collection-map';
-    var defaultFullscreenId = defaultFullscreenType + '__' + 'NEW';
+    var fullscreenType = 'collection-map';
+    var fullscreenId = fullscreenType + '__' + 'NEW';
 
     if (window.WGST.requestedCollectionId !== 'undefined') {
-        var defaultFullscreenId = defaultFullscreenType + '__' + window.WGST.requestedCollectionId;
+        var fullscreenId = fullscreenType + '__' + window.WGST.requestedCollectionId;
     }
 
-    window.WGST.exports.createFullscreen(defaultFullscreenType, {
-        fullscreenType: defaultFullscreenType,
-        fullscreenId: defaultFullscreenId
+    window.WGST.exports.createFullscreen(fullscreenId, {
+        fullscreenType: fullscreenType,
+        fullscreenId: fullscreenId
     });
 
     //
     // Show default fullscreen
     //
-    window.WGST.exports.showFullscreen(defaultFullscreenId);
+    window.WGST.exports.showFullscreen(fullscreenId);
 
 
 
@@ -1420,83 +1420,83 @@ $(function(){
 
 
 
-    // User wants to select representative tree branch
-    $('.collection-assembly-list').on('change', 'input[type="radio"]', function(e) {
+    // // User wants to select representative tree branch
+    // $('.collection-assembly-list').on('change', 'input[type="radio"]', function(e) {
 
-        //
-        // Temporary disable this functionality until representative collection is reuploaded
-        //
-        return;
+    //     //
+    //     // Temporary disable this functionality until representative collection is reuploaded
+    //     //
+    //     return;
 
-        var selectedAssemblyId = $(this).attr('data-assembly-id'),
-            collectionId = $(this).closest('.wgst-collection-info').attr('data-collection-id');
+    //     var selectedAssemblyId = $(this).attr('data-assembly-id'),
+    //         collectionId = $(this).closest('.wgst-collection-info').attr('data-collection-id');
 
-        $('.collection-assembly-list .assembly-list-item.row-selected').removeClass('row-selected');
-        $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + selectedAssemblyId + '"]').addClass('row-selected');
+    //     $('.collection-assembly-list .assembly-list-item.row-selected').removeClass('row-selected');
+    //     $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + selectedAssemblyId + '"]').addClass('row-selected');
 
-        WGST.collection[collectionId].tree.canvas.selectNodes(selectedAssemblyId);
+    //     WGST.collection[collectionId].tree.canvas.selectNodes(selectedAssemblyId);
 
-        // var leaves = WGST.collection[collectionId].tree.canvas.leaves;
-        // console.dir(WGST.collection[collectionId].tree.canvas.leaves);
-        // var selectedLeaf = $.grep(leaves, function(leaf){ return leaf.id === selectedAssemblyId; });
-        // selectedLeaf[0].nodeShape = 'square';
-        //WGST.collection[collectionId].tree.canvas.leaves[selectedAssemblyId].nodeShape = 'rectangular';
+    //     // var leaves = WGST.collection[collectionId].tree.canvas.leaves;
+    //     // console.dir(WGST.collection[collectionId].tree.canvas.leaves);
+    //     // var selectedLeaf = $.grep(leaves, function(leaf){ return leaf.id === selectedAssemblyId; });
+    //     // selectedLeaf[0].nodeShape = 'square';
+    //     //WGST.collection[collectionId].tree.canvas.leaves[selectedAssemblyId].nodeShape = 'rectangular';
 
-        // Show collection tree panel
-        activatePanel('collectionTree');
-        showPanel('collectionTree');
-        showPanelBodyContent('collectionTree');
-        bringPanelToTop('collectionTree');
+    //     // Show collection tree panel
+    //     activatePanel('collectionTree');
+    //     showPanel('collectionTree');
+    //     showPanelBodyContent('collectionTree');
+    //     bringPanelToTop('collectionTree');
 
-        //======================================================
-        // Tree - THIS IS FOR SELECTING MULTIPLE ASSEMBLIES
-        //======================================================
+    //     //======================================================
+    //     // Tree - THIS IS FOR SELECTING MULTIPLE ASSEMBLIES
+    //     //======================================================
 
-        // // Store node ids to highlight in a string
-        // var checkedAssemblyNodesString = '',
-        //     collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+    //     // // Store node ids to highlight in a string
+    //     // var checkedAssemblyNodesString = '',
+    //     //     collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
 
-        // // Get node id of each node that user selected via checked checkbox 
-        // $('.wgst-panel__collection .collection-assembly-list input[type="radio"]:checked').each(function(){
-        //     // Concat assembly ids to string
-        //     // Use this string to highlight nodes on tree
-        //     if (checkedAssemblyNodesString.length > 0) {
-        //         checkedAssemblyNodesString = checkedAssemblyNodesString + ',' + $(this).attr('data-assembly-id');
-        //     } else {
-        //         checkedAssemblyNodesString = $(this).attr('data-assembly-id');
-        //     }
-        // });
+    //     // // Get node id of each node that user selected via checked checkbox 
+    //     // $('.wgst-panel__collection .collection-assembly-list input[type="radio"]:checked').each(function(){
+    //     //     // Concat assembly ids to string
+    //     //     // Use this string to highlight nodes on tree
+    //     //     if (checkedAssemblyNodesString.length > 0) {
+    //     //         checkedAssemblyNodesString = checkedAssemblyNodesString + ',' + $(this).attr('data-assembly-id');
+    //     //     } else {
+    //     //         checkedAssemblyNodesString = $(this).attr('data-assembly-id');
+    //     //     }
+    //     // });
 
-        // //console.debug('checkedAssemblyNodesString: ' + checkedAssemblyNodesString);
-        // //console.dir(WGST.collection[collectionId].tree.canvas);
+    //     // //console.debug('checkedAssemblyNodesString: ' + checkedAssemblyNodesString);
+    //     // //console.dir(WGST.collection[collectionId].tree.canvas);
 
-        // // Highlight assembly with the highest score on the representative tree
+    //     // // Highlight assembly with the highest score on the representative tree
 
-        // WGST.collection[collectionId].tree.canvas.selectNodes(checkedAssemblyNodesString);
-        // //WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
-    });
+    //     // WGST.collection[collectionId].tree.canvas.selectNodes(checkedAssemblyNodesString);
+    //     // //WGST.representativeTree.tree.selectNodes(checkedAssemblyNodesString);
+    // });
 
-    $('.assemblies-upload-cancel-button').on('click', function() {
-        // Close FASTA files upload panel
-        $('.assembly-upload-panel').hide();
-        // Remove stored dropped FASTA files
-        fastaFilesAndMetadata = {};
-        // Remove stored selected FASTA file
-        selectedFastaFileName = '';
-        // Remove analytics HTML element
-        $('.wgst-assembly-upload__analytics ul').html('');
-        // Remove metadata HTML element
-        $('.wgst-assembly-upload__metadata ul').html('');
-        // Reset progress bar
-        // Update bar's width
-        $('.adding-metadata-progress-container .progress-bar').width('0%');
-        // Update aria-valuenow attribute
-        $('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow', 0);
-        // Update percentage value
-        $('.adding-metadata-progress-container .progress-percentage').text('0%');
-        // Remove metadata marker
-        WGST.geo.map.markers.metadata.setMap(null);
-    });
+    // $('.assemblies-upload-cancel-button').on('click', function() {
+    //     // Close FASTA files upload panel
+    //     $('.assembly-upload-panel').hide();
+    //     // Remove stored dropped FASTA files
+    //     fastaFilesAndMetadata = {};
+    //     // Remove stored selected FASTA file
+    //     selectedFastaFileName = '';
+    //     // Remove analytics HTML element
+    //     $('.wgst-assembly-upload__analytics ul').html('');
+    //     // Remove metadata HTML element
+    //     $('.wgst-assembly-upload__metadata ul').html('');
+    //     // Reset progress bar
+    //     // Update bar's width
+    //     $('.adding-metadata-progress-container .progress-bar').width('0%');
+    //     // Update aria-valuenow attribute
+    //     $('.adding-metadata-progress-container .progress-bar').attr('aria-valuenow', 0);
+    //     // Update percentage value
+    //     $('.adding-metadata-progress-container .progress-percentage').text('0%');
+    //     // Remove metadata marker
+    //     WGST.geo.map.markers.metadata.setMap(null);
+    // });
 
     // var assemblyUploadDoneHandler = function(collectionId, assemblyId) {
     //     return function(data, textStatus, jqXHR) {
@@ -1800,183 +1800,183 @@ $(function(){
         // WGST.collection.representative.tree.canvas.draw();
     };
 
-    /**
-     * Description
-     * @method openRepresentativeCollectionTree
-     * @return 
-     */
-    var openRepresentativeCollectionTree = function() {
-        console.log('[WGST] Opening representative collection tree');
+    // /**
+    //  * Description
+    //  * @method openRepresentativeCollectionTree
+    //  * @return 
+    //  */
+    // var openRepresentativeCollectionTree = function() {
+    //     console.log('[WGST] Opening representative collection tree');
 
-        // TO DO: Figure out whether representative tree is just another collection or it's a completely separate entity.
-        // Currently treating it like just another collection.
+    //     // TO DO: Figure out whether representative tree is just another collection or it's a completely separate entity.
+    //     // Currently treating it like just another collection.
 
-        var collectionId = 'representative';//WGST.settings.representativeCollectionId;
+    //     var collectionId = 'representative';//WGST.settings.representativeCollectionId;
 
-        // ----------------------------------------
-        // Init panels
-        // ----------------------------------------
-        // Set collection id to representativeCollectionTree panel
-        $('.wgst-panel__representative-collection-tree').attr('data-collection-id', collectionId);
+    //     // ----------------------------------------
+    //     // Init panels
+    //     // ----------------------------------------
+    //     // Set collection id to representativeCollectionTree panel
+    //     $('.wgst-panel__representative-collection-tree').attr('data-collection-id', collectionId);
 
-        // activatePanel('representativeCollectionTree', function(){
-        //     startPanelLoadingIndicator('representativeCollectionTree');
-        // });
+    //     // activatePanel('representativeCollectionTree', function(){
+    //     //     startPanelLoadingIndicator('representativeCollectionTree');
+    //     // });
 
-        activatePanel('representativeCollectionTree');
-        endPanelLoadingIndicator('representativeCollectionTree');
-        showPanelBodyContent('representativeCollectionTree');
-        showPanel('representativeCollectionTree');
-        bringPanelToTop('representativeCollectionTree');
+    //     activatePanel('representativeCollectionTree');
+    //     endPanelLoadingIndicator('representativeCollectionTree');
+    //     showPanelBodyContent('representativeCollectionTree');
+    //     showPanel('representativeCollectionTree');
+    //     bringPanelToTop('representativeCollectionTree');
 
-        // getRepresentativeCollectionTreeMetadata(function(error, representativeCollectionMetadata){
-        //     if (error) {
-        //         // Show error notification
-        //         return;
-        //     }
+    //     // getRepresentativeCollectionTreeMetadata(function(error, representativeCollectionMetadata){
+    //     //     if (error) {
+    //     //         // Show error notification
+    //     //         return;
+    //     //     }
            
-        //     renderRepresentativeCollectionTree();
+    //     //     renderRepresentativeCollectionTree();
 
-        //     // // Init collection tree
-        //     // WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
-        //     // // Render collection tree
-        //     // //renderCollectionTree(collectionId);
+    //     //     // // Init collection tree
+    //     //     // WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
+    //     //     // // Render collection tree
+    //     //     // //renderCollectionTree(collectionId);
 
-        //     // WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
-        //     // WGST.collection.representative.tree.canvas.treeType = 'rectangular';
-        //     // //WGST.collection.representative.tree.showLabels = false;
-        //     // WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
-        //     // WGST.collection.representative.tree.canvas.setTextSize(24);
-        //     // WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
-        //     // WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
-        //     // WGST.collection.representative.tree.canvas.rightClickZoom = true;
-        //     // //WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
+    //     //     // WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
+    //     //     // WGST.collection.representative.tree.canvas.treeType = 'rectangular';
+    //     //     // //WGST.collection.representative.tree.showLabels = false;
+    //     //     // WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
+    //     //     // WGST.collection.representative.tree.canvas.setTextSize(24);
+    //     //     // WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
+    //     //     // WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
+    //     //     // WGST.collection.representative.tree.canvas.rightClickZoom = true;
+    //     //     // //WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
 
-        //     // endPanelLoadingIndicator('representativeCollectionTree');
-        //     // showPanelBodyContent('representativeCollectionTree');
-        //     // showPanel('representativeCollectionTree');
-        // });
+    //     //     // endPanelLoadingIndicator('representativeCollectionTree');
+    //     //     // showPanelBodyContent('representativeCollectionTree');
+    //     //     // showPanel('representativeCollectionTree');
+    //     // });
 
-        // // Get representative collection metadata
-        // $.ajax({
-        //     type: 'GET',
-        //     url: '/api/collection/representative/metadata',
-        //     datatype: 'json' // http://stackoverflow.com/a/9155217
-        // })
-        // .done(function(representativeCollectionMetadata, textStatus, jqXHR) {
-        //     console.log('[WGST] Got representative collection metadata');
-        //     console.dir(representativeCollectionMetadata);
+    //     // // Get representative collection metadata
+    //     // $.ajax({
+    //     //     type: 'GET',
+    //     //     url: '/api/collection/representative/metadata',
+    //     //     datatype: 'json' // http://stackoverflow.com/a/9155217
+    //     // })
+    //     // .done(function(representativeCollectionMetadata, textStatus, jqXHR) {
+    //     //     console.log('[WGST] Got representative collection metadata');
+    //     //     console.dir(representativeCollectionMetadata);
 
-        //     // ----------------------------------------
-        //     // Render collection tree
-        //     // ----------------------------------------
-        //     // Remove previosly rendered collection tree
-        //     $('.wgst-panel__representative-collection-tree .phylocanvas').html('');
-        //     // Attach collection id
-        //     $('.wgst-panel__representative-collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
-        //     // Init collection tree
-        //     WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
-        //     // Render collection tree
-        //     //renderCollectionTree(collectionId);
+    //     //     // ----------------------------------------
+    //     //     // Render collection tree
+    //     //     // ----------------------------------------
+    //     //     // Remove previosly rendered collection tree
+    //     //     $('.wgst-panel__representative-collection-tree .phylocanvas').html('');
+    //     //     // Attach collection id
+    //     //     $('.wgst-panel__representative-collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+    //     //     // Init collection tree
+    //     //     WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .phylocanvas')[0]);
+    //     //     // Render collection tree
+    //     //     //renderCollectionTree(collectionId);
 
-        //     WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
-        //     WGST.collection.representative.tree.canvas.treeType = 'rectangular';
-        //     //WGST.collection.representative.tree.showLabels = false;
-        //     WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
-        //     WGST.collection.representative.tree.canvas.setTextSize(24);
-        //     WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
-        //     WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
-        //     WGST.collection.representative.tree.canvas.rightClickZoom = true;
-        //     //WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
+    //     //     WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
+    //     //     WGST.collection.representative.tree.canvas.treeType = 'rectangular';
+    //     //     //WGST.collection.representative.tree.showLabels = false;
+    //     //     WGST.collection.representative.tree.canvas.baseNodeSize = 0.5;
+    //     //     WGST.collection.representative.tree.canvas.setTextSize(24);
+    //     //     WGST.collection.representative.tree.canvas.selectedNodeSizeIncrease = 0.5;
+    //     //     WGST.collection.representative.tree.canvas.selectedColor = '#0059DE';
+    //     //     WGST.collection.representative.tree.canvas.rightClickZoom = true;
+    //     //     //WGST.collection.representative.tree.canvas.onselected = showRepresentativeTreeNodesOnMap;
 
-        //     endPanelLoadingIndicator('representativeCollectionTree');
-        //     showPanelBodyContent('representativeCollectionTree');
-        //     showPanel('representativeCollectionTree');
-        // })
-        // .fail(function(jqXHR, textStatus, errorThrown) {
-        //     console.error('✗ [WGST][Error] Failed to get representative collection metadata');
-        //     console.error(textStatus);
-        //     console.error(errorThrown);
-        //     console.error(jqXHR);
-        // });
+    //     //     endPanelLoadingIndicator('representativeCollectionTree');
+    //     //     showPanelBodyContent('representativeCollectionTree');
+    //     //     showPanel('representativeCollectionTree');
+    //     // })
+    //     // .fail(function(jqXHR, textStatus, errorThrown) {
+    //     //     console.error('✗ [WGST][Error] Failed to get representative collection metadata');
+    //     //     console.error(textStatus);
+    //     //     console.error(errorThrown);
+    //     //     console.error(jqXHR);
+    //     // });
 
-            //WGST.collection.representative.tree.data = data.collection.tree;
-            //WGST.collection[collectionId].assemblies = data.collection.assemblies;
+    //         //WGST.collection.representative.tree.data = data.collection.tree;
+    //         //WGST.collection[collectionId].assemblies = data.collection.assemblies;
 
-            // // ----------------------------------------
-            // // Render collection tree
-            // // ----------------------------------------
-            // // Remove previosly rendered collection tree
-            // $('.wgst-panel__collection-tree .phylocanvas').html('');
-            // // Attach collection id
-            // $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
-            // // Init collection tree
-            // WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
-            // // Render collection tree
-            // renderCollectionTree(collectionId);
+    //         // // ----------------------------------------
+    //         // // Render collection tree
+    //         // // ----------------------------------------
+    //         // // Remove previosly rendered collection tree
+    //         // $('.wgst-panel__collection-tree .phylocanvas').html('');
+    //         // // Attach collection id
+    //         // $('.wgst-panel__collection-tree .phylocanvas').attr('id', 'phylocanvas_' + collectionId);
+    //         // // Init collection tree
+    //         // WGST.collection[collectionId].tree.canvas = new PhyloCanvas.Tree(document.getElementById('phylocanvas_' + collectionId));
+    //         // // Render collection tree
+    //         // renderCollectionTree(collectionId);
 
-            // endPanelLoadingIndicator('collectionTree');
-            // //showPanelBodyContent('collectionTree');
+    //         // endPanelLoadingIndicator('collectionTree');
+    //         // //showPanelBodyContent('collectionTree');
 
-        // ----------------------------------------
-        // Load representative collection tree
-        // ----------------------------------------
-        // AAA
-
-
-        // WGST.representativeTree.tree.load('/data/reference_tree.nwk');
-        // WGST.representativeTree.tree.treeType = 'rectangular';
-        // //WGST.representativeTree.tree.showLabels = false;
-        // WGST.representativeTree.tree.baseNodeSize = 0.5;
-        // WGST.representativeTree.tree.setTextSize(24);
-        // WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
-        // WGST.representativeTree.tree.selectedColor = '#0059DE';
-        // WGST.representativeTree.tree.rightClickZoom = true;
-        // WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
-
-        // // ==============================
-        // // Load reference tree metadata
-        // // ==============================
-        // console.log('[WGST] Getting representative tree metadata');
-
-        // $.ajax({
-        //     type: 'POST',
-        //     url: '/representative-tree-metadata/',
-        //     datatype: 'json', // http://stackoverflow.com/a/9155217
-        //     data: {}
-        // })
-        // .done(function(data, textStatus, jqXHR) {
-        //     console.log('[WGST] Got representative tree metadata');
-        //     console.dir(data.value);
-
-        //     // Create representative tree markers
-        //     var metadataCounter = data.value.metadata.length,
-        //         metadata = data.value.metadata,
-        //         accession,
-        //         marker;
-
-        //     for (; metadataCounter !== 0;) {
-        //         // Decrement counter
-        //         metadataCounter = metadataCounter - 1;
-
-        //         //console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
-        //         //console.log(metadata[metadataCounter]);
-
-        //         accession = metadata[metadataCounter].accession;
-
-        //         // Set representative tree metadata
-        //         WGST.representativeTree[accession] = metadata[metadataCounter];
-        //     } // for
-        // })
-        // .fail(function(jqXHR, textStatus, errorThrown) {
-        //     console.log('[WGST][ERROR] Failed to get representative tree metadata');
-        //     console.error(textStatus);
-        //     console.error(errorThrown);
-        //     console.error(jqXHR);
-        // });
+    //     // ----------------------------------------
+    //     // Load representative collection tree
+    //     // ----------------------------------------
+    //     // AAA
 
 
-    };
+    //     // WGST.representativeTree.tree.load('/data/reference_tree.nwk');
+    //     // WGST.representativeTree.tree.treeType = 'rectangular';
+    //     // //WGST.representativeTree.tree.showLabels = false;
+    //     // WGST.representativeTree.tree.baseNodeSize = 0.5;
+    //     // WGST.representativeTree.tree.setTextSize(24);
+    //     // WGST.representativeTree.tree.selectedNodeSizeIncrease = 0.5;
+    //     // WGST.representativeTree.tree.selectedColor = '#0059DE';
+    //     // WGST.representativeTree.tree.rightClickZoom = true;
+    //     // WGST.representativeTree.tree.onselected = showRepresentativeTreeNodesOnMap;
+
+    //     // // ==============================
+    //     // // Load reference tree metadata
+    //     // // ==============================
+    //     // console.log('[WGST] Getting representative tree metadata');
+
+    //     // $.ajax({
+    //     //     type: 'POST',
+    //     //     url: '/representative-tree-metadata/',
+    //     //     datatype: 'json', // http://stackoverflow.com/a/9155217
+    //     //     data: {}
+    //     // })
+    //     // .done(function(data, textStatus, jqXHR) {
+    //     //     console.log('[WGST] Got representative tree metadata');
+    //     //     console.dir(data.value);
+
+    //     //     // Create representative tree markers
+    //     //     var metadataCounter = data.value.metadata.length,
+    //     //         metadata = data.value.metadata,
+    //     //         accession,
+    //     //         marker;
+
+    //     //     for (; metadataCounter !== 0;) {
+    //     //         // Decrement counter
+    //     //         metadataCounter = metadataCounter - 1;
+
+    //     //         //console.log('[WGST] Representative tree metadata for ' + metadata[metadataCounter] + ':');
+    //     //         //console.log(metadata[metadataCounter]);
+
+    //     //         accession = metadata[metadataCounter].accession;
+
+    //     //         // Set representative tree metadata
+    //     //         WGST.representativeTree[accession] = metadata[metadataCounter];
+    //     //     } // for
+    //     // })
+    //     // .fail(function(jqXHR, textStatus, errorThrown) {
+    //     //     console.log('[WGST][ERROR] Failed to get representative tree metadata');
+    //     //     console.error(textStatus);
+    //     //     console.error(errorThrown);
+    //     //     console.error(jqXHR);
+    //     // });
+
+
+    // };
 
     $('.wgst-navigation-item').on('click', function(event){
         event.preventDefault();

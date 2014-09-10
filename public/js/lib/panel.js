@@ -1,1 +1,233 @@
-$(function(){!function(){window.WGST.exports.mapPanelTypeToTemplateId={assembly:"assembly-panel","collection-data":"collection-data-panel","collection-tree":"collection-tree-panel","collection-map":"collection-map-panel","assembly-upload-navigation":"assembly-upload-navigation-panel","assembly-upload-metadata":"assembly-upload-metadata-panel","assembly-upload-analytics":"assembly-upload-analytics-panel","assembly-upload-progress":"assembly-upload-progress-panel"},window.WGST.exports.createPanel=function(a,e){if(console.debug("$$$ panelType: "+a),console.dir(e),!($('.wgst-panel[data-panel-id="'+e.panelId+'"]').length>0)){var n=window.WGST.exports.mapPanelTypeToTemplateId[a],l=$('.wgst-template[data-template-id="'+n+'"]').html(),t=Handlebars.compile(l),o=t(e);$(".wgst-page__app").prepend(o);var s=$('.wgst-panel[data-panel-id="'+e.panelId+'"]');s.draggable({handle:s.find(".wgst-draggable-handle"),appendTo:".wgst-page__app",scroll:!1,stop:function(){}})}},window.WGST.exports.removePanel=function(a){$('.wgst-panel[data-panel-id="'+a+'"]').remove()},window.WGST.exports.showPanel=function(a){$('.wgst-panel[data-panel-id="'+a+'"]').removeClass("hide-this invisible-this")},window.WGST.exports.hidePanel=function(a){$('.wgst-panel[data-panel-id="'+a+'"]').addClass("hide-this")},window.WGST.exports.bringPanelToTop=function(a){var e=0;$(".wgst-panel").each(function(){var a=parseInt($(this).css("zIndex"),10);a>e&&(e=a)}),$('[data-panel-id="'+a+'"]').css("zIndex",e+1)},$("body").on("click",".wgst-panel-control-button__close",function(){var a=$(this).closest(".wgst-panel"),e=a.attr("data-panel-id");window.WGST.exports.hidePanel(e)}),$("body").on("mousedown",".wgst-panel",function(){window.WGST.exports.bringPanelToTop($(this).attr("data-panel-id"))}),$("body").on("click",".wgst-panel-control-button__maximize",function(){var a=$(".wgst-fullscreen"),e=a.attr("data-fullscreen-id"),n=e;window.WGST.exports.bringFullscreenToPanel(e,n);var l=$(this).closest(".wgst-panel"),n=l.attr("data-panel-id"),e=n;window.WGST.exports.bringPanelToFullscreen(n,e)})}()});
+$(function(){
+
+	(function(){
+
+        window.WGST.exports.mapPanelTypeToTemplateId = {
+        	'assembly': 'assembly-panel',
+            'collection-data': 'collection-data-panel',
+            'collection-tree': 'collection-tree-panel',
+            'collection-map': 'collection-map-panel',
+            'assembly-upload-navigation': 'assembly-upload-navigation-panel',
+            'assembly-upload-metadata': 'assembly-upload-metadata-panel',
+            'assembly-upload-analytics': 'assembly-upload-analytics-panel',
+            'assembly-upload-progress': 'assembly-upload-progress-panel'
+        };
+
+        window.WGST.exports.createPanel = function(panelType, templateContext) {
+
+        	//
+        	// Check if panel already exists
+        	//
+        	if ($('.wgst-panel[data-panel-id="' + templateContext.panelId + '"]').length > 0) {
+
+        		//
+        		// Show panel
+        		//
+        		window.WGST.exports.showPanel(templateContext.panelId);
+
+        		return;
+        	}
+
+        	//
+        	// Get panel's label
+        	//
+        	templateContext.panelLabel = window.WGST.exports.getContainerLabel({
+        		containerName: 'panel', 
+        		containerType: panelType,
+        		containerId: templateContext.panelId
+        	});
+
+        	//
+        	// Render
+        	//
+            var templateId = window.WGST.exports.mapPanelTypeToTemplateId[panelType],
+                panelTemplateSource = $('.wgst-template[data-template-id="' + templateId + '"]').html(),
+                panelTemplate = Handlebars.compile(panelTemplateSource),
+                panelHtml = panelTemplate(templateContext);
+
+            $('.wgst-workspace').prepend(panelHtml);
+
+        	var $panel = $('.wgst-panel[data-panel-id="' + templateContext.panelId + '"]');
+
+        	//
+        	// Init jQuery UI draggable interaction
+        	//
+	        $panel.draggable({
+	            handle: $panel.find('.wgst-draggable-handle'),
+	            appendTo: ".wgst-page__app",
+	            scroll: false,
+	            stop: function(event, ui) {
+	                // // Store current panel position
+	                // var panelName = ui.helper.attr('data-panel-name');
+	                // WGST.panels[panelName].top = ui.position.top;
+	                // WGST.panels[panelName].left = ui.position.left;
+	            }
+	        });
+
+	        //
+	        // Create hidable
+	        //
+	        window.WGST.exports.createHidable(templateContext.panelId, templateContext.panelLabel);
+        };
+
+        window.WGST.exports.removePanel = function(panelId) {
+        	$('.wgst-panel[data-panel-id="' + panelId + '"]').remove();
+
+        	//
+        	// Update hidable state
+        	//
+        	window.WGST.exports.hidablePanelRemoved(panelId);
+        };
+
+        window.WGST.exports.showPanel = function(panelId) {
+        	$('.wgst-panel[data-panel-id="' + panelId + '"]').removeClass('hide-this invisible-this');
+
+        	//
+        	// Update hidable state
+        	//
+        	window.WGST.exports.hidablePanelShown(panelId);
+        };
+
+        window.WGST.exports.hidePanel = function(panelId) {
+        	$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('hide-this');
+
+        	//
+        	// Update hidable state
+        	//
+        	window.WGST.exports.hidablePanelHidden(panelId);
+        };
+
+        window.WGST.exports.togglePanel = function(panelId) {
+        	var $panel = $('.wgst-panel[data-panel-id="' + panelId + '"]');
+
+    		//
+    		// Toggle panel
+    		//
+    		if ($panel.is('.hide-this, .invisible-this')) {
+
+        		//
+        		// Show panel
+        		//
+        		window.WGST.exports.showPanel(panelId);
+
+    		} else {
+
+        		//
+        		// Hide panel
+        		//
+        		window.WGST.exports.hidePanel(panelId);
+
+    		}
+        };
+
+	    window.WGST.exports.bringPanelToFront = function(panelId) {
+	        var zIndexHighest = 0;
+
+	        $('.wgst-panel').each(function(){
+	            var zIndexCurrent = parseInt($(this).css('zIndex'), 10);
+	            if (zIndexCurrent > zIndexHighest) {
+	                zIndexHighest = zIndexCurrent;
+	            }
+	        });
+
+	        $('[data-panel-id="' + panelId + '"]').css('zIndex', zIndexHighest + 1);
+	    };
+
+	    window.WGST.exports.maximizePanel = function(panelId) {
+
+	        var fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
+
+	        //
+	        // Bring fullscreen into panel
+	        //
+	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
+
+	        //
+	        // Bring panel into fullscreen
+	        //
+	        window.WGST.exports.bringPanelToFullscreen(panelId);
+
+	    };
+
+	    window.WGST.exports.getContainerLabel = function(options) {
+
+	    	//
+	    	// Options:
+	    	//
+	    	// containerName: "panel" or "fullscreen"
+	    	// containerType: panelType or fullscreenType
+	    	// containerId: panelId or fullscreenId
+	    	//
+	    	//
+	    	//
+
+	    	console.debug('getContainerLabel:');
+        	console.dir(options);
+
+        	var containerLabel = 'Anonymous';
+
+        	//
+        	// Prepare container's label
+        	//
+        	if (options.containerType === 'collection-data') {
+
+        		containerLabel = 'Data';
+
+        	} else if (options.containerType === 'collection-map') {
+
+        		containerLabel = 'Map';
+
+        	} else if (options.containerType === 'collection-tree') {
+
+        		var treeType = options.containerId.split('__')[2];
+
+        		containerLabel = treeType.replace(/[_]/g, ' ').toLowerCase().capitalize();
+
+        	} else if (options.containerType === 'assembly') {
+
+        		containerLabel = 'Assembly';
+
+        	}
+
+        	return containerLabel;
+	    };
+
+		$('body').on('click', '.wgst-panel-control-button__close', function(){
+			var panel = $(this).closest('.wgst-panel'),
+				panelId = panel.attr('data-panel-id');
+
+			window.WGST.exports.hidePanel(panelId);
+		});
+
+		//
+	    // Bring to front selected panel
+	    //
+	    $('body').on('mousedown', '.wgst-panel', function(){
+	        window.WGST.exports.bringPanelToFront($(this).attr('data-panel-id'));
+	    });
+
+        $('body').on('click', '.wgst-panel-control-button__maximize', function(){
+
+	        //
+	        // Bring fullscreen to panel
+	        //
+	        var $fullscreen = $('.wgst-fullscreen');
+	        var fullscreenId = $fullscreen.attr('data-fullscreen-id');
+	        var panelId = fullscreenId;
+
+	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
+
+	        //
+	        // Bring panel to fullscreen
+	        //
+	        var $panel = $(this).closest('.wgst-panel');
+	        var panelId = $panel.attr('data-panel-id');
+	        var fullscreenId = panelId;
+
+	        window.WGST.exports.bringPanelToFullscreen(panelId, fullscreenId);
+
+        });
+
+	})();
+
+});

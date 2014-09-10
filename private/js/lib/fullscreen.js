@@ -13,6 +13,7 @@ $(function(){
         };
 
         window.WGST.exports.createFullscreen = function(fullscreenId, templateContext) {
+
             //
             // Check if fullscreen already exists
             //
@@ -20,28 +21,59 @@ $(function(){
                 return;
             }
 
-            console.debug('*** fullscreenId: ' + fullscreenId);
+            //
+            // Check if template context was passed
+            //
+            if (typeof templateContext === 'undefined') {
+                console.error('[WGST][Error] No template context were provided.');
+                return;
+            }
 
-            var fullscreenTemplateId = window.WGST.exports.mapFullscreenIdToTemplateId[fullscreenId];
+            //
+            // Get fullscreen's label
+            //
+            templateContext.fullscreenLabel = window.WGST.exports.getContainerLabel({
+                containerName: 'fullscreen',
+                containerType: templateContext.fullscreenType,
+                containerId: fullscreenId
+            });
 
-            console.debug('*** fullscreenTemplateId: ' + fullscreenTemplateId);
-
-                var fullscreenTemplateSource = $('.wgst-template[data-template-id="' + fullscreenTemplateId + '"]').html(),
+            //
+            // Render
+            //
+            var fullscreenTemplateId = window.WGST.exports.mapFullscreenIdToTemplateId[templateContext.fullscreenType];
+            var fullscreenTemplateSource = $('.wgst-template[data-template-id="' + fullscreenTemplateId + '"]').html(),
                 fullscreenTemplate = Handlebars.compile(fullscreenTemplateSource),
                 fullscreenHtml = fullscreenTemplate(templateContext);
 
-            $('.wgst-page__app').prepend(fullscreenHtml);
+            $('.wgst-workspace').prepend(fullscreenHtml);
+
+            //
+            // Create hidable
+            //
+            window.WGST.exports.createHidable(fullscreenId, templateContext.fullscreenLabel);
+
         };
 
         window.WGST.exports.removeFullscreen = function(fullscreenId) {
             $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').remove();
+
+            //
+            // Update hidable state
+            //
+            window.WGST.exports.hidableFullscreenRemoved(fullscreenId);
         };
 
         window.WGST.exports.showFullscreen = function(fullscreenId) {
             $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').removeClass('hide-this invisible-this');
+        
+            //
+            // Update hidable state
+            //
+            window.WGST.exports.hidableFullscreenShown(fullscreenId);
         };
 
-        window.WGST.exports.bringFullscreenToPanel = function(fullscreenId, panelId, panelWasCreated) {
+        window.WGST.exports.bringFullscreenToPanel = function(fullscreenId, panelWasCreated) {
             //
             // Check if fullscreen exists
             //
@@ -52,8 +84,9 @@ $(function(){
             //
             // Create panel
             //
-            var panelType = panelId.split('__')[0],
-                collectionId = panelId.split('__')[1],
+            var panelType = fullscreenId.split('__')[0],
+                panelId = fullscreenId,
+                collectionId = fullscreenId.split('__')[1],
                 fullscreenType = panelType;
 
             console.debug('[WGST][Debug] bringFullscreenToPanel | fullscreenType: ' + fullscreenType);
@@ -128,7 +161,7 @@ $(function(){
             //
             // Bring panel to front
             //
-            window.WGST.exports.bringPanelToTop(panelId);
+            window.WGST.exports.bringPanelToFront(panelId);
 
             //
             // Trigger Twitter Bootstrap tooltip
@@ -156,7 +189,7 @@ $(function(){
             //
             // Create fullscreen
             //
-            window.WGST.exports.createFullscreen(fullscreenType, {
+            window.WGST.exports.createFullscreen(fullscreenId, {
                 fullscreenType: fullscreenType,
                 fullscreenId: fullscreenId
             });

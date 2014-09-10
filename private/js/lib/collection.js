@@ -106,10 +106,17 @@ $(function(){
 	        		var collectionPanelId = window.WGST.exports.createCollectionDataPanel(collectionId);
 	        		var $collectionPanel = $('.wgst-panel[data-panel-id="' + collectionPanelId + '"]');
 
+	                //
+	                // Create collection map fullscreen
+	                // 
+	        		window.WGST.exports.createFullscreen('collection-map__' + collectionId, {
+	        			fullscreenType: 'collection_map'
+	        		});
+
 	        		//
 		            // Bring panel to top
 		            //
-	        		window.WGST.exports.bringPanelToTop(collectionPanelId);
+	        		window.WGST.exports.bringPanelToFront(collectionPanelId);
 
 	                //
 	                // Render
@@ -224,7 +231,7 @@ $(function(){
 	                //
 	                // Store open collection id
 	                //
-	                WGST.collection.opened = collectionId;
+	                //WGST.collection.opened = collectionId;
 
 
 
@@ -232,7 +239,7 @@ $(function(){
 	                //
 	                // Show collection navigation
 	                //
-	                $('.wgst-navigation__collection-panels').toggleClass('hide-this');
+	                //$('.wgst-navigation__collection-panels').toggleClass('hide-this');
 
 	            } // if
 	        })
@@ -470,7 +477,7 @@ $(function(){
 	        console.debug('fullscreenId: ' + fullscreenId);
 	        console.debug('panelId: ' + panelId);
 
-	        window.WGST.exports.bringFullscreenToPanel(fullscreenId, panelId);
+	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
 
 	        //
 	        // Bring panel into fullscreen
@@ -478,7 +485,7 @@ $(function(){
 	        var panelId = 'collection-data__' + collectionId,
 	        	fullscreenId = 'collection-data';
 
-	        window.WGST.exports.bringPanelToFullscreen(panelId, fullscreenId);
+	        window.WGST.exports.bringPanelToFullscreen(panelId);
 
 	        // Destroy all Twitter Bootstrap Tooltips
 	        //$('[data-toggle="tooltip"]').tooltip('destroy');

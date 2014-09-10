@@ -260,7 +260,7 @@ $(function(){
 	            //
 	            // Bring to front
 	            //
-	            window.WGST.exports.bringPanelToTop(collectionTreePanelId);
+	            window.WGST.exports.bringPanelToFront(collectionTreePanelId);
 
 	        })
 	        .fail(function(jqXHR, textStatus, errorThrown) {

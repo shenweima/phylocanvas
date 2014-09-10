@@ -336,7 +336,7 @@ $(function(){
 	            //
 	            // Bring panel to top
 	            //
-				window.WGST.exports.bringPanelToTop(assemblyPanelId);
+				window.WGST.exports.bringPanelToFront(assemblyPanelId);
                 
                 //
                 // Show panel

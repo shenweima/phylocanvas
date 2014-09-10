@@ -48,15 +48,22 @@
       -->
     </div><!-- /.wgst-init -->
 
+    <!--
     <div class="wgst-notification wgst-notification__error hide-this"></div>
     <div class="wgst-notification wgst-notification__warning hide-this"></div>
     <div class="wgst-alert hide-this"></div>
-
+    -->
+    
     {% include "partials/header.html" %}
+    
+    <div class="wgst-layout-container">
+      {% include "partials/sidebar.html" %}
+      <div class="wgst-workspace"></div>
+    </div>
 
-    <div class="wgst-react-component wgst-react-component__workflow-question"></div>
+    <!-- <div class="wgst-react-component wgst-react-component__workflow-question"></div> -->
 
-    <div class="wgst-background"></div>
+    <!-- <div class="wgst-background"></div> -->
 
     <!--
     <div class="wgst-ring" data-wgst-js="ring">
@@ -97,6 +104,8 @@
   {% include "partials/panels/upload/assembly_metadata_form.html" %}
 
   {% include "partials/feedback_overlay.html" %}
+
+  {% include "partials/hidable.html" %}
 
 {% endblock %}
 
@@ -143,6 +152,7 @@
 <script src="/js/lib/fullscreen.js"></script>
 <script src="/js/lib/map.js"></script>
 <script src="/js/lib/fasta.js"></script>
+<script src="/js/lib/hidable.js"></script>
 
 <script src="/js/lib/collection_data_panel.js"></script>
 <script src="/js/lib/collection_tree_panel.js"></script>
