@@ -269,6 +269,10 @@ $(function(){
                 //
                 window.WGST.exports.togglePanel(hidableId);
 
+                //
+                // Bring panel to front
+                //
+                window.WGST.exports.bringPanelToFront(hidableId);
             }
 
             event.preventDefault();
