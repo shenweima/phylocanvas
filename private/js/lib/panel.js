@@ -97,6 +97,15 @@ $(function(){
         	window.WGST.exports.hidablePanelHidden(panelId);
         };
 
+        // window.WGST.exports.hideAllPanels = function() {
+        // 	$('.wgst-panel').addClass('hide-this');
+
+        // 	//
+        // 	// Update hidable state
+        // 	//
+        // 	window.WGST.exports.hidablePanelHidden(panelId);
+        // };
+
         window.WGST.exports.togglePanel = function(panelId) {
         	var $panel = $('.wgst-panel[data-panel-id="' + panelId + '"]');
 

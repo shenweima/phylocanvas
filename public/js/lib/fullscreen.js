@@ -73,6 +73,26 @@ $(function(){
             window.WGST.exports.hidableFullscreenShown(fullscreenId);
         };
 
+        window.WGST.exports.bringFullscreenToTop = function(fullscreenId) {
+
+            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').css('z-index', '9999');
+        
+            //
+            // Update hidable state
+            //
+            //window.WGST.exports.hidableFullscreenShown(fullscreenId);
+        };
+
+        window.WGST.exports.bringFullscreenToBack = function(fullscreenId) {
+            
+            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').css('z-index', 'auto');
+        
+            //
+            // Update hidable state
+            //
+            //window.WGST.exports.hidableFullscreenShown(fullscreenId);
+        };
+
         window.WGST.exports.bringFullscreenToPanel = function(fullscreenId, panelWasCreated) {
             //
             // Check if fullscreen exists

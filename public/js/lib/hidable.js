@@ -150,8 +150,6 @@ $(function(){
 
         $('body').on('mouseenter', '.wgst-hidable', function() {
 
-            console.log('mouseenter');
-
             var hidableId = $(this).attr('data-hidable-id');
 
             //
@@ -161,14 +159,38 @@ $(function(){
             $(this).find('.wgst-hidable-controls').removeClass('hide-this');
 
             //
-            // Bring panel to front
             //
-            window.WGST.exports.bringPanelToFront(hidableId);
+            //
+            // Panel or fullscreen?
+            //
+            //
+            //
+            var $activeControl = $(this).find('.wgst-hidable-controls .wgst-hidable--active');
+            var containerType = $activeControl.closest('a').attr('class');
+
+            //
+            // If panel
+            //
+            if (containerType === 'wgst-hidable-panel') {
+
+                //
+                // Bring panel to front
+                //
+                window.WGST.exports.bringPanelToFront(hidableId);
+
+            //
+            // If fullscreen
+            //
+            } else {
+
+                window.WGST.exports.bringFullscreenToTop(hidableId);
+
+            }
+
+
         });
 
         $('body').on('mouseleave', '.wgst-hidable', function() {
-
-            console.log('mouseleave');
 
             var hidableId = $(this).attr('data-hidable-id');
 
@@ -177,6 +199,26 @@ $(function(){
             //
             $(this).find('.wgst-hidable-controls').addClass('hide-this');
             $(this).find('.wgst-hidable-toggle').removeClass('hide-this');
+
+            //
+            //
+            //
+            // Panel or fullscreen?
+            //
+            //
+            //
+            var $activeControl = $(this).find('.wgst-hidable-controls .wgst-hidable--active');
+            var containerType = $activeControl.closest('a').attr('class');
+
+            //
+            // If fullscreen
+            //
+            if (containerType === 'wgst-hidable-fullscreen') {
+
+                window.WGST.exports.bringFullscreenToBack(hidableId);
+
+            }
+
         });
 
         $('body').on('click', '.wgst-hidable-panel', function(event){
