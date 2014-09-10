@@ -30,10 +30,14 @@
         <h3>Use</h3>
         <h4>Interested in using WGSA?</h4>
         <p>Subscribe to our mailing list and be the first one to find out when WGSA is released.</p>
-        <div>
-          <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter your email">
-          <button class="btn btn-default">Subscribe</button>
-        </div>
+        <form role="form" data-form="subscribe">
+          <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter your email" data-input="email">
+          <button type="submit" class="btn btn-default">
+            <div class="wgst-spinner hide-this"></div>
+            <span>Subscribe</span>
+          </button>
+          <p class="wgst-subscribe-success-message hide-this">Thank you! We'll keep you updated.</p>
+        </form>
       </div>
     </div>
   </section>
@@ -57,4 +61,6 @@
 
 {% block script %}
   <script src="/js/lib/landing.js"></script>
+  <script src="/js/lib/utils.js"></script>
+  <script src="/js/lib/subscribe.js"></script>
 {% endblock %}

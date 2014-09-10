@@ -76,6 +76,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', routes.index);
 
 app.post('/feedback', routes.feedback);
+app.post('/subscribe', routes.subscribe);
 
 // User routes
 app.get('/users', user.list);

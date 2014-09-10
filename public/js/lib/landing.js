@@ -1,3 +1,5 @@
+window.WGST = window.WGST || {};
+
 $(function() {
 
 	if (! window.chrome) {
