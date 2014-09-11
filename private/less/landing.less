@@ -65,14 +65,10 @@ section {
         @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
         @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
-
-
-
-
         h1 {
             font-weight: 400;
             margin: 40px 0 0 0;
-            margin-bottom: 70px;
+            margin-bottom: 20px;
             line-height: 1.2em;
             .text-shadow;
         }
@@ -81,6 +77,16 @@ section {
             font-weight: 300;
             font-size: 20px;
         }
+        h3 {
+            font-weight: 300;
+            font-size: 22px;
+            line-height: 30px;
+        }
+
+        .wgst-landing-buttons {
+            margin-top: 40px;
+            //margin-bottom: 40px;
+        }
 
         .wgst-landing-collection {
             display: inline-block;
@@ -88,6 +94,10 @@ section {
             //color: #8c61d4;
             //margin-bottom: 20px;
             margin: 40px 0;
+
+            .fa {
+                margin-right: 10px;
+            }
 
             &.wgst-landing-collection---focus {
                 margin-bottom: 80px;
@@ -114,8 +124,6 @@ section {
                 }
             }
         }
-
-
 
         a {
             //display: inline-block;
@@ -158,10 +166,21 @@ section {
         background-color: @action-color;
         padding: 60px;
 
+        .wgst-project-description {
+            font-weight: 300;
+            font-size: 18px;
+            margin-bottom: 40px;
+
+            &:last-of-type {
+                margin-bottom: 0;
+            }
+        }
+
         .action-box {
             border: 1px solid rgba(0, 0, 0, 1);
             color: #000;
             text-align: center;
+            margin-top: 0;
             margin-bottom: 60px;
 
             &:last-of-type {
@@ -210,7 +229,7 @@ section {
         padding: 60px 0;
 
         p {
-            font-weight: 200;
+            font-weight: 300;
             font-size: 12px;
             line-height: 24px;
             color: #ccc;
