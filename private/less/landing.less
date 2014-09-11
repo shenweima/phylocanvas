@@ -20,6 +20,14 @@ h1, h2, h3, h4, p {
     padding: 0;
 }
 
+a {
+    color: #fff;
+
+    &:hover {
+        color: #fff;
+    }
+}
+
 section {
     overflow: hidden;
 }
@@ -29,7 +37,7 @@ section {
     background-color: #333;
 
     .wgst-page-section {
-        padding: 40px;
+        //padding: 40px;
         text-align: center;
     }
 
@@ -39,7 +47,8 @@ section {
         color: #fff;
         background: url(/images/wgsa_cover.jpg) no-repeat center;
         background-size: cover;
-        padding: 80px;
+        padding-top: 80px;
+        padding-bottom: 60px;
 
 
         .wgst-logo {
@@ -72,15 +81,48 @@ section {
             font-weight: 300;
             font-size: 20px;
         }
-        a {
-            display: inline-block;
-            clear: both;
-            color: #8c61d4;
-            margin-bottom: 20px;
 
-            &:first-of-type {
-                margin-bottom: 30px;
+        .wgst-landing-collection {
+            display: inline-block;
+            //clear: both;
+            //color: #8c61d4;
+            //margin-bottom: 20px;
+            margin: 40px 0;
+
+            &.wgst-landing-collection---focus {
+                margin-bottom: 80px;
             }
+
+            h4 {
+                text-align: left;
+                font-weight: 300;
+                font-size: 20px;
+            }
+
+            p {
+                text-align: left;
+                margin-top: 20px;
+
+                small {
+                    display: block;
+                    //line-height: 30px;
+                    margin-top: 10px;
+
+                    a {
+                        color: #ccc; 
+                    }
+                }
+            }
+        }
+
+
+
+        a {
+            //display: inline-block;
+            //clear: both;
+            //color: #8c61d4;
+            //margin-bottom: 20px;
+
             &.btn-link {
                 color: #fff;
                 font-weight: 300;
@@ -165,6 +207,7 @@ section {
 
     .wgst-page-section__partners {
         color: #fff;
+        padding: 60px 0;
 
         p {
             font-weight: 200;
