@@ -30,6 +30,8 @@ $(function(){
 
             console.dir(result);
 
+            window.WGST.exports.mixpanel.submitFeedback();
+
             // Get collection data
             $.ajax({
                 type: 'POST',

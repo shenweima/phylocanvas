@@ -34,7 +34,7 @@
 
         <section class="wgst-landing-collection col-xs-12 col-sm-6 col-md-4">
           <h4>
-            <a href="/collection/b8d3aab1-625f-49aa-9857-a5e97f5d6be5" class="btn btn-default btn-lg wgst-button__open-sample-collection"><i class="fa fa-list-alt"></i>Explore reference collection</a>
+            <a href="/collection/b8d3aab1-625f-49aa-9857-a5e97f5d6be5" class="btn btn-default btn-lg wgst-button__open-sample-collection" data-mixpanel-open-collection="Reference"><i class="fa fa-list-alt"></i>Explore reference collection</a>
           </h4>
           <p>
             Sanger sequenced <em>Staphylococcus aureus</em> references.
@@ -43,7 +43,7 @@
 
         <section class="wgst-landing-collection col-xs-12 col-sm-6 col-md-4">
           <h4>
-            <a href="/collection/c0ca8c57-11b9-4e27-93a5-6ffe841e7768" class="btn btn-default btn-lg wgst-button__open-sample-collection"><i class="fa fa-list-alt"></i>Explore ST239 collection</a>
+            <a href="/collection/c0ca8c57-11b9-4e27-93a5-6ffe841e7768" class="btn btn-default btn-lg wgst-button__open-sample-collection" data-mixpanel-open-collection="ST239"><i class="fa fa-list-alt"></i>Explore ST239 collection</a>
           </h4>
           <p>
             Harris SR <em>et al.</em>
@@ -54,7 +54,7 @@
 
         <section class="wgst-landing-collection col-xs-12 col-sm-6 col-md-4">
           <h4>
-            <a href="/collection/5324c298-4cd0-4329-848b-30d7fe28a560" class="btn btn-default btn-lg wgst-button__open-sample-collection"><i class="fa fa-list-alt"></i>Explore EMRSA15 collection</a>
+            <a href="/collection/5324c298-4cd0-4329-848b-30d7fe28a560" class="btn btn-default btn-lg wgst-button__open-sample-collection" data-mixpanel-open-collection="EMRSA15"><i class="fa fa-list-alt"></i>Explore EMRSA15 collection</a>
           </h4>
           <p>
             Holden MT <em>et al.</em>
@@ -177,7 +177,7 @@
         <p>For further information please register interest below or feedback within the collection pages.</p>
         <form role="form" data-form="subscribe">
           <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter your email address" data-input="email">
-          <button type="submit" class="btn btn-default">
+          <button type="submit" class="btn btn-default" data-mixpanel-button="subscribe">
             <div class="wgst-spinner hide-this"></div>
             <span>I am interested</span>
           </button>
@@ -227,4 +227,5 @@
   <script src="/js/lib/landing.js"></script>
   <script src="/js/lib/utils.js"></script>
   <script src="/js/lib/subscribe.js"></script>
+  <script src="/js/lib/wgsa_mixpanel.js"></script>
 {% endblock %}

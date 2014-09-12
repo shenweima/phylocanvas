@@ -298,7 +298,7 @@ $(function(){
             var collectionTree = WGST.collection[collectionId].tree[collectionTreeType],
                 collectionTreeName = collectionTree.name,
                 openTreeButton,
-                openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}">{{collectionTreeName}}</button>',
+                openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}" data-mixpanel-show-tree-button="{{collectionTreeType}}">{{collectionTreeName}}</button>',
                 $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group'),
                 $collectionControlsShowDataTable = $('.wgst-collection-controls__show-data-table .btn-group');
 
