@@ -111,6 +111,11 @@ app.post('/api/assembly/resistance-profile', assembly.apiGetResistanceProfile);
 // Data routes
 app.get('/api/all-antibiotics', assembly.apiGetAllAntibiotics);
 
+// 404
+app.use(function(req, res, next){
+    res.status(404).render('404');
+});
+
 // Test routes
 // app.get('/dev/d3tree', require('./routes/dev').d3tree);
 // app.get('/dev/d3test', require('./routes/dev').d3test);
