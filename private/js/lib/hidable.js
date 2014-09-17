@@ -108,6 +108,8 @@ $(function(){
                 .addClass('wgst-hidable--active');
         };
 
+        window.WGST.exports.hidableDidUpdate = function(hidableId) {};
+
         window.WGST.exports.hidablePanelHidden = function(panelId) {
             
             //
@@ -271,7 +273,7 @@ $(function(){
                 window.WGST.exports.bringFullscreenToPanel(hidableId);
 
             //
-            // Fullscreen doesnt exist
+            // Fullscreen doesn't exist
             // 
             } else {
 
@@ -303,13 +305,27 @@ $(function(){
                 //
                 window.WGST.exports.maximizePanel(hidableId);
 
-            }
+                //
+                // Make this hidable active
+                //
+                $('.wgst-hidable[data-hidable-id="' + hidableId + '"]')
+                    .addClass('wgst-hidable--active');
 
             //
-            // Make this hidable active
+            // Check if fullscreen exists
             //
-            $('.wgst-hidable[data-hidable-id="' + hidableId + '"]')
-                .addClass('wgst-hidable--active');
+            } else if ($('.wgst-fullscreen[data-fullscreen-id="' + hidableId + '"]').length > 0) {
+
+                //
+                // Bring fullscreen to panel
+                //
+                window.WGST.exports.bringFullscreenToPanel(hidableId);
+
+                //
+                // Toggle panel
+                //
+                window.WGST.exports.togglePanel(hidableId);
+            }
 
             event.preventDefault();
         });
