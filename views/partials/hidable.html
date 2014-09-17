@@ -9,10 +9,18 @@
 		<i class="fa fa-angle-double-right wgst-hidable-toggle-controls"></i>
 		<ul class="wgst-hidable-controls hide-this">
 
+			{{#unless noFocus}}
+			<li>
+				<a href="#" class="wgst-hidable-focus">
+					<i class="fa fa-crosshairs"></i> <small>Focus</small>
+				</a>
+			</li>
+			{{/unless}}
+
 			{{#unless noPanel}}
 			<li>
 				<a href="#" class="wgst-hidable-panel">
-					<i class="fa fa-square-o"></i> <small>Toggle Panel</small>
+					<i class="fa fa-eye"></i> <small>Toggle Panel</small>
 				</a>
 			</li>
 			{{/unless}}
