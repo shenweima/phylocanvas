@@ -165,26 +165,39 @@ $(function(){
         selector: '[data-toggle="tooltip"]'
     });
 
-    //
-    // Create fullscreen
-    //
-    var fullscreenType = 'collection-map';
-    var fullscreenId = fullscreenType + '__' + 'NEW';
+    // //
+    // // Create fullscreen
+    // //
+    // var fullscreenType = 'collection-map';
+    // var fullscreenId = fullscreenType + '__' + 'NEW';
 
-    if (window.WGST.requestedCollectionId !== 'undefined') {
-        var fullscreenId = fullscreenType + '__' + window.WGST.requestedCollectionId;
+    // if (window.WGST.requestedCollectionId !== 'undefined') {
+    //     var fullscreenId = fullscreenType + '__' + window.WGST.requestedCollectionId;
+    // }
+
+    // window.WGST.exports.createFullscreen(fullscreenId, {
+    //     fullscreenType: fullscreenType,
+    //     fullscreenId: fullscreenId
+    // });
+
+    if (typeof window.WGST.requestedCollectionId !== 'undefined') {
+
+        //
+        // Create map fullscreen
+        //
+        var fullscreenType = 'collection-map',
+            fullscreenId = 'collection-map'; //fullscreenType + '__' + window.WGST.requestedCollectionId;
+
+        window.WGST.exports.createFullscreen(fullscreenId, {
+            fullscreenType: fullscreenType,
+            fullscreenId: fullscreenId
+        });
+
+        //
+        // Show fullscreen
+        //
+        window.WGST.exports.showFullscreen(fullscreenId);
     }
-
-    window.WGST.exports.createFullscreen(fullscreenId, {
-        fullscreenType: fullscreenType,
-        fullscreenId: fullscreenId
-    });
-
-    //
-    // Show default fullscreen
-    //
-    window.WGST.exports.showFullscreen(fullscreenId);
-
 
 
 
@@ -232,8 +245,9 @@ $(function(){
 
 
 
-    WGST.geo = {
+    window.WGST.geo = {
         map: {
+            initialised: false,
             canvas: {},
             options: {
                 zoom: 5,
@@ -250,35 +264,53 @@ $(function(){
             },
             markerBounds: new google.maps.LatLngBounds(),
             searchBoxBounds: new google.maps.LatLngBounds(),
-            /**
-             * Description
-             * @method init
-             * @return 
-             */
             init: function() {
-                WGST.geo.map.canvas = new google.maps.Map($('.wgst-map')[0], WGST.geo.map.options);
-                WGST.geo.map.markers.metadata = new google.maps.Marker({
+
+                //
+                // Do nothing if map was already initialised
+                //
+                if (this.initialised === true) {
+                    return;
+                }
+
+                //
+                // Create map
+                //
+                window.WGST.geo.map.canvas = new google.maps.Map($('.wgst-map')[0], window.WGST.geo.map.options);
+
+                //
+                // Set map as initialised
+                //
+                window.WGST.geo.map.initialised = true;
+
+                //
+                // Create metadata marker
+                //
+                window.WGST.geo.map.markers.metadata = new google.maps.Marker({
                     position: new google.maps.LatLng(51.511214, -0.119824),
                     map: WGST.geo.map.canvas,
                     visible: false
                 });
+
+                //
                 // Bias the SearchBox results towards places that are within the bounds of the current map's viewport.
+                //
                 google.maps.event.addListener(WGST.geo.map.canvas, 'bounds_changed', function() {
-                    WGST.geo.map.searchBoxBounds = WGST.geo.map.canvas.getBounds();
+                    window.WGST.geo.map.searchBoxBounds = window.WGST.geo.map.canvas.getBounds();
                 });
             } // init
         },
         placeSearchBox: {} // Store Google SearchBox object for each dropped file
     };
 
-    WGST.alert = {
+    window.WGST.alert = {
         status: {
             SUCCESS: 'success',
             FAILURE: 'failure'
         }
     };
 
-    WGST.init = {
+    window.WGST.init = {
         all: {
             SOCKET_CONNECT: 'Socket connected',
             SOCKET_ROOM_ID: 'Received socket room id',
@@ -287,9 +319,9 @@ $(function(){
         loaded: []
     };
 
-    WGST.dragAndDrop = WGST.dragAndDrop || {};
-    WGST.dragAndDrop.files = [];
-    WGST.dragAndDrop.fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i;
+    window.WGST.dragAndDrop = WGST.dragAndDrop || {};
+    window.WGST.dragAndDrop.files = [];
+    window.WGST.dragAndDrop.fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i;
 
     /**
      * Description
@@ -306,7 +338,7 @@ $(function(){
                 initHtmlElement.fadeOut('fast');
             }, 500);
 
-            delete WGST.init;
+            delete window.WGST.init;
         } // if
     };
 
@@ -2013,12 +2045,12 @@ $(function(){
         }
     });
 
-google.maps.event.addDomListener(window, "resize", function() {
-    var map = WGST.geo.map.canvas;
- var center = map.getCenter();
- google.maps.event.trigger(map, "resize");
- map.setCenter(center); 
-});
+    // google.maps.event.addDomListener(window, "resize", function() {
+    //     var map = WGST.geo.map.canvas;
+    //     var center = map.getCenter();
+    //     google.maps.event.trigger(map, "resize");
+    // map.setCenter(center); 
+    // });
 
 
 
@@ -2175,7 +2207,7 @@ google.maps.event.addDomListener(window, "resize", function() {
     });
 
     // Init map
-    WGST.geo.map.init();
+    //window.WGST.geo.map.init();
 
 });
 

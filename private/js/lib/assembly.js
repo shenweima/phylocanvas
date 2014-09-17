@@ -277,8 +277,8 @@ $(function(){
 
 	            var assemblyResistanceData = getAssemblyResistanceData(antibiotics, assemblyResistanceProfile);
 
-	            console.debug('assemblyResistanceData:');
-	            console.dir(assemblyResistanceData);
+	            //console.debug('assemblyResistanceData:');
+	            //console.dir(assemblyResistanceData);
 
 	            //
 	            // Sequence type
@@ -350,7 +350,7 @@ $(function(){
 	            console.error(errorThrown);
 	            console.error(jqXHR);
 
-	            showNotification(textStatus);
+	            //showNotification(textStatus);
 	        });
 	    };
 

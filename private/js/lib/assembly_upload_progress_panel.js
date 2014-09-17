@@ -24,6 +24,16 @@ $(function(){
 	        window.WGST.exports.removePanel('assembly-upload-metadata');
 	        window.WGST.exports.removePanel('assembly-upload-analytics');
 
+            //
+            // Remove map fullscreen
+            //
+            window.WGST.exports.removeFullscreen('collection-map');
+
+            //
+            // Remove hidable
+            //
+            window.WGST.exports.removeHidable('collection-map');
+
 	        //deactivatePanel(['assemblyUploadNavigator', 'assemblyUploadAnalytics', 'assemblyUploadMetadata']);
 
 
@@ -299,13 +309,14 @@ $(function(){
                     // } // for
                 })
                 .fail(function(jqXHR, textStatus, errorThrown) {
-                    console.log('[WGST][ERROR] Failed to get collection id');
+                    console.error('[WGST][Error] Failed to get collection id');
                     console.error(textStatus);
                     console.error(errorThrown);
                     console.error(jqXHR);
 
-                    showNotification(textStatus);
+                    //showNotification(textStatus);
                 });
+
             }, GET_COLLECTION_ID_TIMER);
 
 

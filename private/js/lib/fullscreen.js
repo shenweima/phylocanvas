@@ -38,10 +38,15 @@ $(function(){
                 containerId: fullscreenId
             });
 
+            console.debug('templateContext.fullscreenType: ' + templateContext.fullscreenType);
+
             //
             // Render
             //
             var fullscreenTemplateId = window.WGST.exports.mapFullscreenIdToTemplateId[templateContext.fullscreenType];
+
+            console.debug('fullscreenTemplateId: ' + fullscreenTemplateId);
+
             var fullscreenTemplateSource = $('.wgst-template[data-template-id="' + fullscreenTemplateId + '"]').html(),
                 fullscreenTemplate = Handlebars.compile(fullscreenTemplateSource),
                 fullscreenHtml = fullscreenTemplate(templateContext);
@@ -75,7 +80,7 @@ $(function(){
 
         window.WGST.exports.bringFullscreenToFront = function(fullscreenId) {
 
-            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').css('z-index', '9999');
+            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').css('z-index', '5000');
         
             //
             // Update hidable state

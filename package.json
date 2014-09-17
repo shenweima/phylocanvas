@@ -8,7 +8,7 @@
   "dependencies": {
     "amqp": "*",
     "body-parser": "*",
-    "couchbase": "*",
+    "couchbase": "1.2.4",
     "ejs": "*",
     "express": "*",
     "longjohn": "*",

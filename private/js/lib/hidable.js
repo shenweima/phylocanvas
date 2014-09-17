@@ -175,6 +175,14 @@ $(function(){
 
         };
 
+        $('body').on('click', '.wgst-hidable', function() {
+
+            var $hidableControls = $(this).find('.wgst-hidable-controls');
+
+            $hidableControls.toggleClass('hide-this');
+
+        });
+
         $('body').on('mouseenter', '.wgst-hidable', function() {
 
             var hidableId = $(this).attr('data-hidable-id');
@@ -182,8 +190,8 @@ $(function(){
             //
             // Show hidable controls
             //
-            $(this).find('.wgst-hidable-toggle').addClass('hide-this');
-            $(this).find('.wgst-hidable-controls').removeClass('hide-this');
+            //$(this).find('.wgst-hidable-toggle').addClass('hide-this');
+            //$(this).find('.wgst-hidable-controls').removeClass('hide-this');
 
             //
             //
@@ -210,6 +218,9 @@ $(function(){
             //
             } else {
 
+                //
+                // Bring fullscreen to front
+                //
                 window.WGST.exports.bringFullscreenToFront(hidableId);
 
             }
@@ -225,7 +236,7 @@ $(function(){
             // Show hidable label
             //
             $(this).find('.wgst-hidable-controls').addClass('hide-this');
-            $(this).find('.wgst-hidable-toggle').removeClass('hide-this');
+            //$(this).find('.wgst-hidable-toggle').removeClass('hide-this');
 
             //
             //

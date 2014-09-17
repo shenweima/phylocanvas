@@ -4,23 +4,37 @@
 <script type="text/x-handlebars-template" class="wgst-template" data-template-id="hidable">
 
 	<li class="wgst-hidable" data-hidable-id="{{hidableId}}">
-		<span class="wgst-hidable-toggle" title="{{hidableLabel}}">{{hidableLabel}}</span>
-		<div class="wgst-hidable-controls hide-this">
+		<i class="fa fa-eye wgst-hidable-bring-to-front"></i>
+		<span class="wgst-hidable-toggle">{{hidableLabel}}</span>
+		<i class="fa fa-angle-right wgst-hidable-toggle-controls"></i>
+		<ul class="wgst-hidable-controls hide-this">
 
 			{{#unless noPanel}}
-			<a href="#" class="wgst-hidable-panel"><i class="fa fa-square-o"></i></a>
+			<li>
+				<a href="#" class="wgst-hidable-panel">
+					<i class="fa fa-square-o"></i> <small>Toggle Panel</small>
+				</a>
+			</li>
 			{{/unless}}
 
 			{{#unless noFullscreen}}
-			<a href="#" class="wgst-hidable-fullscreen"><i class="fa fa-arrows-alt"></i></a>
+			<li>
+				<a href="#" class="wgst-hidable-fullscreen">
+					<i class="fa fa-arrows-alt"></i> <small>Toggle Fullscreen</small>
+				</a>
+			</li>
 			{{/unless}}
 
 			{{#if close}}
-			<a href="#" class="wgst-hidable-close"><i class="fa fa-close"></i></a>
+			<li>
+				<a href="#" class="wgst-hidable-close">
+					<i class="fa fa-close"></i> <small>Close</small>
+				</a>
+			</li>
 			{{/if}}
 
-			<small>{{hidableLabel}}</small>
-		</div>
+			<!-- <small>{{hidableLabel}}</small> -->
+		</ul>
 	</li>
 
 </script>

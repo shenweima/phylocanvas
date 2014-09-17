@@ -112,11 +112,16 @@ $(function(){
 	        		var collectionPanelId = window.WGST.exports.createCollectionDataPanel(collectionId);
 	        		var $collectionPanel = $('.wgst-panel[data-panel-id="' + collectionPanelId + '"]');
 
+                    //
+				    // Initialise map
+				    //
+			    	window.WGST.geo.map.init();
+
 	                //
 	                // Create collection map fullscreen
 	                // 
-	        		window.WGST.exports.createFullscreen('collection-map__' + collectionId, {
-	        			fullscreenType: 'collection_map'
+	        		window.WGST.exports.createFullscreen('collection-map', {
+	        			fullscreenType: 'collection-map'
 	        		});
 
 	        		//

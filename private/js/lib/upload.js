@@ -193,7 +193,10 @@ $(function(){
 
 	                            // Once all files have been loaded
 	                            if (WGST.dragAndDrop.loadedFiles.length === WGST.dragAndDrop.files.length) {
+	                                
+	                                //
 	                                // Sort loaded files by name
+	                                //
 	                                WGST.dragAndDrop.loadedFiles.sort(function(a, b){
 	                                    if (a.file.name > b.file.name) {
 	                                        return 1;
@@ -205,7 +208,13 @@ $(function(){
 	                                });
 
 	                                //
+	                                //
 	                                // Create assembly upload panels
+	                                //
+	                                //
+
+	                                //
+	                                // Create assembly upload navigation panel
 	                                //
 	                                window.WGST.exports.createPanel('assembly-upload-navigation', {
 	                                	panelType: 'assembly-upload-navigation',
@@ -216,9 +225,9 @@ $(function(){
 					                //
 					                window.WGST.exports.showPanel('assembly-upload-navigation');
 
-
-
-
+	                                //
+	                                // Create assembly upload metadata panel
+	                                //
 	                                window.WGST.exports.createPanel('assembly-upload-metadata', {
 	                                	panelType: 'assembly-upload-metadata',
 	                                	panelId: 'assembly-upload-metadata'
@@ -228,9 +237,9 @@ $(function(){
 					                //
 					                window.WGST.exports.showPanel('assembly-upload-metadata');
 
-
-
-
+	                                //
+	                                // Create assembly upload analytics panel
+	                                //
 	                                window.WGST.exports.createPanel('assembly-upload-analytics', {
 	                                	panelType: 'assembly-upload-analytics',
 	                                	panelId: 'assembly-upload-analytics'
@@ -239,9 +248,43 @@ $(function(){
 					                // Show panel
 					                //
 					                window.WGST.exports.showPanel('assembly-upload-analytics');
-	                                
+
+							        //
+							        // Create map fullscreen
+							        //
+							        var fullscreenType = 'collection-map',
+							            fullscreenId = fullscreenType;
+
+							        window.WGST.exports.createFullscreen(fullscreenId, {
+							            fullscreenType: fullscreenType,
+							            fullscreenId: fullscreenId
+							        });
+
+							        //
+							        // Show fullscreen
+							        //
+							        window.WGST.exports.showFullscreen(fullscreenId);
+
+	                                //
+								    // Initialise map
+								    //
+							    	window.WGST.geo.map.init();
+
+							        //
+							        // Was map loaded?
+							        //
+								    //if (! window.WGST.geo.map.initilised) {
+
+		                                //
+									    // Initialise map
+									    //
+								    	//window.WGST.geo.map.init();
+								    //}
+
+	                                //
 	                                // Parse loaded files
-	                                WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile){
+	                                //
+	                                window.WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile){
 	                                    parseFastaFile(loadedFile.event, loadedFile.fileCounter, loadedFile.file, loadedFile.droppedFiles, loadedFile.collectionId, loadedFile.uid);
 	                                    
 	                                    // Add assembly to the drop down select of dropeed assemblies
@@ -258,9 +301,6 @@ $(function(){
 	                                //window.WGST.exports.showDroppedAssembly(WGST.dragAndDrop.loadedFiles[0].uid);
 					                //window.WGST.exports.showAssemblyUploadAnalytics(WGST.dragAndDrop.loadedFiles[0].file.name);
 					                //window.WGST.exports.showAssemblyUploadMetadata(WGST.dragAndDrop.loadedFiles[0].file.name);
-
-
-
 	                            }
 	                        });
 

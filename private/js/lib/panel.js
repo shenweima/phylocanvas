@@ -31,10 +31,14 @@ $(function(){
         	//
         	// Get panel's label
         	//
+            templateContext.panelLabel = templateContext.assemblyUserId;
+
+
         	templateContext.panelLabel = window.WGST.exports.getContainerLabel({
         		containerName: 'panel', 
         		containerType: panelType,
-        		containerId: templateContext.panelId
+        		containerId: templateContext.panelId,
+                containerContext: templateContext
         	});
 
         	//
@@ -160,12 +164,15 @@ $(function(){
 
 	    window.WGST.exports.getContainerLabel = function(options) {
 
+            //
+            //
 	    	//
 	    	// Options:
 	    	//
 	    	// containerName: "panel" or "fullscreen"
 	    	// containerType: panelType or fullscreenType
 	    	// containerId: panelId or fullscreenId
+            // containerContext: context object specific to container
 	    	//
 	    	//
 	    	//
@@ -194,9 +201,25 @@ $(function(){
 
         	} else if (options.containerType === 'assembly') {
 
-        		containerLabel = 'Assembly';
+        		containerLabel = options.containerContext.assemblyUserId; // 'Assembly';
 
-        	}
+        	} else if (options.containerType === 'assembly-upload-progress') {
+
+                containerLabel = 'Assembly Upload';
+
+            } else if (options.containerType === 'assembly-upload-metadata') {
+
+                containerLabel = 'Assembly Metadata';
+
+            } else if (options.containerType === 'assembly-upload-analytics') {
+
+                containerLabel = 'Assembly Analytics';
+
+            } else if (options.containerType === 'assembly-upload-navigation') {
+
+                containerLabel = 'Collection Navigation';
+
+            }
 
         	return containerLabel;
 	    };
