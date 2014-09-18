@@ -14,16 +14,16 @@ $(function(){
             'assembly-upload-progress': 'assembly-upload-progress-panel'
         };
 
-        window.WGST.exports.mapPanelTypeToTemplateId = {
-        	'assembly': 'assembly-panel',
-            'collection-data': 'collection-data-panel',
-            'collection-tree': 'collection-tree-panel',
-            'collection-map': 'collection-map-panel',
-            'assembly-upload-navigation': 'assembly-upload-navigation-panel',
-            'assembly-upload-metadata': 'assembly-upload-metadata-panel',
-            'assembly-upload-analytics': 'assembly-upload-analytics-panel',
-            'assembly-upload-progress': 'assembly-upload-progress-panel'
-        };
+        // window.WGST.exports.mapPanelTypeToTemplateId = {
+        // 	'assembly': 'assembly-panel',
+        //     'collection-data': 'collection-data-panel',
+        //     'collection-tree': 'collection-tree-panel',
+        //     'collection-map': 'collection-map-panel',
+        //     'assembly-upload-navigation': 'assembly-upload-navigation-panel',
+        //     'assembly-upload-metadata': 'assembly-upload-metadata-panel',
+        //     'assembly-upload-analytics': 'assembly-upload-analytics-panel',
+        //     'assembly-upload-progress': 'assembly-upload-progress-panel'
+        // };
 
         window.WGST.exports.createPanel = function(panelType, templateContext) {
 
