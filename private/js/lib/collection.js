@@ -68,7 +68,7 @@ $(function(){
 	    window.WGST.exports.getCollection = function(collectionId) {
 	        console.log('[WGST] Getting collection ' + collectionId);
 
-	        if (WGST.speak) {
+	        if (window.WGST.speak) {
 	            var message = new SpeechSynthesisUtterance('Loading collection');
 	            window.speechSynthesis.speak(message);
 	        }
@@ -259,7 +259,7 @@ $(function(){
 	                //
 	                // Show collection navigation
 	                //
-	                //$('.wgst-navigation__collection-panels').toggleClass('hide-this');
+	                //$('.wgst-navigation__collection-panels').toggleClass('wgst--hide-this');
 
 	            } // if
 	        })
@@ -309,7 +309,7 @@ $(function(){
 
 	        // Hide collection navigation
 	        //$('.wgst-navigation__collection').show();
-	        $('.wgst-navigation__collection-panels').toggleClass('hide-this');
+	        $('.wgst-navigation__collection-panels').toggleClass('wgst--hide-this');
 	    };
 
 	    window.WGST.exports.addResistanceProfileDataToCollection = function(collectionId) {

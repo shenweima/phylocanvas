@@ -355,7 +355,12 @@ $(function(){
                 collectionId: collectionId,
                 collectionTreeType: collectionTreeType,
                 collectionTreeTitle: collectionTreeName,
-                phylocanvasId: phylocanvasId
+                phylocanvasId: phylocanvasId,
+                invisibleThis: true,
+                dataAttributes: [{
+                    name: 'data-collection-tree-type',
+                    value: collectionTreeType
+                }]
             }
 
             //

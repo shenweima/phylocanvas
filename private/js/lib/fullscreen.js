@@ -70,7 +70,7 @@ $(function(){
         };
 
         window.WGST.exports.showFullscreen = function(fullscreenId) {
-            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').removeClass('hide-this invisible-this');
+            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').removeClass('wgst--hide-this wgst--invisible-this');
         
             //
             // Update hidable state
@@ -79,7 +79,7 @@ $(function(){
         };
 
         window.WGST.exports.hideFullscreen = function(fullscreenId) {
-            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').addClass('hide-this invisible-this');
+            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').addClass('wgst--hide-this wgst--invisible-this');
         
             //
             // Update hidable state
@@ -156,7 +156,7 @@ $(function(){
 
                 $panel.find('.wgst-panel-body').replaceWith($fullscreenContent.clone(true));
 
-                $panel.find('.wgst-collection-controls').removeClass('hide-this');
+                $panel.find('.wgst-collection-controls').removeClass('wgst--hide-this');
 
 //$('[data-toggle="tooltip"]').tooltip('destroy');
 
@@ -253,7 +253,7 @@ $(function(){
                 //
                 // Hide controls
                 //
-                $fullscreen.find('.wgst-collection-controls').addClass('hide-this');
+                $fullscreen.find('.wgst-collection-controls').addClass('wgst--hide-this');
 
 //$('[data-toggle="tooltip"]').tooltip('destroy');
 

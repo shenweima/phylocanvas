@@ -535,7 +535,7 @@ $(function(){
 	        //drawN50Chart(assemblyNucleotideSums, assemblyN50, fileCounter);
 
 	        // Show first assembly
-	        //$('.assembly-item-1').removeClass('hide-this');
+	        //$('.assembly-item-1').removeClass('wgst--hide-this');
 	        //$('.assembly-item').eq('0').show();
 	        // $('#assembly-item-1').show();
 	        // $('#assembly-metadata-item-1').show();

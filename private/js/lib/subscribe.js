@@ -24,8 +24,8 @@ $(function(){
             var $button = $(this).find('[type="submit"]');
 
             $button.prop('disabled', true);
-            $button.find('span').addClass('hide-this');
-            $button.find('.wgst-spinner').removeClass('hide-this');
+            $button.find('span').addClass('wgst--hide-this');
+            $button.find('.wgst-spinner').removeClass('wgst--hide-this');
 
 
             var result = {
@@ -47,9 +47,9 @@ $(function(){
             .done(function(data, textStatus, jqXHR) {
                 console.log('[WGST] Subscribed');
 
-                $button.addClass('hide-this');
+                $button.addClass('wgst--hide-this');
 
-                $('.wgst-subscribe-success-message').removeClass('hide-this');
+                $('.wgst-subscribe-success-message').removeClass('wgst--hide-this');
 
             })
             .fail(function(jqXHR, textStatus, errorThrown) {

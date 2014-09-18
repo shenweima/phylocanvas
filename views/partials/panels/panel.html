@@ -2,14 +2,15 @@
 
 <script type="text/x-handlebars-template" class="wgst-template" data-template-id="panel">
 
-  <section class="wgst-panel wgst-panel__{{panelType}} wgst-draggable hide-this"
+  <section class="wgst-panel wgst-panel__{{panelType}} wgst-draggable{{#if invisibleThis }} wgst--invisible-this{{/if}}{{#if hideThis }} wgst--hide-this{{/if}}"
           data-panel-type="{{panelType}}"
           data-panel-id="{{panelId}}"
           data-panel-label="{{panelLabel}}"
-          data-collection-id="{{collectionId}}">
+          data-collection-id="{{collectionId}}"
+          {{#each dataAttributes}}{{name}}="{{value}}"{{/each}}>
 
     <header class="wgst-panel-header wgst-draggable-handle">
-      <h4 class="header-title">Data</h4>
+      <h4 class="header-title">{{panelLabel}}</h4>
 
       <div class="wgst-panel-header-controls">
 

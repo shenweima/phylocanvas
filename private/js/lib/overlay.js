@@ -56,11 +56,11 @@ $(function(){
 
 
   //       window.WGST.exports.showOverlay = function(overlayId) {
-  //       	$('.wgst-overlay[data-overlay-id="' + overlayId + '"]').removeClass('hide-this invisible-this');
+  //       	$('.wgst-overlay[data-overlay-id="' + overlayId + '"]').removeClass('wgst--hide-this wgst--invisible-this');
   //       };
 
   //       window.WGST.exports.hidePanel = function(panelId) {
-  //       	$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('hide-this');
+  //       	$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('wgst--hide-this');
   //       };
 
 	 //    window.WGST.exports.bringPanelToTop = function(panelId) {

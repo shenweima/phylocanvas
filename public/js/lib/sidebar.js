@@ -56,8 +56,8 @@ $(function(){
         	//
         	// Show hidable controls
         	//
-        	$(this).find('.wgst-hidable-toggle').addClass('hide-this');
-        	$(this).find('.wgst-hidable-controls').removeClass('hide-this');
+        	$(this).find('.wgst-hidable-toggle').addClass('wgst--hide-this');
+        	$(this).find('.wgst-hidable-controls').removeClass('wgst--hide-this');
 
         	//
         	// Bring panel to front
@@ -74,8 +74,8 @@ $(function(){
         	//
         	// Show hidable label
         	//
-        	$(this).find('.wgst-hidable-controls').addClass('hide-this');
-        	$(this).find('.wgst-hidable-toggle').removeClass('hide-this');
+        	$(this).find('.wgst-hidable-controls').addClass('wgst--hide-this');
+        	$(this).find('.wgst-hidable-toggle').removeClass('wgst--hide-this');
         });
 
         $('body').on('click', '.wgst-hidable-panel', function(event){

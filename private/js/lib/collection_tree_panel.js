@@ -161,7 +161,10 @@ $(function(){
 	        //     tree = WGST.collection[collectionId].tree.canvas;
 	        // }
 
-	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        console.debug('$$$ collectionId: ' + collectionId);
+	        console.debug('$$$ collectionTreeType: ' + collectionTreeType);
+
+	        tree = window.WGST.collection[collectionId].tree[collectionTreeType].canvas;
 	        tree.setTreeType(selectedOption.val());
 	    });
 
@@ -240,8 +243,8 @@ $(function(){
 	            // ------------------------------------------
 	            (function() {
 	                var mergeCollectionTreesButton = $('.wgst-tree-control__merge-collection-trees');
-	                mergeCollectionTreesButton.find('.wgst-spinner').addClass('hide-this');
-	                mergeCollectionTreesButton.find('.wgst-spinner-label').removeClass('hide-this');
+	                mergeCollectionTreesButton.find('.wgst-spinner').addClass('wgst--hide-this');
+	                mergeCollectionTreesButton.find('.wgst-spinner-label').removeClass('wgst--hide-this');
 	                mergeCollectionTreesButton.attr('disabled', false);
 	            }());
 
@@ -277,8 +280,8 @@ $(function(){
 	        var mergeButton = $(this);
 
 	        mergeButton.attr('disabled', true);
-	        mergeButton.find('.wgst-spinner-label').addClass('hide-this');
-	        mergeButton.find('.wgst-spinner').removeClass('hide-this');
+	        mergeButton.find('.wgst-spinner-label').addClass('wgst--hide-this');
+	        mergeButton.find('.wgst-spinner').removeClass('wgst--hide-this');
 
 	        //-----------------------------
 	        // Remove after demo
@@ -320,8 +323,8 @@ $(function(){
 	        var mergeButton = $(this);
 
 	        mergeButton.attr('disabled', true);
-	        mergeButton.find('.wgst-spinner-label').addClass('hide-this');
-	        mergeButton.find('.wgst-spinner').removeClass('hide-this');
+	        mergeButton.find('.wgst-spinner-label').addClass('wgst--hide-this');
+	        mergeButton.find('.wgst-spinner').removeClass('wgst--hide-this');
 
 	        var requestData = {
 	            mergeTreeId: mergeTreeId,

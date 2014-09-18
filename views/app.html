@@ -15,53 +15,20 @@
       border-color: #0099ff transparent #0099ff transparent;
       -webkit-animation: spin 1s linear infinite;
     }
-    .wgst-spinner.hide-this {
-        display: none;
-    }
   </style>
 {% endblock %}
 
 {% block content %}
 
-  <section class="wgst-page wgst-page__app hide-this">
+  <section class="wgst-page wgst-page__app wgst--hide-this">
 
-    {% include "partials/init.html" %}
-
-    <!--
-    <div class="wgst-notification wgst-notification__error hide-this"></div>
-    <div class="wgst-notification wgst-notification__warning hide-this"></div>
-    <div class="wgst-alert hide-this"></div>
-    -->
-    
+    {% include "partials/init.html" %}    
     {% include "partials/header.html" %}
     
     <div class="wgst-layout-container">
       {% include "partials/sidebar.html" %}
       <div class="wgst-workspace"></div>
     </div>
-
-    <!-- <div class="wgst-react-component wgst-react-component__workflow-question"></div> -->
-
-    <!-- <div class="wgst-background"></div> -->
-
-    <!--
-    <div class="wgst-ring" data-wgst-js="ring">
-      <div class="wgst-ring-content">WGSA</div>
-    </div>
-    -->
-
-    <!-- 
-    
-    Templates
-
-    -->
-
-    <!-- Collection tree -->
-    <!-- 
-    <div class="wgst-fullscreen wgst-fullscreen__collection-tree" data-fullscreen-name="collectionTree" data-fullscreen-id="collectionTree">
-    </div>
-    -->
-    <!-- /.wgst-fullscreen__collection-tree -->
 
   </section>
 

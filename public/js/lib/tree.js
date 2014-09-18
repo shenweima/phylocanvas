@@ -240,8 +240,8 @@ $(function(){
 	            // ------------------------------------------
 	            (function() {
 	                var mergeCollectionTreesButton = $('.wgst-tree-control__merge-collection-trees');
-	                mergeCollectionTreesButton.find('.wgst-spinner').addClass('hide-this');
-	                mergeCollectionTreesButton.find('.wgst-spinner-label').removeClass('hide-this');
+	                mergeCollectionTreesButton.find('.wgst-spinner').addClass('wgst--hide-this');
+	                mergeCollectionTreesButton.find('.wgst-spinner-label').removeClass('wgst--hide-this');
 	                mergeCollectionTreesButton.attr('disabled', false);
 	            }());
 

@@ -181,7 +181,7 @@ $(function(){
 
             var $hidableControls = $(this).find('.wgst-hidable-controls');
 
-            $hidableControls.toggleClass('hide-this');
+            $hidableControls.toggleClass('wgst--hide-this');
 
         });
 
@@ -192,8 +192,8 @@ $(function(){
             //
             // Show hidable controls
             //
-            //$(this).find('.wgst-hidable-toggle').addClass('hide-this');
-            //$(this).find('.wgst-hidable-controls').removeClass('hide-this');
+            //$(this).find('.wgst-hidable-toggle').addClass('wgst--hide-this');
+            //$(this).find('.wgst-hidable-controls').removeClass('wgst--hide-this');
 
             //
             //
@@ -237,8 +237,8 @@ $(function(){
             //
             // Show hidable label
             //
-            $(this).find('.wgst-hidable-controls').addClass('hide-this');
-            //$(this).find('.wgst-hidable-toggle').removeClass('hide-this');
+            $(this).find('.wgst-hidable-controls').addClass('wgst--hide-this');
+            //$(this).find('.wgst-hidable-toggle').removeClass('wgst--hide-this');
 
             //
             //
@@ -381,7 +381,7 @@ $(function(){
                 //
                 // Check if panel hidden
                 //
-                if ($panel.hasClass('hide-this') || $panel.hasClass('invisible-this')) {
+                if ($panel.hasClass('wgst--hide-this') || $panel.hasClass('wgst--invisible-this')) {
 
                     //
                     // Show panel

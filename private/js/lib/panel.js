@@ -78,13 +78,13 @@ $(function(){
 	        $panel.draggable({
 	            handle: $panel.find('.wgst-draggable-handle'),
 	            appendTo: ".wgst-page__app",
-	            scroll: false,
-	            stop: function(event, ui) {
+	            scroll: false//,
+	            //stop: function(event, ui) {
 	                // // Store current panel position
 	                // var panelName = ui.helper.attr('data-panel-name');
 	                // WGST.panels[panelName].top = ui.position.top;
 	                // WGST.panels[panelName].left = ui.position.left;
-	            }
+	            //}
 	        });
 
 	        //
@@ -103,7 +103,7 @@ $(function(){
         };
 
         window.WGST.exports.showPanel = function(panelId) {
-        	$('.wgst-panel[data-panel-id="' + panelId + '"]').removeClass('hide-this invisible-this');
+        	$('.wgst-panel[data-panel-id="' + panelId + '"]').removeClass('wgst--hide-this wgst--invisible-this');
 
         	//
         	// Update hidable state
@@ -112,7 +112,7 @@ $(function(){
         };
 
         window.WGST.exports.hidePanel = function(panelId) {
-        	$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('hide-this');
+        	$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('wgst--hide-this');
 
         	//
         	// Update hidable state
@@ -121,7 +121,7 @@ $(function(){
         };
 
         // window.WGST.exports.hideAllPanels = function() {
-        // 	$('.wgst-panel').addClass('hide-this');
+        // 	$('.wgst-panel').addClass('wgst--hide-this');
 
         // 	//
         // 	// Update hidable state
@@ -135,7 +135,7 @@ $(function(){
     		//
     		// Toggle panel
     		//
-    		if ($panel.is('.hide-this, .invisible-this')) {
+    		if ($panel.is('.wgst--hide-this, .wgst--invisible-this')) {
 
         		//
         		// Show panel

@@ -142,13 +142,13 @@ $(function(){
         //
         // Show app page
         //
-        $('.wgst-page__app').removeClass('hide-this');
+        $('.wgst-page__app').removeClass('wgst--hide-this');
     } else {
 
         //
         // Show default page
         //
-        $('.wgst-page__landing').removeClass('hide-this');
+        $('.wgst-page__landing').removeClass('wgst--hide-this');
 
         return;
     }
@@ -1216,7 +1216,7 @@ $(function(){
     // // Show hint message when 'I am not sure' checkbox is checkec
     // $('.wgst-assembly-upload__metadata').on('click', '.not-sure-checkbox', function(){
     //     // Show 'I am not sure' message
-    //     $(this).closest('label').find('.not-sure-hint').toggleClass('hide-this');
+    //     $(this).closest('label').find('.not-sure-hint').toggleClass('wgst--hide-this');
     // });
 
 
