@@ -3,9 +3,10 @@ $(function(){
 	(function(){
 
         window.WGST.exports.mapPanelTypeToContentTemplateId = {
-            'assembly': 'assembly-panel',
+            'assembly': 'panel-content__assembly',
             'collection-data': 'panel-content__collection-data',
             'collection-tree': 'panel-content__collection-tree',
+            
             'collection-map': 'collection-map-panel',
             'assembly-upload-navigation': 'assembly-upload-navigation-panel',
             'assembly-upload-metadata': 'assembly-upload-metadata-panel',

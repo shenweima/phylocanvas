@@ -1,5 +1,3 @@
-![](https://github.com/ImperialCollegeLondon/wgst-front/blob/master/public/images/wgsa_logo.png)
-
 WGSA Front End
 ==========
 
