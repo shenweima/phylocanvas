@@ -1,0 +1,41 @@
+{% raw %}
+
+<script type="text/x-handlebars-template" class="wgst-template" data-template-id="panel">
+
+  <section class="wgst-panel wgst-panel__{{panelType}} wgst-draggable hide-this"
+          data-panel-type="{{panelType}}"
+          data-panel-id="{{panelId}}"
+          data-panel-label="{{panelLabel}}"
+          data-collection-id="{{collectionId}}">
+
+    <header class="wgst-panel-header wgst-draggable-handle">
+      <h4 class="header-title">Data</h4>
+
+      <div class="wgst-panel-header-controls">
+
+        <i class="wgst-panel-control-button wgst-panel-control-button--active fa fa-arrows-alt"
+          data-panel-control-button="fullscreen"></i>
+
+        <i class="wgst-panel-control-button wgst-panel-control-button--active fa fa-eye-slash"
+          data-panel-control-button="hide"></i>
+
+        <i class="wgst-panel-control-button wgst-panel-control-button--active fa fa-remove"
+          data-panel-control-button="close"></i>
+
+      </div>
+    </header>
+
+    <article class="wgst-panel-body">
+      <div class="wgst-panel-body-content">
+        {{> content}}
+      </div>     
+    </article>
+
+    <footer class="wgst-panel-footer wgst-draggable-handle">
+    </footer>
+
+  </section>
+
+</script>
+
+{% endraw %}

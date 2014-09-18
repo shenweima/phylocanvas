@@ -1,1 +1,65 @@
-$(function(){!function(){$("body").on("submit",'[data-form="subscribe"]',function(e){console.log("[WGST] Submitting subscribe form..."),e.preventDefault();var s=$('[data-form="subscribe"]'),o=s.find('[data-input="email"]').val();if("undefined"==typeof o||""===o)return console.error("[WGST][Validation][Error] ✗ No email"),void 0;var i=$(this).find('[type="submit"]');i.prop("disabled",!0),i.find("span").addClass("hide-this"),i.find(".wgst-spinner").removeClass("hide-this");var r={email:o};console.dir(r),$.ajax({type:"POST",url:"/subscribe/",datatype:"json",data:r}).done(function(){console.log("[WGST] Subscribed"),i.addClass("hide-this"),$(".wgst-subscribe-success-message").removeClass("hide-this")}).fail(function(e,s,o){console.log("[WGST][Error] Failed to subscribe"),console.error(s),console.error(o),console.error(e)})})}()});
+$(function(){
+
+	(function(){
+
+        //
+        // Subscribe form
+        //
+        $('body').on('submit', '[data-form="subscribe"]', function(event){
+            console.log('[WGST] Submitting subscribe form...');
+
+            event.preventDefault();
+
+            var $form = $('[data-form="subscribe"]'),
+                email = $form.find('[data-input="email"]').val();
+
+            //
+            // Validate
+            //
+            if (typeof email === 'undefined' || email === '') {
+                console.error('[WGST][Validation][Error] ✗ No email');
+                return;
+            }
+
+            var $button = $(this).find('[type="submit"]');
+
+            $button.prop('disabled', true);
+            $button.find('span').addClass('hide-this');
+            $button.find('.wgst-spinner').removeClass('hide-this');
+
+
+            var result = {
+                email: email
+            };
+
+            console.dir(result);
+
+            //
+            // Submit subsription
+            //
+            $.ajax({
+                type: 'POST',
+                url: '/subscribe/',
+                // http://stackoverflow.com/a/9155217
+                datatype: 'json',
+                data: result
+            })
+            .done(function(data, textStatus, jqXHR) {
+                console.log('[WGST] Subscribed');
+
+                $button.addClass('hide-this');
+
+                $('.wgst-subscribe-success-message').removeClass('hide-this');
+
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.log('[WGST][Error] Failed to subscribe');
+                console.error(textStatus);
+                console.error(errorThrown);
+                console.error(jqXHR);
+            });
+        });
+
+	})();
+
+});

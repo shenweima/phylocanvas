@@ -2,6 +2,17 @@ $(function(){
 
 	(function(){
 
+        window.WGST.exports.mapPanelTypeToContentTemplateId = {
+            'assembly': 'assembly-panel',
+            'collection-data': 'panel-content__collection-data',
+            'collection-tree': 'panel-content__collection-tree',
+            'collection-map': 'collection-map-panel',
+            'assembly-upload-navigation': 'assembly-upload-navigation-panel',
+            'assembly-upload-metadata': 'assembly-upload-metadata-panel',
+            'assembly-upload-analytics': 'assembly-upload-analytics-panel',
+            'assembly-upload-progress': 'assembly-upload-progress-panel'
+        };
+
         window.WGST.exports.mapPanelTypeToTemplateId = {
         	'assembly': 'assembly-panel',
             'collection-data': 'collection-data-panel',
@@ -31,9 +42,7 @@ $(function(){
         	//
         	// Get panel's label
         	//
-            templateContext.panelLabel = templateContext.assemblyUserId;
-
-
+            //templateContext.panelLabel = templateContext.assemblyUserId;
         	templateContext.panelLabel = window.WGST.exports.getContainerLabel({
         		containerName: 'panel', 
         		containerType: panelType,
@@ -44,18 +53,28 @@ $(function(){
         	//
         	// Render
         	//
-            var templateId = window.WGST.exports.mapPanelTypeToTemplateId[panelType],
-                panelTemplateSource = $('.wgst-template[data-template-id="' + templateId + '"]').html(),
-                panelTemplate = Handlebars.compile(panelTemplateSource),
-                panelHtml = panelTemplate(templateContext);
+            var //templateId = window.WGST.exports.mapPanelTypeToTemplateId[panelType],
+                panelTemplateSource = $('.wgst-template[data-template-id="panel"]').html(),
+                panelTemplate = Handlebars.compile(panelTemplateSource);
 
+
+            //
+            // Content
+            //
+            var contentTemplateId = window.WGST.exports.mapPanelTypeToContentTemplateId[panelType];
+            Handlebars.registerPartial('content', $('.wgst-template[data-template-id="' + contentTemplateId + '"]').html());
+
+            //
+            // Html
+            //
+            var panelHtml = panelTemplate(templateContext);
             $('.wgst-workspace').prepend(panelHtml);
-
-        	var $panel = $('.wgst-panel[data-panel-id="' + templateContext.panelId + '"]');
 
         	//
         	// Init jQuery UI draggable interaction
         	//
+            var $panel = $('.wgst-panel[data-panel-id="' + templateContext.panelId + '"]');
+
 	        $panel.draggable({
 	            handle: $panel.find('.wgst-draggable-handle'),
 	            appendTo: ".wgst-page__app",
@@ -230,6 +249,13 @@ $(function(){
 
 			window.WGST.exports.hidePanel(panelId);
 		});
+
+        $('body').on('click', '[data-panel-control-button="hide"]', function(){
+            var panel = $(this).closest('.wgst-panel'),
+                panelId = panel.attr('data-panel-id');
+
+            window.WGST.exports.hidePanel(panelId);
+        });
 
 		//
 	    // Bring to front selected panel
