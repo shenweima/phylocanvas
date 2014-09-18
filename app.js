@@ -72,6 +72,14 @@ app.use(bodyParser.urlencoded({
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+//
+// Set our own x-powered-by header
+//
+app.use(function(req, res, next){
+    res.header("X-powered-by", "Blood, sweat, and tears");
+    next();
+});
+
 // App home route
 app.get('/', routes.index);
 
