@@ -52,17 +52,22 @@ $(function(){
 	    };
 
 	    var sortCollectionAssemblies = function(collectionId) {
-            var assemblies = WGST.collection[collectionId].assemblies,
+            var assemblies = window.WGST.collection[collectionId].assemblies,
                 sortedAssemblies = [],
                 sortedAssemblyIds = [];
 
-            // Sort assemblies in order in which they are displayed on tree
-            $.each(window.WGST.collection[collectionId].tree['CORE_TREE_RESULT'].leavesOrder, function(leafCounter, leaf){
+            var treeName = "COLLECTION_TREE",
+            	tree = window.WGST.collection[collectionId].tree[treeName];
+
+            //
+            // Sort assemblies in order in which they are displayed on a tree
+            //
+            $.each(tree.leavesOrder, function(leafCounter, leaf){
                 sortedAssemblies.push(assemblies[leaf.id]);
                 sortedAssemblyIds.push(leaf.id);
             });
 
-            WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
+            window.WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
 	    };
 
 	    window.WGST.exports.getCollection = function(collectionId) {
@@ -112,17 +117,23 @@ $(function(){
 	        		var collectionPanelId = window.WGST.exports.createCollectionDataPanel(collectionId);
 	        		var $collectionPanel = $('.wgst-panel[data-panel-id="' + collectionPanelId + '"]');
 
-                    //
-				    // Initialise map
-				    //
-			    	window.WGST.geo.map.init();
-
 	                //
 	                // Create collection map fullscreen
 	                // 
 	        		window.WGST.exports.createFullscreen('collection-map', {
+	        			fullscreenId: 'collection-map',
 	        			fullscreenType: 'collection-map'
 	        		});
+
+				    //
+				    // Show fullscreen
+				    //
+				    window.WGST.exports.showFullscreen('collection-map');
+
+	        		//
+				    // Init map
+				    //
+				    window.WGST.geo.map.init();
 
 	        		//
 		            // Bring panel to top

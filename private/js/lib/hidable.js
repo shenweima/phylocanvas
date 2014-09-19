@@ -1,5 +1,7 @@
 $(function(){
 
+	(function(){
+
         window.WGST.exports.createHidable = function(hidableId, hidableLabel, options) {
             //
             //
@@ -411,10 +413,6 @@ $(function(){
 
             event.preventDefault();
         });
-
-	(function(){
-
-
 
 	})();
 

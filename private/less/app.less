@@ -1047,126 +1047,6 @@ h2, h4 {
 
 }
 
-// Object
-.wgst-panel__assembly-upload-analytics {
-
-    // Position
-    top: 30px;
-    left: 716px;
-
-}
-
-// Object
-.wgst-panel__assembly-upload-metadata {
-
-    // Position
-    top: 175px;
-    left: 90px;
-
-    // Object element
-    .adding-metadata-progress-container {
-        padding: 15px;
-        overflow: hidden;
-        clear: both;
-        border-top: 1px solid #eee;
-        .progress-container {
-            .progress-label {
-                .progress-percentage-label {
-                    font-size: 12px;
-                    font-weight: 400;
-                    text-transform: uppercase;
-                }
-                .progress-percentage {
-                    font-weight: 400;
-                    font-size: 22px;
-                    margin-left: 2px;
-                    line-height: 1em;
-                    text-transform: uppercase;
-                }
-                .progress-hint {
-                    font-size: 14px;
-                    margin-left: 4px;
-                }
-            }
-            .progress {
-                margin: 0;
-                margin-top: 10px;
-            }
-        }
-        .upload-controls-container {
-            display: none;
-            .assemblies-upload-ready-button {
-                margin-right: 10px;
-                margin-left: 10px;
-            }
-        }
-    }
-
-    // Object element
-    .uploading-assembly-progress-container {
-        display: none;
-        padding: 15px;
-        clear: both;
-        overflow: hidden;
-        border-top: 1px solid #eee;
-        .uploading-progress-container {
-            width: 100%;
-            float: left;
-            //.no-user-select;
-            .uploaded-assembly-url {
-                display: none;
-                //margin-top: 10px;
-                .uploaded-assembly-url-label {
-                    font-size: 12px;
-                    font-weight: 400;
-                    text-transform: uppercase;
-                    .visit-url-seconds-number {
-                        font-weight: 400;
-                        font-size: 22px;
-                        margin: 0 3px;
-                    }
-                    .uploaded-assembly-process-status {
-                        font-size: 22px;
-                        font-weight: 400;
-                        text-transform: uppercase;
-                        margin-right: 3px;
-                    }
-                }
-                .uploaded-assembly-url-input {
-                    margin-top: 5px;
-                    color: #000;
-                }
-            }
-            .progress-label {
-                //line-height: 1.2em;
-                margin-bottom: 10px;
-                .progress-percentage-label {
-                    font-size: 12px;
-                    font-weight: 400;
-                    text-transform: uppercase;
-                }
-                .progress-percentage {
-                    font-weight: 400;
-                    font-size: 22px;
-                    margin-left: 2px;
-                    line-height: 1em;
-                    text-transform: uppercase;
-                }
-                .progress-hint {
-                    //font-weight: 100;
-                    font-size: 14px;
-                    margin-left: 4px;
-                    //font-style: italic;
-                }
-            }
-            .progress {
-                margin: 0;
-                margin-top: 10px;
-            }
-        }
-    }
-}
-
 // ****************************
 
 //======================================
@@ -1603,83 +1483,7 @@ h2, h4 {
     }
 }
 
-.wgst-panel__assembly-upload-progress {
-    .assemblies-upload-progress {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-        font-weight: 300;
-        .assemblies-upload-processed, .assemblies-upload-total {
-            font-weight: 500;
-        }
-        .progress {
-            margin-top: 10px;
-            margin-bottom: 7px;
-            .progress-bar {
-                text-shadow: 1px 1px #444;
-                font-weight: 400;
-            }
-        }
-    }
-    .assembly-list-upload-progress {
-        display: block;
-        max-height: 300px;
-        overflow: scroll;
-        margin: 10px;
-        th, td {
-            padding: 5px;
-        }
-        th {
-            font-weight: 500;
-        }
-        td {
-/*            width: 3px;
-            height: 18px;
-            border: 0;
-            margin: 0;
-            padding: 0;*/
-        }
-        .assembly-processing-result-header {
-            text-align: center;
-        }
-        .assembly-upload-progress {
-            padding: 0;
-        }
-        .assembly-upload-result {
-            text-align: center;
-            border-right: 1px solid #ddd;
-            &:last-of-type {
-                border-right: 0;
-            }
-            .glyphicon {
-                margin-left: 15px;
-                margin-right: 15px;
-                &.glyphicon-record {
-                    color: #ccc;
-                }
-            }
-        }
-        .progress {
-            margin: 5px;
-            width: 120px;
-            .progress-bar {
-                text-shadow: 1px 1px #444;
-            }
-        }
-    }
-}
 
-.wgst-panel__map {
-    width: 800px;
-    //height: 600px;
-    overflow: hidden;
-    .wgst-panel-body {
-        width: 100%;
-        .wgst-map {
-            width: 100%;
-            height: 500px;
-        }
-    }
-}
 
 // ============================
 // Stats
@@ -1836,7 +1640,6 @@ h2, h4 {
     }
 }
 
-//@import "react-components/workflow-question";
 @import "spinner";
 @import "header";
 @import "utils";
@@ -1848,6 +1651,12 @@ h2, h4 {
 @import "workspace";
 @import "panel";
 @import "fullscreen";
+@import "collection-map";
+
+@import "assembly_upload/assembly_upload_metadata";
+@import "assembly_upload/assembly_upload_analytics";
+@import "assembly_upload/assembly_upload_navigation";
+@import "assembly_upload/assembly_upload_progress";
 
 
 

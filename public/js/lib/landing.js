@@ -1,1 +1,10 @@
-window.WGST=window.WGST||{},$(function(){window.chrome||$(".wgst-chrome-only").removeClass("wgst--hide-this")});
+window.WGST = window.WGST || {};
+
+$(function() {
+
+	if (! window.chrome) {
+		//$('.wgst-landing-buttons').hide();
+		$('.wgst-chrome-only').removeClass('wgst--hide-this');
+	}
+
+});

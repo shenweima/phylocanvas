@@ -10,25 +10,31 @@
           {{#each dataAttributes}}{{name}}="{{value}}"{{/each}}>
 
     <header class="wgst-panel-header wgst-draggable-handle">
-      <h4 class="header-title">{{panelLabel}}</h4>
+      <h4 class="header-title">{{> header}}</h4>
 
       <div class="wgst-panel-header-controls">
 
-        <i class="wgst-panel-control-button wgst-panel-control-button--active fa fa-arrows-alt"
-          data-panel-control-button="fullscreen"></i>
+        {{#unless noFullscreenButton }}
+        <i class="wgst-panel-header-control-button wgst-panel-header-control-button--active fa fa-arrows-alt"
+          data-panel-header-control-button="fullscreen"></i>
+        {{/unless}}
 
-        <i class="wgst-panel-control-button wgst-panel-control-button--active fa fa-eye-slash"
-          data-panel-control-button="hide"></i>
+        {{#unless noHideButton }}
+        <i class="wgst-panel-header-control-button wgst-panel-header-control-button--active fa fa-eye-slash"
+          data-panel-header-control-button="hide"></i>
+        {{/unless}}
 
-        <i class="wgst-panel-control-button wgst-panel-control-button--active fa fa-remove"
-          data-panel-control-button="close"></i>
-
+        {{#unless noCloseButton }}
+        <i class="wgst-panel-header-control-button wgst-panel-header-control-button--active fa fa-remove"
+          data-panel-header-control-button="close"></i>
+        {{/unless}}
+        
       </div>
     </header>
 
     <article class="wgst-panel-body">
       <div class="wgst-panel-body-content">
-        {{> content}}
+        {{> body}}
       </div>     
     </article>
 

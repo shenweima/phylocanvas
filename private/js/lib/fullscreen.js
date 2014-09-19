@@ -67,6 +67,14 @@ $(function(){
             // Update hidable state
             //
             window.WGST.exports.hidableFullscreenRemoved(fullscreenId);
+
+            if (fullscreenId === 'collection-map') {
+
+                //
+                // Remove map
+                //
+                window.WGST.geo.map.remove();
+            }
         };
 
         window.WGST.exports.showFullscreen = function(fullscreenId) {

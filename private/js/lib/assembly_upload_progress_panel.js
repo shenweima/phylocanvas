@@ -82,6 +82,7 @@ $(function(){
 
 	        window.WGST.exports.createPanel('assembly-upload-progress', {
 	        	panelId: 'assembly-upload-progress',
+                panelType: 'assembly-upload-progress',
 	        	assemblyFileIds: Object.keys(window.WGST.upload.fastaAndMetadata),
 	        	totalNumberOfAssembliesUploading: totalNumberOfAssembliesUploading
 	        });

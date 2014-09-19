@@ -35,28 +35,27 @@
   {% include "partials/fullscreens/collection_map_fullscreen.html" %}
   {% include "partials/fullscreens/collection_data_fullscreen.html" %}
 
-  {% include "partials/panels/assembly_upload_navigation_panel.html" %}
-  {% include "partials/panels/assembly_upload_analytics_panel.html" %}
-  {% include "partials/panels/assembly_upload_metadata_panel.html" %}
-  {% include "partials/panels/assembly_upload_progress_panel.html" %}
-
-  {% include "partials/panels/collection_map_panel.html" %}
-
-  {% include "partials/panels/upload/assembly_analytics.html" %}
-  {% include "partials/panels/upload/assembly_metadata_form.html" %}
-
-
-
-
-
   {% include "partials/panels/panel.html" %}
-  {% include "partials/panels/content/collection_data.html" %}
-  {% include "partials/panels/content/collection_tree.html" %}
-  {% include "partials/panels/content/assembly.html" %}
 
+  {% include "partials/panels/body/collection_data.html" %}
+  {% include "partials/panels/body/collection_tree.html" %}
+  {% include "partials/panels/body/collection_map.html" %}
+  {% include "partials/panels/body/assembly.html" %}
+  {% include "partials/panels/body/assembly_upload/analytics.html" %}
+  {% include "partials/panels/body/assembly_upload/analytics/assembly_analytics_item.html" %}
+  {% include "partials/panels/body/assembly_upload/metadata.html" %}
+  {% include "partials/panels/body/assembly_upload/metadata/assembly_metadata_form.html" %}
+  {% include "partials/panels/body/assembly_upload/navigation.html" %}
+  {% include "partials/panels/body/assembly_upload/progress.html" %}
 
-
-
+  {% include "partials/panels/header/collection_data.html" %}
+  {% include "partials/panels/header/collection_tree.html" %}
+  {% include "partials/panels/header/collection_map.html" %}
+  {% include "partials/panels/header/assembly.html" %}
+  {% include "partials/panels/header/assembly_upload/analytics.html" %}
+  {% include "partials/panels/header/assembly_upload/metadata.html" %}
+  {% include "partials/panels/header/assembly_upload/navigation.html" %}
+  {% include "partials/panels/header/assembly_upload/progress.html" %}
 
   {% include "partials/feedback_overlay.html" %}
 
