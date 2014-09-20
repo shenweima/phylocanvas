@@ -221,6 +221,11 @@ $(function(){
 	        //
 	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
 
+            //
+            // Hide panel
+            //
+            window.WGST.exports.hidePanel(fullscreenId);
+
 	        //
 	        // Bring panel into fullscreen
 	        //

@@ -228,7 +228,6 @@ $(function(){
             // Notify hidable
             //
             window.WGST.exports.happenedFullscreenToPanel(fullscreenId);
-
         };
 
         window.WGST.exports.bringPanelToFullscreen = function(panelId, fullscreenWasCreated) {
