@@ -7,32 +7,28 @@ $(function(){
 	    var numberOfDroppedFastaFiles = 0,
 	        numberOfParsedFastaFiles = 0;
 
-		var handleDragOver = function(event) {
-		    event.stopPropagation();
-		    event.preventDefault();
-		    event.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy
+		var handleDragEnter = function(event) {
+		    $('.wgst-drag-and-drop-content').addClass('wgst-drag-over');
+		    $('.wgst-drag-and-drop-content').find('.fa').addClass('animated bounce');
 		};
 
-      //   var createAssemblyUploadNavigationPanel = function(additionalTemplateContext) {
-      //       var panelId = 'assembly-upload-navigation',
-      //           panelType = 'assembly-upload-navigation';
-                
-      //       var templateContext = {
-      //           panelId: panelId,
-      //           panelType: panelType
-      //       };
+		var handleDragOver = function(event) {
+		    if (event.preventDefault) {
+		    	event.preventDefault();
+		    }
 
-		    // if (typeof additionalTemplateContext !== 'undefined') {
-		    //     $.extend(templateContext, additionalTemplateContext);
-		    // }
+		    //
+		    // Explicitly show this is a copy
+		    //
+		    event.dataTransfer.dropEffect = 'copy';
 
-		    // console.log('templateContext:');
-		    // console.dir(templateContext);
+		    return false;
+		};
 
-      //       window.WGST.exports.createPanel(panelType, templateContext);
-
-      //       return panelId;
-      //   };
+		var handleDragLeave = function(event) {
+		    $('.wgst-drag-and-drop-content').removeClass('wgst-drag-over');
+		    $('.wgst-drag-and-drop-content').find('.fa').removeClass('animated bounce');
+		};
 
 	    var handleDrop = function(event) {
 
@@ -50,6 +46,11 @@ $(function(){
 
 	            event.stopPropagation();
 	            event.preventDefault();
+
+	            //
+	            // Hide drag and drop
+	            //
+	            $('[data-wgst-drag-and-drop]').addClass('wgst--hide-this');
 
 	            var collectionId = '';
 
@@ -206,6 +207,11 @@ $(function(){
 	                                        return 0;
 	                                    }
 	                                });
+
+	                                //
+	                                // Show sidebar
+	                                //
+	                                window.WGST.exports.showSidebar();
 
 	                                //
 	                                //
@@ -714,12 +720,13 @@ $(function(){
 	    }; // parseFastaFile()
 
 		//
-		// Listen to dragover and drop events
+		// Listen to drag and drop events
 		//
-		var dropZone = $('body')[0];
+		var dropZone = $('[wgst-drag-and-drop-zone]')[0];
+		dropZone.addEventListener('dragenter', handleDragEnter, false);
 		dropZone.addEventListener('dragover', handleDragOver, false);
+		dropZone.addEventListener('dragleave', handleDragLeave, false);
 		dropZone.addEventListener('drop', handleDrop, false);
-
 	})();
 
 });

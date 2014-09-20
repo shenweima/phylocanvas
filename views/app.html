@@ -1,6 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block head %}
+
+  <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" rel="stylesheet" type="text/css">
   <link href="/css/app.css" rel="stylesheet" type="text/css">
 
   <style>
@@ -25,8 +27,10 @@
     {% include "partials/header.html" %}
     
     <div class="wgst-layout-container">
+      {% include "partials/drag_and_drop.html" %}
       {% include "partials/sidebar.html" %}
-      <div class="wgst-workspace"></div>
+      <div class="wgst-workspace">
+      </div>
     </div>
 
   </section>
@@ -103,6 +107,7 @@
 <script src="/js/lib/upload.js"></script>
 <script src="/js/lib/panel.js"></script>
 <script src="/js/lib/overlay.js"></script>
+<script src="/js/lib/container.js"></script>
 <script src="/js/lib/fullscreen.js"></script>
 <script src="/js/lib/map.js"></script>
 <script src="/js/lib/fasta.js"></script>
@@ -123,6 +128,8 @@
 
 <script src="/js/lib/feedback.js"></script>
 <script src="/js/lib/subscribe.js"></script>
+
+<script src="/js/lib/sidebar.js"></script>
 
 <script src="/js/client.js"></script>
 
