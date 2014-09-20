@@ -657,10 +657,18 @@ $(function(){
 
     // If user provided collection id in url then load requested collection
     if (typeof WGST.requestedCollectionId !== 'undefined') {
+        //
+        // Get existing collection
+        //
         window.WGST.exports.getCollection(WGST.requestedCollectionId);
     } else {
-        $('.wgst-header-collection-name').text('New');
+        //
+        // Allow to create a new one
+        //
+        //$('.wgst-header-collection-name').text('New');
+        $('.wgst-drag-and-drop').removeClass('wgst--hide-this');
     }
+
 
 
 

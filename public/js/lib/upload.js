@@ -40,17 +40,24 @@ $(function(){
 	        }
 
 	        //
+	        // Update animation
+	        //
+			$('.wgst-drag-and-drop-content').find('.fa').removeClass('animated bounce');
+	        $('.wgst-drag-and-drop-content').find('.fa').addClass('animated pulse');
+
+	        //
+	        // Update status
+	        //
+	        $('[data-wgst-drag-and-drop-ready]').addClass('wgst--hide-this');
+	        $('[data-wgst-drag-and-drop-analysing-data]').removeClass('wgst--hide-this');
+
+	        //
 	        // Only handle file drops
 	        //
 	        if (event.dataTransfer.files.length > 0) {
 
 	            event.stopPropagation();
 	            event.preventDefault();
-
-	            //
-	            // Hide drag and drop
-	            //
-	            $('[data-wgst-drag-and-drop]').addClass('wgst--hide-this');
 
 	            var collectionId = '';
 
@@ -307,6 +314,11 @@ $(function(){
 	                                //window.WGST.exports.showDroppedAssembly(WGST.dragAndDrop.loadedFiles[0].uid);
 					                //window.WGST.exports.showAssemblyUploadAnalytics(WGST.dragAndDrop.loadedFiles[0].file.name);
 					                //window.WGST.exports.showAssemblyUploadMetadata(WGST.dragAndDrop.loadedFiles[0].file.name);
+	                            
+						            //
+						            // Hide drag and drop
+						            //
+						            $('[data-wgst-drag-and-drop]').addClass('wgst--hide-this');
 	                            }
 	                        });
 
