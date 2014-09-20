@@ -83,7 +83,8 @@ $(function(){
             //
             // Update hidable state
             //
-            window.WGST.exports.hidableFullscreenShown(fullscreenId);
+            //window.WGST.exports.hidableFullscreenShown(fullscreenId);
+            window.WGST.exports.happenedShowFullscreen(fullscreenId);
         };
 
         window.WGST.exports.hideFullscreen = function(fullscreenId) {
@@ -92,17 +93,45 @@ $(function(){
             //
             // Update hidable state
             //
-            window.WGST.exports.hidableFullscreenHidden(fullscreenId);
+            //window.WGST.exports.hidableFullscreenHidden(fullscreenId);
+            window.WGST.exports.happenedHideFullscreen(fullscreenId);
+        };
+
+        window.WGST.exports.toggleFullscreen = function(fullscreenId) {
+
+            var $fullscreen = $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]');
+
+            //
+            // Toggle fullscreen
+            //
+            if ($fullscreen.is('.wgst--hide-this, .wgst--invisible-this')) {
+
+                //
+                // Show fullscreen
+                //
+                window.WGST.exports.showFullscreen(fullscreenId);
+
+            } else {
+
+                //
+                // Hide fullscreen
+                //
+                window.WGST.exports.hideFullscreen(fullscreenId);
+            }
         };
 
         window.WGST.exports.bringFullscreenToFront = function(fullscreenId) {
+            var zIndexHighest = 0;
 
-            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').css('z-index', '5000');
-        
-            //
-            // Update hidable state
-            //
-            //window.WGST.exports.hidableFullscreenShown(fullscreenId);
+            $('.wgst-panel, .wgst-fullscreen').each(function(){
+                var zIndexCurrent = parseInt($(this).css('zIndex'), 10);
+                if (zIndexCurrent > zIndexHighest) {
+                    $(this).css('zIndex', zIndexCurrent - 1);
+                    zIndexHighest = zIndexCurrent;
+                }
+            });
+
+            $('[data-fullscreen-id="' + fullscreenId + '"]').css('zIndex', zIndexHighest);
         };
 
         window.WGST.exports.bringFullscreenToBack = function(fullscreenId) {
@@ -206,9 +235,9 @@ $(function(){
             window.WGST.exports.bringPanelToFront(panelId);
 
             //
-            // Trigger Twitter Bootstrap tooltip
+            // Notify hidable
             //
-            //$('[data-toggle="tooltip"]').tooltip();
+            window.WGST.exports.happenedFullscreenToPanel(fullscreenId);
 
         };
 
@@ -263,8 +292,6 @@ $(function(){
                 //
                 $fullscreen.find('.wgst-collection-controls').addClass('wgst--hide-this');
 
-//$('[data-toggle="tooltip"]').tooltip('destroy');
-
             //
             // Map panel
             //
@@ -276,7 +303,6 @@ $(function(){
                 $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
                     .find('.wgst-map')
                     .replaceWith(window.WGST.geo.map.canvas.getDiv());
-
             }
 
             //
@@ -299,12 +325,9 @@ $(function(){
             window.WGST.exports.removePanel(panelId);
 
             //
-            // Trigger Twitter Bootstrap tooltip
+            // Notify hidable
             //
-            console.debug('>>>> WATCH this one: ' + $('[data-toggle="tooltip"]').length);
-
-            //$('[data-toggle="tooltip"]').tooltip();
-
+            window.WGST.exports.happenedPanelToFullscreen(panelId);
         };
 
 

@@ -161,7 +161,8 @@ $(function(){
         	//
         	// Update hidable state
         	//
-        	window.WGST.exports.hidablePanelShown(panelId);
+        	//window.WGST.exports.hidablePanelShown(panelId);
+            window.WGST.exports.happenedShowPanel(panelId);
         };
 
         window.WGST.exports.hidePanel = function(panelId) {
@@ -170,7 +171,8 @@ $(function(){
         	//
         	// Update hidable state
         	//
-        	window.WGST.exports.hidablePanelHidden(panelId);
+            //window.WGST.exports.hidablePanelHidden(panelId);
+        	window.WGST.exports.happenedHidePanel(panelId);
         };
 
         // window.WGST.exports.hideAllPanels = function() {
@@ -208,14 +210,15 @@ $(function(){
 	    window.WGST.exports.bringPanelToFront = function(panelId) {
 	        var zIndexHighest = 0;
 
-	        $('.wgst-panel').each(function(){
+	        $('.wgst-panel, .wgst-fullscreen').each(function(){
 	            var zIndexCurrent = parseInt($(this).css('zIndex'), 10);
 	            if (zIndexCurrent > zIndexHighest) {
+                    $(this).css('zIndex', zIndexCurrent - 1);
 	                zIndexHighest = zIndexCurrent;
 	            }
 	        });
 
-	        $('[data-panel-id="' + panelId + '"]').css('zIndex', zIndexHighest + 1);
+	        $('[data-panel-id="' + panelId + '"]').css('zIndex', zIndexHighest);
 	    };
 
 	    window.WGST.exports.maximizePanel = function(panelId) {

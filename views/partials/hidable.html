@@ -1,4 +1,3 @@
-<!-- Handlebars template -->
 {% raw %}
 
 <script type="text/x-handlebars-template" class="wgst-template" data-template-id="hidable">
@@ -9,39 +8,43 @@
 		<i class="fa fa-angle-double-right wgst-hidable-toggle-controls"></i>
 		<ul class="wgst-hidable-controls wgst--hide-this">
 
-			{{#unless noFocus}}
-			<li>
-				<a href="#" class="wgst-hidable-focus">
+			<li data-wgst-hidable-controls>
+				<a href="#" data-wgst-hidable="focus">
 					<i class="fa fa-crosshairs"></i> <small>Focus</small>
 				</a>
 			</li>
-			{{/unless}}
 
-			{{#unless noPanel}}
-			<li>
-				<a href="#" class="wgst-hidable-panel">
-					<i class="fa fa-eye"></i> <small>Toggle Panel</small>
+			<li data-wgst-hidable-controls>
+				<a href="#" data-wgst-hidable="show" class="wgst--hide-this">
+					<i class="fa fa-eye"></i> <small>Show</small>
+				</a>
+				<a href="#" data-wgst-hidable="hide">
+					<i class="fa fa-eye-slash"></i> <small>Hide</small>
 				</a>
 			</li>
-			{{/unless}}
 
 			{{#unless noFullscreen}}
-			<li>
-				<a href="#" class="wgst-hidable-fullscreen">
-					<i class="fa fa-arrows-alt"></i> <small>Toggle Fullscreen</small>
+			<li data-wgst-hidable-controls>
+
+				<a href="#" data-wgst-hidable="fullscreen" {{#if isFullscreen}}class="wgst--hide-this"{{/if}}>
+					<i class="fa fa-arrows-alt"></i> <small>Maximize</small>
 				</a>
+
+				<a href="#" data-wgst-hidable="panel" {{#if isPanel}}class="wgst--hide-this"{{/if}}>
+					<i class="fa fa-square"></i> <small>Minimize</small>
+				</a>
+
 			</li>
 			{{/unless}}
 
 			{{#if close}}
-			<li>
-				<a href="#" class="wgst-hidable-close">
+			<li data-wgst-hidable-controls>
+				<a href="#" data-wgst-hidable="close">
 					<i class="fa fa-close"></i> <small>Close</small>
 				</a>
 			</li>
 			{{/if}}
 
-			<!-- <small>{{hidableLabel}}</small> -->
 		</ul>
 	</li>
 
