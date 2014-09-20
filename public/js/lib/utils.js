@@ -31,7 +31,13 @@ window.WGST.exports.getContainerType = function(containerId) {
     //
     } else if ($('.wgst-fullscreen[data-fullscreen-id="' + containerId + '"]').length > 0) {
 
-    	return 'fullscreen'
+    	return 'fullscreen';
 
+   	//
+   	// Unknown
+   	//
+    } else {
+
+    	return 'unknown';
     }
 };
