@@ -42,8 +42,7 @@ $(function(){
                 return;
             }
 
-            var templateId = 'hidable',
-                templateContext = {
+            var templateContext = {
                     hidableId: hidableId,
                     hidableLabel: hidableLabel
                 };
@@ -63,7 +62,7 @@ $(function(){
             //
             // Filter out trees
             //
-            if (typeof hidableId.split('__')[2] !== 'undefined') {
+            if (window.WGST.exports.isHidableTree(hidableId)) {
                 templateContext.noFullscreen = true;
             }
 
@@ -107,18 +106,33 @@ $(function(){
             //
             // Render
             //
-            var hidableTemplateSource = $('.wgst-template[data-template-id="' + templateId + '"]').html(),
+            var templateId = 'hidable',
+                hidableTemplateSource = $('.wgst-template[data-template-id="' + templateId + '"]').html(),
                 hidableTemplate = Handlebars.compile(hidableTemplateSource),
                 hidableHtml = hidableTemplate(templateContext);
 
             $('.wgst-hidables').prepend(hidableHtml);
+
+            //
+            // Trees are hidden by default
+            //
+            if (window.WGST.exports.isHidableTree(hidableId)) {
+                window.WGST.exports.happenedHidePanel(hidableId);
+            }
+
+        };
+
+        window.WGST.exports.isHidableTree = function(hidableId) {
+            if (typeof hidableId.split('__')[2] !== 'undefined') {
+                return true;
+            }
+
+            return false;
         };
 
         window.WGST.exports.removeHidable = function(hidableId) {
             $('.wgst-hidable[data-hidable-id="' + hidableId + '"]').remove();
         };
-
-        window.WGST.exports.hidableDidUpdate = function(hidableId) {};
 
         window.WGST.exports.hidablePanelShown = function(panelId) {
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
@@ -207,54 +221,95 @@ $(function(){
 
         });
 
-        $('body').on('mouseenter', '.wgst-hidable', function() {
+        // $('body').on('mouseenter', '.wgst-hidable', function() {
+
+        //     var hidableId = $(this).attr('data-hidable-id');
+
+        //     //
+        //     // Panel or fullscreen?
+        //     //
+
+        //     //
+        //     // Panel
+        //     //
+        //     if ($('.wgst-panel[data-panel-id="' + hidableId + '"]').length > 0) {
+
+        //         //
+        //         // Show panel
+        //         //
+        //         //window.WGST.exports.showPanel(hidableId);
+
+        //         //
+        //         // Bring panel to front
+        //         //
+        //         window.WGST.exports.bringPanelToFront(hidableId);
+
+        //     //
+        //     // Fullscreen
+        //     //
+        //     } else if ($('.wgst-fullscreen[data-fullscreen-id="' + hidableId + '"]').length > 0) {
+
+        //         //
+        //         // Bring fullscreen to front
+        //         //
+        //         window.WGST.exports.bringFullscreenToFront(hidableId);
+
+        //     }
 
 
 
-            var hidableId = $(this).attr('data-hidable-id');
 
-            console.log(')))) hidableId: ' + hidableId);
+
+        //     // //
+        //     // //
+        //     // //
+        //     // // Panel or fullscreen?
+        //     // //
+        //     // //
+        //     // //
+        //     // var $activeControl = $(this).find('.wgst-hidable-controls .wgst-hidable--active');
+        //     // var containerType = $activeControl.closest('a').attr('class');
+
+        //     // //
+        //     // // If panel
+        //     // //
+        //     // if (containerType === 'wgst-hidable-panel') {
+
+        //     //     //
+        //     //     // Bring panel to front
+        //     //     //
+        //     //     window.WGST.exports.bringPanelToFront(hidableId);
+
+        //     // //
+        //     // // If fullscreen
+        //     // //
+        //     // } else {
+
+        //     //     //
+        //     //     // Bring fullscreen to front
+        //     //     //
+        //     //     window.WGST.exports.bringFullscreenToFront(hidableId);
+
+        //     // }
+
+
+        // });
+
+        $('body').on('mouseleave', '.wgst-hidable', function() {
 
             //
-            // Show hidable controls
+            // Hide submenu
             //
-            //$(this).find('.wgst-hidable-toggle').addClass('wgst--hide-this');
-            //$(this).find('.wgst-hidable-controls').removeClass('wgst--hide-this');
-
-            //
-            // Panel or fullscreen?
-            //
-
-            //
-            // Panel
-            //
-            if ($('.wgst-panel[data-panel-id="' + hidableId + '"]').length > 0) {
-
-                //
-                // Show panel
-                //
-                //window.WGST.exports.showPanel(hidableId);
-
-                //
-                // Bring panel to front
-                //
-                window.WGST.exports.bringPanelToFront(hidableId);
-
-            //
-            // Fullscreen
-            //
-            } else if ($('.wgst-fullscreen[data-fullscreen-id="' + hidableId + '"]').length > 0) {
-
-                //
-                // Bring fullscreen to front
-                //
-                window.WGST.exports.bringFullscreenToFront(hidableId);
-
-            }
+            $(this).find('.wgst-hidable-controls').addClass('wgst--hide-this');
 
 
+            // var hidableId = $(this).attr('data-hidable-id');
 
-
+            // //
+            // // Show hidable label
+            // //
+            // //$(this).find('.wgst-hidable-controls').addClass('wgst--hide-this');
+            // //$(this).find('.wgst-hidable-toggle').removeClass('wgst--hide-this');
 
             // //
             // //
@@ -267,92 +322,30 @@ $(function(){
             // var containerType = $activeControl.closest('a').attr('class');
 
             // //
-            // // If panel
-            // //
-            // if (containerType === 'wgst-hidable-panel') {
-
-            //     //
-            //     // Bring panel to front
-            //     //
-            //     window.WGST.exports.bringPanelToFront(hidableId);
-
-            // //
             // // If fullscreen
             // //
-            // } else {
+            // if (containerType === 'wgst-hidable-fullscreen') {
 
-            //     //
-            //     // Bring fullscreen to front
-            //     //
-            //     window.WGST.exports.bringFullscreenToFront(hidableId);
+            //     window.WGST.exports.bringFullscreenToBack(hidableId);
 
             // }
 
-
         });
 
-        $('body').on('mouseleave', '.wgst-hidable', function() {
 
-            var hidableId = $(this).attr('data-hidable-id');
+        //
+        //
+        //
+        //
+        // Handle hidable control events
+        //
+        //
+        //
+        //
 
-            //
-            // Show hidable label
-            //
-            $(this).find('.wgst-hidable-controls').addClass('wgst--hide-this');
-            //$(this).find('.wgst-hidable-toggle').removeClass('wgst--hide-this');
+        $('body').on('click', '[data-wgst-hidable-button="fullscreen"]', function(event){
 
-            //
-            //
-            //
-            // Panel or fullscreen?
-            //
-            //
-            //
-            var $activeControl = $(this).find('.wgst-hidable-controls .wgst-hidable--active');
-            var containerType = $activeControl.closest('a').attr('class');
-
-            //
-            // If fullscreen
-            //
-            if (containerType === 'wgst-hidable-fullscreen') {
-
-                window.WGST.exports.bringFullscreenToBack(hidableId);
-
-            }
-
-        });
-
-        // $('body').on('click', '.wgst-hidable-panel', function(event){
-
-        //     var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
-
-        //     //
-        //     // Check if fullscreen exists
-        //     //
-        //     if ($('.wgst-fullscreen[data-fullscreen-id="' + hidableId + '"]').length > 0) {
-
-        //         window.WGST.exports.bringFullscreenToPanel(hidableId);
-
-        //     //
-        //     // Fullscreen doesn't exist
-        //     // 
-        //     } else {
-
-        //         //
-        //         // Toggle panel
-        //         //
-        //         window.WGST.exports.togglePanel(hidableId);
-
-        //         //
-        //         // Bring panel to front
-        //         //
-        //         window.WGST.exports.bringPanelToFront(hidableId);
-        //     }
-
-        //     event.preventDefault();
-        // });
-
-        $('body').on('click', '[data-wgst-hidable="fullscreen"]', function(event){
+            event.stopPropagation();
 
             var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
 
@@ -379,7 +372,9 @@ $(function(){
             event.preventDefault();
         });
 
-        $('body').on('click', '[data-wgst-hidable="panel"]', function(event){
+        $('body').on('click', '[data-wgst-hidable-button="panel"]', function(event){
+
+            event.stopPropagation();
 
             var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
 
@@ -405,40 +400,44 @@ $(function(){
             event.preventDefault();
         });
 
-        $('body').on('click', '[data-wgst-hidable="toggle"]', function(event){
+        // $('body').on('click', '[data-wgst-hidable-button="toggle"]', function(event){
 
-            var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
+        //     event.stopPropagation();
 
-            //
-            // Check if panel exists
-            //
-            if ($('.wgst-panel[data-panel-id="' + hidableId + '"]').length > 0) {
+        //     var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
 
-                //
-                // Toggle panel
-                //
-                window.WGST.exports.togglePanel(hidableId);
+        //     //
+        //     // Check if panel exists
+        //     //
+        //     if ($('.wgst-panel[data-panel-id="' + hidableId + '"]').length > 0) {
 
-                //
-                // Bring panel to front
-                //
-                window.WGST.exports.bringPanelToFront(hidableId);
+        //         //
+        //         // Toggle panel
+        //         //
+        //         window.WGST.exports.togglePanel(hidableId);
 
-            //
-            // Check if fullscreen exists
-            //
-            } else if ($('.wgst-fullscreen[data-fullscreen-id="' + hidableId + '"]').length > 0) {
+        //         //
+        //         // Bring panel to front
+        //         //
+        //         window.WGST.exports.bringPanelToFront(hidableId);
 
-                //
-                // Toggle fullscreen
-                //
-                window.WGST.exports.toggleFullscreen(hidableId);
-            }
+        //     //
+        //     // Check if fullscreen exists
+        //     //
+        //     } else if ($('.wgst-fullscreen[data-fullscreen-id="' + hidableId + '"]').length > 0) {
 
-            event.preventDefault();
-        });
+        //         //
+        //         // Toggle fullscreen
+        //         //
+        //         window.WGST.exports.toggleFullscreen(hidableId);
+        //     }
 
-        $('body').on('click', '[data-wgst-hidable="show"]', function(event){
+        //     event.preventDefault();
+        // });
+
+        $('body').on('click', '[data-wgst-hidable-button="show"]', function(event){
+
+            event.stopPropagation();
 
             var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
 
@@ -471,7 +470,9 @@ $(function(){
             event.preventDefault();
         });
 
-        $('body').on('click', '[data-wgst-hidable="hide"]', function(event){
+        $('body').on('click', '[data-wgst-hidable-button="hide"]', function(event){
+
+            event.stopPropagation();
 
             var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
 
@@ -504,7 +505,9 @@ $(function(){
             event.preventDefault();
         });
 
-        $('body').on('click', '[data-wgst-hidable="close"]', function(event){
+        $('body').on('click', '[data-wgst-hidable-button="close"]', function(event){
+
+            event.stopPropagation();
 
             var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
 
@@ -528,7 +531,9 @@ $(function(){
             event.preventDefault();
         });
 
-        $('body').on('click', '[data-wgst-hidable="focus"]', function(event){
+        $('body').on('click', '[data-wgst-hidable-button="focus"]', function(event){
+
+            event.stopPropagation();
 
             var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
 
@@ -600,44 +605,44 @@ $(function(){
 
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
                 .find('.wgst-hidable-controls')
-                .find('[data-wgst-hidable="panel"]').removeClass('wgst--hide-this');
+                .find('[data-wgst-hidable-button="panel"]').removeClass('wgst--hide-this');
 
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
                 .find('.wgst-hidable-controls')
-                .find('[data-wgst-hidable="fullscreen"]').addClass('wgst--hide-this');
+                .find('[data-wgst-hidable-button="fullscreen"]').addClass('wgst--hide-this');
         }
 
         window.WGST.exports.happenedFullscreenToPanel = function(fullscreenId) {
 
             $('.wgst-hidable[data-hidable-id="' + fullscreenId + '"]')
                 .find('.wgst-hidable-controls')
-                .find('[data-wgst-hidable="panel"]').addClass('wgst--hide-this');
+                .find('[data-wgst-hidable-button="panel"]').addClass('wgst--hide-this');
 
             $('.wgst-hidable[data-hidable-id="' + fullscreenId + '"]')
                 .find('.wgst-hidable-controls')
-                .find('[data-wgst-hidable="fullscreen"]').removeClass('wgst--hide-this');
+                .find('[data-wgst-hidable-button="fullscreen"]').removeClass('wgst--hide-this');
         }
 
         window.WGST.exports.happenedHidePanel = function(panelId) {
 
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
                 .find('.wgst-hidable-controls')
-                .find('[data-wgst-hidable="show"]').removeClass('wgst--hide-this');
+                .find('[data-wgst-hidable-button="show"]').removeClass('wgst--hide-this');
 
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
                 .find('.wgst-hidable-controls')
-                .find('[data-wgst-hidable="hide"]').addClass('wgst--hide-this');
+                .find('[data-wgst-hidable-button="hide"]').addClass('wgst--hide-this');
         }
 
         window.WGST.exports.happenedShowPanel = function(panelId) {
 
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
                 .find('.wgst-hidable-controls')
-                .find('[data-wgst-hidable="hide"]').removeClass('wgst--hide-this');
+                .find('[data-wgst-hidable-button="hide"]').removeClass('wgst--hide-this');
 
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
                 .find('.wgst-hidable-controls')
-                .find('[data-wgst-hidable="show"]').addClass('wgst--hide-this');
+                .find('[data-wgst-hidable-button="show"]').addClass('wgst--hide-this');
         }
 
         window.WGST.exports.happenedHideFullscreen = function(fullscreenId) {

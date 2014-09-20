@@ -277,9 +277,6 @@ $(function(){
 
 	            var assemblyResistanceData = getAssemblyResistanceData(antibiotics, assemblyResistanceProfile);
 
-	            //console.debug('assemblyResistanceData:');
-	            //console.dir(assemblyResistanceData);
-
 	            //
 	            // Sequence type
 	            //
@@ -327,9 +324,6 @@ $(function(){
 	            	nearestRepresentativeData: assemblyNearestRepresentativeData,
 	            	scoresData: assemblyScoresData
 	            };
-
-	            console.debug('additionalTemplateContext:');
-	            console.dir(additionalTemplateContext);
 
 	            var assemblyPanelId = window.WGST.exports.createAssemblyPanel(assemblyId, additionalTemplateContext);
 				

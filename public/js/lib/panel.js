@@ -32,6 +32,7 @@ $(function(){
                 noCloseButton: true
             },
             'collection-tree': {
+                noFullscreenButton: true,
                 noCloseButton: true
             },
             'collection-map': {
@@ -208,17 +209,7 @@ $(function(){
         };
 
 	    window.WGST.exports.bringPanelToFront = function(panelId) {
-	        var zIndexHighest = 0;
-
-	        $('.wgst-panel, .wgst-fullscreen').each(function(){
-	            var zIndexCurrent = parseInt($(this).css('zIndex'), 10);
-	            if (zIndexCurrent > zIndexHighest) {
-                    $(this).css('zIndex', zIndexCurrent - 1);
-	                zIndexHighest = zIndexCurrent;
-	            }
-	        });
-
-	        $('[data-panel-id="' + panelId + '"]').css('zIndex', zIndexHighest);
+            window.WGST.exports.bringContainerToFront('panel', panelId);
 	    };
 
 	    window.WGST.exports.maximizePanel = function(panelId) {
@@ -252,9 +243,6 @@ $(function(){
 	    	//
 	    	//
 
-	    	console.debug('getContainerLabel:');
-        	console.dir(options);
-
         	var containerLabel = 'Anonymous';
 
         	//
@@ -270,9 +258,10 @@ $(function(){
 
         	} else if (options.containerType === 'collection-tree') {
 
-        		var treeType = options.containerId.split('__')[2];
+                containerLabel = 'Tree';
 
-        		containerLabel = treeType.replace(/[_]/g, ' ').toLowerCase().capitalize();
+        		// var treeType = options.containerId.split('__')[2];
+        		// containerLabel = treeType.replace(/[_]/g, ' ').toLowerCase().capitalize();
 
         	} else if (options.containerType === 'assembly') {
 
@@ -300,50 +289,27 @@ $(function(){
 	    };
 
         $('body').on('click', '[data-panel-header-control-button="fullscreen"]', function(){
-            // var $panel = $(this).closest('.wgst-panel'),
-            //     panelId = $panel.attr('data-panel-id');
+            var $panel = $(this).closest('.wgst-panel'),
+                panelId = $panel.attr('data-panel-id');
 
-            // $('[data-hidable-id="' + panelId + '"]').find('.wgst-hidable-fullscreen').trigger('click');
+            $('[data-hidable-id="' + panelId + '"]').find('[data-wgst-hidable-button="fullscreen"]').trigger('click');
 
-            var $panel = $(this).closest('.wgst-panel');
-            var panelId = $panel.attr('data-panel-id');
-            window.WGST.exports.maximizePanel(panelId);
-
-            // //
-            // // Bring fullscreen to panel
-            // //
-            // var $fullscreen = $('.wgst-fullscreen');
-            // var fullscreenId = $fullscreen.attr('data-fullscreen-id');
-            // var panelId = fullscreenId;
-
-            // window.WGST.exports.bringFullscreenToPanel(fullscreenId);
-
-            // //
-            // // Bring panel to fullscreen
-            // //
-            // var $panel = $(this).closest('.wgst-panel');
-            // var panelId = $panel.attr('data-panel-id');
-            // var fullscreenId = panelId;
-
-            // window.WGST.exports.bringPanelToFullscreen(panelId, fullscreenId);
         });
 
 		$('body').on('click', '[data-panel-header-control-button="close"]', function(){
 			var $panel = $(this).closest('.wgst-panel'),
 				panelId = $panel.attr('data-panel-id');
 
-            $('[data-hidable-id="' + panelId + '"]').find('.wgst-hidable-close').trigger('click');
+            $('[data-hidable-id="' + panelId + '"]').find('[data-wgst-hidable-button="close"]').trigger('click');
 
-			//window.WGST.exports.removePanel(panelId);
 		});
 
         $('body').on('click', '[data-panel-header-control-button="hide"]', function(){
             var $panel = $(this).closest('.wgst-panel'),
                 panelId = $panel.attr('data-panel-id');
 
-            //$('[data-hidable-id="' + panelId + '"]').find('.wgst-hidable-panel').trigger('click');
+            $('[data-hidable-id="' + panelId + '"]').find('[data-wgst-hidable-button="hide"]').trigger('click');
 
-            window.WGST.exports.hidePanel(panelId);
         });
 
 		//

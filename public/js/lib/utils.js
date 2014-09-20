@@ -41,3 +41,38 @@ window.WGST.exports.getContainerType = function(containerId) {
     	return 'unknown';
     }
 };
+
+//
+// Bring container to front
+//
+window.WGST.exports.bringContainerToFront = function(containerType, containerId) {
+
+    //
+    // Calculate the highest z index
+    //
+    var zIndexHighest = 0,
+        zIndexCurrent;
+
+    $('.wgst-panel, .wgst-fullscreen').each(function(){
+        zIndexCurrent = parseInt($(this).css('z-index'), 10);
+
+        if (zIndexCurrent >= zIndexHighest) {
+            zIndexHighest = zIndexCurrent;
+            $(this).css('z-index', zIndexHighest - 1);
+        }
+    });
+
+    //
+    // Panel
+    //
+    if (containerType === 'panel') {
+        $('[data-panel-id="' + containerId + '"]').css('z-index', zIndexHighest);
+
+    //
+    // Fullscreen
+    //
+    } else if (containerType === 'fullscreen') {
+        $('[data-fullscreen-id="' + containerId + '"]').css('z-index', zIndexHighest);
+
+    }
+};
