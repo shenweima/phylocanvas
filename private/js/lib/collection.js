@@ -78,6 +78,11 @@ $(function(){
 	            window.speechSynthesis.speak(message);
 	        }
 
+	        //
+	        // Show background
+	        //
+	        window.WGST.exports.showBackground('get-collection');
+
 	        // When extending current collection, close it and then open it again
 	        //
 	        // ???
@@ -271,6 +276,11 @@ $(function(){
 	                // Show collection navigation
 	                //
 	                //$('.wgst-navigation__collection-panels').toggleClass('wgst--hide-this');
+
+			        //
+			        // Hide background
+			        //
+			        window.WGST.exports.hideBackground('get-collection');
 
 	            } // if
 	        })
@@ -499,37 +509,40 @@ $(function(){
 	    var maximizeCollection = function(collectionId) {
 	        console.log('[WGST] Maximizing collection ' + collectionId);
 
-	        //
-	        // Bring fullscreen into panel
-	        //
-	        var fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
-	        var panelId = fullscreenId;
+	        window.WGST.exports.maximizePanel('collection-data__' + collectionId);
+
+	        // //
+	        // // Bring fullscreen into panel
+	        // //
+	        // var fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
+	        // var panelId = fullscreenId;
+	        // var originalFullscreenId = fullscreenId;
 	        
-	        console.debug('fullscreenId: ' + fullscreenId);
-	        console.debug('panelId: ' + panelId);
+	        // console.debug('fullscreenId: ' + fullscreenId);
+	        // console.debug('panelId: ' + panelId);
 
-	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
+	        // window.WGST.exports.bringFullscreenToPanel(fullscreenId);
 
-	        //
-	        // Bring panel into fullscreen
-	        //
-	        var panelId = 'collection-data__' + collectionId,
-	        	fullscreenId = 'collection-data';
+	        // //
+	        // // Bring panel into fullscreen
+	        // //
+	        // var panelId = 'collection-data__' + collectionId,
+	        // 	fullscreenId = 'collection-data';
 
-	        window.WGST.exports.bringPanelToFullscreen(panelId);
+	        // window.WGST.exports.bringPanelToFullscreen(panelId);
 
-	        // Destroy all Twitter Bootstrap Tooltips
-	        //$('[data-toggle="tooltip"]').tooltip('destroy');
+	        // // Destroy all Twitter Bootstrap Tooltips
+	        // //$('[data-toggle="tooltip"]').tooltip('destroy');
 
-	        // bringPanelToFullscreen('collection_' + collectionId, function(){
-	        //     // Trigger Twitter Bootstrap tooltip
-	        //     $('[data-toggle="tooltip"]').tooltip();
-	        //     // Open Map panel
-	        //     window.WGST.openPanel('map');
-	        // });
+	        // // bringPanelToFullscreen('collection_' + collectionId, function(){
+	        // //     // Trigger Twitter Bootstrap tooltip
+	        // //     $('[data-toggle="tooltip"]').tooltip();
+	        // //     // Open Map panel
+	        // //     window.WGST.openPanel('map');
+	        // // });
 
-	        google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
 
+	        // google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
 	    };
 
 	})();

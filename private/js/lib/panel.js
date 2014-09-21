@@ -159,6 +159,10 @@ $(function(){
         window.WGST.exports.showPanel = function(panelId) {
         	$('.wgst-panel[data-panel-id="' + panelId + '"]').removeClass('wgst--hide-this wgst--invisible-this');
 
+            // if (panelId === 'collection-map') {
+            //     google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
+            // }
+
         	//
         	// Update hidable state
         	//
@@ -167,7 +171,8 @@ $(function(){
         };
 
         window.WGST.exports.hidePanel = function(panelId) {
-        	$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('wgst--hide-this');
+        	//$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('wgst--hide-this wgst--invisible-this');
+            $('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('wgst--invisible-this');
 
         	//
         	// Update hidable state
@@ -231,6 +236,8 @@ $(function(){
 	        //
 	        window.WGST.exports.bringPanelToFullscreen(panelId);
 
+            google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
+
 	    };
 
 	    window.WGST.exports.getContainerLabel = function(options) {
@@ -274,7 +281,7 @@ $(function(){
 
         	} else if (options.containerType === 'assembly-upload-progress') {
 
-                containerLabel = 'Assembly Upload';
+                containerLabel = 'Upload Progress';
 
             } else if (options.containerType === 'assembly-upload-metadata') {
 

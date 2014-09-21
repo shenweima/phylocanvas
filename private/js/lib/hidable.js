@@ -120,6 +120,11 @@ $(function(){
                 window.WGST.exports.happenedHidePanel(hidableId);
             }
 
+            //
+            // Show sidebar
+            //
+            window.WGST.exports.showSidebar();
+
         };
 
         window.WGST.exports.isHidableTree = function(hidableId) {
@@ -132,6 +137,13 @@ $(function(){
 
         window.WGST.exports.removeHidable = function(hidableId) {
             $('.wgst-hidable[data-hidable-id="' + hidableId + '"]').remove();
+
+            //
+            // Hide sidebar if all hidables were removed
+            //
+            if ($('.wgst-hidable').length === 0) {
+                window.WGST.exports.hideSidebar();
+            }
         };
 
         window.WGST.exports.hidablePanelShown = function(panelId) {

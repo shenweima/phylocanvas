@@ -74,23 +74,42 @@ $(function(){
 	        //     } // if
 	        // } // for
 
+            
 
-	        //
-	        // Create panel
-	        //
-	        var totalNumberOfAssembliesUploading = Object.keys(window.WGST.upload.fastaAndMetadata).length;
 
-	        window.WGST.exports.createPanel('assembly-upload-progress', {
-	        	panelId: 'assembly-upload-progress',
-                panelType: 'assembly-upload-progress',
-	        	assemblyFileIds: Object.keys(window.WGST.upload.fastaAndMetadata),
-	        	totalNumberOfAssembliesUploading: totalNumberOfAssembliesUploading
-	        });
+
+
+
 
             //
-            // Show panel
+            // Show uploading background
             //
-            window.WGST.exports.showPanel('assembly-upload-progress');
+            window.WGST.exports.showBackground('uploading');
+
+
+
+
+
+
+
+
+
+	        // //
+	        // // Create panel
+	        // //
+	        // var totalNumberOfAssembliesUploading = Object.keys(window.WGST.upload.fastaAndMetadata).length;
+
+	        // window.WGST.exports.createPanel('assembly-upload-progress', {
+	        // 	panelId: 'assembly-upload-progress',
+         //        panelType: 'assembly-upload-progress',
+	        // 	assemblyFileIds: Object.keys(window.WGST.upload.fastaAndMetadata),
+	        // 	totalNumberOfAssembliesUploading: totalNumberOfAssembliesUploading
+	        // });
+
+         //    //
+         //    // Show panel
+         //    //
+         //    window.WGST.exports.showPanel('assembly-upload-progress');
 
 
 
@@ -112,6 +131,32 @@ $(function(){
                     }
                 })
                 .done(function(collectionIdData, textStatus, jqXHR) {
+
+                    //
+                    // Create panel
+                    //
+                    var totalNumberOfAssembliesUploading = Object.keys(window.WGST.upload.fastaAndMetadata).length;
+
+                    window.WGST.exports.createPanel('assembly-upload-progress', {
+                        panelId: 'assembly-upload-progress',
+                        panelType: 'assembly-upload-progress',
+                        assemblyFileIds: Object.keys(window.WGST.upload.fastaAndMetadata),
+                        totalNumberOfAssembliesUploading: totalNumberOfAssembliesUploading
+                    });
+
+                    //
+                    // Show panel
+                    //
+                    window.WGST.exports.showPanel('assembly-upload-progress');
+
+                    //
+                    // Hide uploading background
+                    //
+                    window.WGST.exports.hideBackground('uploading');
+
+
+
+
 
                     var collectionId = collectionIdData.collectionId,
                     	mapAssemblyIdToUserAssemblyId = collectionIdData.userAssemblyIdToAssemblyIdMap,

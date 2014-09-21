@@ -8,8 +8,10 @@ $(function(){
 	        numberOfParsedFastaFiles = 0;
 
 		var handleDragEnter = function(event) {
-		    $('.wgst-drag-and-drop-content').addClass('wgst-drag-over');
-		    $('.wgst-drag-and-drop-content').find('.fa').addClass('animated bounce');
+			var $dragAndDropBackground = $('[data-wgst-background-id="drag-and-drop"]');
+
+		    $dragAndDropBackground.find('.wgst-drag-and-drop-content').addClass('wgst-drag-over');
+		    $dragAndDropBackground.find('.wgst-drag-and-drop-content').find('.fa').addClass('animated bounce');
 		};
 
 		var handleDragOver = function(event) {
@@ -26,8 +28,10 @@ $(function(){
 		};
 
 		var handleDragLeave = function(event) {
-		    $('.wgst-drag-and-drop-content').removeClass('wgst-drag-over');
-		    $('.wgst-drag-and-drop-content').find('.fa').removeClass('animated bounce');
+			var $dragAndDropBackground = $('[data-wgst-background-id="drag-and-drop"]');
+
+		    $dragAndDropBackground.find('.wgst-drag-and-drop-content').removeClass('wgst-drag-over');
+		    $dragAndDropBackground.find('.wgst-drag-and-drop-content').find('.fa').removeClass('animated bounce');
 		};
 
 	    var handleDrop = function(event) {
@@ -42,8 +46,9 @@ $(function(){
 	        //
 	        // Update animation
 	        //
-			$('.wgst-drag-and-drop-content').find('.fa').removeClass('animated bounce');
-	        $('.wgst-drag-and-drop-content').find('.fa').addClass('animated pulse');
+	        var $dragAndDropBackground = $('[data-wgst-background-id="drag-and-drop"]');
+			$dragAndDropBackground.find('.wgst-drag-and-drop-content').find('.fa').removeClass('animated bounce');
+	        $dragAndDropBackground.find('.wgst-drag-and-drop-content').find('.fa').addClass('animated pulse');
 
 	        //
 	        // Update status
@@ -318,7 +323,7 @@ $(function(){
 						            //
 						            // Hide drag and drop
 						            //
-						            $('[data-wgst-drag-and-drop]').addClass('wgst--hide-this');
+						            $('[data-wgst-background-id="drag-and-drop"]').addClass('wgst--hide-this');
 	                            }
 	                        });
 

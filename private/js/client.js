@@ -663,10 +663,11 @@ $(function(){
         window.WGST.exports.getCollection(WGST.requestedCollectionId);
     } else {
         //
-        // Allow to create a new one
+        // Suggest to create new collection
         //
+        window.WGST.exports.showBackground('drag-and-drop');
         //$('.wgst-header-collection-name').text('New');
-        $('.wgst-drag-and-drop').removeClass('wgst--hide-this');
+        //$('.wgst-drag-and-drop').removeClass('wgst--hide-this');
     }
 
 
