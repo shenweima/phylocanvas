@@ -181,6 +181,14 @@ $(function(){
         	window.WGST.exports.happenedHidePanel(panelId);
         };
 
+        window.WGST.exports.isPanelExists = function(panelId) {
+            if ($('.wgst-panel[data-panel-id="' + panelId + '"]').length > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
         // window.WGST.exports.hideAllPanels = function() {
         // 	$('.wgst-panel').addClass('wgst--hide-this');
 

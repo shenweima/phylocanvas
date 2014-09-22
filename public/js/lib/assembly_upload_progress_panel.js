@@ -132,22 +132,22 @@ $(function(){
                 })
                 .done(function(collectionIdData, textStatus, jqXHR) {
 
-                    //
-                    // Create panel
-                    //
-                    var totalNumberOfAssembliesUploading = Object.keys(window.WGST.upload.fastaAndMetadata).length;
+                    // //
+                    // // Create panel
+                    // //
+                    // var totalNumberOfAssembliesUploading = Object.keys(window.WGST.upload.fastaAndMetadata).length;
 
-                    window.WGST.exports.createPanel('assembly-upload-progress', {
-                        panelId: 'assembly-upload-progress',
-                        panelType: 'assembly-upload-progress',
-                        assemblyFileIds: Object.keys(window.WGST.upload.fastaAndMetadata),
-                        totalNumberOfAssembliesUploading: totalNumberOfAssembliesUploading
-                    });
+                    // window.WGST.exports.createPanel('assembly-upload-progress', {
+                    //     panelId: 'assembly-upload-progress',
+                    //     panelType: 'assembly-upload-progress',
+                    //     assemblyFileIds: Object.keys(window.WGST.upload.fastaAndMetadata),
+                    //     totalNumberOfAssembliesUploading: totalNumberOfAssembliesUploading
+                    // });
 
-                    //
-                    // Show panel
-                    //
-                    window.WGST.exports.showPanel('assembly-upload-progress');
+                    // //
+                    // // Show panel
+                    // //
+                    // window.WGST.exports.showPanel('assembly-upload-progress');
 
                     // //
                     // // Hide uploading background
@@ -451,10 +451,34 @@ $(function(){
 	    //
 	    window.WGST.socket.connection.on('assemblyUploadNotification', function(data) {
 
-            //
-            // Hide uploading background
-            //
-            window.WGST.exports.hideBackground('uploading');
+            if  (! window.WGST.exports.isPanelExists('assembly-upload-progress')) {
+                //
+                // Create panel
+                //
+                var totalNumberOfAssembliesUploading = Object.keys(window.WGST.upload.fastaAndMetadata).length;
+
+                window.WGST.exports.createPanel('assembly-upload-progress', {
+                    panelId: 'assembly-upload-progress',
+                    panelType: 'assembly-upload-progress',
+                    assemblyFileIds: Object.keys(window.WGST.upload.fastaAndMetadata),
+                    totalNumberOfAssembliesUploading: totalNumberOfAssembliesUploading
+                });
+
+                //
+                // Show panel
+                //
+                window.WGST.exports.showPanel('assembly-upload-progress');
+
+                //
+                // Hide uploading background
+                //
+                window.WGST.exports.hideBackground('uploading');
+            }
+
+            // //
+            // // Hide uploading background
+            // //
+            // window.WGST.exports.hideBackground('uploading');
 
 	        var collectionId = data.collectionId,
 	            assemblyId = data.assemblyId,
