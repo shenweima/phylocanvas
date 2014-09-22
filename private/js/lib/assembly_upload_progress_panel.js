@@ -149,10 +149,10 @@ $(function(){
                     //
                     window.WGST.exports.showPanel('assembly-upload-progress');
 
-                    //
-                    // Hide uploading background
-                    //
-                    window.WGST.exports.hideBackground('uploading');
+                    // //
+                    // // Hide uploading background
+                    // //
+                    // window.WGST.exports.hideBackground('uploading');
 
 
 
@@ -450,6 +450,11 @@ $(function(){
 	    // Listen to assembly upload notifications
 	    //
 	    window.WGST.socket.connection.on('assemblyUploadNotification', function(data) {
+
+            //
+            // Hide uploading background
+            //
+            window.WGST.exports.hideBackground('uploading');
 
 	        var collectionId = data.collectionId,
 	            assemblyId = data.assemblyId,
