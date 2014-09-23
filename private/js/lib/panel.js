@@ -2,15 +2,58 @@ $(function(){
 
 	(function(){
 
-        window.WGST.exports.mapPanelTypeToTemplateId = {
-        	'assembly': 'assembly-panel',
-            'collection-data': 'collection-data-panel',
-            'collection-tree': 'collection-tree-panel',
-            'collection-map': 'collection-map-panel',
-            'assembly-upload-navigation': 'assembly-upload-navigation-panel',
-            'assembly-upload-metadata': 'assembly-upload-metadata-panel',
-            'assembly-upload-analytics': 'assembly-upload-analytics-panel',
-            'assembly-upload-progress': 'assembly-upload-progress-panel'
+        window.WGST.exports.mapPanelTypeToPanelHeaderTemplateId = {
+            'assembly': 'panel-header__assembly',
+            'collection-data': 'panel-header__collection-data',
+            'collection-tree': 'panel-header__collection-tree',
+            'collection-map': 'panel-header__collection-map',
+            'assembly-upload-metadata': 'panel-header__assembly-upload-metadata',
+            'assembly-upload-navigation': 'panel-header__assembly-upload-navigation',
+            'assembly-upload-analytics': 'panel-header__assembly-upload-analytics',
+            'assembly-upload-progress': 'panel-header__assembly-upload-progress'
+        };
+
+        window.WGST.exports.mapPanelTypeToPanelBodyTemplateId = {
+            'assembly': 'panel-body__assembly',
+            'collection-data': 'panel-body__collection-data',
+            'collection-tree': 'panel-body__collection-tree',
+            'collection-map': 'panel-body__collection-map',
+            'assembly-upload-metadata': 'panel-body__assembly-upload-metadata',
+            'assembly-upload-navigation': 'panel-body__assembly-upload-navigation',
+            'assembly-upload-analytics': 'panel-body__assembly-upload-analytics',
+            'assembly-upload-progress': 'panel-body__assembly-upload-progress'
+        };
+
+        window.WGST.exports.mapPanelTypeToPanelButtonRules = {
+            'assembly': {
+                noFullscreenButton: true
+            },
+            'collection-data': {
+                noCloseButton: true
+            },
+            'collection-tree': {
+                noFullscreenButton: true,
+                noCloseButton: true
+            },
+            'collection-map': {
+                noCloseButton: true
+            },
+            'assembly-upload-metadata': {
+                noFullscreenButton: true,
+                noCloseButton: true
+            },
+            'assembly-upload-navigation': {
+                noFullscreenButton: true,
+                noCloseButton: true
+            },
+            'assembly-upload-analytics': {
+                noFullscreenButton: true,
+                noCloseButton: true
+            },
+            'assembly-upload-progress': {
+                noFullscreenButton: true,
+                noCloseButton: true
+            }
         };
 
         window.WGST.exports.createPanel = function(panelType, templateContext) {
@@ -25,15 +68,21 @@ $(function(){
         		//
         		window.WGST.exports.showPanel(templateContext.panelId);
 
+                //
+                // And do nothing else
+                //
         		return;
         	}
+
+            //
+            // Extend template context with panel button rules
+            //
+            templateContext = $.extend(templateContext, window.WGST.exports.mapPanelTypeToPanelButtonRules[panelType]);
 
         	//
         	// Get panel's label
         	//
-            templateContext.panelLabel = templateContext.assemblyUserId;
-
-
+            //templateContext.panelLabel = templateContext.assemblyUserId;
         	templateContext.panelLabel = window.WGST.exports.getContainerLabel({
         		containerName: 'panel', 
         		containerType: panelType,
@@ -44,28 +93,44 @@ $(function(){
         	//
         	// Render
         	//
-            var templateId = window.WGST.exports.mapPanelTypeToTemplateId[panelType],
-                panelTemplateSource = $('.wgst-template[data-template-id="' + templateId + '"]').html(),
-                panelTemplate = Handlebars.compile(panelTemplateSource),
-                panelHtml = panelTemplate(templateContext);
+            var //templateId = window.WGST.exports.mapPanelTypeToTemplateId[panelType],
+                panelTemplateSource = $('.wgst-template[data-template-id="panel"]').html(),
+                panelTemplate = Handlebars.compile(panelTemplateSource);
 
+
+            //
+            // Panel's header
+            //
+            var panelHeaderTemplateId = window.WGST.exports.mapPanelTypeToPanelHeaderTemplateId[panelType];
+            Handlebars.registerPartial('header', $('.wgst-template[data-template-id="' + panelHeaderTemplateId + '"]').html());
+
+            //
+            // Panel's body
+            //
+            var panelBodyTemplateId = window.WGST.exports.mapPanelTypeToPanelBodyTemplateId[panelType];
+            Handlebars.registerPartial('body', $('.wgst-template[data-template-id="' + panelBodyTemplateId + '"]').html());
+
+            //
+            // Html
+            //
+            var panelHtml = panelTemplate(templateContext);
             $('.wgst-workspace').prepend(panelHtml);
-
-        	var $panel = $('.wgst-panel[data-panel-id="' + templateContext.panelId + '"]');
 
         	//
         	// Init jQuery UI draggable interaction
         	//
+            var $panel = $('.wgst-panel[data-panel-id="' + templateContext.panelId + '"]');
+
 	        $panel.draggable({
 	            handle: $panel.find('.wgst-draggable-handle'),
 	            appendTo: ".wgst-page__app",
-	            scroll: false,
-	            stop: function(event, ui) {
+	            scroll: false//,
+	            //stop: function(event, ui) {
 	                // // Store current panel position
 	                // var panelName = ui.helper.attr('data-panel-name');
 	                // WGST.panels[panelName].top = ui.position.top;
 	                // WGST.panels[panelName].left = ui.position.left;
-	            }
+	            //}
 	        });
 
 	        //
@@ -81,28 +146,51 @@ $(function(){
         	// Update hidable state
         	//
         	window.WGST.exports.hidablePanelRemoved(panelId);
+
+            if (panelId === 'collection-map') {
+
+                //
+                // Remove map
+                //
+                window.WGST.geo.map.remove();
+            }
         };
 
         window.WGST.exports.showPanel = function(panelId) {
-        	$('.wgst-panel[data-panel-id="' + panelId + '"]').removeClass('hide-this invisible-this');
+        	$('.wgst-panel[data-panel-id="' + panelId + '"]').removeClass('wgst--hide-this wgst--invisible-this');
+
+            // if (panelId === 'collection-map') {
+            //     google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
+            // }
 
         	//
         	// Update hidable state
         	//
-        	window.WGST.exports.hidablePanelShown(panelId);
+        	//window.WGST.exports.hidablePanelShown(panelId);
+            window.WGST.exports.happenedShowPanel(panelId);
         };
 
         window.WGST.exports.hidePanel = function(panelId) {
-        	$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('hide-this');
+        	//$('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('wgst--hide-this wgst--invisible-this');
+            $('.wgst-panel[data-panel-id="' + panelId + '"]').addClass('wgst--invisible-this');
 
         	//
         	// Update hidable state
         	//
-        	window.WGST.exports.hidablePanelHidden(panelId);
+            //window.WGST.exports.hidablePanelHidden(panelId);
+        	window.WGST.exports.happenedHidePanel(panelId);
+        };
+
+        window.WGST.exports.isPanelExists = function(panelId) {
+            if ($('.wgst-panel[data-panel-id="' + panelId + '"]').length > 0) {
+                return true;
+            } else {
+                return false;
+            }
         };
 
         // window.WGST.exports.hideAllPanels = function() {
-        // 	$('.wgst-panel').addClass('hide-this');
+        // 	$('.wgst-panel').addClass('wgst--hide-this');
 
         // 	//
         // 	// Update hidable state
@@ -116,7 +204,7 @@ $(function(){
     		//
     		// Toggle panel
     		//
-    		if ($panel.is('.hide-this, .invisible-this')) {
+    		if ($panel.is('.wgst--hide-this, .wgst--invisible-this')) {
 
         		//
         		// Show panel
@@ -134,16 +222,7 @@ $(function(){
         };
 
 	    window.WGST.exports.bringPanelToFront = function(panelId) {
-	        var zIndexHighest = 0;
-
-	        $('.wgst-panel').each(function(){
-	            var zIndexCurrent = parseInt($(this).css('zIndex'), 10);
-	            if (zIndexCurrent > zIndexHighest) {
-	                zIndexHighest = zIndexCurrent;
-	            }
-	        });
-
-	        $('[data-panel-id="' + panelId + '"]').css('zIndex', zIndexHighest + 1);
+            window.WGST.exports.bringContainerToFront('panel', panelId);
 	    };
 
 	    window.WGST.exports.maximizePanel = function(panelId) {
@@ -155,10 +234,17 @@ $(function(){
 	        //
 	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
 
+            //
+            // Hide panel
+            //
+            window.WGST.exports.hidePanel(fullscreenId);
+
 	        //
 	        // Bring panel into fullscreen
 	        //
 	        window.WGST.exports.bringPanelToFullscreen(panelId);
+
+            google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
 
 	    };
 
@@ -177,9 +263,6 @@ $(function(){
 	    	//
 	    	//
 
-	    	console.debug('getContainerLabel:');
-        	console.dir(options);
-
         	var containerLabel = 'Anonymous';
 
         	//
@@ -195,9 +278,10 @@ $(function(){
 
         	} else if (options.containerType === 'collection-tree') {
 
-        		var treeType = options.containerId.split('__')[2];
+                containerLabel = 'Tree';
 
-        		containerLabel = treeType.replace(/[_]/g, ' ').toLowerCase().capitalize();
+        		// var treeType = options.containerId.split('__')[2];
+        		// containerLabel = treeType.replace(/[_]/g, ' ').toLowerCase().capitalize();
 
         	} else if (options.containerType === 'assembly') {
 
@@ -205,7 +289,7 @@ $(function(){
 
         	} else if (options.containerType === 'assembly-upload-progress') {
 
-                containerLabel = 'Assembly Upload';
+                containerLabel = 'Upload Progress';
 
             } else if (options.containerType === 'assembly-upload-metadata') {
 
@@ -224,12 +308,29 @@ $(function(){
         	return containerLabel;
 	    };
 
-		$('body').on('click', '.wgst-panel-control-button__close', function(){
-			var panel = $(this).closest('.wgst-panel'),
-				panelId = panel.attr('data-panel-id');
+        $('body').on('click', '[data-panel-header-control-button="fullscreen"]', function(){
+            var $panel = $(this).closest('.wgst-panel'),
+                panelId = $panel.attr('data-panel-id');
 
-			window.WGST.exports.hidePanel(panelId);
+            $('[data-hidable-id="' + panelId + '"]').find('[data-wgst-hidable-button="fullscreen"]').trigger('click');
+
+        });
+
+		$('body').on('click', '[data-panel-header-control-button="close"]', function(){
+			var $panel = $(this).closest('.wgst-panel'),
+				panelId = $panel.attr('data-panel-id');
+
+            $('[data-hidable-id="' + panelId + '"]').find('[data-wgst-hidable-button="close"]').trigger('click');
+
 		});
+
+        $('body').on('click', '[data-panel-header-control-button="hide"]', function(){
+            var $panel = $(this).closest('.wgst-panel'),
+                panelId = $panel.attr('data-panel-id');
+
+            $('[data-hidable-id="' + panelId + '"]').find('[data-wgst-hidable-button="hide"]').trigger('click');
+
+        });
 
 		//
 	    // Bring to front selected panel
@@ -238,27 +339,27 @@ $(function(){
 	        window.WGST.exports.bringPanelToFront($(this).attr('data-panel-id'));
 	    });
 
-        $('body').on('click', '.wgst-panel-control-button__maximize', function(){
+        // $('body').on('click', '.wgst-panel-control-button__maximize', function(){
 
-	        //
-	        // Bring fullscreen to panel
-	        //
-	        var $fullscreen = $('.wgst-fullscreen');
-	        var fullscreenId = $fullscreen.attr('data-fullscreen-id');
-	        var panelId = fullscreenId;
+	       //  //
+	       //  // Bring fullscreen to panel
+	       //  //
+	       //  var $fullscreen = $('.wgst-fullscreen');
+	       //  var fullscreenId = $fullscreen.attr('data-fullscreen-id');
+	       //  var panelId = fullscreenId;
 
-	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
+	       //  window.WGST.exports.bringFullscreenToPanel(fullscreenId);
 
-	        //
-	        // Bring panel to fullscreen
-	        //
-	        var $panel = $(this).closest('.wgst-panel');
-	        var panelId = $panel.attr('data-panel-id');
-	        var fullscreenId = panelId;
+	       //  //
+	       //  // Bring panel to fullscreen
+	       //  //
+	       //  var $panel = $(this).closest('.wgst-panel');
+	       //  var panelId = $panel.attr('data-panel-id');
+	       //  var fullscreenId = panelId;
 
-	        window.WGST.exports.bringPanelToFullscreen(panelId, fullscreenId);
+	       //  window.WGST.exports.bringPanelToFullscreen(panelId, fullscreenId);
 
-        });
+        // });
 
 	})();
 

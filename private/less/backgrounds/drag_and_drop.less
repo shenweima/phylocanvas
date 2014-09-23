@@ -1,0 +1,60 @@
+@import "background";
+
+.wgst-background__drag-and-drop {
+    padding: 30px;
+
+	.wgst-drag-and-drop-zone {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1000;
+		opacity: 0;
+	}
+
+    .wgst-drag-and-drop-content {
+    	display: table;
+    	width: 100%;
+    	height: 100%;
+        border: 2px dotted #bbb;
+        text-align: center;
+		-webkit-transition: 0.5s ease;
+
+        &.wgst-drag-over {
+			border-color: #333;
+			-webkit-transition: 0.5s ease;
+
+			.wgst-drag-and-drop-content__guide {
+				.fa {
+					color: #333;
+					-webkit-transition: 0.5s ease;
+				}
+			}
+        }
+
+		.wgst-drag-and-drop-content__guide {
+			display: table-cell;
+			vertical-align: middle;
+
+	        .fa {
+	        	font-size: 70px;
+	        	color: #bbb;
+	        	text-shadow: 1px 1px #fff;
+
+				-webkit-animation-duration: 2s;
+				-webkit-animation-delay: 0s;
+				-webkit-animation-iteration-count: infinite;
+	        }
+
+	        h3 {
+	        	font-weight: 300;
+	        	text-shadow: 1px 1px #fff;
+
+	        	strong {
+	        		font-weight: 500;
+	        	}
+	        }
+		}
+    }
+}

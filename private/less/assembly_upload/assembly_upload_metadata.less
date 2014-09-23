@@ -1,0 +1,109 @@
+.wgst-panel__assembly-upload-metadata {
+
+    // Position
+    top: 175px;
+    left: 90px;
+
+    // Object element
+    .adding-metadata-progress-container {
+        padding: 15px;
+        overflow: hidden;
+        clear: both;
+        border-top: 1px solid #eee;
+        .progress-container {
+            .progress-label {
+                .progress-percentage-label {
+                    font-size: 12px;
+                    font-weight: 400;
+                    text-transform: uppercase;
+                }
+                .progress-percentage {
+                    font-weight: 400;
+                    font-size: 22px;
+                    margin-left: 2px;
+                    line-height: 1em;
+                    text-transform: uppercase;
+                }
+                .progress-hint {
+                    font-size: 14px;
+                    margin-left: 4px;
+                }
+            }
+            .progress {
+                margin: 0;
+                margin-top: 10px;
+            }
+        }
+        .upload-controls-container {
+            display: none;
+            .assemblies-upload-ready-button {
+                margin-right: 10px;
+                margin-left: 10px;
+            }
+        }
+    }
+
+    // Object element
+    .uploading-assembly-progress-container {
+        display: none;
+        padding: 15px;
+        clear: both;
+        overflow: hidden;
+        border-top: 1px solid #eee;
+        .uploading-progress-container {
+            width: 100%;
+            float: left;
+            //.no-user-select;
+            .uploaded-assembly-url {
+                display: none;
+                //margin-top: 10px;
+                .uploaded-assembly-url-label {
+                    font-size: 12px;
+                    font-weight: 400;
+                    text-transform: uppercase;
+                    .visit-url-seconds-number {
+                        font-weight: 400;
+                        font-size: 22px;
+                        margin: 0 3px;
+                    }
+                    .uploaded-assembly-process-status {
+                        font-size: 22px;
+                        font-weight: 400;
+                        text-transform: uppercase;
+                        margin-right: 3px;
+                    }
+                }
+                .uploaded-assembly-url-input {
+                    margin-top: 5px;
+                    color: #000;
+                }
+            }
+            .progress-label {
+                //line-height: 1.2em;
+                margin-bottom: 10px;
+                .progress-percentage-label {
+                    font-size: 12px;
+                    font-weight: 400;
+                    text-transform: uppercase;
+                }
+                .progress-percentage {
+                    font-weight: 400;
+                    font-size: 22px;
+                    margin-left: 2px;
+                    line-height: 1em;
+                    text-transform: uppercase;
+                }
+                .progress-hint {
+                    //font-weight: 100;
+                    font-size: 14px;
+                    margin-left: 4px;
+                    //font-style: italic;
+                }
+            }
+            .progress {
+                margin: 0;
+                margin-top: 10px;
+            }
+        }
+    }
+}

@@ -82,7 +82,7 @@ window.WGST.assembly = {
 //
 window.WGST.collection = {
     analysis: {
-        COLLECTION_TREE: 'COLLECTION_TREE',
+        //COLLECTION_TREE: 'COLLECTION_TREE',
         CORE_MUTANT_TREE: 'CORE_MUTANT_TREE'
     },
     representative: {
@@ -142,13 +142,13 @@ $(function(){
         //
         // Show app page
         //
-        $('.wgst-page__app').removeClass('hide-this');
+        $('.wgst-page__app').removeClass('wgst--hide-this');
     } else {
 
         //
         // Show default page
         //
-        $('.wgst-page__landing').removeClass('hide-this');
+        $('.wgst-page__landing').removeClass('wgst--hide-this');
 
         return;
     }
@@ -180,24 +180,24 @@ $(function(){
     //     fullscreenId: fullscreenId
     // });
 
-    if (typeof window.WGST.requestedCollectionId !== 'undefined') {
+    // if (typeof window.WGST.requestedCollectionId !== 'undefined') {
 
-        //
-        // Create map fullscreen
-        //
-        var fullscreenType = 'collection-map',
-            fullscreenId = 'collection-map'; //fullscreenType + '__' + window.WGST.requestedCollectionId;
+    //     //
+    //     // Create map fullscreen
+    //     //
+    //     var fullscreenType = 'collection-map',
+    //         fullscreenId = 'collection-map'; //fullscreenType + '__' + window.WGST.requestedCollectionId;
 
-        window.WGST.exports.createFullscreen(fullscreenId, {
-            fullscreenType: fullscreenType,
-            fullscreenId: fullscreenId
-        });
+    //     window.WGST.exports.createFullscreen(fullscreenId, {
+    //         fullscreenType: fullscreenType,
+    //         fullscreenId: fullscreenId
+    //     });
 
-        //
-        // Show fullscreen
-        //
-        window.WGST.exports.showFullscreen(fullscreenId);
-    }
+    //     //
+    //     // Show fullscreen
+    //     //
+    //     window.WGST.exports.showFullscreen(fullscreenId);
+    // }
 
 
 
@@ -266,12 +266,16 @@ $(function(){
             searchBoxBounds: new google.maps.LatLngBounds(),
             init: function() {
 
+                console.debug('*** 1 No no no ****');
+
                 //
                 // Do nothing if map was already initialised
                 //
                 if (this.initialised === true) {
                     return;
                 }
+
+                console.debug('*** 2 No no no ****');
 
                 //
                 // Create map
@@ -288,17 +292,32 @@ $(function(){
                 //
                 window.WGST.geo.map.markers.metadata = new google.maps.Marker({
                     position: new google.maps.LatLng(51.511214, -0.119824),
-                    map: WGST.geo.map.canvas,
+                    map: window.WGST.geo.map.canvas,
                     visible: false
                 });
 
                 //
                 // Bias the SearchBox results towards places that are within the bounds of the current map's viewport.
                 //
-                google.maps.event.addListener(WGST.geo.map.canvas, 'bounds_changed', function() {
+                google.maps.event.addListener(window.WGST.geo.map.canvas, 'bounds_changed', function() {
                     window.WGST.geo.map.searchBoxBounds = window.WGST.geo.map.canvas.getBounds();
                 });
-            } // init
+            },
+            remove: function() {
+
+                //
+                //
+                //
+                // Known memory leak issue: https://code.google.com/p/gmaps-api-issues/issues/detail?id=3803
+                //
+                //
+                //
+
+                //
+                // Set map as initialised
+                //
+                window.WGST.geo.map.initialised = false;
+            }
         },
         placeSearchBox: {} // Store Google SearchBox object for each dropped file
     };
@@ -638,10 +657,19 @@ $(function(){
 
     // If user provided collection id in url then load requested collection
     if (typeof WGST.requestedCollectionId !== 'undefined') {
+        //
+        // Get existing collection
+        //
         window.WGST.exports.getCollection(WGST.requestedCollectionId);
     } else {
-        $('.wgst-header-collection-name').text('New');
+        //
+        // Suggest to create new collection
+        //
+        window.WGST.exports.showBackground('drag-and-drop');
+        //$('.wgst-header-collection-name').text('New');
+        //$('.wgst-drag-and-drop').removeClass('wgst--hide-this');
     }
+
 
 
 
@@ -1216,7 +1244,7 @@ $(function(){
     // // Show hint message when 'I am not sure' checkbox is checkec
     // $('.wgst-assembly-upload__metadata').on('click', '.not-sure-checkbox', function(){
     //     // Show 'I am not sure' message
-    //     $(this).closest('label').find('.not-sure-hint').toggleClass('hide-this');
+    //     $(this).closest('label').find('.not-sure-hint').toggleClass('wgst--hide-this');
     // });
 
 

@@ -13,8 +13,8 @@ $(function(){
             var $button = $(this).find('[type="submit"]');
 
             $button.prop('disabled', true);
-            $button.find('span').addClass('hide-this');
-            $button.find('.wgst-spinner').removeClass('hide-this');
+            $button.find('span').addClass('wgst--hide-this');
+            $button.find('.wgst-spinner').removeClass('wgst--hide-this');
 
             var $form = $('[data-form="feedback"]');
 
@@ -43,9 +43,9 @@ $(function(){
             .done(function(data, textStatus, jqXHR) {
                 console.log('[WGST] Sent feedback');
 
-                $button.addClass('hide-this');
+                $button.addClass('wgst--hide-this');
 
-                $('.wgst-send-feedback-success-message').removeClass('hide-this');
+                $('.wgst-send-feedback-success-message').removeClass('wgst--hide-this');
 
             })
             .fail(function(jqXHR, textStatus, errorThrown) {

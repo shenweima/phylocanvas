@@ -1,0 +1,279 @@
+.wgst-panel__collection-data {
+
+    .wgst-panel-body {
+        max-height: 400px;
+        //height: 450px;
+        //padding-bottom: 20px;
+    }
+
+    .wgst-collection-controls {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+
+        &> div {
+            display: inline-block;
+        }
+        .wgst-collection-controls__show-data-table {
+            margin-left: 10px;
+        }
+        label {
+            font-weight: 300;
+            margin: 0;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        button {
+            outline: none;
+        }
+    }
+
+    .collection-stats {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 16px;
+    }
+
+    .collection-details {
+        padding: 20px;
+        overflow: hidden;
+        min-width: 100%;
+        .collection-assembly-list-headers {
+            width: 900px;
+            border-bottom: 1px solid #ddd;
+            overflow: hidden;
+            padding: 10px 0;
+            margin-left: 2px;
+            .assembly-list-header {
+                float: left;
+                font-weight: 500;
+            }
+        }
+        .collection-assembly-list {
+            width: 900px;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            float: left;
+            max-height: 266px;
+            min-height: 0px;
+            .assembly-list-item {
+                width: 100%;
+                float: left;
+                clear: both;
+                padding: 8px 0;
+                border-bottom: 1px solid #ddd;
+                margin-left: 2px;
+                color: #000;
+                &> div {
+                    clear: both;
+                    display: inline-block;
+                    vertical-align: middle;
+                }
+                &.row-stripe {
+                    background-color: #FAFAFA;
+                }
+                &:hover {
+                    //background-color: #FFF8F0;
+                    margin-left: 0;
+                    border-left: 2px solid #333;
+                    //border-right: 2px solid #333;
+                }
+                &.row-selected {
+                    background-color: #F0F7FF;
+                }
+            }
+        }
+        .collection-assembly-list-more-assemblies, .collection-assembly-list-all-assemblies {
+            //background-color: #f5f5f5;
+            //float: left;
+            display: none;
+            clear: both;
+            width: 900px;
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            font-weight: 300;
+            //border-left: 2px solid #fff;
+            .glyphicon {
+                margin: 0 5px;
+            }
+        }
+
+        .assembly-list-header-tree {
+            width: 50px;
+            text-align: center;
+        }
+        .assembly-list-header-map {
+            width: 50px;
+            text-align: center;
+            .show-all-assemblies-on-map {
+                display: block;
+                margin: 12px auto 0 auto;
+            }
+        }
+        .assembly-list-generation {
+            width: 120px;
+            padding-left: 7px;
+            padding-right: 7px;
+        }
+        .assembly-list-item .assembly-list-generation {
+            font-size: 12px;
+        }
+        .assembly-list-header-id {
+            width: 100px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            margin-right: 8px;
+            margin-left: 10px;
+        }
+        .assembly-list-header-st {
+            width: 80px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            margin-right: 8px;
+        }
+        .assembly-list-header-nearest-representative {
+            width: 170px;
+        }
+        .assembly-list-header-resistance-profile {
+            width: 400px;
+        }
+
+
+
+        .assembly-upload-datetime {
+            font-weight: 400;
+        }
+        h2 {
+            font-size: 12px;
+            font-weight: 400;
+            margin: 20px 8px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .mlst-number {
+            font-weight: 300;
+            font-size: 22px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .assembly-resistance-profile-container {
+            //width: 350px;
+            overflow: hidden;
+            .antibiotic-group {
+                float: left;
+                border: 1px solid #111;
+                margin-right: 2px;
+                .antibiotic {
+                    width: 6px;
+                    height: 16px;
+                    float: left;
+                    border-right: 1px solid #111;
+                    padding-left: 7px;
+                    &:last-of-type {
+                        border-right: 0 !important;
+                    }
+                    &.resistance-fail {
+                        background-color: #CF0000;
+                    }
+                    &.resistance-success {
+                        background-color: #038F05;
+                    }
+                    &.resistance-unknown {
+                        background-color: #f5f5f5;
+                    }
+                }
+
+                .antibiotic[data-antibiotic-resistance-state="RESISTANT"] {
+                    background-color: #CF0000; 
+                }
+                .antibiotic[data-antibiotic-resistance-state="SENSITIVE"] {
+                    background-color: #038F05; 
+                }
+                .antibiotic[data-antibiotic-resistance-state="UNKNOWN"] {
+                    background-color: #f5f5f5;
+                    color: #000;
+                }
+
+            }
+        }
+        // .collection-assembly-list, table.assemblies-summary-table { // TO DO: Rename to .assembly-score-table
+        //     width: 900px;
+        //     //max-height: 400px;
+        //     overflow: scroll;
+        //     margin-bottom: 0;
+            // colgroup {
+            //     .col-target-fp {
+            //         width: auto;
+            //     }
+            //     .col-score, .col-score-percentage {
+            //         width: 20%;
+            //     }
+            // }
+            // th {
+            //     border-bottom: 1px;
+            //     font-weight: 500;
+            //     font-size: 14px;
+            //     text-transform: uppercase;
+            //     &:nth-child(1), &:nth-child(2) {
+            //         text-align: center;
+            //     }
+            // }
+            // td.show-on-map-checkbox {
+            //     padding: 6px 5px 5px 5px;
+            //     text-align: center;
+            // }
+            // td.show-on-tree-radio-button {
+            //     padding: 7px 5px 5px 5px;
+            //     text-align: center;
+            // }
+            // th, td {
+            //     padding-left: 12px;
+            //     padding-right: 12px;
+            // }
+            // tbody tr {
+            //     /*
+
+            //     Order is important.
+            //     You want :hover to overwrite .row-stripe rule.
+
+            //     */
+            //     &.row-stripe {
+            //         background-color: #FAFAFA;
+            //     }
+            //     &.row-selected {
+            //         background-color: #F0F7FF;
+            //     }
+            //     &:hover {
+            //         background-color: #FFF8F0;
+
+            //     }
+            // }
+        //}
+        table.assembly-resistance-profile {
+            margin: 0;
+            th {
+                font-weight: 400;
+            }
+            td {
+                width: 3px;
+                height: 18px;
+                border: 0;
+                margin: 0;
+                padding: 0;
+                &.resistance-fail {
+                    background-color: #CF0000;
+                }
+                &.resistance-success {
+                    background-color: #038F05;
+                }
+                &.resistance-unknown {
+                    background-color: #f5f5f5;
+                    color: #000;
+                }
+            }
+        }
+    }
+}

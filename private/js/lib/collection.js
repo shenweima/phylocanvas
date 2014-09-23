@@ -52,26 +52,36 @@ $(function(){
 	    };
 
 	    var sortCollectionAssemblies = function(collectionId) {
-            var assemblies = WGST.collection[collectionId].assemblies,
+            var assemblies = window.WGST.collection[collectionId].assemblies,
                 sortedAssemblies = [],
                 sortedAssemblyIds = [];
 
-            // Sort assemblies in order in which they are displayed on tree
-            $.each(window.WGST.collection[collectionId].tree['CORE_TREE_RESULT'].leavesOrder, function(leafCounter, leaf){
+            var treeName = "COLLECTION_TREE",
+            	tree = window.WGST.collection[collectionId].tree[treeName];
+
+            //
+            // Sort assemblies in order in which they are displayed on a tree
+            //
+            $.each(tree.leavesOrder, function(leafCounter, leaf){
                 sortedAssemblies.push(assemblies[leaf.id]);
                 sortedAssemblyIds.push(leaf.id);
             });
 
-            WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
+            window.WGST.collection[collectionId].sortedAssemblyIds = sortedAssemblyIds;
 	    };
 
 	    window.WGST.exports.getCollection = function(collectionId) {
 	        console.log('[WGST] Getting collection ' + collectionId);
 
-	        if (WGST.speak) {
+	        if (window.WGST.speak) {
 	            var message = new SpeechSynthesisUtterance('Loading collection');
 	            window.speechSynthesis.speak(message);
 	        }
+
+	        //
+	        // Show background
+	        //
+	        window.WGST.exports.showBackground('get-collection');
 
 	        // When extending current collection, close it and then open it again
 	        //
@@ -112,17 +122,23 @@ $(function(){
 	        		var collectionPanelId = window.WGST.exports.createCollectionDataPanel(collectionId);
 	        		var $collectionPanel = $('.wgst-panel[data-panel-id="' + collectionPanelId + '"]');
 
-                    //
-				    // Initialise map
-				    //
-			    	window.WGST.geo.map.init();
-
 	                //
 	                // Create collection map fullscreen
 	                // 
 	        		window.WGST.exports.createFullscreen('collection-map', {
+	        			fullscreenId: 'collection-map',
 	        			fullscreenType: 'collection-map'
 	        		});
+
+				    //
+				    // Show fullscreen
+				    //
+				    window.WGST.exports.showFullscreen('collection-map');
+
+	        		//
+				    // Init map
+				    //
+				    window.WGST.geo.map.init();
 
 	        		//
 		            // Bring panel to top
@@ -259,7 +275,12 @@ $(function(){
 	                //
 	                // Show collection navigation
 	                //
-	                //$('.wgst-navigation__collection-panels').toggleClass('hide-this');
+	                //$('.wgst-navigation__collection-panels').toggleClass('wgst--hide-this');
+
+			        //
+			        // Hide background
+			        //
+			        window.WGST.exports.hideBackground('get-collection');
 
 	            } // if
 	        })
@@ -309,7 +330,7 @@ $(function(){
 
 	        // Hide collection navigation
 	        //$('.wgst-navigation__collection').show();
-	        $('.wgst-navigation__collection-panels').toggleClass('hide-this');
+	        $('.wgst-navigation__collection-panels').toggleClass('wgst--hide-this');
 	    };
 
 	    window.WGST.exports.addResistanceProfileDataToCollection = function(collectionId) {
@@ -488,37 +509,40 @@ $(function(){
 	    var maximizeCollection = function(collectionId) {
 	        console.log('[WGST] Maximizing collection ' + collectionId);
 
-	        //
-	        // Bring fullscreen into panel
-	        //
-	        var fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
-	        var panelId = fullscreenId;
+	        window.WGST.exports.maximizePanel('collection-data__' + collectionId);
+
+	        // //
+	        // // Bring fullscreen into panel
+	        // //
+	        // var fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
+	        // var panelId = fullscreenId;
+	        // var originalFullscreenId = fullscreenId;
 	        
-	        console.debug('fullscreenId: ' + fullscreenId);
-	        console.debug('panelId: ' + panelId);
+	        // console.debug('fullscreenId: ' + fullscreenId);
+	        // console.debug('panelId: ' + panelId);
 
-	        window.WGST.exports.bringFullscreenToPanel(fullscreenId);
+	        // window.WGST.exports.bringFullscreenToPanel(fullscreenId);
 
-	        //
-	        // Bring panel into fullscreen
-	        //
-	        var panelId = 'collection-data__' + collectionId,
-	        	fullscreenId = 'collection-data';
+	        // //
+	        // // Bring panel into fullscreen
+	        // //
+	        // var panelId = 'collection-data__' + collectionId,
+	        // 	fullscreenId = 'collection-data';
 
-	        window.WGST.exports.bringPanelToFullscreen(panelId);
+	        // window.WGST.exports.bringPanelToFullscreen(panelId);
 
-	        // Destroy all Twitter Bootstrap Tooltips
-	        //$('[data-toggle="tooltip"]').tooltip('destroy');
+	        // // Destroy all Twitter Bootstrap Tooltips
+	        // //$('[data-toggle="tooltip"]').tooltip('destroy');
 
-	        // bringPanelToFullscreen('collection_' + collectionId, function(){
-	        //     // Trigger Twitter Bootstrap tooltip
-	        //     $('[data-toggle="tooltip"]').tooltip();
-	        //     // Open Map panel
-	        //     window.WGST.openPanel('map');
-	        // });
+	        // // bringPanelToFullscreen('collection_' + collectionId, function(){
+	        // //     // Trigger Twitter Bootstrap tooltip
+	        // //     $('[data-toggle="tooltip"]').tooltip();
+	        // //     // Open Map panel
+	        // //     window.WGST.openPanel('map');
+	        // // });
 
-	        google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
 
+	        // google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
 	    };
 
 	})();

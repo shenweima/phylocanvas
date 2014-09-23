@@ -1,1 +1,61 @@
-$(function(){!function(){$("body").on("submit",'[data-form="feedback"]',function(e){console.log("[WGST] Submitting feedback form..."),e.preventDefault();var a=$(this).find('[type="submit"]');a.prop("disabled",!0),a.find("span").addClass("hide-this"),a.find(".wgst-spinner").removeClass("hide-this");var n=$('[data-form="feedback"]'),d=n.find('[data-input="name"]').val(),o=n.find('[data-input="email"]').val(),i=n.find('[data-input="feedback"]').val(),s={name:d,email:o,feedback:i};console.dir(s),window.WGST.exports.mixpanel.submitFeedback(),$.ajax({type:"POST",url:"/feedback/",datatype:"json",data:s}).done(function(){console.log("[WGST] Sent feedback"),a.addClass("hide-this"),$(".wgst-send-feedback-success-message").removeClass("hide-this")}).fail(function(e,a,n){console.log("[WGST][Error] Failed to send feedback"),console.error(a),console.error(n),console.error(e)})})}()});
+$(function(){
+
+	(function(){
+
+        //
+        // Feedback form
+        //
+        $('body').on('submit', '[data-form="feedback"]', function(event){
+            console.log('[WGST] Submitting feedback form...');
+
+            event.preventDefault();
+
+            var $button = $(this).find('[type="submit"]');
+
+            $button.prop('disabled', true);
+            $button.find('span').addClass('wgst--hide-this');
+            $button.find('.wgst-spinner').removeClass('wgst--hide-this');
+
+            var $form = $('[data-form="feedback"]');
+
+            var name = $form.find('[data-input="name"]').val(),
+                email = $form.find('[data-input="email"]').val(),
+                feedback = $form.find('[data-input="feedback"]').val();
+
+            var result = {
+                name: name,
+                email: email,
+                feedback: feedback
+            };
+
+            console.dir(result);
+
+            window.WGST.exports.mixpanel.submitFeedback();
+
+            // Get collection data
+            $.ajax({
+                type: 'POST',
+                url: '/feedback/',
+                // http://stackoverflow.com/a/9155217
+                datatype: 'json',
+                data: result
+            })
+            .done(function(data, textStatus, jqXHR) {
+                console.log('[WGST] Sent feedback');
+
+                $button.addClass('wgst--hide-this');
+
+                $('.wgst-send-feedback-success-message').removeClass('wgst--hide-this');
+
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                console.log('[WGST][Error] Failed to send feedback');
+                console.error(textStatus);
+                console.error(errorThrown);
+                console.error(jqXHR);
+            });
+        });
+
+	})();
+
+});

@@ -1,0 +1,57 @@
+.wgst-panel {
+
+	.wgst-panel-header {
+	    height: 40px;
+
+	    .header-title {
+	        font-size: 14px;
+	        font-weight: 300;
+	        text-align: center;
+	        small {
+	            font-size: 100%;
+	            font-weight: 400;
+	            color: #000;
+	        }
+	    }
+
+		.wgst-panel-header-controls {
+			position: absolute;
+			right: 0;
+			top: 0;
+			width: auto;
+			height: 40px;
+			line-height: 40px;
+			padding: 0 15px;
+
+		    .wgst-panel-header-control-button {
+		        color: #ccc;
+		        padding: 0 4px;
+
+			    &.wgst-panel-header-control-button--active {
+			        cursor: pointer;
+			        color: #777;
+			        &:hover {
+			            color: #000;
+			        }
+			    }
+		    }
+		}
+
+
+/*	    .wgst-panel-control-button__maximize {
+	        right: 91px; // 13 + 13 + 13
+	    }
+	    .wgst-panel-control-button__opacity {
+	        right: 65px;
+	    }
+	    .wgst-panel-control-button__minimize {
+	        right: 39px; // 13 + 13 + 13
+	    }
+	    .wgst-panel-control-button__close {
+	        right: 13px;
+	    }*/
+	}
+
+}
+
+@import "panels/panel__collection-data.less";

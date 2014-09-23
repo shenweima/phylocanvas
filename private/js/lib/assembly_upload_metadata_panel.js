@@ -3,8 +3,8 @@ $(function(){
 	(function(){
 
 		window.WGST.exports.showAssemblyUploadMetadata = function(assemblyFileId) {
-			$('.wgst-panel__assembly-upload-metadata .wgst-upload-assembly__metadata').addClass('hide-this');
-			$('.wgst-panel__assembly-upload-metadata .wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]').removeClass('hide-this');
+			$('.wgst-panel__assembly-upload-metadata .wgst-upload-assembly__metadata').addClass('wgst--hide-this');
+			$('.wgst-panel__assembly-upload-metadata .wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]').removeClass('wgst--hide-this');
 		
 			//
 			// Set file name in panel's header
@@ -42,9 +42,9 @@ $(function(){
 	        // Show next input of date metadata
 	        // ----------------------------------------------------
 	        if (timestampPart === 'year') {
-	            $('.assembly-metadata-timestamp-month[data-assembly-file-id="' + assemblyFileId + '"]').removeClass('hide-this');
+	            $('.assembly-metadata-timestamp-month[data-assembly-file-id="' + assemblyFileId + '"]').removeClass('wgst--hide-this');
 	        } else if (timestampPart === 'month') {
-	            $('.assembly-metadata-timestamp-day[data-assembly-file-id="' + assemblyFileId + '"]').removeClass('hide-this');
+	            $('.assembly-metadata-timestamp-day[data-assembly-file-id="' + assemblyFileId + '"]').removeClass('wgst--hide-this');
 	        }
 
 	        // ----------------------------------------------------
@@ -504,7 +504,7 @@ $(function(){
 	                //
 	                // Show all metadata blocks
 	                //
-	                $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + targetAssemblyFileId + '"] .assembly-metadata-block').removeClass('hide-this');
+	                $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + targetAssemblyFileId + '"] .assembly-metadata-block').removeClass('wgst--hide-this');
 	            
 	            } // if
 	        });
@@ -575,13 +575,13 @@ $(function(){
 	        }
 	        // Show timestamp parts
 	        if ($sourceTimestampYearHtml.is(':visible')) {
-	            $targetTimestampYearHtml.removeClass('hide-this');
+	            $targetTimestampYearHtml.removeClass('wgst--hide-this');
 	        }
 	        if ($sourceTimestampMonthHtml.is(':visible')) {
-	            $targetTimestampMonthHtml.removeClass('hide-this');
+	            $targetTimestampMonthHtml.removeClass('wgst--hide-this');
 	        }
 	        if ($sourceTimestampDayHtml.is(':visible')) {
-	            $targetTimestampDayHtml.removeClass('hide-this');
+	            $targetTimestampDayHtml.removeClass('wgst--hide-this');
 	        }
 	    };
 
@@ -619,7 +619,7 @@ $(function(){
             //
             // Show next metadata form block
             //
-            $currentInputElement.closest('.assembly-metadata-block').next('.assembly-metadata-block').removeClass('hide-this');
+            $currentInputElement.closest('.assembly-metadata-block').next('.assembly-metadata-block').removeClass('wgst--hide-this');
             
             //
             // Scroll to the next form block

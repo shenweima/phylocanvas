@@ -39,7 +39,7 @@ gulp.task('react', function() {
 gulp.task('scripts', function() {
     return gulp.src(taskPaths.scripts.src)
     	//.pipe(sourcemaps.init())
-    	.pipe(uglify())
+    	//.pipe(uglify())
     	//.pipe(jshint())
     	//.pipe(jshint.reporter('jshint-stylish'))
     	//.pipe(rename('wgsa.min.js'))

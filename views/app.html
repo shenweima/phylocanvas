@@ -1,7 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block head %}
-  <!-- Client -->
+
+  <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" rel="stylesheet" type="text/css">
   <link href="/css/app.css" rel="stylesheet" type="text/css">
 
   <style>
@@ -15,72 +16,52 @@
       border-color: #0099ff transparent #0099ff transparent;
       -webkit-animation: spin 1s linear infinite;
     }
-    .wgst-spinner.hide-this {
-        display: none;
-    }
   </style>
 {% endblock %}
 
 {% block content %}
 
-  <section class="wgst-page wgst-page__app hide-this">
+  <section class="wgst-page wgst-page__app wgst--hide-this">
 
-    {% include "partials/init.html" %}
-
-    <!--
-    <div class="wgst-notification wgst-notification__error hide-this"></div>
-    <div class="wgst-notification wgst-notification__warning hide-this"></div>
-    <div class="wgst-alert hide-this"></div>
-    -->
-    
+    {% include "partials/init.html" %}    
     {% include "partials/header.html" %}
     
     <div class="wgst-layout-container">
+      {% include "partials/backgrounds/drag_and_drop.html" %}
       {% include "partials/sidebar.html" %}
-      <div class="wgst-workspace"></div>
+      {% include "partials/backgrounds/uploading.html" %}
+      {% include "partials/backgrounds/get_collection.html" %}
+      <div class="wgst-workspace">
+      </div>
     </div>
-
-    <!-- <div class="wgst-react-component wgst-react-component__workflow-question"></div> -->
-
-    <!-- <div class="wgst-background"></div> -->
-
-    <!--
-    <div class="wgst-ring" data-wgst-js="ring">
-      <div class="wgst-ring-content">WGSA</div>
-    </div>
-    -->
-
-    <!-- 
-    
-    Templates
-
-    -->
-
-    <!-- Collection tree -->
-    <!-- 
-    <div class="wgst-fullscreen wgst-fullscreen__collection-tree" data-fullscreen-name="collectionTree" data-fullscreen-id="collectionTree">
-    </div>
-    -->
-    <!-- /.wgst-fullscreen__collection-tree -->
 
   </section>
 
   {% include "partials/fullscreens/collection_map_fullscreen.html" %}
   {% include "partials/fullscreens/collection_data_fullscreen.html" %}
 
-  {% include "partials/panels/assembly_panel.html" %}
+  {% include "partials/panels/panel.html" %}
 
-  {% include "partials/panels/assembly_upload_navigation_panel.html" %}
-  {% include "partials/panels/assembly_upload_analytics_panel.html" %}
-  {% include "partials/panels/assembly_upload_metadata_panel.html" %}
-  {% include "partials/panels/assembly_upload_progress_panel.html" %}
+  {% include "partials/panels/body/collection_data.html" %}
+  {% include "partials/panels/body/collection_data/tree_button.html" %}
+  {% include "partials/panels/body/collection_tree.html" %}
+  {% include "partials/panels/body/collection_map.html" %}
+  {% include "partials/panels/body/assembly.html" %}
+  {% include "partials/panels/body/assembly_upload/analytics.html" %}
+  {% include "partials/panels/body/assembly_upload/analytics/assembly_analytics_item.html" %}
+  {% include "partials/panels/body/assembly_upload/metadata.html" %}
+  {% include "partials/panels/body/assembly_upload/metadata/assembly_metadata_form.html" %}
+  {% include "partials/panels/body/assembly_upload/navigation.html" %}
+  {% include "partials/panels/body/assembly_upload/progress.html" %}
 
-  {% include "partials/panels/collection_data_panel.html" %}
-  {% include "partials/panels/collection_tree_panel.html" %}
-  {% include "partials/panels/collection_map_panel.html" %}
-
-  {% include "partials/panels/upload/assembly_analytics.html" %}
-  {% include "partials/panels/upload/assembly_metadata_form.html" %}
+  {% include "partials/panels/header/collection_data.html" %}
+  {% include "partials/panels/header/collection_tree.html" %}
+  {% include "partials/panels/header/collection_map.html" %}
+  {% include "partials/panels/header/assembly.html" %}
+  {% include "partials/panels/header/assembly_upload/analytics.html" %}
+  {% include "partials/panels/header/assembly_upload/metadata.html" %}
+  {% include "partials/panels/header/assembly_upload/navigation.html" %}
+  {% include "partials/panels/header/assembly_upload/progress.html" %}
 
   {% include "partials/feedback_overlay.html" %}
 
@@ -123,11 +104,13 @@
 </script>
 
 <script src="/js/lib/utils.js"></script>
+<script src="/js/lib/background.js"></script>
 
 <script src="/js/lib/unsorted.js"></script>
 <script src="/js/lib/upload.js"></script>
 <script src="/js/lib/panel.js"></script>
 <script src="/js/lib/overlay.js"></script>
+<script src="/js/lib/container.js"></script>
 <script src="/js/lib/fullscreen.js"></script>
 <script src="/js/lib/map.js"></script>
 <script src="/js/lib/fasta.js"></script>
@@ -148,6 +131,8 @@
 
 <script src="/js/lib/feedback.js"></script>
 <script src="/js/lib/subscribe.js"></script>
+
+<script src="/js/lib/sidebar.js"></script>
 
 <script src="/js/client.js"></script>
 

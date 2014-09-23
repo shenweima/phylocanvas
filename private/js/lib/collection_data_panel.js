@@ -218,20 +218,6 @@ $(function(){
 
             var assemblyId = $(this).attr('data-assembly-id');
 
-            // 
-            // Close any previously openned assembly panels?
-            //
-
-
-
-
-            // if (isPanelActive('assembly')) {
-            //     deactivatePanel('assembly');
-            //     // Remove content
-            //     $('.wgst-panel__assembly .assembly-details .assembly-detail-content').html('');
-            // }
-
-            //openAssemblyPanel(assemblyId);
             window.WGST.exports.getAssembly(assemblyId);
 
             event.preventDefault();
@@ -286,7 +272,7 @@ $(function(){
             var collectionTrees = WGST.collection[collectionId].tree;
 
             $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
-                if (collectionTreeType === 'CORE_TREE_RESULT') {
+                if (collectionTreeType === 'COLLECTION_TREE') {
                     // Render collection tree button
                     renderCollectionTreeButton(collectionId, panelId, collectionTreeType);    
                 }
@@ -294,32 +280,59 @@ $(function(){
         };
 
         var renderCollectionTreeButton = function(collectionId, panelId, collectionTreeType) {
-            // Init all collection trees
+
             var collectionTree = WGST.collection[collectionId].tree[collectionTreeType],
-                collectionTreeName = collectionTree.name,
-                openTreeButton,
-                openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}" data-mixpanel-show-tree-button="{{collectionTreeType}}">{{collectionTreeName}}</button>',
-                $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group'),
-                $collectionControlsShowDataTable = $('.wgst-collection-controls__show-data-table .btn-group');
+                collectionTreeName = collectionTree.name;
 
-            // Add "Open tree" button to this collection panel
-            openTreeButton = openTreeButtonTemplate.replace(/{{collectionTreeType}}/g, collectionTreeType);
-            openTreeButton = openTreeButton.replace(/{{collectionId}}/g, collectionId);
-            openTreeButton = openTreeButton.replace(/{{collectionTreeName}}/g, collectionTreeName);
-            $collectionControlsShowTree.append($(openTreeButton));
+            var templateContext = {
+                collectionTreeType: collectionTreeType,
+                collectionId: collectionId,
+                collectionTreeName: 'Tree'
+            };
 
-            $('.wgst-panel[data-panel-id="' + panelId + '"]').find('.wgst-collection-controls__show-data-table .btn-group');
+            //
+            // Render button
+            //
+            var buttonTemplateSource = $('.wgst-template[data-template-id="panel-body__collection-data__tree-button"]').html(),
+                buttonTemplate = Handlebars.compile(buttonTemplateSource);
+
+            //
+            // Html
+            //
+            var buttonHtml = buttonTemplate(templateContext);
+            $('.wgst-panel[data-panel-id="' + panelId + '"]').find('.wgst-collection-controls__show-tree .btn-group').prepend(buttonHtml);
+
+
+
+
+
+
+            // // Init all collection trees
+            // var collectionTree = WGST.collection[collectionId].tree[collectionTreeType],
+            //     collectionTreeName = collectionTree.name,
+            //     openTreeButton,
+            //     openTreeButtonTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-tree" data-tree-type="{{collectionTreeType}}" data-collection-id="{{collectionId}}" data-mixpanel-show-tree-button="{{collectionTreeType}}">{{collectionTreeName}}</button>',
+            //     $collectionControlsShowTree = $('.wgst-collection-controls__show-tree .btn-group');//,
+            //     //$collectionControlsShowDataTable = $('.wgst-collection-controls__show-data-table .btn-group');
+
+            // // Add "Open tree" button to this collection panel
+            // openTreeButton = openTreeButtonTemplate.replace(/{{collectionTreeType}}/g, collectionTreeType);
+            // openTreeButton = openTreeButton.replace(/{{collectionId}}/g, collectionId);
+            // openTreeButton = openTreeButton.replace(/{{collectionTreeName}}/g, collectionTreeName);
+            // $collectionControlsShowTree.append($(openTreeButton));
+
+            // $('.wgst-panel[data-panel-id="' + panelId + '"]').find('.wgst-collection-controls__show-data-table .btn-group');
         };
 
-        var renderCollectionDataButton = function(collectionId) {
-            // Init all collection trees
-            var openCollectionDataTableButton,
-                openCollectionDataTableTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-data-table" data-collection-id="{{collectionId}}">Core Genome Profile</button>',
-                $collectionControlsShowDataTable = $('.wgst-collection-controls__show-data-table .btn-group');
+        // var renderCollectionDataButton = function(collectionId) {
+        //     // Init all collection trees
+        //     var openCollectionDataTableButton,
+        //         openCollectionDataTableTemplate = '<button type="button" class="btn btn-sm btn-default wgst-collection-control__show-data-table" data-collection-id="{{collectionId}}">Core Genome Profile</button>',
+        //         $collectionControlsShowDataTable = $('.wgst-collection-controls__show-data-table .btn-group');
 
-            openCollectionDataTableButton = openCollectionDataTableTemplate.replace(/{{collectionId}}/g, collectionId);
-            $collectionControlsShowDataTable.append($(openCollectionDataTableButton));
-        };
+        //     openCollectionDataTableButton = openCollectionDataTableTemplate.replace(/{{collectionId}}/g, collectionId);
+        //     $collectionControlsShowDataTable.append($(openCollectionDataTableButton));
+        // };
 
         window.WGST.exports.renderCollectionTrees = function(collectionId, collectionTreeOptions) {
 
@@ -355,7 +368,12 @@ $(function(){
                 collectionId: collectionId,
                 collectionTreeType: collectionTreeType,
                 collectionTreeTitle: collectionTreeName,
-                phylocanvasId: phylocanvasId
+                phylocanvasId: phylocanvasId,
+                invisibleThis: true,
+                dataAttributes: [{
+                    name: 'data-collection-tree-type',
+                    value: collectionTreeType
+                }]
             }
 
             //
@@ -372,9 +390,10 @@ $(function(){
                 templateContext.mergeWithButton = true;
             }
 
+            //
+            // Create panel
+            //
             window.WGST.exports.createPanel(panelType, templateContext);
-
-            $collectionTreePanel = $('.wgst-panel[data-panel-id="' + collectionTreePanelId + '"]');
 
             //
             // Render tree
@@ -446,7 +465,7 @@ $(function(){
             console.log('» Uncomment to see.');
             //console.log(newickString);
 
-            WGST.collection[collectionId].tree[collectionTreeType].newickStringWithLabels = newickString;
+            window.WGST.collection[collectionId].tree[collectionTreeType].newickStringWithLabels = newickString;
 
             // ====================================================================================================================
         
@@ -478,6 +497,10 @@ $(function(){
             //     antibioticCounter = antibioticCounter + 1;
             // }
 
+            //
+            // Populate list of antibiotics
+            //
+            $collectionTreePanel = $('.wgst-panel[data-panel-id="' + collectionTreePanelId + '"]');
             window.WGST.exports.populateListOfAntibiotics($collectionTreePanel.find('.wgst-tree-control__change-node-colour'));
 
             // Need to resize to fit it correctly

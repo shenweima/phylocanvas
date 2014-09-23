@@ -1,0 +1,57 @@
+{% raw %}
+
+<script type="text/x-handlebars-template" class="wgst-template" data-template-id="assembly-panel">
+
+    <section class="wgst-panel wgst-panel__assembly wgst-draggable wgst--hide-this"
+          data-panel-type="{{panelType}}"
+          data-panel-id="{{panelId}}"
+          data-panel-label="{{panelLabel}}">
+
+      <header class="wgst-panel-header wgst-draggable-handle">
+        <h4 class="header-title">Assembly: <small>{{assemblyUserId}}</small></h4>
+        <span class="wgst-panel-control-button wgst-panel-control-button__opacity wgst-panel-control-button--active glyphicon glyphicon-adjust"></span>
+        <span class="wgst-panel-control-button wgst-panel-control-button__minimize glyphicon glyphicon-minus"></span>
+
+        <i class="wgst-panel-control-button wgst-panel-control-button__close wgst-panel-control-button--active fa fa-square-o"></i>
+      </header>
+      <article class="wgst-panel-body">
+        <div class="assembly-details">
+          <!-- <div class="wgst-panel-loading"><div class="loading"></div></div> -->
+
+          <div class="assembly-detail assembly-detail__nearest-representative">
+            <h4>Nearest Representative</h4>
+            <div class="assembly-detail-content">{{nearestRepresentativeData}}</div>
+          </div> 
+
+          <div class="assembly-detail assembly-detail__score">
+            <h4>Score</h4>
+            <div class="assembly-detail-content">{% endraw %}{% include "assembly/scores.html" %}{% raw %}</div>
+          </div>
+
+          <div class="assembly-detail assembly-detail__st-type">
+            <h4>Sequence Type</h4>
+            <div class="assembly-detail-content">{{sequenceTypeData}}</div>
+          </div> 
+
+          <div class="assembly-detail assembly-detail__mlst">
+            <h4>MLST</h4>
+            <div class="assembly-detail-content">{% endraw %}{% include "assembly/mlst.html" %}{% raw %}</div>
+          </div>              
+
+          <div class="assembly-detail assembly-detail__resistance-profile">
+            <h4>Predicted Resistance Profile</h4>
+            <div class="assembly-detail-content">
+              {{#each antibioticResistanceData}}
+                {% endraw %}{% include "assembly/antibiotic_group.html" %}{% raw %}
+              {{/each}}
+            </div>
+          </div>
+        </div><!-- /.assembly-details -->
+      </article><!-- /.wgst-panel-body -->
+      <footer class="wgst-panel-footer wgst-draggable-handle">
+      </footer><!-- /.wgst-panel-footer -->
+    </section>
+
+</script>
+
+{% endraw %}

@@ -67,34 +67,61 @@ $(function(){
             // Update hidable state
             //
             window.WGST.exports.hidableFullscreenRemoved(fullscreenId);
+
+            if (fullscreenId === 'collection-map') {
+
+                //
+                // Remove map
+                //
+                window.WGST.geo.map.remove();
+            }
         };
 
         window.WGST.exports.showFullscreen = function(fullscreenId) {
-            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').removeClass('hide-this invisible-this');
-        
-            //
-            // Update hidable state
-            //
-            window.WGST.exports.hidableFullscreenShown(fullscreenId);
-        };
-
-        window.WGST.exports.hideFullscreen = function(fullscreenId) {
-            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').addClass('hide-this invisible-this');
-        
-            //
-            // Update hidable state
-            //
-            window.WGST.exports.hidableFullscreenHidden(fullscreenId);
-        };
-
-        window.WGST.exports.bringFullscreenToFront = function(fullscreenId) {
-
-            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').css('z-index', '5000');
+            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').removeClass('wgst--hide-this wgst--invisible-this');
         
             //
             // Update hidable state
             //
             //window.WGST.exports.hidableFullscreenShown(fullscreenId);
+            window.WGST.exports.happenedShowFullscreen(fullscreenId);
+        };
+
+        window.WGST.exports.hideFullscreen = function(fullscreenId) {
+            $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').addClass('wgst--hide-this wgst--invisible-this');
+        
+            //
+            // Update hidable state
+            //
+            //window.WGST.exports.hidableFullscreenHidden(fullscreenId);
+            window.WGST.exports.happenedHideFullscreen(fullscreenId);
+        };
+
+        window.WGST.exports.toggleFullscreen = function(fullscreenId) {
+
+            var $fullscreen = $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]');
+
+            //
+            // Toggle fullscreen
+            //
+            if ($fullscreen.is('.wgst--hide-this, .wgst--invisible-this')) {
+
+                //
+                // Show fullscreen
+                //
+                window.WGST.exports.showFullscreen(fullscreenId);
+
+            } else {
+
+                //
+                // Hide fullscreen
+                //
+                window.WGST.exports.hideFullscreen(fullscreenId);
+            }
+        };
+
+        window.WGST.exports.bringFullscreenToFront = function(fullscreenId) {
+            window.WGST.exports.bringContainerToFront('fullscreen', fullscreenId);
         };
 
         window.WGST.exports.bringFullscreenToBack = function(fullscreenId) {
@@ -156,7 +183,7 @@ $(function(){
 
                 $panel.find('.wgst-panel-body').replaceWith($fullscreenContent.clone(true));
 
-                $panel.find('.wgst-collection-controls').removeClass('hide-this');
+                $panel.find('.wgst-collection-controls').removeClass('wgst--hide-this');
 
 //$('[data-toggle="tooltip"]').tooltip('destroy');
 
@@ -198,10 +225,9 @@ $(function(){
             window.WGST.exports.bringPanelToFront(panelId);
 
             //
-            // Trigger Twitter Bootstrap tooltip
+            // Notify hidable
             //
-            //$('[data-toggle="tooltip"]').tooltip();
-
+            window.WGST.exports.happenedFullscreenToPanel(fullscreenId);
         };
 
         window.WGST.exports.bringPanelToFullscreen = function(panelId, fullscreenWasCreated) {
@@ -253,9 +279,7 @@ $(function(){
                 //
                 // Hide controls
                 //
-                $fullscreen.find('.wgst-collection-controls').addClass('hide-this');
-
-//$('[data-toggle="tooltip"]').tooltip('destroy');
+                $fullscreen.find('.wgst-collection-controls').addClass('wgst--hide-this');
 
             //
             // Map panel
@@ -268,7 +292,6 @@ $(function(){
                 $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
                     .find('.wgst-map')
                     .replaceWith(window.WGST.geo.map.canvas.getDiv());
-
             }
 
             //
@@ -291,12 +314,9 @@ $(function(){
             window.WGST.exports.removePanel(panelId);
 
             //
-            // Trigger Twitter Bootstrap tooltip
+            // Notify hidable
             //
-            console.debug('>>>> WATCH this one: ' + $('[data-toggle="tooltip"]').length);
-
-            //$('[data-toggle="tooltip"]').tooltip();
-
+            window.WGST.exports.happenedPanelToFullscreen(panelId);
         };
 
 

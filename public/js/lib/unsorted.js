@@ -1,1 +1,37 @@
-$(function(){!function(){window.WGST.exports.populateListOfAntibiotics=function(i){var o,t,n=[],e={};for(o in WGST.antibiotics)for(t in WGST.antibiotics[o])n.push(t),e[t]='<option value="'+t.replace(WGST.antibioticNameRegex,"_").toLowerCase()+'">'+t+"</option>";n.sort();var a=n.length;for(a=0;a<n.length;)t=n[a],i.append($(e[t])),a+=1}}()});
+$(function(){
+
+	(function(){
+
+	    window.WGST.exports.populateListOfAntibiotics = function($antibioticSelectElement) {
+	        // Populate list of antibiotics
+	        var antibioticGroupName,
+	            antibioticName,
+	            antibioticNames = [],
+	            antibioticOptionHtmlElements = {};
+	            //antibiotics = {};
+
+	        for (antibioticGroupName in WGST.antibiotics) {
+	            for (antibioticName in WGST.antibiotics[antibioticGroupName]) {
+	                //antibiotics[antibioticName] = WGST.antibiotics[antibioticGroupName][antibioticName];
+	                antibioticNames.push(antibioticName);
+	                antibioticOptionHtmlElements[antibioticName] = '<option value="' + antibioticName.replace(WGST.antibioticNameRegex, '_').toLowerCase() + '">' + antibioticName + '</option>';
+	            }
+	        }
+
+	        // Sort antibiotic names
+	        antibioticNames.sort();
+
+	        var antibioticCounter = antibioticNames.length;
+
+	        for (antibioticCounter = 0; antibioticCounter < antibioticNames.length;) {
+	            antibioticName = antibioticNames[antibioticCounter];
+	            $antibioticSelectElement.append($(antibioticOptionHtmlElements[antibioticName]));
+	            
+	            antibioticCounter = antibioticCounter + 1;
+	        }
+	    };
+
+	    //window.WGST.exports.showDroppedAssembly = showDroppedAssembly;
+	})();
+
+});

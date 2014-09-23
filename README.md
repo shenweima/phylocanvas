@@ -31,4 +31,6 @@ If that didn't help, check if you get JS error in Chrome Developer Tools Console
 Development Notes
 ----------------
 
-Nothing yet.
+`.wgst--hide-this` class uses `display: none;` - can not render `canvas` when it's parent element is not displayed.
+
+`.wgst--invisible-this` class uses `visibility: hidden;` - can render `canvas` when it's parent element is invisible.

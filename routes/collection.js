@@ -416,9 +416,9 @@ exports.apiGetCollection = function(req, res) {
 
 					var collectionTreeQueryKeys = [];
 
-					collectionTreeQueryKeys.push('CORE_TREE_RESULT_' + collectionId);
+					//collectionTreeQueryKeys.push('CORE_TREE_RESULT_' + collectionId);
 					collectionTreeQueryKeys.push('COLLECTION_TREE_' + collectionId);
-					collectionTreeQueryKeys.push('CORE_ALLELE_TREE_' + collectionId);
+					//collectionTreeQueryKeys.push('CORE_ALLELE_TREE_' + collectionId);
 
 					// Get collection tree data
 					couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(collectionTreeQueryKeys, {}, function(error, collectionTreesData) {
@@ -426,6 +426,7 @@ exports.apiGetCollection = function(req, res) {
 							// Ignore this error for now
 							//res.json({});
 							console.error('[WGST][Couchbase][Error] ✗ ' + error);
+							console.dir(collectionTreesData);
 							return;
 						}
 
