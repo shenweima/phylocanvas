@@ -1,4 +1,6 @@
-.wgst-panel__collection-tree, .wgst-panel__representative-collection-tree, .wgst-panel__merged-collection-tree {
+//.wgst-panel__collection-tree, .wgst-panel__representative-collection-tree, .wgst-panel__merged-collection-tree {
+
+[data-collection-tree-content] {
     //height: 500px;
 
     .wgst-panel-body {
@@ -8,27 +10,28 @@
     .wgst-tree-content {
         width: 800px;
         height: 400px;
-
-        // width: 100%;
-        // height: 100%;
     }
 
     .wgst-tree-controls {
         padding: 10px;
         border-bottom: 1px solid #eee;
-        text-align: center;
+        text-align: left;
+
         button {
             outline: none;
         }
         .wgst-tree-controls-container {
-            display: inline-block;
-            text-align: center;
+            //display: inline-block;
+            text-align: left;
+
             .wgst-tree-control-row {
                 margin-bottom: 10px;
+
                 .wgst-tree-control {
-                    margin: 0 10px 0 0;
-                    display: inline-block;
+                    //margin: 0 10px 0 0;
+                    //display: inline-block;
                     //vertical-align: middle;
+
                     label {
                         margin: 0;
                         font-weight: 500;
@@ -47,6 +50,14 @@
                 }
                 &:last-child {
                     margin-bottom: 0;
+                }
+
+                div > .wgst-tree-control {
+                    margin-left: 6px;
+
+                    &:first-child {
+                        margin-left: 0;
+                    }
                 }
             }
         }
