@@ -374,7 +374,7 @@ $(function(){
                     name: 'data-collection-tree-type',
                     value: collectionTreeType
                 }]
-            }
+            };
 
             //
             // Extend template context if needed - different type of trees need different data
