@@ -1833,34 +1833,34 @@ $(function(){
 
 
 
-    /**
-     * Description
-     * @method renderRepresentativeCollectionTree
-     * @return 
-     */
-    var renderRepresentativeCollectionTree = function() {
-        console.log('[WGST] Rendering representative collection tree');
+    // /**
+    //  * Description
+    //  * @method renderRepresentativeCollectionTree
+    //  * @return 
+    //  */
+    // var renderRepresentativeCollectionTree = function() {
+    //     console.log('[WGST] Rendering representative collection tree');
 
-        var collectionId = 'representative';//WGST.settings.representativeCollectionId;
+    //     var collectionId = 'representative';//WGST.settings.representativeCollectionId;
 
-        // Remove previosly rendered collection tree
-        $('.wgst-panel__representative-collection-tree .wgst-tree-content').html('');
-        // Attach collection id
-        $('.wgst-panel__representative-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
+    //     // Remove previosly rendered collection tree
+    //     $('.wgst-panel__representative-collection-tree .wgst-tree-content').html('');
+    //     // Attach collection id
+    //     $('.wgst-panel__representative-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
 
-        console.log('WGST.collection.representative:');
-        console.dir(WGST.collection.representative);
+    //     console.log('WGST.collection.representative:');
+    //     console.dir(WGST.collection.representative);
 
-        WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .wgst-tree-content').get(0), { history_collapsed: true });
-        WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
-        WGST.collection.representative.tree.canvas.treeType = 'rectangular';
+    //     WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .wgst-tree-content').get(0), { history_collapsed: true });
+    //     WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
+    //     WGST.collection.representative.tree.canvas.treeType = 'rectangular';
 
-        // // Need to resize to fit it correctly
-        // WGST.collection.representative.tree.canvas.resizeToContainer();
-        // // Need to redraw to actually see it
-        // WGST.collection.representative.tree.canvas.drawn = false;
-        // WGST.collection.representative.tree.canvas.draw();
-    };
+    //     // // Need to resize to fit it correctly
+    //     // WGST.collection.representative.tree.canvas.resizeToContainer();
+    //     // // Need to redraw to actually see it
+    //     // WGST.collection.representative.tree.canvas.drawn = false;
+    //     // WGST.collection.representative.tree.canvas.draw();
+    // };
 
     // /**
     //  * Description

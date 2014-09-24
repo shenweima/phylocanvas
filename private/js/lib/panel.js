@@ -32,7 +32,7 @@ $(function(){
                 noCloseButton: true
             },
             'collection-tree': {
-                noFullscreenButton: true,
+                //noFullscreenButton: true,
                 noCloseButton: true
             },
             'collection-map': {

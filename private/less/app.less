@@ -1325,67 +1325,7 @@ h2, h4 {
 // Object
 
 
-.wgst-panel__collection-tree, .wgst-panel__representative-collection-tree, .wgst-panel__merged-collection-tree {
 
-    .wgst-panel-body {
-        height: 450px;
-    }
-
-    .wgst-tree-content {
-        width: 800px;
-        height: 400px;
-    }
-    .wgst-tree-controls {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-        text-align: center;
-        button {
-            outline: none;
-        }
-        .wgst-tree-controls-container {
-            display: inline-block;
-            text-align: center;
-            .wgst-tree-control-row {
-                margin-bottom: 10px;
-                .wgst-tree-control {
-                    margin: 0 10px 0 0;
-                    display: inline-block;
-                    //vertical-align: middle;
-                    label {
-                        margin: 0;
-                        font-weight: 500;
-                        font-size: 12px;
-                        display: block;
-                        text-align: left;
-                        color: #333;
-                        margin-bottom: 5px;
-                    }
-                    &.wgst-tree-control__change-node-label,
-                    &.wgst-tree-control__change-node-colour,
-                    &.wgst-tree-control__change-tree-type {
-                        width: 220px;
-                        display: inline-block;
-                    }
-                }
-                &:last-child {
-                    margin-bottom: 0;
-                }
-            }
-        }
-        .wgst-tree-control__decrease-label-font-size,
-        .wgst-tree-control__decrease-node-size {
-            .glyphicon {
-                font-size: 10px;
-            }
-        }
-    }
-    // .collection-tree-leaf-metadata {
-    //     z-index: 100;
-    //     display: inline-block;
-    //     overflow: hidden;
-    //     white-space: nowrap;
-    // }
-}
 
 // Object
 .wgst-panel__assembly {
@@ -1661,5 +1601,7 @@ h2, h4 {
 @import "backgrounds/drag_and_drop";
 @import "backgrounds/uploading";
 @import "backgrounds/get_collection";
+
+@import "panels/collection_tree";
 
 
