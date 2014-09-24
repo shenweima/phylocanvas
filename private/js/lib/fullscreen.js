@@ -300,16 +300,19 @@ $(function(){
             //
             } else if (panelType === 'collection-tree') {
 
-
-
-                var $treePanelContent = $('[data-panel-type="collection-tree"]').find('.wgst-panel-body-content');
-
                 //
                 // Copy tree content to fullscreen
                 //
+
+                var $collectionTreeContent = $('[data-panel-type="collection-tree"]').find('[data-collection-tree-content]');
+
                 $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
                     .html('')
-                    .append($treePanelContent);
+                    .append($collectionTreeContent);
+
+
+
+
 
                 //window.redrawOriginalTree();
 
@@ -323,18 +326,18 @@ $(function(){
                 //     .replaceWith(window.WGST.geo.map.canvas.getDiv());
 
 
-                var $content = $('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content')[0];
+                // var $content = $('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content')[0];
 
 
-                console.debug($('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content').length);
-                console.debug($content.offsetWidth);
-                console.debug($content.offsetHeight);
+                // console.debug($('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content').length);
+                // console.debug($content.offsetWidth);
+                // console.debug($content.offsetHeight);
 
-                // var canvasNode = $('[data-fullscreen-type="collection-tree"]').find('canvas')[0];
-                // canvasNode.width = 50;
-                // canvasNode.height = 50;
+                // // var canvasNode = $('[data-fullscreen-type="collection-tree"]').find('canvas')[0];
+                // // canvasNode.width = 50;
+                // // canvasNode.height = 50;
 
-                window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.setSize(10,10);
+                // window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.setSize(10,10);
 
             }
 
@@ -392,13 +395,21 @@ $(function(){
                 console.log('canvasDimensions:');
                 console.dir(canvasDimensions);
 
-                //
-                // Set tree canvas size
-                //
-                window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.setSize(canvasDimensions.width, canvasDimensions.height);
-                //window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.redrawOriginalTree();
-                window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.draw();
+                $('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content').width(canvasDimensions.width);
+                $('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content').height(canvasDimensions.height);
 
+                //
+                // Resize tree
+                //
+                var collectionId = $('[data-collection-tree-content]').attr('data-collection-id'),
+                    collectionTreeType = $('[data-collection-tree-content]').attr('data-collection-tree-type');
+                    
+                window.WGST.collection[collectionId].tree[collectionTreeType].canvas.resizeToContainer();
+                window.WGST.collection[collectionId].tree[collectionTreeType].canvas.draw();
+
+                //window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.setSize(canvasDimensions.width, canvasDimensions.height);
+                //window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.redrawOriginalTree();
+                //window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.draw();
 
                 // var $treePanelContent = $('[data-panel-type="collection-tree"]').find('.wgst-panel-body-content');
 
