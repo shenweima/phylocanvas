@@ -2,6 +2,27 @@ $(function(){
 
 	(function(){
 
+		window.WGST.exports.isContainerExists = function(containerId) {
+			//
+			// Figure out container's type
+			//
+
+			//
+			// Panel
+			//
+			if (window.WGST.exports.isPanelExists(containerId)) {
+				return true;
+
+			//
+			// Fullscreen
+			//
+			} else if (window.WGST.exports.isFullscreenExists(containerId)) {
+				return true;
+			}
+
+			return false;
+		};
+
 		//
 		// Get container type
 		//
@@ -13,14 +34,14 @@ $(function(){
 		    //
 		    // Panel
 		    //
-		    if ($('.wgst-panel[data-panel-id="' + containerId + '"]').length > 0) {
+		    if (window.WGST.exports.isPanelExists(containerId)) {
 
 		    	return 'panel';
 
 		    //
 		    // Fullscreen
 		    //
-		    } else if ($('.wgst-fullscreen[data-fullscreen-id="' + containerId + '"]').length > 0) {
+		    } else if (window.WGST.exports.isFullscreenExists(containerId)) {
 
 		    	return 'fullscreen';
 
@@ -66,6 +87,25 @@ $(function(){
 		        $('[data-fullscreen-id="' + containerId + '"]').css('z-index', zIndexHighest);
 
 		    }
+		};
+
+		window.WGST.exports.removeContainer = function(containerId) {
+			//
+			// Figure out container's type
+			//
+
+			//
+			// Panel
+			//
+			if (window.WGST.exports.getContainerType(containerId) === 'panel') {
+				window.WGST.exports.removePanel(containerId);
+
+			//
+			// Fullscreen
+			//
+			} else if (window.WGST.exports.getContainerType(containerId) === 'fullscreen') {
+				window.WGST.exports.removeFullscreen(containerId);
+			}
 		};
 
 	})();

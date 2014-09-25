@@ -12,35 +12,22 @@ $(function(){
             //
             //
 
-            // //
-            // // Demo special - REMOVE AFTER
-            // //
-            // if (typeof hidableId.split('__')[2] !== 'undefined') {
-            //     if (hidableId.split('__')[2] === 'COLLECTION_TREE' || hidableId.split('__')[2] === 'CORE_ALLELE_TREE') {
-            //         return;
-
-            //     } else if (hidableId.split('__')[2] === 'CORE_TREE_RESULT') {
-            //         var options = options || {};
-            //         options.hidableLabel = "Tree";
-            //     }
-            // }
-
-            //
-            // Make this hidable active
-            //
-            $('.wgst-hidable[data-hidable-id="' + hidableId + '"]')
-                .addClass('wgst-hidable--active');  
-
             //
             // Check if hidable already exists
             //
             if ($('.wgst-hidable[data-hidable-id="' + hidableId + '"]').length > 0) {
 
                 //
-                // Do nothing else
+                // Do nothing
                 //
                 return;
             }
+
+            // //
+            // // Make this hidable active
+            // //
+            // $('.wgst-hidable[data-hidable-id="' + hidableId + '"]')
+            //     .addClass('wgst-hidable--active');
 
             var templateContext = {
                     hidableId: hidableId,
@@ -48,7 +35,7 @@ $(function(){
                 };
 
             //
-            // Extend template context if needed - turn off/on controls
+            // Extend template context if needed, for example: turn on/off controls
             //
             if (typeof options !== 'undefined') {
                 $.extend(templateContext, options);
@@ -136,94 +123,31 @@ $(function(){
         };
 
         window.WGST.exports.removeHidable = function(hidableId) {
-            $('.wgst-hidable[data-hidable-id="' + hidableId + '"]').remove();
+            //
+            // Check if container does not exist
+            //
+            if (! window.WGST.exports.isContainerExists(hidableId)) {
+                //
+                // Remove element
+                //
+                $('.wgst-hidable[data-hidable-id="' + hidableId + '"]').remove();
 
-            //
-            // Hide sidebar if all hidables were removed
-            //
-            if ($('.wgst-hidable').length === 0) {
-                window.WGST.exports.hideSidebar();
+                //
+                // Hide sidebar if all hidables were removed
+                //
+                if ($('.wgst-hidable').length === 0) {
+                    window.WGST.exports.hideSidebar();
+                }
             }
         };
 
-        window.WGST.exports.hidablePanelShown = function(panelId) {
-            $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
-                .find('.wgst-hidable-panel')
-                .find('.fa-eye')
-                .removeClass('fa-eye')
-                .addClass('fa-eye-slash')
-                .addClass('wgst-hidable--active');
-
-            $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
-                .addClass('wgst-hidable--active');
-        };
-
-        window.WGST.exports.hidablePanelHidden = function(panelId) {
-            
-            //
-            // If that's the last active container for this data then remove active class from this hidable
-            //
-            if ($('.wgst-hidable[data-hidable-id="' + panelId + '"]').find('.wgst-hidable--active').length === 1) {
-
-                $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
-                    .removeClass('wgst-hidable--active');
-            }
-
-            $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
-                .find('.wgst-hidable-panel')
-                .find('.fa-eye-slash')
-                .removeClass('fa-eye-slash')
-                .removeClass('wgst-hidable--active')
-                .addClass('fa-eye');
-
-        };
-
-        window.WGST.exports.hidablePanelRemoved = function(panelId) {
-
-            //
-            // Handle special case: assembly upload panels
-            //
-            if (panelId === 'assembly-upload-analytics'
-                || panelId === 'assembly-upload-metadata'
-                || panelId === 'assembly-upload-navigation'
-                || panelId === 'assembly-upload-progress') {
-
-                window.WGST.exports.removeHidable(panelId);
-
-            } else {
-
-                window.WGST.exports.hidablePanelHidden(panelId);
-
-            }
-        };
-
-        window.WGST.exports.hidableFullscreenShown = function(panelId) {
-            $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
-                .find('.wgst-hidable-fullscreen')
-                .find('.fa-arrows-alt')
-                .addClass('wgst-hidable--active');
-
-            $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
-                .addClass('wgst-hidable--active');
-        };
-
-        window.WGST.exports.hidableFullscreenRemoved = function(fullscreenId) {
-
-            //
-            // If that's the last active container for this data then remove active class from this hidable
-            //
-            if ($('.wgst-hidable[data-hidable-id="' + fullscreenId + '"]').find('.wgst-hidable--active').length === 1) {
-
-                $('.wgst-hidable[data-hidable-id="' + fullscreenId + '"]')
-                    .removeClass('wgst-hidable--active');
-            }
-
-            $('.wgst-hidable[data-hidable-id="' + fullscreenId + '"]')
-                .find('.wgst-hidable-fullscreen')
-                .find('.fa-arrows-alt')
-                .removeClass('wgst-hidable--active');
-
-        };
+        //
+        //
+        //
+        // Handle events
+        //
+        //
+        //
 
         $('body').on('click', '.wgst-hidable', function() {
 
@@ -371,11 +295,11 @@ $(function(){
                 //
                 window.WGST.exports.maximizePanel(hidableId);
 
-                //
-                // Make this hidable active
-                //
-                $('.wgst-hidable[data-hidable-id="' + hidableId + '"]')
-                    .addClass('wgst-hidable--active');
+                // //
+                // // Make this hidable active
+                // //
+                // $('.wgst-hidable[data-hidable-id="' + hidableId + '"]')
+                //     .addClass('wgst-hidable--active');
 
                 $(this).closest('[data-wgst-hidable-controls]').find('[data-wgst-hidable="fullscreen"]').addClass('wgst--hide-this');
                 $(this).closest('[data-wgst-hidable-controls]').find('[data-wgst-hidable="panel"]').removeClass('wgst--hide-this');
@@ -526,7 +450,7 @@ $(function(){
             //
             // Check if panel exists
             //
-            if ($('.wgst-panel[data-panel-id="' + hidableId + '"]').length > 0) {
+            if (window.WGST.exports.isPanelExists(hidableId)) {
 
                 //
                 // Remove panel
@@ -622,7 +546,7 @@ $(function(){
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
                 .find('.wgst-hidable-controls')
                 .find('[data-wgst-hidable-button="fullscreen"]').addClass('wgst--hide-this');
-        }
+        };
 
         window.WGST.exports.happenedFullscreenToPanel = function(fullscreenId) {
 
@@ -633,7 +557,14 @@ $(function(){
             $('.wgst-hidable[data-hidable-id="' + fullscreenId + '"]')
                 .find('.wgst-hidable-controls')
                 .find('[data-wgst-hidable-button="fullscreen"]').removeClass('wgst--hide-this');
-        }
+        };
+
+        window.WGST.exports.happenedCreatePanel = function(options) {
+            //
+            // Create hidable
+            //
+            window.WGST.exports.createHidable(options.panelId, options.panelLabel);
+        };
 
         window.WGST.exports.happenedHidePanel = function(panelId) {
 
@@ -644,7 +575,7 @@ $(function(){
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
                 .find('.wgst-hidable-controls')
                 .find('[data-wgst-hidable-button="hide"]').addClass('wgst--hide-this');
-        }
+        };
 
         window.WGST.exports.happenedShowPanel = function(panelId) {
 
@@ -655,15 +586,36 @@ $(function(){
             $('.wgst-hidable[data-hidable-id="' + panelId + '"]')
                 .find('.wgst-hidable-controls')
                 .find('[data-wgst-hidable-button="show"]').addClass('wgst--hide-this');
-        }
+        };
+
+        window.WGST.exports.happenedRemovePanel = function(panelId) {
+            //
+            // Remove hidable
+            //
+            window.WGST.exports.removeHidable(panelId);
+        };
+
+        window.WGST.exports.happenedCreateFullscreen = function(options) {
+            //
+            // Create hidable
+            //
+            window.WGST.exports.createHidable(options.fullscreenId, options.fullscreenLabel);
+        };
 
         window.WGST.exports.happenedHideFullscreen = function(fullscreenId) {
             window.WGST.exports.happenedHidePanel(fullscreenId);
-        }
+        };
 
         window.WGST.exports.happenedShowFullscreen = function(fullscreenId) {
             window.WGST.exports.happenedShowPanel(fullscreenId);
-        }
+        };
+
+        window.WGST.exports.happenedRemoveFullscreen = function(fullscreenId) {
+            //
+            // Remove hidable
+            //
+            window.WGST.exports.removeHidable(fullscreenId);
+        };
 
 	})();
 

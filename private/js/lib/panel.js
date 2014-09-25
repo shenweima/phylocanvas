@@ -135,19 +135,22 @@ $(function(){
 	            //}
 	        });
 
-	        //
-	        // Create hidable
-	        //
-	        window.WGST.exports.createHidable(templateContext.panelId, templateContext.panelLabel);
+            //
+            // Notify hidable
+            //
+            window.WGST.exports.happenedCreatePanel({
+                panelId: templateContext.panelId,
+                panelLabel: templateContext.panelLabel
+            });
         };
 
         window.WGST.exports.removePanel = function(panelId) {
         	$('.wgst-panel[data-panel-id="' + panelId + '"]').remove();
 
-        	//
-        	// Update hidable state
-        	//
-        	window.WGST.exports.hidablePanelRemoved(panelId);
+            //
+            // Notify hidable
+            //
+            window.WGST.exports.happenedRemovePanel(panelId);
 
             if (panelId === 'collection-map') {
 
@@ -168,7 +171,6 @@ $(function(){
         	//
         	// Update hidable state
         	//
-        	//window.WGST.exports.hidablePanelShown(panelId);
             window.WGST.exports.happenedShowPanel(panelId);
         };
 
@@ -179,7 +181,6 @@ $(function(){
         	//
         	// Update hidable state
         	//
-            //window.WGST.exports.hidablePanelHidden(panelId);
         	window.WGST.exports.happenedHidePanel(panelId);
         };
 
@@ -190,15 +191,6 @@ $(function(){
                 return false;
             }
         };
-
-        // window.WGST.exports.hideAllPanels = function() {
-        // 	$('.wgst-panel').addClass('wgst--hide-this');
-
-        // 	//
-        // 	// Update hidable state
-        // 	//
-        // 	window.WGST.exports.hidablePanelHidden(panelId);
-        // };
 
         window.WGST.exports.togglePanel = function(panelId) {
         	var $panel = $('.wgst-panel[data-panel-id="' + panelId + '"]');

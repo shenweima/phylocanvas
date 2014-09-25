@@ -451,23 +451,40 @@ $(function(){
 	    //
 	    window.WGST.socket.connection.on('assemblyUploadNotification', function(data) {
 
-            if  (! window.WGST.exports.isPanelExists('assembly-upload-progress')) {
-                //
-                // Create panel
-                //
+            if  (! window.WGST.exports.isFullscreenExists('assembly-upload-progress')) {
+            //if  (! window.WGST.exports.isContainerExists('assembly-upload-progress')) {
+
                 var totalNumberOfAssembliesUploading = Object.keys(window.WGST.upload.fastaAndMetadata).length;
 
-                window.WGST.exports.createPanel('assembly-upload-progress', {
-                    panelId: 'assembly-upload-progress',
-                    panelType: 'assembly-upload-progress',
+                // //
+                // // Create panel
+                // //
+                // window.WGST.exports.createPanel('assembly-upload-progress', {
+                //     panelId: 'assembly-upload-progress',
+                //     panelType: 'assembly-upload-progress',
+                //     assemblyFileIds: Object.keys(window.WGST.upload.fastaAndMetadata),
+                //     totalNumberOfAssembliesUploading: totalNumberOfAssembliesUploading
+                // });
+
+                // //
+                // // Show panel
+                // //
+                // window.WGST.exports.showPanel('assembly-upload-progress');
+
+                //
+                // Create fullscreen
+                //
+                window.WGST.exports.createFullscreen('assembly-upload-progress', {
+                    fullscreenId: 'assembly-upload-progress',
+                    fullscreenType: 'assembly-upload-progress',
                     assemblyFileIds: Object.keys(window.WGST.upload.fastaAndMetadata),
                     totalNumberOfAssembliesUploading: totalNumberOfAssembliesUploading
                 });
 
                 //
-                // Show panel
+                // Show fullscreen
                 //
-                window.WGST.exports.showPanel('assembly-upload-progress');
+                window.WGST.exports.showFullscreen('assembly-upload-progress');
 
                 //
                 // Hide uploading background
@@ -523,10 +540,15 @@ $(function(){
 	                //
 	                setTimeout(function(){
 
-	                	//
-	                	// Remove panel
-	                	//
-	                	window.WGST.exports.removePanel('assembly-upload-progress');
+                        //
+                        // Remove container
+                        //
+                        window.WGST.exports.removeContainer('assembly-upload-progress');
+
+	                	// //
+	                	// // Remove panel
+	                	// //
+	                	// window.WGST.exports.removePanel('assembly-upload-progress');
 
 	                	//
 	                	// Remove upload assembly data model

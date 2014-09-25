@@ -5,7 +5,8 @@ $(function(){
         window.WGST.exports.mapFullscreenIdToTemplateId = {
             'collection-map': 'collection-map-fullscreen',
             'collection-data': 'collection-data-fullscreen',
-            'collection-tree': 'collection-tree-fullscreen'
+            'collection-tree': 'collection-tree-fullscreen',
+            'assembly-upload-progress': 'assembly-upload-progress-fullscreen'
         };
 
         window.WGST.exports.mapFullscreenIdToPanelType = {
@@ -48,6 +49,7 @@ $(function(){
             var fullscreenTemplateId = window.WGST.exports.mapFullscreenIdToTemplateId[templateContext.fullscreenType];
 
             console.debug('fullscreenTemplateId: ' + fullscreenTemplateId);
+            console.log($('.wgst-template[data-template-id="' + fullscreenTemplateId + '"]').html());
 
             var fullscreenTemplateSource = $('.wgst-template[data-template-id="' + fullscreenTemplateId + '"]').html(),
                 fullscreenTemplate = Handlebars.compile(fullscreenTemplateSource),
@@ -56,10 +58,17 @@ $(function(){
             $('.wgst-workspace').prepend(fullscreenHtml);
 
             //
-            // Create hidable
+            // Notify hidable
             //
-            window.WGST.exports.createHidable(fullscreenId, templateContext.fullscreenLabel);
+            window.WGST.exports.happenedCreateFullscreen({
+                fullscreenId: fullscreenId,
+                fullscreenLabel: templateContext.fullscreenLabel
+            });
 
+            // //
+            // // Create hidable
+            // //
+            // window.WGST.exports.createHidable(fullscreenId, templateContext.fullscreenLabel);
         };
 
         window.WGST.exports.removeFullscreen = function(fullscreenId) {
@@ -68,7 +77,7 @@ $(function(){
             //
             // Update hidable state
             //
-            window.WGST.exports.hidableFullscreenRemoved(fullscreenId);
+            window.WGST.exports.happenedRemoveFullscreen(fullscreenId);
 
             if (fullscreenId === 'collection-map') {
 
@@ -85,7 +94,6 @@ $(function(){
             //
             // Update hidable state
             //
-            //window.WGST.exports.hidableFullscreenShown(fullscreenId);
             window.WGST.exports.happenedShowFullscreen(fullscreenId);
         };
 
@@ -95,8 +103,15 @@ $(function(){
             //
             // Update hidable state
             //
-            //window.WGST.exports.hidableFullscreenHidden(fullscreenId);
             window.WGST.exports.happenedHideFullscreen(fullscreenId);
+        };
+
+        window.WGST.exports.isFullscreenExists = function(fullscreenId) {
+            if ($('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').length > 0) {
+                return true;
+            } else {
+                return false;
+            }
         };
 
         window.WGST.exports.toggleFullscreen = function(fullscreenId) {
@@ -127,13 +142,7 @@ $(function(){
         };
 
         window.WGST.exports.bringFullscreenToBack = function(fullscreenId) {
-
             $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]').css('z-index', 'auto');
-        
-            //
-            // Update hidable state
-            //
-            //window.WGST.exports.hidableFullscreenShown(fullscreenId);
         };
 
         window.WGST.exports.bringFullscreenToPanel = function(fullscreenId, panelWasCreated) {
@@ -488,6 +497,8 @@ $(function(){
                 // window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.setSize(10,10);
 
             }
+
+            console.log('>>> panelId: ' + panelId);
 
             //
             // Remove panel
