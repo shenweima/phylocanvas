@@ -498,8 +498,6 @@ $(function(){
 
             }
 
-            console.log('>>> panelId: ' + panelId);
-
             //
             // Remove panel
             //
