@@ -68,59 +68,66 @@ exports.add = function(req, res) {
 			collectionId = data.uuid,
 			userAssemblyIdToAssemblyIdMap = data.idMap;
 
-		if (isNewCollection) {
-			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].set('collection_' + collectionId, userAssemblyIdToAssemblyIdMap, function(err, result) {
-				if (err) {
-					console.error('[WGST][Couchbase][Error] ✗ ' + err);
-					return;
-				}
+		// if (isNewCollection) {
+		// 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].set('collection_' + collectionId, userAssemblyIdToAssemblyIdMap, function(err, result) {
+		// 		if (err) {
+		// 			console.error('[WGST][Couchbase][Error] ✗ ' + err);
+		// 			return;
+		// 		}
 
-				console.log('[WGST][Couchbase] Inserted new collection:');
-				console.dir(result);
+		// 		console.log('[WGST][Couchbase] Inserted new collection:');
+		// 		console.dir(result);
 
-				console.dir(userAssemblyIdToAssemblyIdMap);
+		// 		console.dir(userAssemblyIdToAssemblyIdMap);
 
-				// Return result data
-				res.json({
-					collectionId: collectionId,
-					userAssemblyIdToAssemblyIdMap: userAssemblyIdToAssemblyIdMap
-				});
+		// 		// Return result data
+		// 		res.json({
+		// 			collectionId: collectionId,
+		// 			userAssemblyIdToAssemblyIdMap: userAssemblyIdToAssemblyIdMap
+		// 		});
 
-			});
-		} else {
-			// Get list of assemblies
-			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].get('collection_' + collectionId, function(err, existingUserAssemblyIdToAssemblyIdMap) {
-				if (err) throw err;
+		// 	});
+		// } else {
+		// 	// Get list of assemblies
+		// 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].get('collection_' + collectionId, function(err, existingUserAssemblyIdToAssemblyIdMap) {
+		// 		if (err) throw err;
 
-				//console.log('Does that look correct to you?');
-				//console.dir(existingUserAssemblyIdToAssemblyIdMap);
+		// 		//console.log('Does that look correct to you?');
+		// 		//console.dir(existingUserAssemblyIdToAssemblyIdMap);
 
-				// Merge exisinting user assembly id to assembly id map with a new one
-				var updatedUserAssemblyIdToAssemblyIdMap = existingUserAssemblyIdToAssemblyIdMap.value,
-					assemblyId;
+		// 		// Merge exisinting user assembly id to assembly id map with a new one
+		// 		var updatedUserAssemblyIdToAssemblyIdMap = existingUserAssemblyIdToAssemblyIdMap.value,
+		// 			assemblyId;
 
-				for (assemblyId in userAssemblyIdToAssemblyIdMap) {
-					updatedUserAssemblyIdToAssemblyIdMap[assemblyId] = userAssemblyIdToAssemblyIdMap[assemblyId];
-				}
+		// 		for (assemblyId in userAssemblyIdToAssemblyIdMap) {
+		// 			updatedUserAssemblyIdToAssemblyIdMap[assemblyId] = userAssemblyIdToAssemblyIdMap[assemblyId];
+		// 		}
 
-				couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].set('collection_' + collectionId, updatedUserAssemblyIdToAssemblyIdMap, function(err, result) {
-					if (err) {
-						console.error('[WGST][Couchbase][Error] ✗ ' + err);
-						return;
-					}
+		// 		couchbaseDatabaseConnections[COUCHBASE_BUCKETS.FRONT].set('collection_' + collectionId, updatedUserAssemblyIdToAssemblyIdMap, function(err, result) {
+		// 			if (err) {
+		// 				console.error('[WGST][Couchbase][Error] ✗ ' + err);
+		// 				return;
+		// 			}
 
-					console.log('[WGST][Couchbase] Updated existing collection:');
-					console.dir(result);
+		// 			console.log('[WGST][Couchbase] Updated existing collection:');
+		// 			console.dir(result);
 
-					// Return result data
-					res.json({
-						collectionId: collectionId,
-						userAssemblyIdToAssemblyIdMap: updatedUserAssemblyIdToAssemblyIdMap
-					});
+		// 			// Return result data
+		// 			res.json({
+		// 				collectionId: collectionId,
+		// 				userAssemblyIdToAssemblyIdMap: updatedUserAssemblyIdToAssemblyIdMap
+		// 			});
 
-				});
-			});
-		} // else
+		// 		});
+		// 	});
+		// } // else
+
+		// Return result data
+		res.json({
+			collectionId: collectionId,
+			userAssemblyIdToAssemblyIdMap: userAssemblyIdToAssemblyIdMap
+		});
+		
 	});
 };
 
