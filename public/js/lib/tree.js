@@ -272,6 +272,82 @@ $(function(){
 	        });
 	    });
 
+	    $('body').on('click', '.wgst-tree-control__show-newick', function(){
+	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
+	            newickStringWithLabels,
+	            newWindow;
+
+	        newickStringWithLabels = WGST.collection[collectionId].tree[collectionTreeType].newickStringWithLabels;
+
+	        newWindow = window.open();
+	        newWindow.document.write(newickStringWithLabels);
+	    });
+
+	    $('body').on('click', '.wgst-tree-control__decrease-label-font-size', function(){
+	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
+	            currentNodeTextSize,
+	            tree;
+
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        currentNodeTextSize = tree.textSize;
+	        tree.setTextSize(currentNodeTextSize - 3);
+	    });
+
+	    $('body').on('click', '.wgst-tree-control__increase-label-font-size', function(){
+	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
+	            currentNodeTextSize,
+	            tree;
+
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        currentNodeTextSize = tree.textSize;
+	        tree.setTextSize(currentNodeTextSize + 3);
+	    });
+
+	    $('body').on('click', '.wgst-tree-control__decrease-node-size', function(){
+	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
+	            tree,
+	            currentNodeSize;
+
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        currentNodeSize = tree.baseNodeSize;
+
+	        if (currentNodeSize > 3) {
+	            tree.setNodeSize(currentNodeSize - 3);
+	            currentNodeSize = tree.baseNodeSize;
+	            if (currentNodeSize < 3) {
+	                $(this).attr('disabled', true);
+	            }
+	        } else {
+	            $(this).attr('disabled', true);
+	        }
+	    });
+	    $('body').on('click', '.wgst-tree-control__increase-node-size', function(){
+	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
+	            tree,
+	            currentNodeSize;
+
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        currentNodeSize = tree.baseNodeSize;
+	        tree.setNodeSize(currentNodeSize + 3);
+
+	        if (tree.baseNodeSize > 3) {
+	            $(this).closest('.wgst-tree-control').find('.wgst-tree-control__decrease-node-size').attr('disabled', false);
+	        }
+	    });
+	    $('body').on('change', '.wgst-tree-control__show-node-labels', function(){
+	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('.wgst-panel').attr('data-collection-tree-type'),
+	            tree;
+	        
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        tree.toggleLabels();
+	    });
+
 	    $('body').on('click', '.wgst-tree-control__merge-collection-trees', function(){
 
 	        var mergeButton = $(this);

@@ -63,7 +63,7 @@ $(function(){
             // Filter out trees
             //
             if (window.WGST.exports.isHidableTree(hidableId)) {
-                templateContext.noFullscreen = true;
+                //templateContext.noFullscreen = true;
             }
 
             //

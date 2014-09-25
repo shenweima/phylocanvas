@@ -32,7 +32,7 @@ $(function(){
                 noCloseButton: true
             },
             'collection-tree': {
-                noFullscreenButton: true,
+                //noFullscreenButton: true,
                 noCloseButton: true
             },
             'collection-map': {
@@ -79,16 +79,18 @@ $(function(){
             //
             templateContext = $.extend(templateContext, window.WGST.exports.mapPanelTypeToPanelButtonRules[panelType]);
 
-        	//
-        	// Get panel's label
-        	//
-            //templateContext.panelLabel = templateContext.assemblyUserId;
-        	templateContext.panelLabel = window.WGST.exports.getContainerLabel({
-        		containerName: 'panel', 
-        		containerType: panelType,
-        		containerId: templateContext.panelId,
-                containerContext: templateContext
-        	});
+            if (typeof templateContext.panelLabel === 'undefined') {
+                //
+                // Get panel's label
+                //
+                //templateContext.panelLabel = templateContext.assemblyUserId;
+                templateContext.panelLabel = window.WGST.exports.getContainerLabel({
+                    containerName: 'panel', 
+                    containerType: panelType,
+                    containerId: templateContext.panelId,
+                    containerContext: templateContext
+                });
+            }
 
         	//
         	// Render

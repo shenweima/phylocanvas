@@ -135,6 +135,14 @@ $(function(){
 				    //
 				    window.WGST.exports.showFullscreen('collection-map');
 
+	          //       //
+	          //       // Create collection map fullscreen
+	          //       // 
+	        		// window.WGST.exports.createFullscreen('collection-tree', {
+	        		// 	fullscreenId: 'collection-tree',
+	        		// 	fullscreenType: 'collection-tree'
+	        		// });
+
 	        		//
 				    // Init map
 				    //

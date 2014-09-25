@@ -4,22 +4,22 @@ $(function(){
 
 	    $('.tree-controls-show-labels').on('click', function(){
 	        // Get collection id
-	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id');
 
 	        WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas.displayLabels();
 	    });
 
 	    $('.tree-controls-hide-labels').on('click', function(){
 	        // Get collection id
-	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id');
 
 	        WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas.hideLabels();
 	    });
 
 	    $('body').on('change', '.wgst-tree-control__change-node-label', function(){
 	        var selectedOption = $(this),
-	            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
-	            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type');
+	            collectionId = selectedOption.closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            collectionTreeType = selectedOption.closest('[data-collection-tree-content]').attr('data-collection-tree-type');
 
 	        var treeCanvas = WGST.collection[collectionId].tree[collectionTreeType].canvas,
 	            assemblies = WGST.collection[collectionId].assemblies,
@@ -98,8 +98,8 @@ $(function(){
 
 	    $('body').on('change', '.wgst-tree-control__change-node-colour', function(){
 	        var selectedOption = $(this).find('option:selected'),
-	            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
-	            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type');
+	            collectionId = selectedOption.closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            collectionTreeType = selectedOption.closest('[data-collection-tree-content]').attr('data-collection-tree-type');
 
 	        var tree = WGST.collection[collectionId].tree[collectionTreeType].canvas,
 	            assemblies = WGST.collection[collectionId].assemblies,
@@ -151,8 +151,8 @@ $(function(){
 
 	    $('body').on('change', '.wgst-tree-control__change-tree-type', function(){
 	        var selectedOption = $(this).find('option:selected'),
-	            collectionId = selectedOption.closest('.wgst-panel').attr('data-collection-id'),
-	            collectionTreeType = selectedOption.closest('.wgst-panel').attr('data-collection-tree-type'),
+	            collectionId = selectedOption.closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            collectionTreeType = selectedOption.closest('[data-collection-tree-content]').attr('data-collection-tree-type'),
 	            tree;
 
 	        // if ($(this).closest('.wgst-panel').attr('data-panel-name') === 'mergedCollectionTree') {
@@ -161,11 +161,84 @@ $(function(){
 	        //     tree = WGST.collection[collectionId].tree.canvas;
 	        // }
 
-	        console.debug('$$$ collectionId: ' + collectionId);
-	        console.debug('$$$ collectionTreeType: ' + collectionTreeType);
-
 	        tree = window.WGST.collection[collectionId].tree[collectionTreeType].canvas;
 	        tree.setTreeType(selectedOption.val());
+	    });
+
+	    $('body').on('click', '.wgst-tree-control__show-newick', function(){
+	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('[data-collection-tree-content]').attr('data-collection-tree-type'),
+	            newickStringWithLabels,
+	            newWindow;
+
+	        newickStringWithLabels = WGST.collection[collectionId].tree[collectionTreeType].newickStringWithLabels;
+
+	        newWindow = window.open();
+	        newWindow.document.write(newickStringWithLabels);
+	    });
+
+	    $('body').on('click', '.wgst-tree-control__decrease-label-font-size', function(){
+	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('[data-collection-tree-content]').attr('data-collection-tree-type'),
+	            currentNodeTextSize,
+	            tree;
+
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        currentNodeTextSize = tree.textSize;
+	        tree.setTextSize(currentNodeTextSize - 3);
+	    });
+
+	    $('body').on('click', '.wgst-tree-control__increase-label-font-size', function(){
+	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('[data-collection-tree-content]').attr('data-collection-tree-type'),
+	            currentNodeTextSize,
+	            tree;
+
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        currentNodeTextSize = tree.textSize;
+	        tree.setTextSize(currentNodeTextSize + 3);
+	    });
+
+	    $('body').on('click', '.wgst-tree-control__decrease-node-size', function(){
+	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('[data-collection-tree-content]').attr('data-collection-tree-type'),
+	            tree,
+	            currentNodeSize;
+
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        currentNodeSize = tree.baseNodeSize;
+
+	        if (currentNodeSize > 3) {
+	            tree.setNodeSize(currentNodeSize - 3);
+	            currentNodeSize = tree.baseNodeSize;
+	            if (currentNodeSize < 3) {
+	                $(this).attr('disabled', true);
+	            }
+	        } else {
+	            $(this).attr('disabled', true);
+	        }
+	    });
+	    $('body').on('click', '.wgst-tree-control__increase-node-size', function(){
+	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('[data-collection-tree-content]').attr('data-collection-tree-type'),
+	            tree,
+	            currentNodeSize;
+
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        currentNodeSize = tree.baseNodeSize;
+	        tree.setNodeSize(currentNodeSize + 3);
+
+	        if (tree.baseNodeSize > 3) {
+	            $(this).closest('.wgst-tree-control').find('.wgst-tree-control__decrease-node-size').attr('disabled', false);
+	        }
+	    });
+	    $('body').on('change', '.wgst-tree-control__show-node-labels', function(){
+	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            collectionTreeType = $(this).closest('[data-collection-tree-content]').attr('data-collection-tree-type'),
+	            tree;
+	        
+	        tree = WGST.collection[collectionId].tree[collectionTreeType].canvas;
+	        tree.toggleLabels();
 	    });
 
 	    window.WGST.socket.connection.on('collectionTreeMergeNotification', function(mergedCollectionTreeData) {
@@ -176,8 +249,8 @@ $(function(){
 	            window.speechSynthesis.speak(message);
 	        }
 
-	        console.debug('mergedCollectionTreeData:');
-	        console.dir(mergedCollectionTreeData);
+	        // console.debug('mergedCollectionTreeData:');
+	        // console.dir(mergedCollectionTreeData);
 
 	        var collectionId = mergedCollectionTreeData.mergedCollectionTreeId,
 	            collectionTree = mergedCollectionTreeData.tree,
@@ -215,7 +288,8 @@ $(function(){
 	            window.WGST.exports.renderCollectionTrees(collectionId, {
 	                // Show buttons
 	                matchAssemblyListButton: true,
-	                mergeWithButton: true
+	                mergeWithButton: true,
+	                panelLabel: 'Merge Tree'
 	            });
 
 	            // ------------------------------------------
@@ -290,7 +364,7 @@ $(function(){
 	            '5324c298-4cd0-4329-848b-30d7fe28a560': 'ab66c759-2242-42c2-a245-d364fcbc7c4f',
 	            'c0ca8c57-11b9-4e27-93a5-6ffe841e7768': '2b3ad477-323c-4c54-b6f2-abc420ba0399'
 	        };
-	        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id');
+	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id');
 	        if (mapCollectionIdToMergeTreeId.hasOwnProperty(collectionId)) {
 	            demoMergeCollectionTrees(mapCollectionIdToMergeTreeId[collectionId]);
 	            return;
@@ -298,8 +372,8 @@ $(function(){
 	        //-----------------------------
 
 	        var requestData = {
-	            collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
-	            mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+	            collectionId: mergeButton.closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            mergeWithCollectionId: window.WGST.settings.referenceCollectionId,
 	            collectionTreeType: mergeButton.attr('data-collection-tree-type'),
 	            socketRoomId: WGST.socket.roomId
 	        };

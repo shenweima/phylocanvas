@@ -4,12 +4,14 @@ $(function(){
 
         window.WGST.exports.mapFullscreenIdToTemplateId = {
             'collection-map': 'collection-map-fullscreen',
-            'collection-data': 'collection-data-fullscreen'
+            'collection-data': 'collection-data-fullscreen',
+            'collection-tree': 'collection-tree-fullscreen'
         };
 
         window.WGST.exports.mapFullscreenIdToPanelType = {
             'collection-map': 'collection-map',
-            'collection-data': 'collection-data'
+            'collection-data': 'collection-data',
+            'collection-tree': 'collection-tree'
         };
 
         window.WGST.exports.createFullscreen = function(fullscreenId, templateContext) {
@@ -150,11 +152,21 @@ $(function(){
                 collectionId = fullscreenId.split('__')[1],
                 fullscreenType = panelType;
 
-            console.debug('[WGST][Debug] bringFullscreenToPanel | fullscreenType: ' + fullscreenType);
-            console.debug('[WGST][Debug] bringFullscreenToPanel | fullscreenId: ' + fullscreenId);
-            console.debug('[WGST][Debug] bringFullscreenToPanel | panelId: ' + panelId);
-            console.debug('[WGST][Debug] bringFullscreenToPanel | panelType: ' + panelType);
-            console.debug('[WGST][Debug] bringFullscreenToPanel | collectionID: ' + collectionId);
+            // console.debug('[WGST][Debug] bringFullscreenToPanel | fullscreenType: ' + fullscreenType);
+            // console.debug('[WGST][Debug] bringFullscreenToPanel | fullscreenId: ' + fullscreenId);
+            // console.debug('[WGST][Debug] bringFullscreenToPanel | panelId: ' + panelId);
+            // console.debug('[WGST][Debug] bringFullscreenToPanel | panelType: ' + panelType);
+            // console.debug('[WGST][Debug] bringFullscreenToPanel | collectionID: ' + collectionId);
+
+            // var panelContext = {
+            //     panelId: panelId,
+            //     panelType: panelType,
+            //     collectionId: collectionId
+            // };
+
+            // if (fullscreenType === 'collection-tree') {
+            //     panelContext
+            // }
 
             window.WGST.exports.createPanel(panelType, {
                 panelId: panelId,
@@ -174,7 +186,7 @@ $(function(){
             //
 
             //
-            // Data fullscreen
+            // Data
             //
             if (fullscreenType === 'collection-data') {
 
@@ -188,7 +200,7 @@ $(function(){
 //$('[data-toggle="tooltip"]').tooltip('destroy');
 
             //
-            // Map fullscreen
+            // Map
             //
             } else if (fullscreenType === 'collection-map') {
 
@@ -198,6 +210,22 @@ $(function(){
                 $('.wgst-panel[data-panel-id="' + panelId + '"]')
                     .find('.wgst-panel-body-content')
                     .append(window.WGST.geo.map.canvas.getDiv());
+
+            //
+            // Tree
+            //
+            } else if (fullscreenType === 'collection-tree') {
+
+                //
+                // Copy tree content to panel
+                //
+                var $collectionTreeContent = $('[data-fullscreen-type="collection-tree"]').find('[data-collection-tree-content]');
+
+                $('.wgst-panel[data-panel-id="' + fullscreenId + '"]')
+                    .find('.wgst-panel-body-content')
+                    .html('')
+                    .append($collectionTreeContent);
+
             }
 
             //
@@ -217,6 +245,19 @@ $(function(){
 
                 google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
 
+            //
+            // Resize tree
+            //
+            } else if (panelType === 'collection-tree') {
+
+                //
+                // Resize tree
+                //
+                var collectionId = $('[data-collection-tree-content]').attr('data-collection-id'),
+                    collectionTreeType = $('[data-collection-tree-content]').attr('data-collection-tree-type');
+
+                window.WGST.collection[collectionId].tree[collectionTreeType].canvas.resizeToContainer();
+                window.WGST.collection[collectionId].tree[collectionTreeType].canvas.draw();
             }
 
             //
@@ -287,12 +328,59 @@ $(function(){
             } else if (panelType === 'collection-map') {
 
                 //
-                // Copy map content to panel
+                // Copy map content to fullscreen
                 //
                 $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
                     .find('.wgst-map')
                     .replaceWith(window.WGST.geo.map.canvas.getDiv());
+
+            //
+            // Tree panel
+            //
+            } else if (panelType === 'collection-tree') {
+
+                //
+                // Copy tree content to fullscreen
+                //
+
+                var $collectionTreeContent = $('[data-panel-type="collection-tree"]').find('[data-collection-tree-content]');
+
+                $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
+                    .html('')
+                    .append($collectionTreeContent);
+
+
+
+
+
+                //window.redrawOriginalTree();
+
+                    //.replaceWith($treePanelContent);
+
+                // //
+                // // Copy map content to panel
+                // //
+                // $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
+                //     .find('.wgst-map')
+                //     .replaceWith(window.WGST.geo.map.canvas.getDiv());
+
+
+                // var $content = $('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content')[0];
+
+
+                // console.debug($('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content').length);
+                // console.debug($content.offsetWidth);
+                // console.debug($content.offsetHeight);
+
+                // // var canvasNode = $('[data-fullscreen-type="collection-tree"]').find('canvas')[0];
+                // // canvasNode.width = 50;
+                // // canvasNode.height = 50;
+
+                // window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.setSize(10,10);
+
             }
+
+            
 
             //
             // Show fullscreen
@@ -305,6 +393,99 @@ $(function(){
             if (panelType === 'collection-map') {
 
                 google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
+
+            //
+            // Resize tree
+            //
+            } else if (panelType === 'collection-tree') {
+
+                //
+                // Figure out how much space canvas tree should take
+                //
+                var $fullscreenElement = $('[data-fullscreen-type="collection-tree"]'),
+                    fullscreenDimensions = {
+                        width: $fullscreenElement.outerWidth(),
+                        height: $fullscreenElement.outerHeight()
+                    };
+
+                console.log('fullscreenDimensions:');
+                console.dir(fullscreenDimensions);
+
+                //
+                // Figure out tree controls size
+                //
+                var $treeControlsElement = $fullscreenElement.find('.wgst-tree-controls'),
+                    treeControlsDimensions = {
+                        width: $treeControlsElement.outerWidth(),
+                        height: $treeControlsElement.outerHeight()
+                    };
+
+                console.log('treeControlsDimensions:');
+                console.dir(treeControlsDimensions);
+
+                //
+                // Calculate tree canvas dimensions
+                //
+                var canvasDimensions = {
+                    width: fullscreenDimensions.width,
+                    height: fullscreenDimensions.height - treeControlsDimensions.height
+                };
+
+                console.log('canvasDimensions:');
+                console.dir(canvasDimensions);
+
+                $('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content').width(canvasDimensions.width);
+                $('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content').height(canvasDimensions.height);
+
+                //
+                // Resize tree
+                //
+                var collectionId = $('[data-collection-tree-content]').attr('data-collection-id'),
+                    collectionTreeType = $('[data-collection-tree-content]').attr('data-collection-tree-type');
+
+                window.WGST.collection[collectionId].tree[collectionTreeType].canvas.resizeToContainer();
+                window.WGST.collection[collectionId].tree[collectionTreeType].canvas.draw();
+
+                //window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.setSize(canvasDimensions.width, canvasDimensions.height);
+                //window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.redrawOriginalTree();
+                //window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.draw();
+
+                // var $treePanelContent = $('[data-panel-type="collection-tree"]').find('.wgst-panel-body-content');
+
+                // //
+                // // Copy tree content to fullscreen
+                // //
+                // $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
+                //     .html('')
+                //     .append($treePanelContent);
+
+                //window.redrawOriginalTree();
+
+                    //.replaceWith($treePanelContent);
+
+                // //
+                // // Copy map content to panel
+                // //
+                // $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
+                //     .find('.wgst-map')
+                //     .replaceWith(window.WGST.geo.map.canvas.getDiv());
+
+
+
+
+
+                // var $content = $('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content')[0];
+
+
+                // console.debug($('[data-fullscreen-type="collection-tree"]').find('.wgst-tree-content').length);
+                // console.debug($content.offsetWidth);
+                // console.debug($content.offsetHeight);
+
+                // // var canvasNode = $('[data-fullscreen-type="collection-tree"]').find('canvas')[0];
+                // // canvasNode.width = 50;
+                // // canvasNode.height = 50;
+
+                // window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.setSize(10,10);
 
             }
 
