@@ -355,12 +355,13 @@ exports.apiGetCollection = function(req, res) {
 			tree: {}
 		};
 
-	console.time('[WGST] Getting list of assemblies for collection ' + collectionId);
+	console.log('[WGST] Getting list of assemblies for collection ' + collectionId);
 
 	// Get list of assemblies
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
 		if (error) {
 			console.error('[WGST][Error] ✗ Failed to get list of assemblies: ' + error);
+			console.dir('COLLECTION_LIST_' + collectionId);
 			// Ignore this error for now
 			//res.json({});
 			return;
@@ -475,6 +476,7 @@ exports.apiGetCollection = function(req, res) {
 								// Ignore this error for now
 								//res.json({});
 								console.error('[WGST][Couchbase][Error] ✗ ' + error);
+								console.dir(antibiotics);
 								return;
 							}
 
@@ -619,7 +621,7 @@ exports.apiGetRepresentativeCollection = function(req, res) {
 exports.get = function(req, res) {
 	var collectionId = req.params.id;
 
-	console.time('[WGST] Requested ' + collectionId + ' collection');
+	console.log('[WGST] Requested ' + collectionId + ' collection');
 
 	res.render('app', {
 		appConfig: JSON.stringify(appConfig.client),

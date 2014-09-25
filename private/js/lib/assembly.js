@@ -252,6 +252,8 @@ $(function(){
 
 	    window.WGST.exports.getAssembly = function(assemblyId) {
 
+            console.log('[WGST] Getting assembly ' + assemblyId);
+
 	        // Get assembly data
 	        $.ajax({
 	            type: 'POST',
