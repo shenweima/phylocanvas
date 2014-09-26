@@ -387,9 +387,17 @@ $(function(){
 
                 // window.WGST.collection["c0ca8c57-11b9-4e27-93a5-6ffe841e7768"].tree["COLLECTION_TREE"].canvas.setSize(10,10);
 
-            }
+            //
+            // Assembly panel
+            //
+            } else if (panelType === 'assembly') {
 
-            
+                var $assemblyContent = $('[data-panel-type="assembly"]').find('.wgst-panel-body-content');
+
+                $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
+                    .html('')
+                    .append($assemblyContent);
+            }
 
             //
             // Show fullscreen

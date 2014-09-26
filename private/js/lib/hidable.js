@@ -53,13 +53,13 @@ $(function(){
                 //templateContext.noFullscreen = true;
             }
 
-            //
-            // Filter out assembly
-            //
-            else if (typeof hidableId.split('__')[0] !== 'undefined' && hidableId.split('__')[0] === 'assembly') {
-                templateContext.noFullscreen = true;
-                templateContext.close = true;
-            }
+            // //
+            // // Filter out assembly
+            // //
+            // else if (typeof hidableId.split('__')[0] !== 'undefined' && hidableId.split('__')[0] === 'assembly') {
+            //     templateContext.noFullscreen = true;
+            //     templateContext.close = true;
+            // }
 
             //
             // Filter out assembly upload panels
@@ -285,10 +285,15 @@ $(function(){
 
             var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
 
+            console.log('A1');
+
             //
             // Check if panel exists
             //
             if ($('.wgst-panel[data-panel-id="' + hidableId + '"]').length > 0) {
+
+            console.log('A2');
+
 
                 //
                 // Maximize panel

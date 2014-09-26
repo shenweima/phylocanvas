@@ -26,7 +26,7 @@ $(function(){
 
         window.WGST.exports.mapPanelTypeToPanelButtonRules = {
             'assembly': {
-                noFullscreenButton: true
+                //noFullscreenButton: true
             },
             'collection-data': {
                 noCloseButton: true
@@ -223,6 +223,8 @@ $(function(){
 
 	        var fullscreenId = $('.wgst-fullscreen').attr('data-fullscreen-id');
 
+            console.log('Test');
+
 	        //
 	        // Bring fullscreen into panel
 	        //
@@ -305,6 +307,9 @@ $(function(){
         $('body').on('click', '[data-panel-header-control-button="fullscreen"]', function(){
             var $panel = $(this).closest('.wgst-panel'),
                 panelId = $panel.attr('data-panel-id');
+
+                console.log('X');
+                console.log('panelId: ' + panelId);
 
             $('[data-hidable-id="' + panelId + '"]').find('[data-wgst-hidable-button="fullscreen"]').trigger('click');
 
