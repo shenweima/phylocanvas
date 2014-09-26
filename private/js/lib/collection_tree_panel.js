@@ -360,15 +360,15 @@ $(function(){
 	        //-----------------------------
 	        // Remove after demo
 	        //
-	        var mapCollectionIdToMergeTreeId = {
-	            '5324c298-4cd0-4329-848b-30d7fe28a560': 'ab66c759-2242-42c2-a245-d364fcbc7c4f',
-	            'c0ca8c57-11b9-4e27-93a5-6ffe841e7768': '2b3ad477-323c-4c54-b6f2-abc420ba0399'
-	        };
-	        var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id');
-	        if (mapCollectionIdToMergeTreeId.hasOwnProperty(collectionId)) {
-	            demoMergeCollectionTrees(mapCollectionIdToMergeTreeId[collectionId]);
-	            return;
-	        }
+	        // var mapCollectionIdToMergeTreeId = {
+	        //     '5324c298-4cd0-4329-848b-30d7fe28a560': 'ab66c759-2242-42c2-a245-d364fcbc7c4f',
+	        //     'c0ca8c57-11b9-4e27-93a5-6ffe841e7768': '2b3ad477-323c-4c54-b6f2-abc420ba0399'
+	        // };
+	        // var collectionId = $(this).closest('[data-collection-tree-content]').attr('data-collection-id');
+	        // if (mapCollectionIdToMergeTreeId.hasOwnProperty(collectionId)) {
+	        //     demoMergeCollectionTrees(mapCollectionIdToMergeTreeId[collectionId]);
+	        //     return;
+	        // }
 	        //-----------------------------
 
 	        var requestData = {
@@ -393,34 +393,34 @@ $(function(){
 
 	    });
 
-	    var demoMergeCollectionTrees = function(mergeTreeId) {
-	        var mergeButton = $(this);
+	    // var demoMergeCollectionTrees = function(mergeTreeId) {
+	    //     var mergeButton = $(this);
 
-	        mergeButton.attr('disabled', true);
-	        mergeButton.find('.wgst-spinner-label').addClass('wgst--hide-this');
-	        mergeButton.find('.wgst-spinner').removeClass('wgst--hide-this');
+	    //     mergeButton.attr('disabled', true);
+	    //     mergeButton.find('.wgst-spinner-label').addClass('wgst--hide-this');
+	    //     mergeButton.find('.wgst-spinner').removeClass('wgst--hide-this');
 
-	        var requestData = {
-	            mergeTreeId: mergeTreeId,
-	            //collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
-	            //mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
-	            //collectionTreeType: mergeButton.attr('data-collection-tree-type'),
-	            socketRoomId: WGST.socket.roomId
-	        };
+	    //     var requestData = {
+	    //         mergeTreeId: mergeTreeId,
+	    //         //collectionId: mergeButton.closest('.wgst-panel').attr('data-collection-id'),
+	    //         //mergeWithCollectionId: 'b8d3aab1-625f-49aa-9857-a5e97f5d6be5', //'78cb7009-64ac-4f04-8428-d4089aae2a13',//'851054d9-86c2-452e-b9af-8cac1d8f0ef6',
+	    //         //collectionTreeType: mergeButton.attr('data-collection-tree-type'),
+	    //         socketRoomId: WGST.socket.roomId
+	    //     };
 
-	        console.log('[WGST] Requesting merge tree');
+	    //     console.log('[WGST] Requesting merge tree');
 
-	        // Merge collection trees
-	        $.ajax({
-	            type: 'POST',
-	            url: '/api/collection/merged',
-	            datatype: 'json', // http://stackoverflow.com/a/9155217
-	            data: requestData
-	        })
-	        .done(function(mergeRequestSent, textStatus, jqXHR) {
-	            console.log('[WGST] Requested merge tree');
-	        });
-	    };
+	    //     // Merge collection trees
+	    //     $.ajax({
+	    //         type: 'POST',
+	    //         url: '/api/collection/merged',
+	    //         datatype: 'json', // http://stackoverflow.com/a/9155217
+	    //         data: requestData
+	    //     })
+	    //     .done(function(mergeRequestSent, textStatus, jqXHR) {
+	    //         console.log('[WGST] Requested merge tree');
+	    //     });
+	    // };
 
 	    var createAssemblyResistanceProfilePreviewString = function(assemblyResistanceProfile, antibiotics) {
 	        var assemblyResistanceProfileHtml = '',

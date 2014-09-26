@@ -107,7 +107,7 @@ window.WGST.upload = {
 // Settings
 //
 window.WGST.settings = window.WGST.settings || {};
-window.WGST.settings.representativeCollectionId = window.WGST.config.referenceCollectionId; //'1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
+window.WGST.settings.referenceCollectionId = window.WGST.config.referenceCollectionId; //'1fab53b0-e7fe-4660-b34e-21d501017397';//'59b792aa-b892-4106-b1dd-2e9e78abefc4';
 
 //
 // Regexes
