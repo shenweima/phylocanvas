@@ -650,7 +650,7 @@ exports.mergeCollectionTrees = function(req, res) {
 	* it's own data source flag for merge request.
 	*/
 	var collectionTreeTypeToDataSourceMap = {
-		'COLLECTION_TREE': 'FINGERPRINT',
+		'COLLECTION_TREE': 'CORE',
 		'CORE_TREE_RESULT': 'CORE',
 		'CORE_ALLELE_TREE': ''
 	};
