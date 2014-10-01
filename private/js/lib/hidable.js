@@ -147,7 +147,7 @@ $(function(){
         //
         //
 
-        $('body').on('click', '.wgst-hidable', function() {
+        $('body').on('mouseenter', '.wgst-hidable', function() {
 
             var $hidableControls = $(this).find('.wgst-hidable-controls');
 
