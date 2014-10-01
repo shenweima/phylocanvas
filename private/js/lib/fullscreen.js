@@ -2,11 +2,12 @@ $(function(){
 
 	(function(){
 
-        window.WGST.exports.mapFullscreenIdToTemplateId = {
+        window.WGST.exports.mapFullscreenTypeToTemplateId = {
             'collection-map': 'collection-map-fullscreen',
             'collection-data': 'collection-data-fullscreen',
             'collection-tree': 'collection-tree-fullscreen',
-            'assembly-upload-progress': 'assembly-upload-progress-fullscreen'
+            'assembly-upload-progress': 'assembly-upload-progress-fullscreen',
+            'assembly': 'assembly-fullscreen'
         };
 
         window.WGST.exports.mapFullscreenIdToPanelType = {
@@ -16,6 +17,9 @@ $(function(){
         };
 
         window.WGST.exports.createFullscreen = function(fullscreenId, templateContext) {
+            console.log('createFullscreen():');
+            console.log(fullscreenId);
+            console.dir(templateContext);
 
             //
             // Check if fullscreen already exists
@@ -33,20 +37,31 @@ $(function(){
             }
 
             //
-            // Get fullscreen's label
+            // Get container's label
             //
-            templateContext.fullscreenLabel = window.WGST.exports.getContainerLabel({
+            var containerOptions = {
                 containerName: 'fullscreen',
                 containerType: templateContext.fullscreenType,
-                containerId: fullscreenId
-            });
+                containerId: fullscreenId 
+            };
+
+            if (containerOptions.containerType === 'assembly') {
+
+                var additionalContainerOptions = {
+                    assemblyUserId: 'AAA'
+                };
+
+                containerOptions = window.WGST.exports.extendContainerOptions(containerOptions, additionalContainerOptions);
+            }
+
+            templateContext.fullscreenLabel = window.WGST.exports.getContainerLabel(containerOptions);
 
             console.debug('templateContext.fullscreenType: ' + templateContext.fullscreenType);
 
             //
             // Render
             //
-            var fullscreenTemplateId = window.WGST.exports.mapFullscreenIdToTemplateId[templateContext.fullscreenType];
+            var fullscreenTemplateId = window.WGST.exports.mapFullscreenTypeToTemplateId[templateContext.fullscreenType];
 
             console.debug('fullscreenTemplateId: ' + fullscreenTemplateId);
             console.log($('.wgst-template[data-template-id="' + fullscreenTemplateId + '"]').html());
@@ -64,11 +79,6 @@ $(function(){
                 fullscreenId: fullscreenId,
                 fullscreenLabel: templateContext.fullscreenLabel
             });
-
-            // //
-            // // Create hidable
-            // //
-            // window.WGST.exports.createHidable(fullscreenId, templateContext.fullscreenLabel);
         };
 
         window.WGST.exports.removeFullscreen = function(fullscreenId) {
@@ -177,6 +187,10 @@ $(function(){
             //     panelContext
             // }
 
+                var collectionId = $('[data-collection-tree-content]').attr('data-collection-id'),
+                    collectionTreeType = $('[data-collection-tree-content]').attr('data-collection-tree-type');
+
+
             window.WGST.exports.createPanel(panelType, {
                 panelId: panelId,
                 panelType: panelType,
@@ -217,7 +231,7 @@ $(function(){
                 // Copy map content to panel
                 //
                 $('.wgst-panel[data-panel-id="' + panelId + '"]')
-                    .find('.wgst-panel-body-content')
+                    .find('.wgst-panel-body-container')
                     .append(window.WGST.geo.map.canvas.getDiv());
 
             //
@@ -225,16 +239,30 @@ $(function(){
             //
             } else if (fullscreenType === 'collection-tree') {
 
+                // var collectionId = $('[data-collection-tree-content]').attr('data-collection-id'),
+                //     collectionTreeType = $('[data-collection-tree-content]').attr('data-collection-tree-type');
+
                 //
                 // Copy tree content to panel
                 //
                 var $collectionTreeContent = $('[data-fullscreen-type="collection-tree"]').find('[data-collection-tree-content]');
 
                 $('.wgst-panel[data-panel-id="' + fullscreenId + '"]')
-                    .find('.wgst-panel-body-content')
+                    .find('.wgst-panel-body-container')
                     .html('')
                     .append($collectionTreeContent);
 
+            //
+            // Assembly
+            //
+            } else if (fullscreenType === 'assembly') {
+
+                var $assemblyContent = $('[data-fullscreen-type="assembly"]');
+
+                $('.wgst-panel[data-panel-id="' + fullscreenId + '"]')
+                    .find('.wgst-panel-body-container')
+                    .html('')
+                    .append($assemblyContent.html());
             }
 
             //
@@ -262,8 +290,12 @@ $(function(){
                 //
                 // Resize tree
                 //
-                var collectionId = $('[data-collection-tree-content]').attr('data-collection-id'),
-                    collectionTreeType = $('[data-collection-tree-content]').attr('data-collection-tree-type');
+                // var collectionId = $('[data-collection-tree-content]').attr('data-collection-id'),
+                //     collectionTreeType = $('[data-collection-tree-content]').attr('data-collection-tree-type');
+
+                console.debug('>>> >>> >>> ' + collectionTreeType);
+                console.debug('collectionId: ' + collectionId);
+                console.debug(typeof window.WGST.collection[collectionId].tree[collectionTreeType]);
 
                 window.WGST.collection[collectionId].tree[collectionTreeType].canvas.resizeToContainer();
                 window.WGST.collection[collectionId].tree[collectionTreeType].canvas.draw();
@@ -280,7 +312,7 @@ $(function(){
             window.WGST.exports.happenedFullscreenToPanel(fullscreenId);
         };
 
-        window.WGST.exports.bringPanelToFullscreen = function(panelId, fullscreenWasCreated) {
+            window.WGST.exports.bringPanelToFullscreen = function(panelId, fullscreenWasCreated) {
             
             var fullscreenType = panelId.split('__')[0];
             var fullscreenId = panelId;
@@ -303,6 +335,8 @@ $(function(){
                 fullscreenType: fullscreenType,
                 fullscreenId: fullscreenId
             });
+
+            console.log('A3');
 
             //
             // Call custom function after creating fullscreen
@@ -392,11 +426,11 @@ $(function(){
             //
             } else if (panelType === 'assembly') {
 
-                var $assemblyContent = $('[data-panel-type="assembly"]').find('.wgst-panel-body-content');
+                var $assemblyContent = $('[data-panel-type="assembly"]').find('.wgst-panel-body-container');
 
                 $('.wgst-fullscreen[data-fullscreen-id="' + fullscreenId + '"]')
                     .html('')
-                    .append($assemblyContent);
+                    .append($assemblyContent.html());
             }
 
             //
@@ -548,7 +582,7 @@ $(function(){
             }
 
             if (fullscreenName === 'map') {
-                $('.wgst-panel[data-panel-name="' + fullscreenName + '"] .wgst-panel-body-content')
+                $('.wgst-panel[data-panel-name="' + fullscreenName + '"] .wgst-panel-body-container')
                     .html('')
                     .append(WGST.geo.map.canvas.getDiv());
 

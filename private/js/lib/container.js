@@ -108,6 +108,76 @@ $(function(){
 			}
 		};
 
+        window.WGST.exports.extendContainerOptions = function(containerOptions, additionalContainerOptions) {
+            $.extend(containerOptions, {
+                additional: additionalContainerOptions
+            });
+
+            return containerOptions;
+        };
+
+	    window.WGST.exports.getContainerLabel = function(options) {
+	    	console.log('getContainerLabel():');
+	    	console.dir(options);
+
+            //
+            //
+	    	//
+	    	// Options:
+	    	//
+	    	// containerName: "panel" or "fullscreen"
+	    	// containerType: panelType or fullscreenType
+	    	// containerId: panelId or fullscreenId
+            // additional: additional container options (specific to each container)
+	    	//
+	    	//
+	    	//
+
+        	var containerLabel = 'Anonymous';
+
+        	//
+        	// Prepare container's label
+        	//
+        	if (options.containerType === 'collection-data') {
+
+        		containerLabel = 'Data';
+
+        	} else if (options.containerType === 'collection-map') {
+
+        		containerLabel = 'Map';
+
+        	} else if (options.containerType === 'collection-tree') {
+
+                containerLabel = 'Tree';
+
+        		// var treeType = options.containerId.split('__')[2];
+        		// containerLabel = treeType.replace(/[_]/g, ' ').toLowerCase().capitalize();
+
+        	} else if (options.containerType === 'assembly') {
+
+        		containerLabel = options.additional.assemblyUserId; // 'Assembly';
+
+        	} else if (options.containerType === 'assembly-upload-progress') {
+
+                containerLabel = 'Upload Progress';
+
+            } else if (options.containerType === 'assembly-upload-metadata') {
+
+                containerLabel = 'Assembly Metadata';
+
+            } else if (options.containerType === 'assembly-upload-analytics') {
+
+                containerLabel = 'Assembly Analytics';
+
+            } else if (options.containerType === 'assembly-upload-navigation') {
+
+                containerLabel = 'Collection Navigation';
+
+            }
+
+        	return containerLabel;
+	    };
+
 	})();
 
 });

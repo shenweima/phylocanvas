@@ -379,6 +379,74 @@ $(function(){
 	    window.WGST.exports.renderAssemblyAnalysisList = function(collectionId, panelId, antibiotics) {
 	        console.log('[WGST] Rendering assembly analysis list');
 
+	        var assemblies = window.WGST.collection[collectionId].assemblies,
+	            sortedAssemblyIds = window.WGST.collection[collectionId].sortedAssemblyIds;
+
+	        var assembly,
+	        	//assemblyTemplateContext,
+	        	preparedForRenderingAssemblyData;
+
+	        var preparedAssembliesData = sortedAssemblyIds.map(function(assemblyId) {
+	        		assembly = assemblies[assemblyId];
+	        		preparedForRenderingAssemblyData = window.WGST.exports.prepareAssemblyDataForRendering(assembly, window.WGST.antibiotics);
+		            return {
+		            	assemblyId: assemblyId,
+		                assemblyUserId: preparedForRenderingAssemblyData.assemblyUserId,
+		                antibioticResistanceData: preparedForRenderingAssemblyData.resistanceProfile,
+		                sequenceTypeData: preparedForRenderingAssemblyData.sequenceType,
+		                mlstData: preparedForRenderingAssemblyData.mlst,
+		                nearestRepresentativeData: preparedForRenderingAssemblyData.nearestRepresentative,
+		                scoresData: preparedForRenderingAssemblyData.scores,
+		                topScore: preparedForRenderingAssemblyData.topScore,
+		                topScorePercentage: preparedForRenderingAssemblyData.topScorePercentage,
+		                metadata: {
+		                	latitude: preparedForRenderingAssemblyData.metadata.latitude,
+		                	longitude: preparedForRenderingAssemblyData.metadata.longitude
+		                }
+		            };
+	        	});
+
+	        var templateContext = {
+	        	collectionId: collectionId,
+	        	assemblies: preparedAssembliesData
+	        };
+
+	        console.log('>>> !!! templateContext:');
+	        console.dir(templateContext);
+
+        	//
+        	// Render
+        	//
+            var //templateId = window.WGST.exports.mapPanelTypeToTemplateId[panelType],
+                templateSource = $('.wgst-template[data-template-id="panel-body__collection-data__assemblies"]').html(),
+                template = Handlebars.compile(templateSource);
+
+            //
+            // Register partials
+            //
+            var partialTemplateSource = $('.wgst-template[data-template-id="panel-body__collection-data__assemblies__assembly"]').html();
+            Handlebars.registerPartial('assembly', partialTemplateSource);
+
+            //
+            // Prepend to DOM
+            //
+            var collectionDataHtml = template(templateContext);
+
+	        var $collectionDataPanel = $('.wgst-panel[data-panel-id="' + panelId + '"]'),
+	        	$collectionDataPanelBodyContainer = $collectionDataPanel.find('.wgst-panel-body-container');
+
+	        $collectionDataPanelBodyContainer.prepend(collectionDataHtml);
+
+	        //
+	        // Check checkboxes
+	        //
+	        //$('.show-on-map-checkbox input[type="checkbox"]').prop('checked', true).change();
+	        $('.wgst-assembly-show-on-map').prop('checked', true).change();
+	    };
+
+	    window.WGST.exports.__old_remove__renderAssemblyAnalysisList = function(collectionId, panelId, antibiotics) {
+	        console.log('[WGST] Rendering assembly analysis list');
+
 	        var assemblies = WGST.collection[collectionId].assemblies,
 	            sortedAssemblyIds = WGST.collection[collectionId].sortedAssemblyIds,
 	            assemblyId,
@@ -450,7 +518,7 @@ $(function(){
 	        $('.show-on-map-checkbox input[type="checkbox"]').prop('checked', true).change();
 	    };
 
-	    window.WGST.exports.createAssemblyResistanceProfilePreviewHtml = function(assemblyResistanceProfile, antibiotics) {
+	    window.WGST.exports.__old_remove__createAssemblyResistanceProfilePreviewHtml = function(assemblyResistanceProfile, antibiotics) {
 	        var assemblyResistanceProfileHtml = '',
 	            antibioticGroup,
 	            antibioticGroupName,

@@ -9,37 +9,41 @@
           data-collection-id="{{collectionId}}"
           {{#each dataAttributes}}{{name}}="{{value}}"{{/each}}>
 
-    <header class="wgst-panel-header wgst-draggable-handle">
-      <h4 class="header-title">{{> header}}</h4>
+    <div class="wgst-panel-container">
 
-      <div class="wgst-panel-header-controls">
+      <header class="wgst-panel-header wgst-draggable-handle">
+        <h4 class="header-title">{{> header}}</h4>
 
-        {{#unless noFullscreenButton }}
-        <i class="wgst-panel-header-control-button wgst-panel-header-control-button--active fa fa-arrows-alt"
-          data-panel-header-control-button="fullscreen"></i>
-        {{/unless}}
+        <div class="wgst-panel-header-controls">
 
-        {{#unless noHideButton }}
-        <i class="wgst-panel-header-control-button wgst-panel-header-control-button--active fa fa-eye-slash"
-          data-panel-header-control-button="hide"></i>
-        {{/unless}}
+          {{#unless noFullscreenButton }}
+          <i class="wgst-panel-header-control-button wgst-panel-header-control-button--active fa fa-arrows-alt"
+            data-panel-header-control-button="fullscreen"></i>
+          {{/unless}}
 
-        {{#unless noCloseButton }}
-        <i class="wgst-panel-header-control-button wgst-panel-header-control-button--active fa fa-remove"
-          data-panel-header-control-button="close"></i>
-        {{/unless}}
-        
-      </div>
-    </header>
+          {{#unless noHideButton }}
+          <i class="wgst-panel-header-control-button wgst-panel-header-control-button--active fa fa-eye-slash"
+            data-panel-header-control-button="hide"></i>
+          {{/unless}}
 
-    <article class="wgst-panel-body">
-      <div class="wgst-panel-body-content">
-        {{> body}}
-      </div>     
-    </article>
+          {{#unless noCloseButton }}
+          <i class="wgst-panel-header-control-button wgst-panel-header-control-button--active fa fa-remove"
+            data-panel-header-control-button="close"></i>
+          {{/unless}}
+          
+        </div>
+      </header>
 
-    <footer class="wgst-panel-footer wgst-draggable-handle">
-    </footer>
+      <article class="wgst-panel-body">
+        <div class="wgst-panel-body-container">
+          {{> body}}
+        </div>     
+      </article>
+
+      <footer class="wgst-panel-footer wgst-draggable-handle">
+      </footer>
+
+    </div>
 
   </section>
 

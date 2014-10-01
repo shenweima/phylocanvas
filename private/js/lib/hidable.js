@@ -51,20 +51,18 @@ $(function(){
             //
             if (window.WGST.exports.isHidableTree(hidableId)) {
                 //templateContext.noFullscreen = true;
-            }
-
-            // //
-            // // Filter out assembly
-            // //
-            // else if (typeof hidableId.split('__')[0] !== 'undefined' && hidableId.split('__')[0] === 'assembly') {
-            //     templateContext.noFullscreen = true;
-            //     templateContext.close = true;
-            // }
-
+            
+            //
+            // Filter out assembly
+            //
+            } else if (typeof hidableId.split('__')[0] !== 'undefined' && hidableId.split('__')[0] === 'assembly') {
+                //templateContext.noFullscreen = true;
+                templateContext.close = true;
+            
             //
             // Filter out assembly upload panels
             //
-            else if (hidableId === 'assembly-upload-navigation'
+            } else if (hidableId === 'assembly-upload-navigation'
                     || hidableId === 'assembly-upload-analytics'
                     || hidableId === 'assembly-upload-metadata'
                     || hidableId === 'assembly-upload-progress') {

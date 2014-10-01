@@ -213,43 +213,6 @@ a {
 }
 
 // ============================
-// Navigation
-// ============================
-
-//@import "navigation.less";
-
-/*.wgst-background {
-    position: relative;
-    width: 100%;
-    z-index: 1;
-}*/
-
-// .wgst-navigation {
-//     position: absolute;
-//     top: 28px;
-//     left: 90px;
-//     min-width: 800px;
-//     &>div {
-//         float: left;
-//         margin-right: 10px;
-//     }
-//     .map-search {
-//         width: 400px;
-//         min-width: 200px;
-//     }
-//     .add-data {}
-//     .data-filters {}
-//     .user-account {}
-//     .upload-data {
-//       font-size: 14px;
-//       font-weight: 300;
-//     }
-//     .upload-data input {
-//       margin-top: 10px;
-//     }
-// }
-
-// ============================
 // Ring
 // ============================
 
@@ -290,203 +253,14 @@ a {
 // Panels
 // ============================
 
-/*.wgst-panel {
-    .wgst-panel-body {
-        display: table;
-        .wgst-panel-loading {
-            display: table-row;
-        }
-        .wgst-panel-body-content {
-            overflow: hidden;
-            display: table-row;
-            //visibility: hidden;
-        }
-    }
-}*/
-
-.wgst-panel.assembly-panel {
-    top: 86px;
-    .wgst-panel-header {
-        //border-bottom: 1px solid #000;
-        line-height: 1em;
-        font-weight: 300;
-        .assembly-id {
-            font-weight: 400;
-        }
-    }
-    .wgst-panel-body {
-        max-height: 560px;
-        overflow: scroll;
-        //padding: 10px;
-        h2 {
-            font-size: 12px;
-            font-weight: 400;
-            margin: 20px 8px;
-            text-align: center;
-            text-transform: uppercase;
-        }
-        .mlst-number {
-            font-weight: 300;
-            font-size: 22px;
-            text-align: center;
-            margin-top: 20px;
-        }
-        /*
-        .assembly-resistance-profile-container {
-            border: 1px solid #111;
-            padding: 1px;
-            width: 96%;
-            min-width: 330px;
-            padding: 0 10px;
-            overflow: hidden;
-        }
-        */
-        table.assembly-data-table { // TODO: Rename to .assembly-score-table
-            width: 96%;
-            margin-bottom: 0;
-            margin: 0 2%;
-            border-top: 1px solid #ddd;
-            colgroup {
-                .col-target-fp {
-                    width: 60%;
-                }
-                .col-score, .col-score-percentage {
-                    width: 20%;
-                }
-            }
-            th {
-                border-bottom: 1px;
-                font-weight: 500;
-                font-size: 14px;
-                text-transform: uppercase;
-            }
-            th, td {
-                text-align: right;
-                padding-left: 12px;
-                padding-right: 12px;
-                &:first-child {
-                    text-align: left;
-                }
-            }
-            tbody {
-                tr {
-                    /*
-
-                    Order is important.
-                    You want :hover to overwrite .row-stripe rule.
-
-                    */
-                    &.row-stripe {
-                        background-color: #F9F9F9;
-                    }
-                    &:hover {
-                        background-color: #F0F7FF;
-                    }
-                }
-            }
-        }
-        table.assembly-resistance-profile {
-            //width: 96%;
-            //border-bottom: 1px solid #ddd;
-            margin-bottom: 0;
-            //margin: 0 2%;
-            .glyphicon {
-                color: #fff;
-            }
-            thead {
-                th {
-                    font-weight: 400;
-                }
-            }
-            tbody {
-                /*
-                tr {
-                    background-color: #f9f9f9;
-                }
-                */
-                td {
-                    width: 7%;
-                    color: #fff;
-                    font-weight: 300;
-                    text-align: center;
-                    border: 0;
-                    font-weight: 400;
-                    &.resistance-fail {
-                        background-color: #CF0000;
-                    }
-                    &.resistance-unknown {
-                        background-color: #f5f5f5;
-                        color: #000;
-                    }
-                    &.resistance-success {
-                        background-color: #038F05;
-                    }
-                }
-            }
-        }
-    }
-    .wgst-panel-footer {
-        //border-top: 1px solid #000;
-        text-align: center;
-        font-weight: 300;
-        padding: 10px;
-        font-size: 12px;
-        .assembly-upload-datetime {
-            font-weight: 400;
-        }
-    }
-}
-
 .wgst-panel {
-    //display: none;
-    position: absolute;
-    width: auto;
-    height: auto;
-    left: 90px; 
-    border: 0px solid #555;  
-    -webkit-box-shadow: 0px 0px 10px #999; 
-    -moz-box-shadow: 0px 0px 10px #999; 
-    box-shadow: 0px 0px 10px #999; 
-    border-radius: 8px;
-    background-color: #fff;
-    z-index: 10;
-    .no-user-select;
-    &.assembly-upload-panel {
+
+    
+/*    &.assembly-upload-panel {
         top: 70px;
         left: 110px;
-    }
-    .wgst-panel-header {
-        width: 100%;
-        background-color: #f7f7f7;
-        border-radius: 8px 8px 0 0;
-        border-bottom: 1px solid #eee;
-        padding: 12px 15px;
-        //line-height: 50px;
-        //font-weight: 400;
-        //cursor: move;
-        text-align: center;
-        font-weight: 300;
-        line-height: 20px;
-        /*
-        h3 {
-            margin: 0;
-            padding: 0;
-            font-size: 14px;
-            font-weight: 300;
-            text-shadow: 1px 1px 1px #fff;
-        }
-        */
-        .assembly-upload-summary {
-            strong,
-            .assembly-upload-total-number,
-            .assembly-upload-total-number-label,
-            .upload-single-assembly-file-name,
-            .assembly-sequences-average {
-                font-weight: 400;
-            }
-        }
-    }
-    .wgst-panel-footer {}
+    }*/
+
     .wgst-panel-body {
         //border-top: 1px solid #fff;
         //padding: 12px 15px;
@@ -732,10 +506,6 @@ a {
  */
 
 /* CSS Reset */
-h2, h4 {
-    margin: 0;
-    padding: 0;
-}
 
 .wgst-assembly-upload__analytics {
     float: left;
@@ -972,42 +742,6 @@ h2, h4 {
     }
 }
 
-// Class
-.wgst-panel {
-    // Default state
-    //display: none; // Hidden by default
-
-    // Default position
-    top: 80px;
-    left: 90px;
-}
-
-// Class state
-/*
-.wgst-panel--active {
-    display: block;
-}
-*/
-
-// Class state
-.wgst-panel--visible {
-    display: block;
-}
-
-// Class element
-.wgst-panel-body {}
-
-// Class element
-.wgst-panel-footer {
-    width: 100%;
-    height: 20px;
-    background-color: #f7f7f7;
-    border-radius: 0 0 8px 8px;
-    border-top: 1px solid #eee;
-    font-weight: 300;
-    overflow: hidden;
-}
-
 .wgst-panel__representative-collection-tree {
 
     // Position
@@ -1119,7 +853,7 @@ h2, h4 {
                 }
             }
         }
-        .collection-assembly-list-more-assemblies, .collection-assembly-list-all-assemblies {
+/*        .collection-assembly-list-more-assemblies, .collection-assembly-list-all-assemblies {
             //background-color: #f5f5f5;
             //float: left;
             display: none;
@@ -1134,7 +868,7 @@ h2, h4 {
             .glyphicon {
                 margin: 0 5px;
             }
-        }
+        }*/
 
         .assembly-list-header-tree {
             width: 50px;
@@ -1327,101 +1061,7 @@ h2, h4 {
 
 
 
-// Object
-.wgst-panel__assembly {
 
-    .wgst-panel-loading {
-        width: 560px;
-        height: 560px;
-    }
-
-    .assembly-details {
-        max-height: 560px;
-        overflow: scroll;
-        .assembly-upload-datetime {
-            font-weight: 400;
-        }
-        h2 {
-            font-size: 12px;
-            font-weight: 400;
-            margin: 20px 8px;
-            text-align: center;
-            text-transform: uppercase;
-        }
-        h4 {
-            margin-bottom: 20px;
-            font-size: 16px;
-            font-weight: 500;
-        }
-        .assembly-detail {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            &:last-of-type {
-                border-bottom: 0;
-            }
-        }
-        .assembly-detail__resistance-profile {
-            overflow: hidden;
-            .antibiotic-group {
-                margin-top: 10px;
-                .antibiotic {
-                    width: 100%;
-                    padding: 5px 10px;
-                    border-right: 1px solid #fff;
-                    font-weight: 300;
-                    &.resistance-fail {
-                        color: #fff;
-                        background-color: #CF0000;
-                    }
-                    &.resistance-success {
-                        background-color: #038F05;
-                    }
-                    &.resistance-unknown {
-                        background-color: #f5f5f5;
-                    }
-                    &.no-resistance-data {
-                        background-color: #333;
-                    }
-                }
-
-                    .antibiotic[data-antibiotic-resistance-state="RESISTANT"] {
-                        background-color: #CF0000;
-                        color: #fff;
-                    }
-                    .antibiotic[data-antibiotic-resistance-state="SENSITIVE"] {
-                        background-color: #038F05; 
-                    }
-                    .antibiotic[data-antibiotic-resistance-state="UNKNOWN"] {
-                        background-color: #f5f5f5;
-                        color: #000;
-                    }
-
-            }
-            th {
-                padding: 5px 0;
-                font-weight: 500;
-            }
-        }
-        .assembly-detail__mlst {
-            td {
-                padding: 5px 10px;
-                border: 1px solid #ddd;
-            }
-            .row-title {
-                font-weight: 500;
-            }
-        }
-        .assembly-detail__score {
-            th {
-                font-weight: 500;
-            }
-            td, th {
-                padding: 5px 10px;
-                border: 1px solid #ddd;
-            }
-        }
-    }
-}
 
 
 
@@ -1596,6 +1236,8 @@ h2, h4 {
 @import "collection_map";
 @import "collection_tree";
 
+@import "assembly";
+
 @import "assembly_upload/assembly_upload_metadata";
 @import "assembly_upload/assembly_upload_analytics";
 @import "assembly_upload/assembly_upload_navigation";
@@ -1604,6 +1246,3 @@ h2, h4 {
 @import "backgrounds/drag_and_drop";
 @import "backgrounds/uploading";
 @import "backgrounds/get_collection";
-
-
-

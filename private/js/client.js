@@ -2115,28 +2115,28 @@ $(function(){
         collectionAssemblyList.find('.antibiotic[data-toggle="tooltip"]').tooltip();
     };
 
-    $('.collection-assembly-list-view-all-assemblies').on('click', function(e) {
-        var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
-            collectionAssemblyList = $('.collection-assembly-list');
+    // $('.collection-assembly-list-view-all-assemblies').on('click', function(e) {
+    //     var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
+    //         collectionAssemblyList = $('.collection-assembly-list');
 
-        // Redraw original tree and set original zoom
-        WGST.collection[collectionId].tree.canvas.redrawOriginalTree();
-        WGST.collection[collectionId].tree.canvas.setZoom(-0.05);
+    //     // Redraw original tree and set original zoom
+    //     WGST.collection[collectionId].tree.canvas.redrawOriginalTree();
+    //     WGST.collection[collectionId].tree.canvas.setZoom(-0.05);
 
-        // Remove existing assemblies from assembly list
-        collectionAssemblyList.find('.assembly-list-item').remove();
-        // Append new assemblies
-        collectionAssemblyList.append($('.collection-assembly-list-full .assembly-list-item').clone());
+    //     // Remove existing assemblies from assembly list
+    //     collectionAssemblyList.find('.assembly-list-item').remove();
+    //     // Append new assemblies
+    //     collectionAssemblyList.append($('.collection-assembly-list-full .assembly-list-item').clone());
 
-        collectionAssemblyList.find('.antibiotic[data-toggle="tooltip"]').tooltip();
+    //     collectionAssemblyList.find('.antibiotic[data-toggle="tooltip"]').tooltip();
 
-        // Hide filter message
-        $('.collection-assembly-list-all-assemblies').hide();
-        // Show scroll message
-        $('.collection-assembly-list-more-assemblies').show();
+    //     // Hide filter message
+    //     $('.collection-assembly-list-all-assemblies').hide();
+    //     // Show scroll message
+    //     $('.collection-assembly-list-more-assemblies').show();
 
-        e.preventDefault();
-    });
+    //     e.preventDefault();
+    // });
 
     // ============================================================
     // Listen to Phylocanvas tree user manipulation
@@ -2156,7 +2156,7 @@ $(function(){
     // });
 
     $('body').on('click', '.tree-controls-match-assembly-list', function(){
-        var $canvas = $(this).closest('.wgst-panel-body-content').find('canvas.phylocanvas');
+        var $canvas = $(this).closest('.wgst-panel-body-container').find('canvas.phylocanvas');
         treeManipulationHandler($canvas);
     });
 

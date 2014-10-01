@@ -57,6 +57,9 @@ $(function(){
         };
 
         window.WGST.exports.createPanel = function(panelType, templateContext) {
+            console.log('createPanel()');
+            console.log('panelType:' + panelType);
+            console.dir(templateContext);
 
         	//
         	// Check if panel already exists
@@ -77,18 +80,20 @@ $(function(){
             //
             // Extend template context with panel button rules
             //
-            templateContext = $.extend(templateContext, window.WGST.exports.mapPanelTypeToPanelButtonRules[panelType]);
+            $.extend(templateContext, window.WGST.exports.mapPanelTypeToPanelButtonRules[panelType]);
 
+            //
+            // Get container's label
+            //
             if (typeof templateContext.panelLabel === 'undefined') {
-                //
-                // Get panel's label
-                //
+
                 //templateContext.panelLabel = templateContext.assemblyUserId;
                 templateContext.panelLabel = window.WGST.exports.getContainerLabel({
                     containerName: 'panel', 
                     containerType: panelType,
                     containerId: templateContext.panelId,
-                    containerContext: templateContext
+                    additional: templateContext
+                    //containerContext: templateContext
                 });
             }
 
@@ -242,66 +247,6 @@ $(function(){
 
             google.maps.event.trigger(window.WGST.geo.map.canvas, 'resize');
 
-	    };
-
-	    window.WGST.exports.getContainerLabel = function(options) {
-
-            //
-            //
-	    	//
-	    	// Options:
-	    	//
-	    	// containerName: "panel" or "fullscreen"
-	    	// containerType: panelType or fullscreenType
-	    	// containerId: panelId or fullscreenId
-            // containerContext: context object specific to container
-	    	//
-	    	//
-	    	//
-
-        	var containerLabel = 'Anonymous';
-
-        	//
-        	// Prepare container's label
-        	//
-        	if (options.containerType === 'collection-data') {
-
-        		containerLabel = 'Data';
-
-        	} else if (options.containerType === 'collection-map') {
-
-        		containerLabel = 'Map';
-
-        	} else if (options.containerType === 'collection-tree') {
-
-                containerLabel = 'Tree';
-
-        		// var treeType = options.containerId.split('__')[2];
-        		// containerLabel = treeType.replace(/[_]/g, ' ').toLowerCase().capitalize();
-
-        	} else if (options.containerType === 'assembly') {
-
-        		containerLabel = options.containerContext.assemblyUserId; // 'Assembly';
-
-        	} else if (options.containerType === 'assembly-upload-progress') {
-
-                containerLabel = 'Upload Progress';
-
-            } else if (options.containerType === 'assembly-upload-metadata') {
-
-                containerLabel = 'Assembly Metadata';
-
-            } else if (options.containerType === 'assembly-upload-analytics') {
-
-                containerLabel = 'Assembly Analytics';
-
-            } else if (options.containerType === 'assembly-upload-navigation') {
-
-                containerLabel = 'Collection Navigation';
-
-            }
-
-        	return containerLabel;
 	    };
 
         $('body').on('click', '[data-panel-header-control-button="fullscreen"]', function(){

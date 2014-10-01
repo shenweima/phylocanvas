@@ -250,11 +250,178 @@ $(function(){
             return assemblyScoresData;
         };
 
-	    window.WGST.exports.getAssembly = function(assemblyId) {
+        window.WGST.exports.getAssemblyData = function(assemblyId, callback) {
+
+            console.log('[WGST] Getting assembly ' + assemblyId + ' data');
+
+            //
+            // Get assembly data
+            //
+            $.ajax({
+                type: 'POST',
+                url: '/api/assembly',
+                // http://stackoverflow.com/a/9155217
+                datatype: 'json',
+                data: {
+                    assemblyId: assemblyId
+                }
+            })
+            .done(function(data, textStatus, jqXHR) {
+                console.log('[WGST] Received data for assembly ' + assemblyId);
+                //console.dir(data);
+
+                callback({
+                    assembly: data.assembly,
+                    antibiotics: data.antibiotics
+                }, null);
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                callback(null, textStatus);
+
+                // console.error('[WGST][Error] Failed to get assembly data');
+                // console.error(textStatus);
+                // console.error(errorThrown);
+                // console.error(jqXHR);
+            });
+        };
+
+        window.WGST.exports.prepareAssemblyDataForRendering = function(assembly, antibiotics) {
+
+            console.log('[WGST] Parsing assembly ' + assembly.assemblyId + ' data');
+
+            var preparedAssemblyData = {
+                metadata: {}
+            };
+
+            //
+            // User assembly id
+            //
+            var //assembly = data.assembly,
+                assemblyUserId = assembly.ASSEMBLY_METADATA.userAssemblyId;
+
+            preparedAssemblyData.assemblyUserId = assemblyUserId;
+
+            //
+            // Resistance profile
+            //
+            var assemblyResistanceProfile = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+            var assemblyResistanceData = getAssemblyResistanceData(antibiotics, assemblyResistanceProfile);
+
+            preparedAssemblyData.resistanceProfile = assemblyResistanceData;
+
+            //
+            // Sequence type
+            //
+            var assemblySequenceType = assembly.MLST_RESULT.stType;
+            var assemblySequenceTypeData = getAssemblySequenceTypeData(assemblySequenceType);
+
+            preparedAssemblyData.sequenceType = assemblySequenceTypeData;
+
+            console.debug('assemblySequenceTypeData:');
+            console.log(assemblySequenceTypeData);
+
+            //
+            // MLST
+            //
+            var assemblyAlleles = assembly.MLST_RESULT.alleles;
+            var assemblyMlstData = getMlstData(assemblyAlleles);
+
+            preparedAssemblyData.mlst = assemblyMlstData;
+
+            console.debug('assemblyMlstData:');
+            console.dir(assemblyMlstData);
+
+            //
+            // Nearest representative
+            //
+            var assemblyScores = assembly['FP_COMP'].scores;
+            var assemblyNearestRepresentativeData = getAssemblyNearestRepresentativeData(assemblyScores);
+
+            preparedAssemblyData.nearestRepresentative = assemblyNearestRepresentativeData;
+
+            console.debug('assemblyNearestRepresentativeData:');
+            console.dir(assemblyNearestRepresentativeData);
+
+            //
+            // Scores
+            //
+            var fingerprintSize = assembly['FP_COMP']['fingerprintSize'];
+            var assemblyScoresData = getAssemblyScoresData(fingerprintSize, assemblyScores);
+
+            preparedAssemblyData.scores = assemblyScoresData;
+
+            console.debug('assemblyScoresData:');
+            console.dir(assemblyScoresData);
+
+            //
+            // Top score
+            //
+            var assemblyTopScore = window.WGST.exports.calculateAssemblyTopScore(assemblyScores);
+
+            preparedAssemblyData.topScore = assemblyTopScore;
+
+            //
+            // Top score percentage
+            //
+            preparedAssemblyData.topScorePercentage = Math.round(assemblyTopScore.score.toFixed(2) * 100);
+
+            //
+            // Metadata
+            //
+
+            //
+            // Geography
+            //
+            preparedAssemblyData.metadata.latitude = assembly['ASSEMBLY_METADATA'].geography.position.latitude;
+            preparedAssemblyData.metadata.longitude = assembly['ASSEMBLY_METADATA'].geography.position.longitude;
+
+            return preparedAssemblyData;
+        };
+
+        window.WGST.exports.getAssembly = function(assemblyId) {
+
+            window.WGST.exports.getAssemblyData(assemblyId, function(data, error){
+
+                if (error) {
+                    console.error('[WGST][Error] Failed to get assembly data: ' + error);
+                    return;
+                }
+
+                var preparedForRenderingAssemblyData = window.WGST.exports.prepareAssemblyDataForRendering(data.assembly, data.antibiotics);
+            
+                //
+                // Create assembly panel
+                //
+                var additionalTemplateContext = {
+                    assemblyUserId: preparedForRenderingAssemblyData.assemblyUserId,
+                    antibioticResistanceData: preparedForRenderingAssemblyData.resistanceProfile,
+                    sequenceTypeData: preparedForRenderingAssemblyData.sequenceType,
+                    mlstData: preparedForRenderingAssemblyData.mlst,
+                    nearestRepresentativeData: preparedForRenderingAssemblyData.nearestRepresentative,
+                    scoresData: preparedForRenderingAssemblyData.scores
+                };
+
+                var assemblyPanelId = window.WGST.exports.createAssemblyPanel(assemblyId, additionalTemplateContext);
+                
+                //
+                // Bring panel to top
+                //
+                window.WGST.exports.bringPanelToFront(assemblyPanelId);
+                
+                //
+                // Show panel
+                //
+                window.WGST.exports.showPanel(assemblyPanelId);
+            });
+        };
+
+	    window.WGST.exports.__old_remove__getAssembly = function(assemblyId) {
 
             console.log('[WGST] Getting assembly ' + assemblyId);
 
+            //
 	        // Get assembly data
+            //
 	        $.ajax({
 	            type: 'POST',
 	            url: '/api/assembly',
@@ -341,7 +508,7 @@ $(function(){
 
 	        })
 	        .fail(function(jqXHR, textStatus, errorThrown) {
-	            console.log('[WGST][Error] Failed to get assembly data');
+	            console.error('[WGST][Error] Failed to get assembly data');
 	            console.error(textStatus);
 	            console.error(errorThrown);
 	            console.error(jqXHR);

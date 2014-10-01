@@ -4,36 +4,38 @@
         class="wgst-template"
         data-template-id="panel-body__assembly">
 
-  <div class="assembly-details">
-    <div class="assembly-detail assembly-detail__nearest-representative">
-      <h4>Nearest Representative</h4>
-      <div class="assembly-detail-content">{{nearestRepresentativeData}}</div>
-    </div> 
+    <div class="wgst-assembly-details">
 
-    <div class="assembly-detail assembly-detail__score">
-      <h4>Score</h4>
-      <div class="assembly-detail-content">{% endraw %}{% include "assembly/scores.html" %}{% raw %}</div>
-    </div>
+        <div class="assembly-detail assembly-detail__nearest-representative">
+          <h4>Nearest Representative</h4>
+          <div class="assembly-detail-content">{{nearestRepresentativeData}}</div>
+        </div>
 
-    <div class="assembly-detail assembly-detail__st-type">
-      <h4>Sequence Type</h4>
-      <div class="assembly-detail-content">{{sequenceTypeData}}</div>
-    </div> 
+        <div class="assembly-detail assembly-detail__score">
+          <h4>Score</h4>
+          <div class="assembly-detail-content">{% endraw %}{% include "assembly/scores.html" %}{% raw %}</div>
+        </div>
 
-    <div class="assembly-detail assembly-detail__mlst">
-      <h4>MLST</h4>
-      <div class="assembly-detail-content">{% endraw %}{% include "assembly/mlst.html" %}{% raw %}</div>
-    </div>              
+        <div class="assembly-detail assembly-detail__st-type">
+          <h4>Sequence Type</h4>
+          <div class="assembly-detail-content">{{sequenceTypeData}}</div>
+        </div>
 
-    <div class="assembly-detail assembly-detail__resistance-profile">
-      <h4>Predicted Resistance Profile</h4>
-      <div class="assembly-detail-content">
-        {{#each antibioticResistanceData}}
-          {% endraw %}{% include "assembly/antibiotic_group.html" %}{% raw %}
-        {{/each}}
-      </div>
-    </div>
-  </div><!-- /.assembly-details -->
+        <div class="assembly-detail assembly-detail__mlst">
+          <h4>MLST</h4>
+          <div class="assembly-detail-content">{% endraw %}{% include "assembly/mlst.html" %}{% raw %}</div>
+        </div> 
+
+        <div class="assembly-detail assembly-detail__resistance-profile">
+          <h4>Predicted Resistance Profile</h4>
+          <div class="assembly-detail-content">
+            {{#each antibioticResistanceData}}
+              {% endraw %}{% include "assembly/antibiotic_group.html" %}{% raw %}
+            {{/each}}
+          </div>
+        </div>
+
+    </div><!-- /.assembly-details -->
 
 </script>
 

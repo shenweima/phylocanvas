@@ -1,12 +1,69 @@
+.wgst-panel__collection-tree {
+	height: 577px;
+}
+
+.wgst-panel__collection-map {
+	height: 560px;
+}
+
 .wgst-panel {
+    top: 40px;
+    left: 90px;
+
+    position: absolute;
+/*    width: auto;
+    height: auto;*/
+
+    border: 0px solid #555;
+
+    -webkit-box-shadow: 0px 0px 10px #999; 
+    -moz-box-shadow: 0px 0px 10px #999; 
+    box-shadow: 0px 0px 10px #999; 
+
+    border-radius: 8px;
+    background-color: #fff;
+    z-index: 10;
+    //.no-user-select;
+
+    .wgst-panel-container {
+    	position: relative;
+    	width: 100%;
+    	height: 100%;
+    }
 
 	.wgst-panel-header {
+		width: 100%;
 	    height: 40px;
+
+	    position: absolute;
+	    top: 0;
+	    left: 0;
+
+        background-color: #f7f7f7;
+        border-radius: 8px 8px 0 0;
+        border-bottom: 1px solid #eee;
+        padding: 12px 15px;
+
+        text-align: center;
+        font-weight: 300;
+        line-height: 20px;
+
+        .assembly-upload-summary {
+
+            strong,
+            .assembly-upload-total-number,
+            .assembly-upload-total-number-label,
+            .upload-single-assembly-file-name,
+            .assembly-sequences-average {
+                font-weight: 400;
+            }
+        }
 
 	    .header-title {
 	        font-size: 14px;
 	        font-weight: 300;
 	        text-align: center;
+
 	        small {
 	            font-size: 100%;
 	            font-weight: 400;
@@ -30,28 +87,47 @@
 			    &.wgst-panel-header-control-button--active {
 			        cursor: pointer;
 			        color: #777;
+
 			        &:hover {
 			            color: #000;
 			        }
 			    }
 		    }
 		}
-
-
-/*	    .wgst-panel-control-button__maximize {
-	        right: 91px; // 13 + 13 + 13
-	    }
-	    .wgst-panel-control-button__opacity {
-	        right: 65px;
-	    }
-	    .wgst-panel-control-button__minimize {
-	        right: 39px; // 13 + 13 + 13
-	    }
-	    .wgst-panel-control-button__close {
-	        right: 13px;
-	    }*/
 	}
 
+	.wgst-panel-body {
+		position: absolute;
+		top: 40px;
+		left: 0;
+		bottom: 20px;
+
+		width: 100%;
+
+	    //box-sizing: border-box;
+	    //-webkit-box-sizing: border-box;
+
+	    //height: 100%;
+
+	    .wgst-panel-body-container {
+			height: 100%;
+	    }
+	}
+
+	.wgst-panel-footer {
+	    width: 100%;
+	    height: 20px;
+
+	    position: absolute;
+	    bottom: 0;
+	    left: 0;
+
+	    background-color: #f7f7f7;
+	    border-radius: 0 0 8px 8px;
+	    border-top: 1px solid #eee;
+	    font-weight: 300;
+	    overflow: hidden;
+	}
 }
 
 @import "panels/panel__collection-data.less";

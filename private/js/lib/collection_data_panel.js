@@ -26,7 +26,7 @@ $(function(){
         //
         // User wants to show assembly on a map
         //
-        $('body').on('change', '.collection-assembly-list input[type="checkbox"]', function(e) {
+        $('body').on('change', '.wgst-assembly-show-on-map', function(e) {
 
             //======================================================
             // Map
@@ -34,7 +34,7 @@ $(function(){
             var checkedAssemblyId = $(this).attr('data-assembly-id'),
                 collectionId = $(this).closest('.wgst-collection').attr('data-collection-id');
 
-            var allCheckedCheckboxes = $(this).closest('.collection-assembly-list').find('.show-on-map-checkbox [type="checkbox"]:checked'),
+            var allCheckedCheckboxes = $(this).closest('.wgst-collection-assemblies-list').find('.wgst-assembly-show-on-map:checked'),
                 selectedAssemblyIds = [],
                 selectedAssemblyId;
 
@@ -42,6 +42,9 @@ $(function(){
                 selectedAssemblyId = $(this).attr('data-assembly-id');
                 selectedAssemblyIds.push(selectedAssemblyId);
             });
+
+            console.debug('>>> }}} A');
+            console.dir(selectedAssemblyIds);
 
             window.WGST.exports.triggerMapMarkers(collectionId, selectedAssemblyIds);
 
@@ -184,10 +187,10 @@ $(function(){
             // }
 
             // Check if you have selected all (filtered out) assemblies
-            if ($(this).closest('.collection-assembly-list').find('input[type="checkbox"]:not(:checked)').length === 0) {
-                $('input[type="checkbox"].show-all-assemblies-on-map').prop('checked', true);
+            if ($(this).closest('.wgst-collection-assemblies-list').find('input[type="checkbox"]:not(:checked)').length === 0) {
+                $('.wgst-assembly-show-all-on-map').prop('checked', true);
             } else {
-                $('input[type="checkbox"].show-all-assemblies-on-map').prop('checked', false);
+                $('.wgst-assembly-show-all-on-map').prop('checked', false);
             }
         });
 
@@ -554,11 +557,13 @@ $(function(){
         //
         // User wants to toggle all assemblies on map
         //
-        $('body').on('change', 'input[type="checkbox"].show-all-assemblies-on-map', function(e) {
+        $('body').on('change', '.wgst-assembly-show-all-on-map', function(e) {
 
-            var $showOnMapCheckboxes = $(this).closest('.collection-details').find('.collection-assembly-list .assembly-list-header-map input[type="checkbox"]');
+            var $showOnMapCheckboxes = $(this).closest('.wgst-collection-assemblies').find('.wgst-collection-assemblies-list .wgst-assembly-show-on-map');
             
             if ($(this).prop('checked')) {
+
+                console.log('X1');
 
                 //
                 // Check all
@@ -567,6 +572,8 @@ $(function(){
 
             } else {
                 
+                console.log('X2');
+
                 //
                 // Uncheck all
                 //
