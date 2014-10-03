@@ -32,9 +32,9 @@ $(function(){
             // Map
             //======================================================
             var checkedAssemblyId = $(this).attr('data-assembly-id'),
-                collectionId = $(this).closest('.wgst-collection').attr('data-collection-id');
+                collectionId = $(this).closest('[data-wgst-collection-data]').attr('data-collection-id');
 
-            var allCheckedCheckboxes = $(this).closest('.wgst-collection-assemblies-list').find('.wgst-assembly-show-on-map:checked'),
+            var allCheckedCheckboxes = $(this).closest('.wgst-collection-data-assemblies').find('.wgst-assembly-show-on-map:checked'),
                 selectedAssemblyIds = [],
                 selectedAssemblyId;
 
@@ -187,34 +187,34 @@ $(function(){
             // }
 
             // Check if you have selected all (filtered out) assemblies
-            if ($(this).closest('.wgst-collection-assemblies-list').find('input[type="checkbox"]:not(:checked)').length === 0) {
+            if ($(this).closest('.wgst-collection-data-assemblies').find('input[type="checkbox"]:not(:checked)').length === 0) {
                 $('.wgst-assembly-show-all-on-map').prop('checked', true);
             } else {
                 $('.wgst-assembly-show-all-on-map').prop('checked', false);
             }
         });
 
-        $('.wgst-panel__collection, .wgst-fullscreen__collection').on('click', '.show-on-representative-tree', function(event){
+        // $('.wgst-panel__collection, .wgst-fullscreen__collection').on('click', '.show-on-representative-tree', function(event){
 
-            return false;
+        //     return false;
 
-            openRepresentativeCollectionTree();
+        //     openRepresentativeCollectionTree();
 
-            // endPanelLoadingIndicator('representativeCollectionTree');
-            // activatePanel('representativeCollectionTree');
-            // showPanel('representativeCollectionTree');
-            // showPanelBodyContent('representativeCollectionTree');
-            // bringPanelToTop('representativeCollectionTree');
+        //     // endPanelLoadingIndicator('representativeCollectionTree');
+        //     // activatePanel('representativeCollectionTree');
+        //     // showPanel('representativeCollectionTree');
+        //     // showPanelBodyContent('representativeCollectionTree');
+        //     // bringPanelToTop('representativeCollectionTree');
 
-            var collectionId = $(this).closest('.wgst-collection-info').attr('data-collection-id'),
-                //collectionId = $(this).closest('.wgst-panel__collection').attr('data-collection-id'),
-                assemblyId = $(this).attr('data-assembly-id'),
-                referenceId = WGST.collection[collectionId].assemblies[assemblyId].FP_COMP.topScore.referenceId;
+        //     var collectionId = $(this).closest('.wgst-collection-info').attr('data-collection-id'),
+        //         //collectionId = $(this).closest('.wgst-panel__collection').attr('data-collection-id'),
+        //         assemblyId = $(this).attr('data-assembly-id'),
+        //         referenceId = WGST.collection[collectionId].assemblies[assemblyId].FP_COMP.topScore.referenceId;
 
-            WGST.collection.representative.tree.canvas.selectNodes(referenceId);
+        //     WGST.collection.representative.tree.canvas.selectNodes(referenceId);
 
-            event.preventDefault();
-        });
+        //     event.preventDefault();
+        // });
 
         // Open Assembly from Collection list
         $('body').on('click', '.open-assembly-button', function(event){
@@ -559,7 +559,7 @@ $(function(){
         //
         $('body').on('change', '.wgst-assembly-show-all-on-map', function(e) {
 
-            var $showOnMapCheckboxes = $(this).closest('.wgst-collection-assemblies').find('.wgst-collection-assemblies-list .wgst-assembly-show-on-map');
+            var $showOnMapCheckboxes = $(this).closest('[data-wgst-collection-data]').find('.wgst-collection-data-assemblies .wgst-assembly-show-on-map');
             
             if ($(this).prop('checked')) {
 

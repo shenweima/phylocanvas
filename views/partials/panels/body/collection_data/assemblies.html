@@ -4,31 +4,27 @@
         class="wgst-template"
         data-template-id="panel-body__collection-data__assemblies">
 
-  <div class="wgst-collection-assemblies wgst-collection wgst-collection-info" data-collection-id="{{collectionId}}">
+  <div class="wgst-collection-data"
+  		data-collection-id="{{collectionId}}"
+      data-wgst-collection-data>
 
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th class="wgst-assembly-data__map">
-          	Map
-          </th>
-          <th class="wgst-assembly-data__assembly-user-id">Assembly</th>
-          <th class="wgst-assembly-data__top-score">Nearest Representative</th>
-          <th class="wgst-assembly-data__sequence-type">MLST</th>
-          <th class="wgst-assembly-data__resistance-profile">Predicted Resistance Profile</th>
-        </tr>
-        <tr>
-        	<th><input type="checkbox" class="wgst-assembly-show-all-on-map"/></th>
-        <tr>
-      </thead>
-      <tbody class="wgst-collection-assemblies-list">
+      <div class="wgst-collection-data-headers">
+  		  <div class="wgst-collection-data-header wgst-assembly-data__map">
+          <span class="fa fa-map-marker"></span>
+  			   <input type="checkbox" class="wgst-assembly-show-all-on-map" />
+  		  </div>
+    		<div class="wgst-collection-data-header wgst-assembly-data__assembly-user-id">Assembly</div>
+    		<div class="wgst-collection-data-header wgst-assembly-data__top-score">Nearest Representative</div>
+    		<div class="wgst-collection-data-header wgst-assembly-data__sequence-type">MLST</div>
+    		<div class="wgst-collection-data-header wgst-assembly-data__resistance-profile">Predicted Resistance Profile</div>
+      </div>
+      <div class="wgst-collection-data-assemblies">
 
         {{#each assemblies}}
           {{> assembly}}
         {{/each}}
 
-      </tbody>
-    </table>
+      </div>
 
   </div>
 
