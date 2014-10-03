@@ -450,14 +450,14 @@ $(function(){
             var hidableId = $(this).closest('.wgst-hidable').attr('data-hidable-id');
 
             //
-            // Check if panel exists
+            // Check if container exists
             //
-            if (window.WGST.exports.isPanelExists(hidableId)) {
+            if (window.WGST.exports.isContainerExists(hidableId)) {
 
                 //
-                // Remove panel
+                // Remove container
                 //
-                window.WGST.exports.removePanel(hidableId);
+                window.WGST.exports.removeContainer(hidableId);
 
             }
 
