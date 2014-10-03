@@ -64,8 +64,7 @@ $(function(){
             //
             } else if (hidableId === 'assembly-upload-navigation'
                     || hidableId === 'assembly-upload-analytics'
-                    || hidableId === 'assembly-upload-metadata'
-                    || hidableId === 'assembly-upload-progress') {
+                    || hidableId === 'assembly-upload-metadata') {
 
                 templateContext.noFullscreen = true;
                 templateContext.close = false;

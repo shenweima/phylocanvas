@@ -451,8 +451,7 @@ $(function(){
 	    //
 	    window.WGST.socket.connection.on('assemblyUploadNotification', function(data) {
 
-            if  (! window.WGST.exports.isFullscreenExists('assembly-upload-progress')) {
-            //if  (! window.WGST.exports.isContainerExists('assembly-upload-progress')) {
+            if  (! window.WGST.exports.isContainerExists('assembly-upload-progress')) {
 
                 var totalNumberOfAssembliesUploading = Object.keys(window.WGST.upload.fastaAndMetadata).length;
 
@@ -491,11 +490,6 @@ $(function(){
                 //
                 window.WGST.exports.hideBackground('uploading');
             }
-
-            // //
-            // // Hide uploading background
-            // //
-            // window.WGST.exports.hideBackground('uploading');
 
 	        var collectionId = data.collectionId,
 	            assemblyId = data.assemblyId,

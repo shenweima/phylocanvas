@@ -51,7 +51,6 @@ $(function(){
                 noCloseButton: true
             },
             'assembly-upload-progress': {
-                noFullscreenButton: true,
                 noCloseButton: true
             }
         };
@@ -282,28 +281,6 @@ $(function(){
 	    $('body').on('mousedown', '.wgst-panel', function(){
 	        window.WGST.exports.bringPanelToFront($(this).attr('data-panel-id'));
 	    });
-
-        // $('body').on('click', '.wgst-panel-control-button__maximize', function(){
-
-	       //  //
-	       //  // Bring fullscreen to panel
-	       //  //
-	       //  var $fullscreen = $('.wgst-fullscreen');
-	       //  var fullscreenId = $fullscreen.attr('data-fullscreen-id');
-	       //  var panelId = fullscreenId;
-
-	       //  window.WGST.exports.bringFullscreenToPanel(fullscreenId);
-
-	       //  //
-	       //  // Bring panel to fullscreen
-	       //  //
-	       //  var $panel = $(this).closest('.wgst-panel');
-	       //  var panelId = $panel.attr('data-panel-id');
-	       //  var fullscreenId = panelId;
-
-	       //  window.WGST.exports.bringPanelToFullscreen(panelId, fullscreenId);
-
-        // });
 
 	})();
 
