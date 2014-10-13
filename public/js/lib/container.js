@@ -1,1 +1,183 @@
-$(function(){!function(){window.WGST.exports.isContainerExists=function(e){return window.WGST.exports.isPanelExists(e)?!0:window.WGST.exports.isFullscreenExists(e)?!0:!1},window.WGST.exports.getContainerType=function(e){return window.WGST.exports.isPanelExists(e)?"panel":window.WGST.exports.isFullscreenExists(e)?"fullscreen":"unknown"},window.WGST.exports.bringContainerToFront=function(e,n){var o,t=0;$(".wgst-panel, .wgst-fullscreen").each(function(){o=parseInt($(this).css("z-index"),10),o>=t&&(t=o,$(this).css("z-index",t-1))}),"panel"===e?$('[data-panel-id="'+n+'"]').css("z-index",t):"fullscreen"===e&&$('[data-fullscreen-id="'+n+'"]').css("z-index",t)},window.WGST.exports.removeContainer=function(e){"panel"===window.WGST.exports.getContainerType(e)?window.WGST.exports.removePanel(e):"fullscreen"===window.WGST.exports.getContainerType(e)&&window.WGST.exports.removeFullscreen(e)},window.WGST.exports.extendContainerOptions=function(e,n){return $.extend(e,{additional:n}),e},window.WGST.exports.getContainerLabel=function(e){console.log("getContainerLabel():"),console.dir(e);var n="Anonymous";return"collection-data"===e.containerType?n="Data":"collection-map"===e.containerType?n="Map":"collection-tree"===e.containerType?n="Tree":"assembly"===e.containerType?n=e.additional.assemblyUserId:"assembly-upload-progress"===e.containerType?n="Upload Progress":"assembly-upload-metadata"===e.containerType?n="Assembly Metadata":"assembly-upload-analytics"===e.containerType?n="Assembly Analytics":"assembly-upload-navigation"===e.containerType&&(n="Collection Navigation"),n}}()});
+$(function(){
+
+	(function(){
+
+		window.WGST.exports.isContainerExists = function(containerId) {
+			//
+			// Figure out container's type
+			//
+
+			//
+			// Panel
+			//
+			if (window.WGST.exports.isPanelExists(containerId)) {
+				return true;
+
+			//
+			// Fullscreen
+			//
+			} else if (window.WGST.exports.isFullscreenExists(containerId)) {
+				return true;
+			}
+
+			return false;
+		};
+
+		//
+		// Get container type
+		//
+		window.WGST.exports.getContainerType = function(containerId) {
+		    //
+		    // Panel or fullscreen?
+		    //
+
+		    //
+		    // Panel
+		    //
+		    if (window.WGST.exports.isPanelExists(containerId)) {
+
+		    	return 'panel';
+
+		    //
+		    // Fullscreen
+		    //
+		    } else if (window.WGST.exports.isFullscreenExists(containerId)) {
+
+		    	return 'fullscreen';
+
+		   	//
+		   	// Unknown
+		   	//
+		    } else {
+
+		    	return 'unknown';
+		    }
+		};
+
+		//
+		// Bring container to front
+		//
+		window.WGST.exports.bringContainerToFront = function(containerType, containerId) {
+
+		    //
+		    // Calculate the highest z index
+		    //
+		    var zIndexHighest = 0,
+		        zIndexCurrent;
+
+		    $('.wgst-panel, .wgst-fullscreen').each(function(){
+		        zIndexCurrent = parseInt($(this).css('z-index'), 10);
+
+		        if (zIndexCurrent >= zIndexHighest) {
+		            zIndexHighest = zIndexCurrent;
+		            $(this).css('z-index', zIndexHighest - 1);
+		        }
+		    });
+
+		    //
+		    // Panel
+		    //
+		    if (containerType === 'panel') {
+		        $('[data-panel-id="' + containerId + '"]').css('z-index', zIndexHighest);
+
+		    //
+		    // Fullscreen
+		    //
+		    } else if (containerType === 'fullscreen') {
+		        $('[data-fullscreen-id="' + containerId + '"]').css('z-index', zIndexHighest);
+
+		    }
+		};
+
+		window.WGST.exports.removeContainer = function(containerId) {
+			//
+			// Figure out container's type
+			//
+
+			//
+			// Panel
+			//
+			if (window.WGST.exports.getContainerType(containerId) === 'panel') {
+				window.WGST.exports.removePanel(containerId);
+
+			//
+			// Fullscreen
+			//
+			} else if (window.WGST.exports.getContainerType(containerId) === 'fullscreen') {
+				window.WGST.exports.removeFullscreen(containerId);
+			}
+		};
+
+        window.WGST.exports.extendContainerOptions = function(containerOptions, additionalContainerOptions) {
+            $.extend(containerOptions, {
+                additional: additionalContainerOptions
+            });
+
+            return containerOptions;
+        };
+
+	    window.WGST.exports.getContainerLabel = function(options) {
+	    	console.log('getContainerLabel():');
+	    	console.dir(options);
+
+            //
+            //
+	    	//
+	    	// Options:
+	    	//
+	    	// containerName: "panel" or "fullscreen"
+	    	// containerType: panelType or fullscreenType
+	    	// containerId: panelId or fullscreenId
+            // additional: additional container options (specific to each container)
+	    	//
+	    	//
+	    	//
+
+        	var containerLabel = 'Anonymous';
+
+        	//
+        	// Prepare container's label
+        	//
+        	if (options.containerType === 'collection-data') {
+
+        		containerLabel = 'Data';
+
+        	} else if (options.containerType === 'collection-map') {
+
+        		containerLabel = 'Map';
+
+        	} else if (options.containerType === 'collection-tree') {
+
+                containerLabel = 'Tree';
+
+        		// var treeType = options.containerId.split('__')[2];
+        		// containerLabel = treeType.replace(/[_]/g, ' ').toLowerCase().capitalize();
+
+        	} else if (options.containerType === 'assembly') {
+
+        		containerLabel = options.additional.assemblyUserId; // 'Assembly';
+
+        	} else if (options.containerType === 'assembly-upload-progress') {
+
+                containerLabel = 'Upload Progress';
+
+            } else if (options.containerType === 'assembly-upload-metadata') {
+
+                containerLabel = 'Assembly Metadata';
+
+            } else if (options.containerType === 'assembly-upload-analytics') {
+
+                containerLabel = 'Assembly Analytics';
+
+            } else if (options.containerType === 'assembly-upload-navigation') {
+
+                containerLabel = 'Collection Navigation';
+
+            }
+
+        	return containerLabel;
+	    };
+
+	})();
+
+});

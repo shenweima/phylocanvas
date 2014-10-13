@@ -34,6 +34,38 @@ $(function(){
 		    $dragAndDropBackground.find('.wgst-drag-and-drop-content').find('.fa').removeClass('animated bounce');
 		};
 
+		var handleCsvDrop = function(file) {
+	        console.log('Dropped CSV file');
+	        console.dir(file);
+
+	        var fileReader = new FileReader();
+
+            // fileReader.addEventListener('load', function(event){
+            //     console.log('[WGST] Loaded csv file ' + event.target);
+            //     console.dir(fileReader);
+
+            // });
+
+            fileReader.onload = function(event){
+                console.log('[WGST] Loaded csv file');
+                console.dir(fileReader.result);
+
+                var csvString = fileReader.result;
+
+                var results = Papa.parse(csvString, {
+                	header: true,
+                	dynamicTyping: true
+                });
+
+                console.dir(results.data);
+
+                
+
+            };
+
+            fileReader.readAsText(file);
+		};
+
 	    var handleDrop = function(event) {
 
 	    	//
@@ -103,7 +135,7 @@ $(function(){
 	            // Set the highest z index for this panel
 	            //$('.assembly-upload-panel').trigger('mousedown');
 
-	            if (WGST.speak) {
+	            if (window.WGST.speak) {
 	                var messageText = '',
 	                    message;
 
@@ -136,41 +168,41 @@ $(function(){
 	                // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
 	                fileReader = new FileReader();
 
-	            //
-	            // Check if user dropped only 1 assembly
-	            //
-	            if (allDroppedFiles.length === 1) {
-	                // Hide average number of contigs per assembly
-	                $('.upload-multiple-assemblies-label').hide();
-	                // Set file name of dropped file
-	                $('.upload-single-assembly-file-name').text(fileName);
-	                // Show single assembly upload label
-	                $('.upload-single-assembly-label').show();
-	            } else {
-	                // Hide text that belongs to a single assembly upload summary
-	                $('.upload-single-assembly-label').hide();
-	                // Show multiple assemblies upload label
-	                $('.upload-multiple-assemblies-label').show();
-	            }
+	            // //
+	            // // Check if user dropped only 1 assembly
+	            // //
+	            // if (allDroppedFiles.length === 1) {
+	            //     // Hide average number of contigs per assembly
+	            //     $('.upload-multiple-assemblies-label').hide();
+	            //     // Set file name of dropped file
+	            //     $('.upload-single-assembly-file-name').text(fileName);
+	            //     // Show single assembly upload label
+	            //     $('.upload-single-assembly-label').show();
+	            // } else {
+	            //     // Hide text that belongs to a single assembly upload summary
+	            //     $('.upload-single-assembly-label').hide();
+	            //     // Show multiple assemblies upload label
+	            //     $('.upload-multiple-assemblies-label').show();
+	            // }
 
-	            // Init assembly navigator
+	            // // Init assembly navigator
 
-	            // Update total number of assemblies
-	            $('.total-number-of-dropped-assemblies').text(allDroppedFiles.length);
+	            // // Update total number of assemblies
+	            // $('.total-number-of-dropped-assemblies').text(allDroppedFiles.length);
 
-	            // Update assembly list slider
-	            $('.assembly-list-slider').slider('option', 'max', allDroppedFiles.length - 1);
+	            // // Update assembly list slider
+	            // $('.assembly-list-slider').slider('option', 'max', allDroppedFiles.length - 1);
 
-	            // Set file name
-	            $('.assembly-file-name').text(fileName);
+	            // // Set file name
+	            // $('.assembly-file-name').text(fileName);
 
-	            // If there is more than 1 file dropped then show assembly navigator
-	            if (allDroppedFiles.length > 1) {
-	                // Show assembly navigator
-	                $('.assembly-navigator').show();
-	                // Focus on slider handle
-	                $('.ui-slider-handle').focus();
-	            }
+	            // // If there is more than 1 file dropped then show assembly navigator
+	            // if (allDroppedFiles.length > 1) {
+	            //     // Show assembly navigator
+	            //     $('.assembly-navigator').show();
+	            //     // Focus on slider handle
+	            //     $('.ui-slider-handle').focus();
+	            // }
 
 	            numberOfDroppedFastaFiles = Object.keys(allDroppedFiles).length;
 
@@ -178,8 +210,6 @@ $(function(){
 	                // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
 
 	                if (file.type.match(csvFileTypeRegex)) {
-	                    console.log('Dropped CSV file');
-	                    console.dir(file);
 
 	                    handleCsvDrop(file);
 

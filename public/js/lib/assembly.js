@@ -1,1 +1,522 @@
-$(function(){!function(){window.WGST.exports.createAssemblyPanel=function(e,s){var a="assembly__"+e,o="assembly",t={panelId:a,panelType:o};return"undefined"!=typeof s&&$.extend(t,s),window.WGST.exports.createPanel(o,t),a},window.WGST.exports.calculateAssemblyTopScore=function(e){var s,a=[];for(s in e)e.hasOwnProperty(s)&&a.push({referenceId:e[s].referenceId,score:e[s].score});return a=a.sort(function(e,s){return s.score-e.score}),a[0]};var e=function(e){var s="";return s=0===e.length?"Not found":e},s=function(e,s){var a,o,t,r,n,l,i=[];for(t in e)if(e.hasOwnProperty(t)){r=e[t],a=[];for(n in r)r.hasOwnProperty(n)&&(o="","undefined"!=typeof s[t]?"undefined"!=typeof s[t][n]?(l=s[t][n].resistanceState,o="RESISTANT"===l?"RESISTANT":"SENSITIVE"===l?"SENSITIVE":"UNKNOWN"):o="UNKNOWN":o="UNKNOWN",a.push({antibioticName:n,antibioticResistanceData:o}));i.push({antibioticGroupName:t,antibioticGroupResistanceData:a})}return i},a=function(e){var s,a,o,t=[];for(o in e)e.hasOwnProperty(o)&&(s=e[o],a={},a=null===s?{locusId:"None",alleleId:o}:{locusId:e[o].locusId,alleleId:e[o].alleleId},t.push(a));return t},o=function(e){var s=window.WGST.exports.calculateAssemblyTopScore(e),a=s.referenceId;return a},t=function(e,s){for(var a=[],o=Object.keys(s).sort(function(e,a){return s[e]-s[a]}),t=o.length;0!==t;){t-=1;var r=o[t],n=s[r],l=n.score.toFixed(2)+" = "+Math.round(n.score*parseInt(e,10))+"/"+e;a.push({referenceId:n.referenceId,text:l})}return a};window.WGST.exports.getAssemblyData=function(e,s){console.log("[WGST] Getting assembly "+e+" data"),$.ajax({type:"POST",url:"/api/assembly",datatype:"json",data:{assemblyId:e}}).done(function(a){console.log("[WGST] Received data for assembly "+e),s({assembly:a.assembly,antibiotics:a.antibiotics},null)}).fail(function(e,a){s(null,a)})},window.WGST.exports.prepareAssemblyDataForRendering=function(r,n){console.log("[WGST] Parsing assembly "+r.assemblyId+" data");var l={metadata:{}},i=r.ASSEMBLY_METADATA.userAssemblyId;l.assemblyUserId=i;var c=r.PAARSNP_RESULT.paarResult.resistanceProfile,d=s(n,c);l.resistanceProfile=d;var u=r.MLST_RESULT.stType,p=e(u);l.sequenceType=p,console.debug("assemblySequenceTypeData:"),console.log(p);var y=r.MLST_RESULT.alleles,S=a(y);l.mlst=S,console.debug("assemblyMlstData:"),console.dir(S);var b=r.FP_COMP.scores,T=o(b);l.nearestRepresentative=T,console.debug("assemblyNearestRepresentativeData:"),console.dir(T);var m=r.FP_COMP.fingerprintSize,f=t(m,b);l.scores=f,console.debug("assemblyScoresData:"),console.dir(f);var w=window.WGST.exports.calculateAssemblyTopScore(b);return l.topScore=w,l.topScorePercentage=Math.round(100*w.score.toFixed(2)),l.metadata.latitude=r.ASSEMBLY_METADATA.geography.position.latitude,l.metadata.longitude=r.ASSEMBLY_METADATA.geography.position.longitude,l},window.WGST.exports.getAssembly=function(e){window.WGST.exports.getAssemblyData(e,function(s,a){if(a)return console.error("[WGST][Error] Failed to get assembly data: "+a),void 0;var o=window.WGST.exports.prepareAssemblyDataForRendering(s.assembly,s.antibiotics),t={assemblyUserId:o.assemblyUserId,antibioticResistanceData:o.resistanceProfile,sequenceTypeData:o.sequenceType,mlstData:o.mlst,nearestRepresentativeData:o.nearestRepresentative,scoresData:o.scores},r=window.WGST.exports.createAssemblyPanel(e,t);window.WGST.exports.bringPanelToFront(r),window.WGST.exports.showPanel(r)})},window.WGST.exports.__old_remove__getAssembly=function(r){console.log("[WGST] Getting assembly "+r),$.ajax({type:"POST",url:"/api/assembly",datatype:"json",data:{assemblyId:r}}).done(function(n){console.log("[WGST] Received data for assembly "+r);var l=n.assembly,i=l.ASSEMBLY_METADATA.userAssemblyId,c=n.antibiotics,d=l.PAARSNP_RESULT.paarResult.resistanceProfile,u=s(c,d),p=l.MLST_RESULT.stType,y=e(p);console.debug("assemblySequenceTypeData:"),console.log(y);var S=l.MLST_RESULT.alleles,b=a(S);console.debug("assemblyMlstData:"),console.dir(b);var T=l.FP_COMP.scores,m=o(T);console.debug("assemblyNearestRepresentativeData:"),console.dir(m);var f=l.FP_COMP.fingerprintSize,w=t(f,T);console.debug("assemblyScoresData:"),console.dir(w);var g={assemblyUserId:i,antibioticResistanceData:u,sequenceTypeData:y,mlstData:b,nearestRepresentativeData:m,scoresData:w},A=window.WGST.exports.createAssemblyPanel(r,g);window.WGST.exports.bringPanelToFront(A),window.WGST.exports.showPanel(A)}).fail(function(e,s,a){console.error("[WGST][Error] Failed to get assembly data"),console.error(s),console.error(a),console.error(e)})}}()});
+$(function(){
+
+	(function(){
+
+        window.WGST.exports.createAssemblyPanel = function(assemblyId, additionalTemplateContext) {
+            var panelId = 'assembly' + '__' + assemblyId,
+                panelType = 'assembly';
+                
+            var templateContext = {
+                panelId: panelId,
+                panelType: panelType
+            };
+
+		    if (typeof additionalTemplateContext !== 'undefined') {
+		        $.extend(templateContext, additionalTemplateContext);
+		    }
+
+            window.WGST.exports.createPanel(panelType, templateContext);
+
+            return panelId;
+        };
+
+	    window.WGST.exports.calculateAssemblyTopScore = function(assemblyScores) {
+	        // Sort data by score
+	        // http://stackoverflow.com/a/15322129
+	        var sortedScores = [],
+	            score;
+
+	        // First create the array of keys/values so that we can sort it
+	        for (score in assemblyScores) {
+	            if (assemblyScores.hasOwnProperty(score)) {
+	                sortedScores.push({ 
+	                    'referenceId': assemblyScores[score].referenceId,
+	                    'score': assemblyScores[score].score
+	                });
+	            }
+	        }
+
+	        // Sort scores
+	        sortedScores = sortedScores.sort(function(a,b){
+	            return b.score - a.score; // Descending sort (Z-A)
+	        });
+
+	        return sortedScores[0];
+	    };
+
+        var getAssemblySequenceTypeData = function(sequenceTypeData) {
+        	var assemblySequenceTypeData = '';
+
+            if (sequenceTypeData.length === 0) {
+            	assemblySequenceTypeData = 'Not found';
+                //$('.wgst-panel__assembly .assembly-detail__st-type .assembly-detail-content').html('Not found');
+            } else {
+            	assemblySequenceTypeData = sequenceTypeData;
+                //$('.wgst-panel__assembly .assembly-detail__st-type .assembly-detail-content').html(assembly.MLST_RESULT.stType);
+            }
+
+            return assemblySequenceTypeData;
+        };
+
+        var getAssemblyResistanceData = function(antibiotics, assemblyResistanceProfile) {
+
+            //
+            // Get predicted resistance profile
+            //
+
+			var groupResistanceData,
+				antibioticResistanceData,
+				assemblyResistanceData = [];
+
+			var antibioticGroupName,
+				antibioticGroup,
+				antibioticName;
+
+			var assemblyAntibioticResistanceState;
+
+            //
+            // Parse each antibiotic group
+            //
+            for (antibioticGroupName in antibiotics) {
+                if (antibiotics.hasOwnProperty(antibioticGroupName)) {
+
+                    antibioticGroup = antibiotics[antibioticGroupName];
+					groupResistanceData = [];
+
+                    //
+                    // Parse each antibiotic
+                    //
+                    for (antibioticName in antibioticGroup) {
+                        if (antibioticGroup.hasOwnProperty(antibioticName)) {
+
+                        	antibioticResistanceData = '';
+
+                            //
+                            // Antibiotic group found in resistance profile for this assembly
+                            //
+                            if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
+                                
+	                            //
+	                            // Antibiotic found in resistance profile for this assembly
+	                            //
+                                if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
+
+                                    assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
+
+                                    //
+                                    // Assembly is resistant to this antibiotic (aka failure)
+                                    //
+                                    if (assemblyAntibioticResistanceState === 'RESISTANT') {
+
+		                            	//
+		                            	// Resistance: RESISTANT
+		                            	//
+	                            		antibioticResistanceData = 'RESISTANT';
+                                    
+                                    //
+                                    // Assembly is sensitive to this antibiotic (aka success)
+                                    //
+                                    } else if (assemblyAntibioticResistanceState === 'SENSITIVE') {
+
+		                            	//
+		                            	// Resistance: SENSITIVE
+		                            	//
+	                            		antibioticResistanceData = 'SENSITIVE';
+                                    
+                                    //
+                                    // Resistance is unknown
+                                    //
+                                    } else {
+
+		                            	//
+		                            	// Resistance: UNKNOWN
+		                            	//
+	                            		antibioticResistanceData = 'UNKNOWN';
+
+                                    }
+
+	                            //
+	                            // Antibiotic was not found in resistance profile for this assembly
+	                            //
+                                } else {
+
+	                            	//
+	                            	// Resistance: UNKNOWN
+	                            	//
+                            		antibioticResistanceData = 'UNKNOWN';
+
+                                }
+
+                            //
+                            // Antibiotic group was not found in resistance profile for this assembly
+                            //
+                            } else {
+
+                            	//
+                            	// Resistance: UNKNOWN
+                            	//
+                        		antibioticResistanceData = 'UNKNOWN';
+
+                            }
+
+                            groupResistanceData.push({
+                            	antibioticName: antibioticName,
+                            	antibioticResistanceData: antibioticResistanceData
+                            });
+
+                        } // if
+                    } // for
+
+                	assemblyResistanceData.push({
+                		antibioticGroupName: antibioticGroupName,
+                		antibioticGroupResistanceData: groupResistanceData
+                	});
+
+                } // if
+            } // for
+
+            return assemblyResistanceData;
+        };
+
+        var getMlstData = function(assemblyAlleles) {
+
+        	var mlstData = [];
+
+			var assemblyAllele,
+                assemblyAlleleData,
+                assemblyAlleleName;
+
+            for (assemblyAlleleName in assemblyAlleles) {
+                if (assemblyAlleles.hasOwnProperty(assemblyAlleleName)) {
+                    assemblyAllele = assemblyAlleles[assemblyAlleleName];
+                    assemblyAlleleData = {};
+
+                    if (assemblyAllele === null) {
+
+                    	assemblyAlleleData = {
+                    		locusId: 'None',
+                    		alleleId: assemblyAlleleName
+                    	};
+
+                    } else {
+
+                    	assemblyAlleleData = {
+                    		locusId: assemblyAlleles[assemblyAlleleName].locusId,
+                    		alleleId: assemblyAlleles[assemblyAlleleName].alleleId
+                    	};
+
+                    }
+
+                    mlstData.push(assemblyAlleleData);
+
+                } // if
+            } // for
+
+            return mlstData;
+        };
+
+        var getAssemblyNearestRepresentativeData = function(assemblyScores) {
+
+            var assemblyTopScore = window.WGST.exports.calculateAssemblyTopScore(assemblyScores);
+
+            var nearestRepresentative = assemblyTopScore.referenceId;
+
+            return nearestRepresentative;
+        };
+
+        var getAssemblyScoresData = function(fingerprintSize, assemblyScores) {
+
+        	var assemblyScoresData = [];
+
+            // Sort scores
+            var sortedAssemblyScores = Object.keys(assemblyScores).sort(function(assemblyScoreReferenceId1, assemblyScoreReferenceId2){
+                return assemblyScores[assemblyScoreReferenceId1] - assemblyScores[assemblyScoreReferenceId2];
+            });
+
+            var assemblyScoreCounter = sortedAssemblyScores.length;
+            for (; assemblyScoreCounter !== 0;) {
+                assemblyScoreCounter = assemblyScoreCounter - 1;
+
+                var referenceId = sortedAssemblyScores[assemblyScoreCounter],
+                    scoreData = assemblyScores[referenceId],
+                    scoreText = scoreData.score.toFixed(2) + ' = ' + Math.round(scoreData.score * parseInt(fingerprintSize, 10)) + '/' + fingerprintSize;
+
+                assemblyScoresData.push({
+                	referenceId: scoreData.referenceId,
+                	text: scoreText
+                });
+            } // for
+
+            return assemblyScoresData;
+        };
+
+        window.WGST.exports.getAssemblyData = function(assemblyId, callback) {
+
+            console.log('[WGST] Getting assembly ' + assemblyId + ' data');
+
+            //
+            // Get assembly data
+            //
+            $.ajax({
+                type: 'POST',
+                url: '/api/assembly',
+                // http://stackoverflow.com/a/9155217
+                datatype: 'json',
+                data: {
+                    assemblyId: assemblyId
+                }
+            })
+            .done(function(data, textStatus, jqXHR) {
+                console.log('[WGST] Received data for assembly ' + assemblyId);
+                //console.dir(data);
+
+                callback({
+                    assembly: data.assembly,
+                    antibiotics: data.antibiotics
+                }, null);
+            })
+            .fail(function(jqXHR, textStatus, errorThrown) {
+                callback(null, textStatus);
+
+                // console.error('[WGST][Error] Failed to get assembly data');
+                // console.error(textStatus);
+                // console.error(errorThrown);
+                // console.error(jqXHR);
+            });
+        };
+
+        window.WGST.exports.prepareAssemblyDataForRendering = function(assembly, antibiotics) {
+
+            console.log('[WGST] Parsing assembly ' + assembly.assemblyId + ' data');
+
+            var preparedAssemblyData = {
+                metadata: {}
+            };
+
+            //
+            // User assembly id
+            //
+            var //assembly = data.assembly,
+                assemblyUserId = assembly.ASSEMBLY_METADATA.userAssemblyId;
+
+            preparedAssemblyData.assemblyUserId = assemblyUserId;
+
+            //
+            // Resistance profile
+            //
+            var assemblyResistanceProfile = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+            var assemblyResistanceData = getAssemblyResistanceData(antibiotics, assemblyResistanceProfile);
+
+            preparedAssemblyData.resistanceProfile = assemblyResistanceData;
+
+            //
+            // Sequence type
+            //
+            var assemblySequenceType = assembly.MLST_RESULT.stType;
+            var assemblySequenceTypeData = getAssemblySequenceTypeData(assemblySequenceType);
+
+            preparedAssemblyData.sequenceType = assemblySequenceTypeData;
+
+            console.debug('assemblySequenceTypeData:');
+            console.log(assemblySequenceTypeData);
+
+            //
+            // MLST
+            //
+            var assemblyAlleles = assembly.MLST_RESULT.alleles;
+            var assemblyMlstData = getMlstData(assemblyAlleles);
+
+            preparedAssemblyData.mlst = assemblyMlstData;
+
+            console.debug('assemblyMlstData:');
+            console.dir(assemblyMlstData);
+
+            //
+            // Nearest representative
+            //
+            var assemblyScores = assembly['FP_COMP'].scores;
+            var assemblyNearestRepresentativeData = getAssemblyNearestRepresentativeData(assemblyScores);
+
+            preparedAssemblyData.nearestRepresentative = assemblyNearestRepresentativeData;
+
+            console.debug('assemblyNearestRepresentativeData:');
+            console.dir(assemblyNearestRepresentativeData);
+
+            //
+            // Scores
+            //
+            var fingerprintSize = assembly['FP_COMP']['fingerprintSize'];
+            var assemblyScoresData = getAssemblyScoresData(fingerprintSize, assemblyScores);
+
+            preparedAssemblyData.scores = assemblyScoresData;
+
+            console.debug('assemblyScoresData:');
+            console.dir(assemblyScoresData);
+
+            //
+            // Top score
+            //
+            var assemblyTopScore = window.WGST.exports.calculateAssemblyTopScore(assemblyScores);
+
+            preparedAssemblyData.topScore = assemblyTopScore;
+
+            //
+            // Top score percentage
+            //
+            preparedAssemblyData.topScorePercentage = Math.round(assemblyTopScore.score.toFixed(2) * 100);
+
+            //
+            // Metadata
+            //
+
+            //
+            // Geography
+            //
+            preparedAssemblyData.metadata.latitude = assembly['ASSEMBLY_METADATA'].geography.position.latitude;
+            preparedAssemblyData.metadata.longitude = assembly['ASSEMBLY_METADATA'].geography.position.longitude;
+
+            return preparedAssemblyData;
+        };
+
+        window.WGST.exports.getAssembly = function(assemblyId) {
+
+            window.WGST.exports.getAssemblyData(assemblyId, function(data, error){
+
+                if (error) {
+                    console.error('[WGST][Error] Failed to get assembly data: ' + error);
+                    return;
+                }
+
+                var preparedForRenderingAssemblyData = window.WGST.exports.prepareAssemblyDataForRendering(data.assembly, data.antibiotics);
+            
+                //
+                // Create assembly panel
+                //
+                var additionalTemplateContext = {
+                    assemblyUserId: preparedForRenderingAssemblyData.assemblyUserId,
+                    antibioticResistanceData: preparedForRenderingAssemblyData.resistanceProfile,
+                    sequenceTypeData: preparedForRenderingAssemblyData.sequenceType,
+                    mlstData: preparedForRenderingAssemblyData.mlst,
+                    nearestRepresentativeData: preparedForRenderingAssemblyData.nearestRepresentative,
+                    scoresData: preparedForRenderingAssemblyData.scores
+                };
+
+                var assemblyPanelId = window.WGST.exports.createAssemblyPanel(assemblyId, additionalTemplateContext);
+                
+                //
+                // Bring panel to top
+                //
+                window.WGST.exports.bringPanelToFront(assemblyPanelId);
+                
+                //
+                // Show panel
+                //
+                window.WGST.exports.showPanel(assemblyPanelId);
+            });
+        };
+
+	    window.WGST.exports.__old_remove__getAssembly = function(assemblyId) {
+
+            console.log('[WGST] Getting assembly ' + assemblyId);
+
+            //
+	        // Get assembly data
+            //
+	        $.ajax({
+	            type: 'POST',
+	            url: '/api/assembly',
+	            // http://stackoverflow.com/a/9155217
+	            datatype: 'json',
+	            data: {
+	                assemblyId: assemblyId
+	            }
+	        })
+	        .done(function(data, textStatus, jqXHR) {
+	            console.log('[WGST] Received data for assembly ' + assemblyId);
+	            //console.dir(data);
+
+	            var assembly = data.assembly,
+	            	assemblyUserId = assembly.ASSEMBLY_METADATA.userAssemblyId;
+
+	            //
+	            // Resistance profile
+	            //
+	            var antibiotics = data.antibiotics,
+	            	assemblyResistanceProfile = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+
+	            var assemblyResistanceData = getAssemblyResistanceData(antibiotics, assemblyResistanceProfile);
+
+	            //
+	            // Sequence type
+	            //
+	            var assemblySequenceType = assembly.MLST_RESULT.stType;
+	            var assemblySequenceTypeData = getAssemblySequenceTypeData(assemblySequenceType);
+
+	            console.debug('assemblySequenceTypeData:');
+	            console.log(assemblySequenceTypeData);
+
+	            //
+	            // MLST
+	            //
+	            var assemblyAlleles = assembly.MLST_RESULT.alleles;
+	            var assemblyMlstData = getMlstData(assemblyAlleles);
+
+	            console.debug('assemblyMlstData:');
+	            console.dir(assemblyMlstData);
+
+	            //
+	            // Nearest representative
+	            //
+	            var assemblyScores = assembly['FP_COMP'].scores;
+	            var assemblyNearestRepresentativeData = getAssemblyNearestRepresentativeData(assemblyScores);
+
+	            console.debug('assemblyNearestRepresentativeData:');
+	            console.dir(assemblyNearestRepresentativeData);
+
+	            //
+	            // Scores
+	            //
+	            var fingerprintSize = assembly['FP_COMP']['fingerprintSize'];
+	            var assemblyScoresData = getAssemblyScoresData(fingerprintSize, assemblyScores);
+
+	            console.debug('assemblyScoresData:');
+	            console.dir(assemblyScoresData);
+
+	            //
+	            // Create assembly panel
+	            //
+	            var additionalTemplateContext = {
+	            	assemblyUserId: assemblyUserId,
+	            	antibioticResistanceData: assemblyResistanceData,
+	            	sequenceTypeData: assemblySequenceTypeData,
+	            	mlstData: assemblyMlstData,
+	            	nearestRepresentativeData: assemblyNearestRepresentativeData,
+	            	scoresData: assemblyScoresData
+	            };
+
+	            var assemblyPanelId = window.WGST.exports.createAssemblyPanel(assemblyId, additionalTemplateContext);
+				
+	            //
+	            // Bring panel to top
+	            //
+				window.WGST.exports.bringPanelToFront(assemblyPanelId);
+                
+                //
+                // Show panel
+                //
+                window.WGST.exports.showPanel(assemblyPanelId);
+
+	        })
+	        .fail(function(jqXHR, textStatus, errorThrown) {
+	            console.error('[WGST][Error] Failed to get assembly data');
+	            console.error(textStatus);
+	            console.error(errorThrown);
+	            console.error(jqXHR);
+
+	            //showNotification(textStatus);
+	        });
+	    };
+
+	})();
+
+});
