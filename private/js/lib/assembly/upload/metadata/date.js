@@ -122,6 +122,45 @@ $(function(){
 	        return days;
 	    };
 
+		window.WGST.exports.isValidDateString = function(dateString) {
+			return moment(dateString).isValid();
+		};
+
+	    window.WGST.exports.setAssemblyMetadataDateView = function(assemblyFileId, date) {
+
+	    	//
+	    	// Parse date string - break it into parts
+	    	//
+
+	    	//
+	    	// Check if date string is valid
+	    	//
+	    	if (! window.WGST.exports.isValidDateString(date)) {
+	    		console.log('[WGST][Error] Date string is invalid.');
+	    		return;
+	    	}
+
+	    	//
+	    	// Get year
+	    	//
+	    	var year = moment(dateString).year();
+
+	    	//
+	    	// Get month
+	    	//
+	    	var month = moment(dateString).month();
+
+	    	//
+	    	// Get date
+	    	//
+	    	var date = moment(dateString).date();
+
+	    	console.log('year: ' + year);
+	    	console.log('month: ' + month);
+	    	console.log('date: ' + date);
+
+	    };
+
 	    var copyAssemblyMetadataTimestamp = function(sourceAssemblyFileId, targetAssemblyFileId) {
 
 	        if (sourceAssemblyFileId === targetAssemblyFileId) {

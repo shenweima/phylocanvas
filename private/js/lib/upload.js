@@ -432,6 +432,45 @@ $(function(){
 	        }
 	    };
 
+	    // window.WGST.exports.isAssemblyMetadataFormExists = function(assemblyFileId) {
+	    // 	if ($('.wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]').length === 0) {
+	    // 		return false;
+	    // 	} else {
+	    // 		return true;
+	    // 	}
+	    // };	    
+
+	    // window.WGST.exports.renderAssemblyMetadataForm = function(assemblyFileId) {
+
+	    // 	//
+	    // 	// Do not render assembly metadata form if it's already rendered
+	    // 	//
+	    // 	if (window.WGST.exports.isAssemblyMetadataFormExists(assemblyFileId)) {
+	    // 		return;
+	    // 	}
+
+	    //     //
+	    //     // 
+	    //     // Render dropped assembly metadata form
+	    //     //
+	    //     //
+	    //     var droppedAssemblyMetadataFormContext = {
+	    //         assemblyFileId: assemblyFileId,
+	    //         listOfYears: window.WGST.exports.generateYears(1940, 2014),
+	    //         listOfMonths: window.WGST.exports.generateMonths(),
+	    //         listOfDays: window.WGST.exports.generateDays()
+	    //     };
+
+	    //     //console.debug('droppedAssemblyMetadataFormContext:');
+	    //     //console.dir(droppedAssemblyMetadataFormContext);
+
+	    //     var droppedAssemblyMetadataFormTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyMetadataForm"]').html();
+	    //     var droppedAssemblyMetadataFormTemplate = Handlebars.compile(droppedAssemblyMetadataFormTemplateHtml);
+	    //     var droppedAssemblyMetadataFormHtml = droppedAssemblyMetadataFormTemplate(droppedAssemblyMetadataFormContext);
+
+	    //     $('.wgst-assembly-upload__metadata ul').append($(droppedAssemblyMetadataFormHtml));
+	    // };
+
 	    //
 	    // Parse fasta file
 	    //
@@ -518,60 +557,67 @@ $(function(){
 
 
 
+	        window.WGST.exports.renderAssemblyAnalytics(assemblyFileId, {
+	        	totalNumberOfNucleotidesInDnaStrings: totalNumberOfNucleotidesInDnaStrings,
+	        	totalNumberOfContigs: contigs.length,
+	        	smallestNumberOfNucleotidesInDnaStrings: smallestNumberOfNucleotidesInDnaStrings,
+	        	averageNumberOfNucleotidesInDnaStrings: averageNumberOfNucleotidesInDnaStrings,
+	        	biggestNumberOfNucleotidesInDnaStrings: biggestNumberOfNucleotidesInDnaStrings,
+	        	contigN50: assemblyN50Data['sequenceLength']
+	        });
+	        // //
+	        // // 
+	        // // Render dropped assembly analytics
+	        // //
+	        // //
+	        // var droppedAssemblyAnalyticsContext = {
+	        //     //name: assemblyFileId,
+	        //     //fileCounter: fileCounter,
+	        //     assemblyFileId: assemblyFileId,
+	        //     // Print a number with commas as thousands separators
+	        //     // http://stackoverflow.com/a/2901298
+	        //     totalNumberOfNucleotidesInDnaStrings: totalNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+	        //     totalNumberOfContigs: contigs.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+	        //     smallestNumberOfNucleotidesInDnaStrings: smallestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+	        //     averageNumberOfNucleotidesInDnaStrings: averageNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+	        //     biggestNumberOfNucleotidesInDnaStrings: biggestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+	        //     contigN50: assemblyN50Data['sequenceLength'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+	        // };
 
-	        //
-	        // 
-	        // Render dropped assembly analytics
-	        //
-	        //
-	        var droppedAssemblyAnalyticsContext = {
-	            //name: assemblyFileId,
-	            //fileCounter: fileCounter,
-	            assemblyFileId: assemblyFileId,
-	            // Print a number with commas as thousands separators
-	            // http://stackoverflow.com/a/2901298
-	            totalNumberOfNucleotidesInDnaStrings: totalNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	            totalNumberOfContigs: contigs.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	            smallestNumberOfNucleotidesInDnaStrings: smallestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	            averageNumberOfNucleotidesInDnaStrings: averageNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	            biggestNumberOfNucleotidesInDnaStrings: biggestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	            contigN50: assemblyN50Data['sequenceLength'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-	        };
+	        // //console.debug('droppedAssemblyAnalyticsContext:');
+	        // //console.dir(droppedAssemblyAnalyticsContext);
 
-	        //console.debug('droppedAssemblyAnalyticsContext:');
-	        //console.dir(droppedAssemblyAnalyticsContext);
+	        // var droppedAssemblyAnalyticsTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyAnalytics"]').html();
+	        // var droppedAssemblyAnalyticsTemplate = Handlebars.compile(droppedAssemblyAnalyticsTemplateHtml);
+	        // var droppedAssemblyAnalyticsHtml = droppedAssemblyAnalyticsTemplate(droppedAssemblyAnalyticsContext);
 
-	        var droppedAssemblyAnalyticsTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyAnalytics"]').html();
-	        var droppedAssemblyAnalyticsTemplate = Handlebars.compile(droppedAssemblyAnalyticsTemplateHtml);
-	        var droppedAssemblyAnalyticsHtml = droppedAssemblyAnalyticsTemplate(droppedAssemblyAnalyticsContext);
-
-	        $('.wgst-assembly-upload__analytics ul').append($(droppedAssemblyAnalyticsHtml));
+	        // $('.wgst-assembly-upload__analytics ul').append($(droppedAssemblyAnalyticsHtml));
 
 
 
 
-	        //
-	        // 
-	        // Render dropped assembly metadata form
-	        //
-	        //
-	        var droppedAssemblyMetadataFormContext = {
-	            //name: assemblies[fileCounter]['name'],
-	            //fileCounter: fileCounter,
-	            assemblyFileId: assemblyFileId,
-	            listOfYears: window.WGST.exports.generateYears(1940, 2014),
-	            listOfMonths: window.WGST.exports.generateMonths(),
-	            listOfDays: window.WGST.exports.generateDays()
-	        };
 
-	        //console.debug('droppedAssemblyMetadataFormContext:');
-	        //console.dir(droppedAssemblyMetadataFormContext);
+	        window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
+	        // //
+	        // // 
+	        // // Render dropped assembly metadata form
+	        // //
+	        // //
+	        // var droppedAssemblyMetadataFormContext = {
+	        //     assemblyFileId: assemblyFileId,
+	        //     listOfYears: window.WGST.exports.generateYears(1940, 2014),
+	        //     listOfMonths: window.WGST.exports.generateMonths(),
+	        //     listOfDays: window.WGST.exports.generateDays()
+	        // };
 
-	        var droppedAssemblyMetadataFormTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyMetadataForm"]').html();
-	        var droppedAssemblyMetadataFormTemplate = Handlebars.compile(droppedAssemblyMetadataFormTemplateHtml);
-	        var droppedAssemblyMetadataFormHtml = droppedAssemblyMetadataFormTemplate(droppedAssemblyMetadataFormContext);
+	        // //console.debug('droppedAssemblyMetadataFormContext:');
+	        // //console.dir(droppedAssemblyMetadataFormContext);
 
-	        $('.wgst-assembly-upload__metadata ul').append($(droppedAssemblyMetadataFormHtml));
+	        // var droppedAssemblyMetadataFormTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyMetadataForm"]').html();
+	        // var droppedAssemblyMetadataFormTemplate = Handlebars.compile(droppedAssemblyMetadataFormTemplateHtml);
+	        // var droppedAssemblyMetadataFormHtml = droppedAssemblyMetadataFormTemplate(droppedAssemblyMetadataFormContext);
+
+	        // $('.wgst-assembly-upload__metadata ul').append($(droppedAssemblyMetadataFormHtml));
 
 
 
