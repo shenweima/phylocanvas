@@ -3,7 +3,7 @@ $(function(){
 	(function(){
 
 		//
-		// Store upload
+		// Store data that is ready for upload
 		//
 		window.WGST.upload = {
 		    collection: {},
@@ -14,7 +14,13 @@ $(function(){
 		    }
 		};
 
-    	var csvFileTypeRegex = /csv/;
+		//
+		// Store data that was dragged and dropped
+		//
+	    window.WGST.dragAndDrop = {};
+	    window.WGST.dragAndDrop.files = [];
+	    window.WGST.dragAndDrop.fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i;
+	    window.WGST.dragAndDrop.csvFileTypeRegex = /csv/;
 
 	    var numberOfDroppedFastaFiles = 0,
 	        numberOfParsedFastaFiles = 0;
@@ -140,7 +146,7 @@ $(function(){
 	            $.each(allDroppedFiles, function(fileCounter, file){
 	                // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
 
-	                if (file.type.match(csvFileTypeRegex)) {
+	                if (file.type.match(window.WGST.dragAndDrop.csvFileTypeRegex)) {
 
 	                    handleCsvDrop(file);
 
@@ -506,7 +512,7 @@ $(function(){
 	            $.each(allDroppedFiles, function(fileCounter, file){
 	                // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
 
-	                if (file.type.match(csvFileTypeRegex)) {
+	                if (file.type.match(window.WGST.dragAndDrop.csvFileTypeRegex)) {
 
 	                    handleCsvDrop(file);
 

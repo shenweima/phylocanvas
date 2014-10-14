@@ -92,18 +92,6 @@ window.WGST.collection = {
 };
 
 //
-// Store upload
-//
-window.WGST.upload = {
-    collection: {},
-    assembly: {},
-    fastaAndMetadata: {},
-    stats: {
-        totalNumberOfContigs: 0
-    }
-};
-
-//
 // Settings
 //
 window.WGST.settings = window.WGST.settings || {};
@@ -337,11 +325,7 @@ $(function(){
         },
         loaded: []
     };
-
-    window.WGST.dragAndDrop = WGST.dragAndDrop || {};
-    window.WGST.dragAndDrop.files = [];
-    window.WGST.dragAndDrop.fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i;
-
+    
     /**
      * Description
      * @method initApp
