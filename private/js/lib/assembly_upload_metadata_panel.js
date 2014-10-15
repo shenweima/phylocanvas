@@ -148,29 +148,33 @@ $(function(){
 	        }
 	    };
 
-	    window.WGST.exports.initAssemblyUploadMetadataLocation = function(assemblyFileId) {
+	    window.WGST.exports.initAssemblyMetadataLocation = function(assemblyFileId) {
 
 			//
 			// Init location metadata input
 			//			
 
+			//
             // Get autocomplete input (jQuery) element
+            //
             var autocompleteInput = $('.wgst-assembly-upload__metadata li[data-assembly-file-id="' + assemblyFileId + '"] .assembly-sample-location-input')[0];
 
             //
             // Init Goolge Maps API Places SearchBox
             //
-            WGST.geo.placeSearchBox[assemblyFileId] = new google.maps.places.SearchBox(autocompleteInput, {
-                bounds: WGST.geo.map.searchBoxBounds
+            window.WGST.geo.placeSearchBox[assemblyFileId] = new google.maps.places.SearchBox(autocompleteInput, {
+                bounds: window.WGST.geo.map.searchBoxBounds
             });
 
+            //
             //
             // When user selects an address from the dropdown, get geo coordinates
             // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
             // TO DO: Remove this event listener after metadata was sent
             // http://rawgit.com/klokan/8408394/raw/5ab795fb36c67ad73c215269f61c7648633ae53e/places-enter-first-item.html
             //
-            google.maps.event.addListener(WGST.geo.placeSearchBox[assemblyFileId], 'places_changed', function(){
+            //
+            google.maps.event.addListener(window.WGST.geo.placeSearchBox[assemblyFileId], 'places_changed', function() {
             	handlePlacesChanged(assemblyFileId);
             });
 	    };
