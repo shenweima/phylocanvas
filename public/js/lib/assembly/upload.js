@@ -3,7 +3,7 @@ $(function(){
 	(function(){
 
 		//
-		// Store upload
+		// Store data that is ready for upload
 		//
 		window.WGST.upload = {
 		    collection: {},
@@ -14,7 +14,20 @@ $(function(){
 		    }
 		};
 
-    	var csvFileTypeRegex = /csv/;
+		//
+		// Store data that was dragged and dropped
+		//
+	    window.WGST.dragAndDrop = {
+	    	files: [],
+	    	loadedFiles: [],
+	    	fastaFileNameRegex: /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i,
+	    	csvFileTypeRegex: /csv/
+	    };
+
+	    // window.WGST.dragAndDrop.files = [];
+	    // window.WGST.dragAndDrop.loadedFiles = [];
+	    // window.WGST.dragAndDrop.fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i;
+	    // window.WGST.dragAndDrop.csvFileTypeRegex = /csv/;
 
 	    var numberOfDroppedFastaFiles = 0,
 	        numberOfParsedFastaFiles = 0;
@@ -47,7 +60,7 @@ $(function(){
 		};
 
 		var handleCsvDrop = function(file) {
-	        console.log('Dropped CSV file');
+	        console.log('[WGST] Dropped CSV file: ' + file.name);
 	        console.dir(file);
 
 	        var fileReader = new FileReader();
@@ -59,7 +72,7 @@ $(function(){
             // });
 
             fileReader.onload = function(event){
-                console.log('[WGST] Loaded csv file');
+                console.log('[WGST] Loaded CSV file: ' + file.name);
                 console.dir(fileReader.result);
 
                 var csvString = fileReader.result;
@@ -114,72 +127,61 @@ $(function(){
             fileReader.readAsText(file);
 		};
 
+		var sortLoadedFilesByName = function() {
+	        //
+	        // Sort loaded files by name
+	        //
+	        window.WGST.dragAndDrop.loadedFiles.sort(function(a, b){
+	            if (a.file.name > b.file.name) {
+	                return 1;
+	            } else if (a.file.name < b.file.name) {
+	                return -1;
+	            } else {
+	                return 0;
+	            }
+	        });
+		};
+
 		var handleFastaDrop = function(file) {
+	        console.log('[WGST] Dropped FASTA file: ' + file.name);
+	        //console.dir(file);
 
-	            //
-	            // FileList object
-	            // https://developer.mozilla.org/en-US/docs/Web/API/FileList
-	            //
-	            var droppedFiles = event.dataTransfer.files;
+	        var fileReader = new FileReader();
 
-	            WGST.dragAndDrop.files = $.merge(WGST.dragAndDrop.files, droppedFiles);
-	            WGST.dragAndDrop.loadedFiles = [];
-
-	            var allDroppedFiles = WGST.dragAndDrop.files,
-	                // A single file from FileList object
-	                file = allDroppedFiles[0],
-	                // File name is used for initial user assembly id
-	                fileName = file.name,
-	                // Count files
-	                //fileCounter = 0,
-	                // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
-	                fileReader = new FileReader();
-
-	            numberOfDroppedFastaFiles = Object.keys(allDroppedFiles).length;
-
-	            $.each(allDroppedFiles, function(fileCounter, file){
-	                // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
-
-	                if (file.type.match(csvFileTypeRegex)) {
-
-	                    handleCsvDrop(file);
-
-	                } else if (file.name.match(WGST.dragAndDrop.fastaFileNameRegex)) {
-	                    console.log('Dropped FASTA file');
-
-	                    if ($('.wgst-panel__assembly-upload-analytics .assembly-item[data-name="' + file.name + '"]').length === 0) {
-
-	                        var fileReader = new FileReader();
-
-	                        fileReader.addEventListener('load', function(event){
-	                            console.log('[WGST] Loaded file ' + event.target.name);
+            fileReader.onload = function(event) {
+                console.log('[WGST] Loaded FASTA file: ' + file.name);
+                //console.dir(fileReader.result);
 
 	                            // Store loaded file
 	                            WGST.dragAndDrop.loadedFiles.push({
 	                                // Generate uid for dropped file
 	                                uid: uuid.v4(),
 	                                event: event,
-	                                fileCounter: fileCounter,
-	                                file: file,
-	                                droppedFiles: droppedFiles,
-	                                collectionId: collectionId
+	                                //fileCounter: fileCounter,
+	                                file: file//,
+	                                //droppedFiles: droppedFiles,
+	                                //collectionId: collectionId
 	                            });
 
 	                            // Once all files have been loaded
 	                            if (WGST.dragAndDrop.loadedFiles.length === WGST.dragAndDrop.files.length) {
 	                                
+                					console.log('[WGST] Loaded all FASTA files');
+
 	                                //
 	                                // Sort loaded files by name
 	                                //
-	                                WGST.dragAndDrop.loadedFiles.sort(function(a, b){
-	                                    if (a.file.name > b.file.name) {
-	                                        return 1;
-	                                    } else if (a.file.name < b.file.name) {
-	                                        return -1;
-	                                    } else {
-	                                        return 0;
-	                                    }
-	                                });
+	                            	sortLoadedFilesByName();
+
+	                                // WGST.dragAndDrop.loadedFiles.sort(function(a, b){
+	                                //     if (a.file.name > b.file.name) {
+	                                //         return 1;
+	                                //     } else if (a.file.name < b.file.name) {
+	                                //         return -1;
+	                                //     } else {
+	                                //         return 0;
+	                                //     }
+	                                // });
 
 	                                //
 	                                // Show sidebar
@@ -264,8 +266,24 @@ $(function(){
 	                                // Parse loaded files
 	                                //
 	                                window.WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile){
-	                                    parseFastaFile(loadedFile.event, loadedFile.fileCounter, loadedFile.file, loadedFile.droppedFiles, loadedFile.collectionId, loadedFile.uid);
+
+	                                	var assemblyFileId = loadedFile.file.name,
+	                                		fastaFileString = loadedFile.event.target.result;
+
+	                                    var fastaAnalysis = analyseFasta(assemblyFileId, fastaFileString);
 	                                    
+	        window.WGST.exports.renderAssemblyAnalytics(assemblyFileId, fastaAnalysis);
+
+	        window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
+
+	        // Draw N50 chart
+	        var sumsOfNucleotidesInDnaStrings = window.WGST.exports.calculateSumsOfNucleotidesInDnaStrings(fastaAnalysis.dnaStrings);
+
+	        window.WGST.exports.drawN50Chart(fastaAnalysis.sumsOfNucleotidesInDnaStrings, fastaAnalysis.assemblyN50Data, '.sequence-length-distribution-chart[data-assembly-file-id="' + assemblyFileId + '"]');
+
+			window.WGST.exports.initAssemblyUploadMetadataLocation(assemblyFileId);
+
+
 	                                    // Add assembly to the drop down select of dropeed assemblies
 	                                    $('.wgst-dropped-assembly-list').append(
 	                                        '<option value="' + loadedFile.file.name + '">' + loadedFile.file.name + '</option>'
@@ -286,81 +304,10 @@ $(function(){
 						            //
 						            $('[data-wgst-background-id="drag-and-drop"]').addClass('wgst--hide-this');
 	                            }
-	                        });
 
-	                        // Read file as text
-	                        fileReader.readAsText(file);
+            };
 
-	                    } // if
-
-	                } else {
-	                    // ============================================================
-	                    // React component
-	                    // ============================================================
-	                    React.renderComponent(
-	                        WorkflowQuestion({
-	                            title: 'What type of data have you dropped?',
-	                            buttons: [
-	                            {
-	                                label: 'Assemblies in FASTA format',
-	                                value: 'fasta'
-	                            },
-	                            {
-	                                label: 'Metadata in CSV format',
-	                                value: 'csv'
-	                            }]
-	                        }),
-	                        document.querySelectorAll(".wgst-react-component__workflow-question")[0]
-	                    );
-	                } // if
-
-	                //console.log('Dropped file type: ' + file.type);
-	                //console.dir(file);
-
-	                // // Validate file name   
-	                // if (file.name.match(WGST.dragAndDrop.fastaFileNameRegex)) {
-	                //     if ($('.wgst-panel__assembly-upload-analytics .assembly-item[data-name="' + file.name + '"]').length === 0) {
-
-	                //         // Create closure (new scope) to save fileCounter, file variable with it's current value
-	                //         //(function(){
-	                //             var fileReader = new FileReader();
-
-	                //             fileReader.addEventListener('load', function(event){
-	                //                 parseFastaFile(event, fileCounter, file, droppedFiles, collectionId);
-	                //             });
-
-	                //             // Read file as text
-	                //             fileReader.readAsText(file);
-	                //         //})();
-
-	                //     } // if
-	                // // Invalid file name
-	                // } else {
-	                //     console.log("[WGST] File not supported");
-	                // }
-
-	            });
-
-	            // if (! isPanelActive('assemblyUploadNavigator')) {
-	            //     activatePanel('assemblyUploadNavigator');
-	            //     showPanel('assemblyUploadNavigator');
-	            // }
-
-	            // if (! isPanelActive('assemblyUploadAnalytics')) {
-	            //     activatePanel('assemblyUploadAnalytics');
-	            //     showPanel('assemblyUploadAnalytics');
-	            // }        
-
-	            // if (! isPanelActive('assemblyUploadMetadata')) {
-	            //     activatePanel('assemblyUploadMetadata');
-	            //     showPanel('assemblyUploadMetadata');
-	            // }
-
-	            // Update total number of assemblies to upload
-	            $('.assembly-upload-total-number').text(allDroppedFiles.length);
-	            // Update lable for total number of assemblies to upload
-	            $('.assembly-upload-total-number-label').html((allDroppedFiles.length === 1 ? 'assembly': 'assemblies'));
-
+            fileReader.readAsText(file);
 		};
 
 	    var handleDrop = function(event) {
@@ -453,7 +400,6 @@ $(function(){
 	            var droppedFiles = event.dataTransfer.files;
 
 	            WGST.dragAndDrop.files = $.merge(WGST.dragAndDrop.files, droppedFiles);
-	            WGST.dragAndDrop.loadedFiles = [];
 
 	            var allDroppedFiles = WGST.dragAndDrop.files,
 	                // A single file from FileList object
@@ -506,7 +452,7 @@ $(function(){
 	            $.each(allDroppedFiles, function(fileCounter, file){
 	                // https://developer.mozilla.org/en-US/docs/Web/API/FileList#item()
 
-	                if (file.type.match(csvFileTypeRegex)) {
+	                if (file.type.match(window.WGST.dragAndDrop.csvFileTypeRegex)) {
 
 	                    handleCsvDrop(file);
 
@@ -514,6 +460,10 @@ $(function(){
 	                    console.log('Dropped FASTA file');
 
 	                    if ($('.wgst-panel__assembly-upload-analytics .assembly-item[data-name="' + file.name + '"]').length === 0) {
+
+	                    	handleFastaDrop(file);
+
+	                    	return;
 
 	                        var fileReader = new FileReader();
 
@@ -537,15 +487,17 @@ $(function(){
 	                                //
 	                                // Sort loaded files by name
 	                                //
-	                                WGST.dragAndDrop.loadedFiles.sort(function(a, b){
-	                                    if (a.file.name > b.file.name) {
-	                                        return 1;
-	                                    } else if (a.file.name < b.file.name) {
-	                                        return -1;
-	                                    } else {
-	                                        return 0;
-	                                    }
-	                                });
+	                            	sortLoadedFilesByName();
+
+	                                // WGST.dragAndDrop.loadedFiles.sort(function(a, b){
+	                                //     if (a.file.name > b.file.name) {
+	                                //         return 1;
+	                                //     } else if (a.file.name < b.file.name) {
+	                                //         return -1;
+	                                //     } else {
+	                                //         return 0;
+	                                //     }
+	                                // });
 
 	                                //
 	                                // Show sidebar
@@ -630,8 +582,23 @@ $(function(){
 	                                // Parse loaded files
 	                                //
 	                                window.WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile){
-	                                    parseFastaFile(loadedFile.event, loadedFile.fileCounter, loadedFile.file, loadedFile.droppedFiles, loadedFile.collectionId, loadedFile.uid);
+
+	                                	var assemblyFileId = loadedFile.file.name;
+
+	                                    var fastaAnalysis = analyseFasta(loadedFile.event, loadedFile.fileCounter, loadedFile.file, loadedFile.droppedFiles, loadedFile.collectionId, loadedFile.uid);
 	                                    
+	        window.WGST.exports.renderAssemblyAnalytics(assemblyFileId, fastaAnalysis);
+
+	        window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
+
+	        // Draw N50 chart
+	        var sumsOfNucleotidesInDnaStrings = window.WGST.exports.calculateSumsOfNucleotidesInDnaStrings(fastaAnalysis.dnaStrings);
+
+	        window.WGST.exports.drawN50Chart(fastaAnalysis.sumsOfNucleotidesInDnaStrings, fastaAnalysis.assemblyN50Data, '.sequence-length-distribution-chart[data-assembly-file-id="' + assemblyFileId + '"]');
+
+			window.WGST.exports.initAssemblyUploadMetadataLocation(assemblyFileId);
+
+
 	                                    // Add assembly to the drop down select of dropeed assemblies
 	                                    $('.wgst-dropped-assembly-list').append(
 	                                        '<option value="' + loadedFile.file.name + '">' + loadedFile.file.name + '</option>'
@@ -729,49 +696,95 @@ $(function(){
 	        }
 	    };
 
-	    // window.WGST.exports.isAssemblyMetadataFormExists = function(assemblyFileId) {
-	    // 	if ($('.wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]').length === 0) {
-	    // 		return false;
-	    // 	} else {
-	    // 		return true;
-	    // 	}
-	    // };	    
+	    //
+	    // Analyse FASTA
+	    //
+	    var analyseFasta = function(assemblyFileId, fastaFileString) {
 
-	    // window.WGST.exports.renderAssemblyMetadataForm = function(assemblyFileId) {
+	    	//
+	    	// Init data structure
+	    	//
 
-	    // 	//
-	    // 	// Do not render assembly metadata form if it's already rendered
-	    // 	//
-	    // 	if (window.WGST.exports.isAssemblyMetadataFormExists(assemblyFileId)) {
-	    // 		return;
-	    // 	}
+	    	// var assemblyFileId = file.name,
+	    	// 	fastaFileContent = event.target.result;
 
-	    //     //
-	    //     // 
-	    //     // Render dropped assembly metadata form
-	    //     //
-	    //     //
-	    //     var droppedAssemblyMetadataFormContext = {
-	    //         assemblyFileId: assemblyFileId,
-	    //         listOfYears: window.WGST.exports.generateYears(1940, 2014),
-	    //         listOfMonths: window.WGST.exports.generateMonths(),
-	    //         listOfDays: window.WGST.exports.generateDays()
-	    //     };
+	    	window.WGST.upload.fastaAndMetadata[assemblyFileId] = {
+	    		fasta: {
+	    			name: assemblyFileId,
+	    			assembly: fastaFileString
+	    		},
+	    		metadata: {}
+	    	};
 
-	    //     //console.debug('droppedAssemblyMetadataFormContext:');
-	    //     //console.dir(droppedAssemblyMetadataFormContext);
+	        //
+	        // Parse
+	        //
 
-	    //     var droppedAssemblyMetadataFormTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyMetadataForm"]').html();
-	    //     var droppedAssemblyMetadataFormTemplate = Handlebars.compile(droppedAssemblyMetadataFormTemplateHtml);
-	    //     var droppedAssemblyMetadataFormHtml = droppedAssemblyMetadataFormTemplate(droppedAssemblyMetadataFormContext);
+	        var contigs = window.WGST.exports.extractContigsFromFastaFileString(fastaFileString);
 
-	    //     $('.wgst-assembly-upload__metadata ul').append($(droppedAssemblyMetadataFormHtml));
-	    // };
+	        window.WGST.exports.validateContigs(contigs);
+
+	        var totalNumberOfContigs = contigs.length;
+	        var dnaStrings = window.WGST.exports.extractDnaStringsFromContigs(contigs);
+	        var assemblyN50Data = window.WGST.exports.calculateN50(dnaStrings);
+	        var contigN50 = assemblyN50Data['sequenceLength'];
+	        var sumsOfNucleotidesInDnaStrings = window.WGST.exports.calculateSumsOfNucleotidesInDnaStrings(dnaStrings);
+	        //var dnaStrings = window.WGST.exports.extractDnaStringsFromContigs(contigs);
+	        var totalNumberOfNucleotidesInDnaStrings = window.WGST.exports.calculateTotalNumberOfNucleotidesInDnaStrings(dnaStrings);
+	        var averageNumberOfNucleotidesInDnaStrings = window.WGST.exports.calculateAverageNumberOfNucleotidesInDnaStrings(dnaStrings);
+	        var smallestNumberOfNucleotidesInDnaStrings = window.WGST.exports.calculateSmallestNumberOfNucleotidesInDnaStrings(dnaStrings);
+	        var biggestNumberOfNucleotidesInDnaStrings = window.WGST.exports.calculateBiggestNumberOfNucleotidesInDnaStrings(dnaStrings);
+
+	        console.log('[WGST] * dev * dnaStrings:');
+	        console.dir(dnaStrings);
+	        console.log('[WGST] * dev * totalNumberOfNucleotidesInDnaStrings: ' + totalNumberOfNucleotidesInDnaStrings);
+	        console.log('[WGST] * dev * averageNumberOfNucleotidesInDnaStrings: ' + averageNumberOfNucleotidesInDnaStrings);
+	        console.log('[WGST] * dev * smallestNumberOfNucleotidesInDnaStrings: ' + smallestNumberOfNucleotidesInDnaStrings);
+	        console.log('[WGST] * dev * biggestNumberOfNucleotidesInDnaStrings: ' + biggestNumberOfNucleotidesInDnaStrings);
+
+	        window.WGST.upload.stats.totalNumberOfContigs = window.WGST.upload.stats.totalNumberOfContigs + contigs.length;
+
+	        return {
+	        	totalNumberOfContigs: totalNumberOfContigs,
+	        	dnaStrings: dnaStrings,
+				assemblyN50Data: assemblyN50Data,
+	        	contigN50: contigN50,
+	        	sumsOfNucleotidesInDnaStrings: sumsOfNucleotidesInDnaStrings,
+
+	        	totalNumberOfNucleotidesInDnaStrings: totalNumberOfNucleotidesInDnaStrings,
+	        	averageNumberOfNucleotidesInDnaStrings: averageNumberOfNucleotidesInDnaStrings,
+	        	smallestNumberOfNucleotidesInDnaStrings: smallestNumberOfNucleotidesInDnaStrings,
+	        	biggestNumberOfNucleotidesInDnaStrings: biggestNumberOfNucleotidesInDnaStrings,
+	        };
+
+
+
+
+
+	        window.WGST.exports.renderAssemblyAnalytics(assemblyFileId, {
+	        	totalNumberOfNucleotidesInDnaStrings: totalNumberOfNucleotidesInDnaStrings,
+	        	totalNumberOfContigs: totalNumberOfContigs,
+	        	smallestNumberOfNucleotidesInDnaStrings: smallestNumberOfNucleotidesInDnaStrings,
+	        	averageNumberOfNucleotidesInDnaStrings: averageNumberOfNucleotidesInDnaStrings,
+	        	biggestNumberOfNucleotidesInDnaStrings: biggestNumberOfNucleotidesInDnaStrings,
+	        	contigN50: contigN50
+	        });
+
+	        window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
+
+	        // Draw N50 chart
+	        //var sumsOfNucleotidesInDnaStrings = window.WGST.exports.calculateSumsOfNucleotidesInDnaStrings(dnaStrings);
+
+	        window.WGST.exports.drawN50Chart(sumsOfNucleotidesInDnaStrings, assemblyN50Data, '.sequence-length-distribution-chart[data-assembly-file-id="' + assemblyFileId + '"]');
+
+			window.WGST.exports.initAssemblyUploadMetadataLocation(assemblyFileId);
+	    
+	    };
 
 	    //
 	    // Parse fasta file
 	    //
-	    var parseFastaFile = function(event, fileCounter, file, droppedFiles, collectionId) {
+	    var __parseFastaFile = function(event, fileCounter, file, droppedFiles, collectionId) {
 
 	    	//
 	    	// Init data structure
@@ -814,24 +827,13 @@ $(function(){
 
 	        var fastaFileString = event.target.result;
 	        var contigs = window.WGST.exports.extractContigsFromFastaFileString(fastaFileString);
+	        var totalNumberOfContigs = contigs.length;
 
 	        window.WGST.exports.validateContigs(contigs);
 
-	        // // Start counting assemblies from 1, not 0
-	        // fileCounter = fileCounter + 1;
-
-	        // assemblies[fileCounter] = {
-	        //     'name': file.name,
-	        //     'id': '',
-	        //     'contigs': {
-	        //         'total': contigs.length,
-	        //         'invalid': 0,
-	        //         'individual': []
-	        //     }
-	        // };
-
 	        var dnaStrings = window.WGST.exports.extractDnaStringsFromContigs(contigs);
 	        var assemblyN50Data = window.WGST.exports.calculateN50(dnaStrings);
+	        var contigN50 = assemblyN50Data['sequenceLength'];
 	        var dnaStrings = window.WGST.exports.extractDnaStringsFromContigs(contigs);
 	        var totalNumberOfNucleotidesInDnaStrings = window.WGST.exports.calculateTotalNumberOfNucleotidesInDnaStrings(dnaStrings);
 	        var averageNumberOfNucleotidesInDnaStrings = window.WGST.exports.calculateAverageNumberOfNucleotidesInDnaStrings(dnaStrings);
@@ -845,274 +847,32 @@ $(function(){
 	        console.log('[WGST] * dev * smallestNumberOfNucleotidesInDnaStrings: ' + smallestNumberOfNucleotidesInDnaStrings);
 	        console.log('[WGST] * dev * biggestNumberOfNucleotidesInDnaStrings: ' + biggestNumberOfNucleotidesInDnaStrings);
 
-	        //totalNumberOfContigsDropped = totalNumberOfContigsDropped + contigs.length;
 	        window.WGST.upload.stats.totalNumberOfContigs = window.WGST.upload.stats.totalNumberOfContigs + contigs.length;
-
-	        // Show average number of contigs per assembly
-	        //$('.assembly-sequences-average').text(Math.floor(totalNumberOfContigsDropped / droppedFiles.length));
-	        //$('.assembly-sequences-average').text(Math.floor(window.WGST.upload.stats.totalNumberOfContigs / droppedFiles.length));
-
-
 
 	        window.WGST.exports.renderAssemblyAnalytics(assemblyFileId, {
 	        	totalNumberOfNucleotidesInDnaStrings: totalNumberOfNucleotidesInDnaStrings,
-	        	totalNumberOfContigs: contigs.length,
+	        	totalNumberOfContigs: totalNumberOfContigs,
 	        	smallestNumberOfNucleotidesInDnaStrings: smallestNumberOfNucleotidesInDnaStrings,
 	        	averageNumberOfNucleotidesInDnaStrings: averageNumberOfNucleotidesInDnaStrings,
 	        	biggestNumberOfNucleotidesInDnaStrings: biggestNumberOfNucleotidesInDnaStrings,
-	        	contigN50: assemblyN50Data['sequenceLength']
+	        	contigN50: contigN50
 	        });
-	        // //
-	        // // 
-	        // // Render dropped assembly analytics
-	        // //
-	        // //
-	        // var droppedAssemblyAnalyticsContext = {
-	        //     //name: assemblyFileId,
-	        //     //fileCounter: fileCounter,
-	        //     assemblyFileId: assemblyFileId,
-	        //     // Print a number with commas as thousands separators
-	        //     // http://stackoverflow.com/a/2901298
-	        //     totalNumberOfNucleotidesInDnaStrings: totalNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	        //     totalNumberOfContigs: contigs.length.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	        //     smallestNumberOfNucleotidesInDnaStrings: smallestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	        //     averageNumberOfNucleotidesInDnaStrings: averageNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	        //     biggestNumberOfNucleotidesInDnaStrings: biggestNumberOfNucleotidesInDnaStrings.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-	        //     contigN50: assemblyN50Data['sequenceLength'].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-	        // };
-
-	        // //console.debug('droppedAssemblyAnalyticsContext:');
-	        // //console.dir(droppedAssemblyAnalyticsContext);
-
-	        // var droppedAssemblyAnalyticsTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyAnalytics"]').html();
-	        // var droppedAssemblyAnalyticsTemplate = Handlebars.compile(droppedAssemblyAnalyticsTemplateHtml);
-	        // var droppedAssemblyAnalyticsHtml = droppedAssemblyAnalyticsTemplate(droppedAssemblyAnalyticsContext);
-
-	        // $('.wgst-assembly-upload__analytics ul').append($(droppedAssemblyAnalyticsHtml));
-
-
-
-
 
 	        window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
-	        // //
-	        // // 
-	        // // Render dropped assembly metadata form
-	        // //
-	        // //
-	        // var droppedAssemblyMetadataFormContext = {
-	        //     assemblyFileId: assemblyFileId,
-	        //     listOfYears: window.WGST.exports.generateYears(1940, 2014),
-	        //     listOfMonths: window.WGST.exports.generateMonths(),
-	        //     listOfDays: window.WGST.exports.generateDays()
-	        // };
-
-	        // //console.debug('droppedAssemblyMetadataFormContext:');
-	        // //console.dir(droppedAssemblyMetadataFormContext);
-
-	        // var droppedAssemblyMetadataFormTemplateHtml = $('.wgst-template[data-template-id="droppedAssemblyMetadataForm"]').html();
-	        // var droppedAssemblyMetadataFormTemplate = Handlebars.compile(droppedAssemblyMetadataFormTemplateHtml);
-	        // var droppedAssemblyMetadataFormHtml = droppedAssemblyMetadataFormTemplate(droppedAssemblyMetadataFormContext);
-
-	        // $('.wgst-assembly-upload__metadata ul').append($(droppedAssemblyMetadataFormHtml));
-
-
-
-
-
 
 	        // Draw N50 chart
 	        var sumsOfNucleotidesInDnaStrings = window.WGST.exports.calculateSumsOfNucleotidesInDnaStrings(dnaStrings);
 
-	        //console.log('[WGST] * dev * assemblyN50:');
-	        //console.dir(assemblyN50);
-
 	        window.WGST.exports.drawN50Chart(sumsOfNucleotidesInDnaStrings, assemblyN50Data, '.sequence-length-distribution-chart[data-assembly-file-id="' + assemblyFileId + '"]');
-	        //drawN50Chart(assemblyNucleotideSums, assemblyN50, fileCounter);
-
-	        // Show first assembly
-	        //$('.assembly-item-1').removeClass('wgst--hide-this');
-	        //$('.assembly-item').eq('0').show();
-	        // $('#assembly-item-1').show();
-	        // $('#assembly-metadata-item-1').show();
-
-	        //showDroppedAssembly();
-	        //$('.')
-
-	        // // Set file name in metadata panel title
-	        // $('.wgst-panel__assembly-upload-metadata .header-title small').text($('#assembly-metadata-item-1').attr('data-name'));
-
-	        // // Set file name in analytics panel title
-	        // $('.wgst-panel__assembly-upload-analytics .header-title small').text($('#assembly-item-1').attr('data-name'));
-
-	        // Store displayed fasta file name
-	        //selectedFastaFileName = $('.assembly-item-1').attr('data-name');
-	        //selectedFastaFileName = $('.assembly-item').eq('0').attr('data-name');
-
-	        // Init bootstrap datetimepicker
-	        //$('.assembly-upload-panel .assembly-sample-datetime-input').datetimepicker();
-	        // $('#assemblySampleDatetimeInput' + fileCounter).datetimepicker().on('dp.change', function(){
-	        //     console.log('Datetime changed');
-	        // });
-
 
 			window.WGST.exports.initAssemblyUploadMetadataLocation(assemblyFileId);
-
-
-            // // On change store datetime in assembly metadata
-            // $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-datetime-input').datetimepicker({
-            //     useCurrent: false,
-            //     language: 'en-gb'
-            // }).on('change', function(){
-            //     WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
-            //     WGST.upload.assembly[fileName].metadata.datetime = $(this).val();
-            // });
-
-
-
-
-
-                // numberOfParsedFastaFiles = numberOfParsedFastaFiles + 1;
-
-                // console.log('numberOfDroppedFastaFiles: ' + numberOfDroppedFastaFiles);
-                // console.log('numberOfParsedFastaFiles: ' + numberOfParsedFastaFiles);
-
-                // if (numberOfDroppedFastaFiles === numberOfParsedFastaFiles) {
-                //     //openAssemblyUploadPanels();
-
-                //     //YYY
-                // }
-
-	        
-
-
-
-
-
-	        // // Create closure to save value of fileName
-	        // (function(fileName){
-
-	        //     // Get autocomplete input (jQuery) element
-	        //     var autocompleteInput = $('.wgst-assembly-upload__metadata li[data-name="' + fileName + '"] .assembly-sample-location-input');
-
-	        //     // Init Goolge Maps API Places Autocomplete
-	        //     // TO DO: This creates new Autocomplete object for each drag and drop file - possibly needs refactoring/performance optimization
-	        //     //WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(document.getElementById('assemblySampleLocationInput' + fileCounter));
-	        //     // [0] returns native DOM element: http://learn.jquery.com/using-jquery-core/faq/how-do-i-pull-a-native-dom-element-from-a-jquery-object/
-	        //     //WGST.geo.metadataAutocomplete[fileName] = new google.maps.places.Autocomplete(autocompleteInput[0]);
-	        //     WGST.geo.placeSearchBox[fileName] = new google.maps.places.SearchBox(autocompleteInput[0], {
-	        //         bounds: WGST.geo.map.searchBoxBounds
-	        //     });
-
-	        //     // When the user selects an address from the dropdown, get geo coordinates
-	        //     // https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform
-	        //     // TO DO: Remove this event listener after metadata was sent
-	        //     // view-source:http://rawgit.com/klokan/8408394/raw/5ab795fb36c67ad73c215269f61c7648633ae53e/places-enter-first-item.html
-	        //     google.maps.event.addListener(WGST.geo.placeSearchBox[fileName], 'places_changed', function() {
-
-	        //         // Get the place details from the autocomplete object.
-	        //         var places = WGST.geo.placeSearchBox[fileName].getPlaces(),
-	        //             place = places[0];
-
-	        //         if (typeof place === 'undefined' || typeof place.geometry === 'undefined') {
-	        //             console.dir(WGST.geo.placeSearchBox[fileName]);
-	        //             return;
-	        //         }
-
-	        //         // If the place has a geometry, then present it on a map
-	        //         var latitude = place.geometry.location.lat(),
-	        //             longitude = place.geometry.location.lng(),
-	        //             formattedAddress = place.formatted_address;
-
-	        //         console.log('[WGST] Google Places API first SearchBox place:');
-	        //         console.log(formattedAddress);
-
-	        //         // ------------------------------------------
-	        //         // Update metadata form
-	        //         // ------------------------------------------
-	        //         var currentInputElement = $('.wgst-panel__assembly-upload-metadata .assembly-item[data-name="' + fileName + '"]').find('.assembly-sample-location-input');
-
-	        //         // Show next form block if current input has some value
-	        //         if (currentInputElement.val().length > 0) {
-
-	        //             // Show next metadata form block
-	        //             currentInputElement.closest('.form-block').next('.form-block').fadeIn();
-
-	        //             // Scroll to the next form block
-	        //             currentInputElement.closest('.assembly-metadata').animate({scrollTop: currentInputElement.closest('.assembly-metadata').height()}, 400);
-	        //         } // if
-
-	        //         // Increment metadata progress bar
-	        //         updateMetadataProgressBar();
-	        //         // Replace whatever user typed into this input box with formatted address returned by Google
-	        //         currentInputElement.blur().val(formattedAddress);
-
-	        //         // ------------------------------------------
-	        //         // Update map, marker and put metadata into assembly object
-	        //         // ------------------------------------------
-	        //         // Set map center to selected address
-	        //         WGST.geo.map.canvas.setCenter(place.geometry.location);
-	        //         // Set map
-	        //         WGST.geo.map.markers.metadata.setMap(WGST.geo.map.canvas);
-	        //         // Set metadata marker's position to selected address
-	        //         WGST.geo.map.markers.metadata.setPosition(place.geometry.location);
-	        //         // Show metadata marker
-	        //         WGST.geo.map.markers.metadata.setVisible(true);
-
-	        //         //
-	        //         // Update metadata store
-	        //         //
-	        //         WGST.upload.assembly[fileName] = WGST.upload.assembly[fileName] || {};
-	        //         WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
-	        //         WGST.upload.assembly[fileName].metadata.geography = {
-	        //             address: formattedAddress,
-	        //             position: {
-	        //                 latitude: latitude,
-	        //                 longitude: longitude
-	        //             },
-	        //             // https://developers.google.com/maps/documentation/geocoding/#Types
-	        //             type: place.types[0]
-	        //         };
-
-	        //     });
-
-	        //     // // On change store datetime in assembly metadata
-	        //     // $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-datetime-input').datetimepicker({
-	        //     //     useCurrent: false,
-	        //     //     language: 'en-gb'
-	        //     // }).on('change', function(){
-	        //     //     WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
-	        //     //     WGST.upload.assembly[fileName].metadata.datetime = $(this).val();
-	        //     // });
-
-	        //     // On change store source in assembly metadata
-	        //     $('li.assembly-item[data-name="' + fileName + '"] .assembly-sample-source-input').on('change', function(){
-	        //         WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
-	        //         WGST.upload.assembly[fileName].metadata.source = $(this).val();
-	        //     });
-
-
-
-	        //         numberOfParsedFastaFiles = numberOfParsedFastaFiles + 1;
-
-	        //         console.log('numberOfDroppedFastaFiles: ' + numberOfDroppedFastaFiles);
-	        //         console.log('numberOfParsedFastaFiles: ' + numberOfParsedFastaFiles);
-
-	        //         if (numberOfDroppedFastaFiles === numberOfParsedFastaFiles) {
-	        //             //openAssemblyUploadPanels();
-
-	        //             //YYY
-	        //         }
-
-	        
-	        // }(file.name));
 	    
-	    }; // parseFastaFile()
+	    };
 
 		//
 		// Listen to drag and drop events
 		//
-		var dropZone = $('[wgst-drag-and-drop-zone]')[0];
+		var dropZone = $('[data-wgst-drag-and-drop-zone]')[0];
 		dropZone.addEventListener('dragenter', handleDragEnter, false);
 		dropZone.addEventListener('dragover', handleDragOver, false);
 		dropZone.addEventListener('dragleave', handleDragLeave, false);
