@@ -16,7 +16,7 @@ $(function(){
 				assemblyMetadataKey = options.assemblyMetadataKey,
 				assemblyMetadataValue = options.assemblyMetadataValue;
 
-			if (assemblyMetadataKey === 'datetime') {
+			if (assemblyMetadataKey === 'date') {
 
                 //
                 // Set datetime
@@ -59,7 +59,7 @@ $(function(){
 		window.WGST.exports.copyAssemblyMetadata = function(sourceAssemblyFileId, targetAssemblyFileId) {
 			var sourceAssemblyMetadata = window.WGST.upload.fastaAndMetadata[sourceAssemblyFileId].metadata;
 
-			Object.keys(sourceAssemblyMetadata).map(function(metadataKey){
+			Object.keys(sourceAssemblyMetadata).map(function(metadataKey) {
 
 				window.WGST.exports.setAssemblyMetadata({
 					assemblyFileId: targetAssemblyFileId,
@@ -84,7 +84,16 @@ $(function(){
 					//
 					// Copy assembly metadata
 					//
+
+					//
+					// Copy model
+					//
 					window.WGST.exports.copyAssemblyMetadata(sourceAssemblyFileId, targetAssemblyFileId);
+
+					//
+					// Copy view
+					//
+					window.WGST.exports.copyAssemblyMetadataView(sourceAssemblyFileId, targetAssemblyFileId);
 				}
 			});
 		};
@@ -98,6 +107,9 @@ $(function(){
 		//
 
 		window.WGST.exports.happenedSetAssemblyMetadata = function(options) {
+
+			return;
+
 			var assemblyFileId = options.assemblyFileId,
 				assemblyMetadataKey = options.assemblyMetadataKey,
 				assemblyMetadataValue = options.assemblyMetadataValue;
@@ -107,7 +119,7 @@ $(function(){
                 //
                 // Update date input
                 //
-                setAssemblyMetadataTimestamp(source.assemblyFileId, targetAssemblyFileId);
+                window.WGST.exports.setAssemblyMetadataTimestamp(source.assemblyFileId, targetAssemblyFileId);
 
 			} else if (assemblyMetadataKey === 'geography') {
 

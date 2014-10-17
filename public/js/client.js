@@ -1317,27 +1317,6 @@ $(function(){
         $('.adding-metadata-progress-container .progress-hint').fadeOut();
     });
 
-    // // TO DO: Refactor
-    // // When 'Next empty assembly' button is pressed
-    // $('.wgst-assembly-upload__metadata').on('click', '.assembly-metadata button.next-assembly-button', function(event){
-    //     // Show assembly with empty metadata input field
-
-    //     // Trigger to show next assembly
-    //     $('.nav-next-item').trigger('click');
-
-    //     //$('#assembly-item-' + (+currentAssemblyIdCounter + 1)).find('input:first').focus();
-
-    //     // Focus on the next empty input field
-    //     //$(this).closest('.assembly-metadata-list-container').find('.assembly-metadata-item input:text[value=""]').focus();
-    //     //console.log($(this).closest('.assembly-metadata-list-container').find('.assembly-metadata-item input:text[value=""]'));
-
-    //     var currentAssemblyIdCounter = $(this).closest('.assembly-item').attr('id').replace('assembly-metadata-item-', '');
-
-    //     $(this).closest('.wgst-assembly-upload__metadata').find('.assembly-metadata-block input:text[value=""]').focus();
-
-    //     event.preventDefault();
-    // });
-
 
 
 
@@ -1643,56 +1622,6 @@ $(function(){
     $('.tree-panel .wgst-tree-controls button').on('click', function(){
         $(this).blur();
     });
-
-
-
-
-
-    // $('.wgst-panel__assembly-upload-metadata').on('click', '.apply-to-all-assemblies-button', function() {
-
-    //     // ---------------------------------------------------------
-    //     // Copy same metadata to all assemblies
-    //     // ---------------------------------------------------------
-    //     var sourceFileName = $(this).closest('.assembly-item').attr('data-name'),
-    //         sourceFileId = $(this).closest('.assembly-item').attr('data-file-id'),
-    //         sourceMetadata = WGST.upload.assembly[sourceFileName].metadata,
-    //         targetFileId;
-
-    //     $.each(WGST.upload.assembly, function(targetFileName, targetMetadata){
-    //         WGST.upload.assembly[targetFileName].metadata = sourceMetadata;
-    //     });
-
-    //     // Get metadata from selected assembly
-    //     var //metadataElementTimestamp = $(this).closest('.assembly-metadata').find('.assembly-sample-datetime-input'),
-    //         metadataElementLocation = $(this).closest('.assembly-metadata').find('.assembly-sample-location-input'),
-    //         metadataElementSource = $(this).closest('.assembly-metadata').find('.assembly-sample-source-input');
-
-    //     // Set value
-    //     $('.assembly-item').each(function(){
-    //         targetFileId = $(this).attr('data-file-id');
-
-    //         console.dir($(this));
-
-    //         console.log('sourceFileId: ' + sourceFileId);
-    //         console.log('targetFileId: ' + targetFileId);
-
-    //         setAssemblyMetadataTimestamp(sourceFileId, targetFileId);
-    //     });
-
-    //     //$('.assembly-metadata').find('.assembly-sample-datetime-input').val(metadataElementTimestamp.val());
-    //     $('.assembly-metadata').find('.assembly-sample-location-input').val(metadataElementLocation.val());
-    //     $('.assembly-metadata').find('.assembly-sample-source-input').val(metadataElementSource.val());
-
-    //     // // Set data
-    //     // $('.assembly-metadata').find('.assembly-sample-location-input').attr('data-latitude', metadataElementLocation.attr('data-latitude'));
-    //     // $('.assembly-metadata').find('.assembly-sample-location-input').attr('data-longitude', metadataElementLocation.attr('data-longitude'));
-
-    //     // Show metadata
-    //     $('.assembly-metadata-block').show();
-
-    //     updateMetadataProgressBar();
-
-    // });
 
 
 

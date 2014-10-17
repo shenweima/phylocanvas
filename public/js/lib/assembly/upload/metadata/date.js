@@ -15,7 +15,7 @@ $(function(){
 	        return 32 - new Date(year, month, 32).getDate();
 	    };
 
-	    var populateDaySelect = function($selectElement, selectedYear, selectedMonth) {
+	    window.WGST.exports.populateDaySelect = function($selectElement, selectedYear, selectedMonth) {
 	    	//
 	        // Remove previous list of days and append a new one
 	        //
@@ -161,7 +161,7 @@ $(function(){
 
 	    };
 
-	    var copyAssemblyMetadataTimestamp = function(sourceAssemblyFileId, targetAssemblyFileId) {
+	    window.WGST.exports.copyAssemblyMetadataTimestamp = function(sourceAssemblyFileId, targetAssemblyFileId) {
 
 	        if (sourceAssemblyFileId === targetAssemblyFileId) {
 	            return;

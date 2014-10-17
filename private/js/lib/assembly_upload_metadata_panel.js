@@ -30,7 +30,7 @@ $(function(){
 	        if (timestampPart === 'year' || timestampPart === 'month') {
 	            // If year and month selected then populate days select
 	            if (selectedYear !== '-1' && selectedMonth !== '-1') {
-	                populateDaySelect($timestampDaySelect, selectedYear, selectedMonth);
+	                window.WGST.exports.populateDaySelect($timestampDaySelect, selectedYear, selectedMonth);
 	                // Select the same day as previously if newly selected year/month combination has this day
 	                if (selectedDay !== '-1') {
 	                    $timestampDaySelect.find('option:contains("' + selectedDay + '")').prop('selected', true);   
@@ -88,12 +88,6 @@ $(function(){
 
 	        	showNextMetadataBlock($select);
 
-	            // Show next metadata form block
-	            //$select.closest('.assembly-metadata-block').next('.assembly-metadata-block').fadeIn();
-	            // Scroll to the next form block
-	            //$select.closest('.assembly-metadata-block').animate({scrollTop: $select.closest('.assembly-metadata-block').height()}, 400);
-
-	            //window.WGST.exports.updateMetadataProgressBar();
 	        } // if
 	    });
 
@@ -276,6 +270,7 @@ $(function(){
 	    // On change store source metadata
 	    //
         $('body').on('change', '.assembly-sample-source-input', function(){
+
         	var assemblyFileId = $(this).attr('data-assembly-file-id'),
         		$select = $(this);
 
@@ -302,106 +297,12 @@ $(function(){
 
 	        var assemblyFileId = $sourceAssemblyMetadata.attr('data-assembly-file-id');
 
-	        var source = {
-	            assemblyFileId: assemblyFileId,
-	            metadata: window.WGST.upload.fastaAndMetadata[assemblyFileId].metadata
-	        };
-
-	        var $assemblyUploadMetadataPanel = $('.wgst-panel__assembly-upload-metadata'),
-	            $assemblyItem,
-	            targetFileId;
-
 	        window.WGST.exports.copyAssemblyMetadataToAssembliesWithNoMetadata(assemblyFileId);
 
 	        //
-	        // Copy all metadata
+	        // Show all metadata input elements
 	        //
-	        $.each(window.WGST.upload.fastaAndMetadata, function(targetAssemblyFileId, targetAssemblyFastaAndMetadata) {
-
-	        	//
-	            // Only copy metadata to assemblies with no metadata
-	            //
-	            if (Object.keys(targetAssemblyFastaAndMetadata.metadata).length === 0) {
-	                
-	            	//window.WGST.exports.setAllAssemblyMetadata(targetAssemblyFileId, targetAssemblyFastaAndMetadata);
-
-	            	// //
-	            	// // Update data model
-	            	// //
-
-	             //    //
-	             //    //
-	             //    // Important! http://docstore.mik.ua/orelly/webprog/jscript/ch11_02.htm
-	             //    // This is copying by reference (not good for this case):
-	             //    // WGST.upload.assembly[targetFileName].metadata = source.metadata;
-	             //    // We need to copy by value!
-	             //    //
-	             //    //
-
-	             //    //
-	             //    // Copy datetime
-	             //    //
-	             //    window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata.datetime = source.metadata.datetime;
-	                
-	             //    //
-	             //    // Copy geography
-	             //    //
-	             //    window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata.geography = {
-	             //        address: '',
-	             //        position: {
-	             //            latitude: '',
-	             //            longitude: ''
-	             //        },
-	             //        type: ''
-	             //    };
-	             //    window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata.geography.address = source.metadata.geography.address;
-
-	             //    console.debug('window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata');
-	             //    console.debug(targetAssemblyFileId);
-	             //    console.dir(window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata);
-
-	             //    window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata.geography.position.latitude = source.metadata.geography.position.latitude;
-	             //    window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata.geography.position.longitude = source.metadata.geography.position.longitude;
-	             //    window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata.geography.type = source.metadata.geography.type;
-	                
-	             //    //
-	             //    // Copy source
-	             //    //
-	             //    window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata.source = source.metadata.source;
-
-	                //
-	                //
-	                // Update UI
-	                //
-	                //
-
-	                $targetAssemblyMetadata = $assemblyUploadMetadataPanel.find('.wgst-upload-assembly__metadata[data-assembly-file-id="' + targetAssemblyFileId + '"]');
-
-	                //
-	                // Update date input
-	                //
-	                copyAssemblyMetadataTimestamp(source.assemblyFileId, targetAssemblyFileId);
-
-	                //
-	                // Update location input
-	                //
-	                $targetAssemblyMetadata.find('.assembly-sample-location-input').val($sourceAssemblyMetadataLocation.val());
-	                
-	                //
-	                // Update source input
-	                //
-	                $targetAssemblyMetadata.find('.assembly-sample-source-input').val($sourceAssemblyMetadataSource.val());
-	                
-	                //
-	                // Show all metadata blocks
-	                //
-	                $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + targetAssemblyFileId + '"] .assembly-metadata-block').removeClass('wgst--hide-this');
-	            
-	            } // if
-	        });
-
-	        // Show all metadata
-	        $('.assembly-metadata-block').show();
+	        $('.wgst-assembly-metadata-block').show();
 
 	        window.WGST.exports.updateMetadataProgressBar();
 	    });
@@ -440,13 +341,13 @@ $(function(){
             //
             // Show next metadata form block
             //
-            $currentInputElement.closest('.assembly-metadata-block').next('.assembly-metadata-block').removeClass('wgst--hide-this');
+            $currentInputElement.closest('.wgst-assembly-metadata-block').next('.wgst-assembly-metadata-block').removeClass('wgst--hide-this');
             
             //
             // Scroll to the next form block
 			//
 			$currentInputElement.closest('.wgst-upload-assembly__metadata .assembly-metadata').animate({
-				scrollTop: $currentInputElement.closest('.assembly-metadata-block').next('.assembly-metadata-block').offset().top
+				scrollTop: $currentInputElement.closest('.wgst-assembly-metadata-block').next('.wgst-assembly-metadata-block').offset().top
 			}, 'fast');
 		};
 

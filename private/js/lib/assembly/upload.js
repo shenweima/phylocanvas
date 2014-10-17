@@ -29,6 +29,26 @@ $(function(){
 	    	csvFileTypeRegex: /csv/
 	    };
 
+	    window.WGST.exports.initFastaAndMetadata = function(assemblyFileId) {
+	    	//
+	    	// Only create model if it doesn't exist
+	    	//
+	    	if (typeof window.WGST.upload.fastaAndMetadata[assemblyFileId] !== 'undefined') {
+	    		return;
+	    	}
+
+	    	//
+	    	// Init data structure
+	    	//
+	    	window.WGST.upload.fastaAndMetadata[assemblyFileId] = {
+	    		fasta: {
+	    			name: assemblyFileId,
+	    			assembly: ''
+	    		},
+	    		metadata: {}
+	    	};
+	    };
+
 	    // window.WGST.dragAndDrop.files = [];
 	    // window.WGST.dragAndDrop.loadedFiles = [];
 	    // window.WGST.dragAndDrop.fastaFileNameRegex = /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i;
@@ -89,6 +109,7 @@ $(function(){
 
                 var metadata = results.data;
 
+                console.log('CSV data result:');
                 console.dir(results.data);
 
                 //
@@ -104,6 +125,40 @@ $(function(){
                 	}
 
                 	var assemblyFileId = assemblyMetadata.filename;
+
+                	//
+                	// Validate mandatory metadata: date, location
+                	//
+
+                	//
+                	// Validate date
+                	//
+                	if (typeof assemblyMetadata.date !== 'undefined') {
+                		//
+                		// Update model
+                		//
+                		window.WGST.exports.setAssemblyMetadata({
+                			assemblyFileId: assemblyFileId,
+                			assemblyMetadataKey: 'date',
+                			assemblyMetadataValue: assemblyMetadata.date
+                		});
+
+                		return;
+
+                		//
+                		// Render date form
+                		//
+                		window.WGST.exports.renderAssemblyMetadataDateForm(assemblyFileId);
+                	}
+
+                	//
+                	// Validate location
+                	//
+                	if (typeof assemblyMetadata.location !== 'undefined') {
+                		
+                	}
+
+
 
                 	//
                 	// Create view
@@ -137,9 +192,9 @@ $(function(){
 	        // Sort loaded files by name
 	        //
 	        window.WGST.dragAndDrop.loadedFiles.sort(function(a, b){
-	            if (a.file.name > b.file.name) {
+	            if (a.assemblyFileId > b.assemblyFileId) {
 	                return 1;
-	            } else if (a.file.name < b.file.name) {
+	            } else if (a.assemblyFileId < b.assemblyFileId) {
 	                return -1;
 	            } else {
 	                return 0;
@@ -161,176 +216,161 @@ $(function(){
                 // Store loaded file
                 //
                 window.WGST.dragAndDrop.loadedFiles.push({
-                    // Generate uid for dropped file
-                    uid: uuid.v4(),
-                    event: event,
-                    //fileCounter: fileCounter,
-                    file: file//,
-                    //droppedFiles: droppedFiles,
-                    //collectionId: collectionId
+                	assemblyFileId: file.name,
+                	fastaFileString: event.target.result
                 });
 
-                				//
-	                            // Wait until all files were loaded
-	                            //
-	                            if (window.WGST.dragAndDrop.loadedFiles.length === window.WGST.dragAndDrop.droppedValidFiles.length) {
-	                                
-                					console.log('[WGST] Loaded all FASTA files');
+				//
+                // Wait until all files were loaded
+                //
+                if (window.WGST.dragAndDrop.loadedFiles.length === window.WGST.dragAndDrop.droppedValidFiles.length) {
+                    
+					console.log('[WGST] Loaded all ' + window.WGST.dragAndDrop.loadedFiles.length + ' FASTA files');
 
-	                                //
-	                                // Sort loaded files by name
-	                                //
-	                            	sortLoadedFilesByName();
+                    //
+                    // Sort loaded files by name
+                    //
+                	sortLoadedFilesByName();
 
-	                                // WGST.dragAndDrop.loadedFiles.sort(function(a, b){
-	                                //     if (a.file.name > b.file.name) {
-	                                //         return 1;
-	                                //     } else if (a.file.name < b.file.name) {
-	                                //         return -1;
-	                                //     } else {
-	                                //         return 0;
-	                                //     }
-	                                // });
+                    // WGST.dragAndDrop.loadedFiles.sort(function(a, b){
+                    //     if (a.file.name > b.file.name) {
+                    //         return 1;
+                    //     } else if (a.file.name < b.file.name) {
+                    //         return -1;
+                    //     } else {
+                    //         return 0;
+                    //     }
+                    // });
 
-	                                //
-	                                // Show sidebar
-	                                //
-	                                window.WGST.exports.showSidebar();
+                    //
+                    // Show sidebar
+                    //
+                    window.WGST.exports.showSidebar();
 
-	                                //
-	                                //
-	                                // Create assembly upload panels
-	                                //
-	                                //
+                    //
+                    //
+                    // Create assembly upload panels
+                    //
+                    //
 
-	                                //
-	                                // Create assembly upload navigation panel
-	                                //
-	                                window.WGST.exports.createPanel('assembly-upload-navigation', {
-	                                	panelType: 'assembly-upload-navigation',
-	                                	panelId: 'assembly-upload-navigation'
-	                                });
-					                //
-					                // Show panel
-					                //
-					                window.WGST.exports.showPanel('assembly-upload-navigation');
+                    //
+                    // Create assembly upload navigation panel
+                    //
+                    window.WGST.exports.createPanel('assembly-upload-navigation', {
+                    	panelType: 'assembly-upload-navigation',
+                    	panelId: 'assembly-upload-navigation'
+                    });
+	                //
+	                // Show panel
+	                //
+	                window.WGST.exports.showPanel('assembly-upload-navigation');
 
-	                                //
-	                                // Create assembly upload metadata panel
-	                                //
-	                                window.WGST.exports.createPanel('assembly-upload-metadata', {
-	                                	panelType: 'assembly-upload-metadata',
-	                                	panelId: 'assembly-upload-metadata'
-	                                });
-					                //
-					                // Show panel
-					                //
-					                window.WGST.exports.showPanel('assembly-upload-metadata');
+                    //
+                    // Create assembly upload metadata panel
+                    //
+                    window.WGST.exports.createPanel('assembly-upload-metadata', {
+                    	panelType: 'assembly-upload-metadata',
+                    	panelId: 'assembly-upload-metadata'
+                    });
+	                //
+	                // Show panel
+	                //
+	                window.WGST.exports.showPanel('assembly-upload-metadata');
 
-	                                //
-	                                // Create assembly upload analytics panel
-	                                //
-	                                window.WGST.exports.createPanel('assembly-upload-analytics', {
-	                                	panelType: 'assembly-upload-analytics',
-	                                	panelId: 'assembly-upload-analytics'
-	                                });
-					                //
-					                // Show panel
-					                //
-					                window.WGST.exports.showPanel('assembly-upload-analytics');
+                    //
+                    // Create assembly upload analytics panel
+                    //
+                    window.WGST.exports.createPanel('assembly-upload-analytics', {
+                    	panelType: 'assembly-upload-analytics',
+                    	panelId: 'assembly-upload-analytics'
+                    });
+	                //
+	                // Show panel
+	                //
+	                window.WGST.exports.showPanel('assembly-upload-analytics');
 
-							        //
-							        // Create map fullscreen
-							        //
-							        var fullscreenType = 'collection-map',
-							            fullscreenId = fullscreenType;
+			        //
+			        // Create map fullscreen
+			        //
+			        var fullscreenType = 'collection-map',
+			            fullscreenId = fullscreenType;
 
-							        window.WGST.exports.createFullscreen(fullscreenId, {
-							            fullscreenType: fullscreenType,
-							            fullscreenId: fullscreenId
-							        });
+			        window.WGST.exports.createFullscreen(fullscreenId, {
+			            fullscreenType: fullscreenType,
+			            fullscreenId: fullscreenId
+			        });
 
-							        //
-							        // Show fullscreen
-							        //
-							        window.WGST.exports.showFullscreen(fullscreenId);
+			        //
+			        // Show fullscreen
+			        //
+			        window.WGST.exports.showFullscreen(fullscreenId);
 
-	                                //
-								    // Initialise map
-								    //
-							    	window.WGST.geo.map.init();
+                    //
+				    // Initialise map
+				    //
+			    	window.WGST.geo.map.init();
 
-							        //
-							        // Was map loaded?
-							        //
-								    //if (! window.WGST.geo.map.initilised) {
+			        //
+			        // Was map loaded?
+			        //
+				    //if (! window.WGST.geo.map.initilised) {
 
-		                                //
-									    // Initialise map
-									    //
-								    	//window.WGST.geo.map.init();
-								    //}
+                        //
+					    // Initialise map
+					    //
+				    	//window.WGST.geo.map.init();
+				    //}
 
-	                                //
-	                                // Parse loaded files
-	                                //
-	                                window.WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile){
+                    //
+                    // Parse loaded files
+                    //
+                    window.WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile){
 
-	                                	var assemblyFileId = loadedFile.file.name,
-	                                		fastaFileString = loadedFile.event.target.result;
+                    	var assemblyFileId = loadedFile.assemblyFileId,
+                    		fastaFileString = loadedFile.fastaFileString;
 
-								    	//
-								    	// Init data structure
-								    	//
-								    	window.WGST.upload.fastaAndMetadata[assemblyFileId] = {
-								    		fasta: {
-								    			name: assemblyFileId,
-								    			assembly: fastaFileString
-								    		},
-								    		metadata: {}
-								    	};
+                    	window.WGST.exports.initFastaAndMetadata(assemblyFileId);
+                    	
+                    	window.WGST.upload.fastaAndMetadata[assemblyFileId].fasta.assembly = fastaFileString;
 
-	                                    var fastaAnalysis = analyseFasta(assemblyFileId, fastaFileString);
+                        var fastaAnalysis = analyseFasta(assemblyFileId, fastaFileString);
 
-								        window.WGST.exports.renderAssemblyAnalytics(assemblyFileId, fastaAnalysis);
-								        window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
+				        window.WGST.exports.renderAssemblyAnalytics(assemblyFileId, fastaAnalysis);
+				        window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
 
-								        //
-								        // Draw N50 chart
-								        //
-								        window.WGST.exports.drawN50Chart(fastaAnalysis.sumsOfNucleotidesInDnaStrings, fastaAnalysis.assemblyN50Data, '.sequence-length-distribution-chart[data-assembly-file-id="' + assemblyFileId + '"]');
+				        //
+				        // Draw N50 chart
+				        //
+				        window.WGST.exports.drawN50Chart(fastaAnalysis.sumsOfNucleotidesInDnaStrings, fastaAnalysis.assemblyN50Data, '.sequence-length-distribution-chart[data-assembly-file-id="' + assemblyFileId + '"]');
 
-										window.WGST.exports.initAssemblyMetadataLocation(assemblyFileId);
+						window.WGST.exports.initAssemblyMetadataLocation(assemblyFileId);
 
-	                                    // Add assembly to the drop down select of dropeed assemblies
-	                                    $('.wgst-dropped-assembly-list').append(
-	                                        '<option value="' + loadedFile.file.name + '">' + loadedFile.file.name + '</option>'
-	                                    );
-	                                });
+                        // Add assembly to the drop down select of dropeed assemblies
+                        $('.wgst-dropped-assembly-list').append(
+                            '<option value="' + loadedFile.assemblyFileId + '">' + loadedFile.assemblyFileId + '</option>'
+                        );
+                    });
 
-	                                //
-	                                // Show first assembly
-	                                //
-	                                window.WGST.exports.showAssemblyUpload(WGST.dragAndDrop.loadedFiles[0].file.name);
+                    //
+                    // Show first assembly
+                    //
+                    window.WGST.exports.showAssemblyUpload(WGST.dragAndDrop.loadedFiles[0].assemblyFileId);
 
-	                                //window.WGST.exports.showDroppedAssembly(WGST.dragAndDrop.loadedFiles[0].uid);
-					                //window.WGST.exports.showAssemblyUploadAnalytics(WGST.dragAndDrop.loadedFiles[0].file.name);
-					                //window.WGST.exports.showAssemblyUploadMetadata(WGST.dragAndDrop.loadedFiles[0].file.name);
-	                            
-						            //
-						            // Hide drag and drop
-						            //
-						            $('[data-wgst-background-id="drag-and-drop"]').addClass('wgst--hide-this');
+                    //window.WGST.exports.showDroppedAssembly(WGST.dragAndDrop.loadedFiles[0].uid);
+	                //window.WGST.exports.showAssemblyUploadAnalytics(WGST.dragAndDrop.loadedFiles[0].file.name);
+	                //window.WGST.exports.showAssemblyUploadMetadata(WGST.dragAndDrop.loadedFiles[0].file.name);
+                
+		            //
+		            // Hide drag and drop background
+		            //
+		            $('[data-wgst-background-id="drag-and-drop"]').addClass('wgst--hide-this');
 
-
-
-
-						            //
-						            // Reset files
-						            //
-									window.WGST.dragAndDrop.loadedFiles = [];
-									window.WGST.dragAndDrop.droppedValidFiles = [];
-	                            }
+		            //
+		            // Reset files
+		            //
+					window.WGST.dragAndDrop.loadedFiles = [];
+					window.WGST.dragAndDrop.droppedValidFiles = [];
+                }
 
             };
 
