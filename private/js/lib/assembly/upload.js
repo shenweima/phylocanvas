@@ -26,7 +26,7 @@ $(function(){
 	    	droppedValidFiles: [],
 	    	loadedFiles: [],
 	    	fastaFileNameRegex: /^.+(.fa|.fas|.fna|.ffn|.faa|.frn|.fasta|.contig)$/i,
-	    	csvFileTypeRegex: /csv/
+	    	csvFileTypeRegex: /^.+(.csv)$/i
 	    };
 
 	    window.WGST.exports.initFastaAndMetadata = function(assemblyFileId) {
@@ -84,7 +84,135 @@ $(function(){
 		    $dragAndDropBackground.find('.wgst-drag-and-drop-content').find('.fa').removeClass('animated bounce');
 		};
 
-		var handleCsvDrop = function(file) {
+        var extractCsvFileContent = function(file) {
+            var csvString = file.content;
+
+            var results = Papa.parse(csvString, {
+                header: true,
+                dynamicTyping: true
+            });
+
+            return results.data;
+        };
+
+		var parseCsvFile = function(file) {
+	        console.log('[WGST] Parsing CSV file: ' + file.name);
+	        console.dir(file);
+
+            // var csvString = file.content;
+
+            // var results = Papa.parse(csvString, {
+            // 	header: true,
+            // 	dynamicTyping: true
+            // });
+
+            // var metadata = results.data;
+
+            var metadata = extractCsvFileContent(file);
+
+            console.log('CSV data result:');
+            console.dir(metadata);
+
+                //
+                // Iterate and parse each row of metadata
+                //
+                metadata.map(function(assemblyMetadata) {
+
+                    console.log('>>> THIS: ' + assemblyMetadata.filename);
+
+                	//
+                	// Assembly metadata must have an assembly file id
+                	//
+                	if (typeof assemblyMetadata.filename === 'undefined') {
+                		return;
+                	}
+
+                    console.log('OK!');
+
+                    var assemblyFileId = assemblyMetadata.filename;
+
+                    //
+                    // Navigation
+                    //
+
+                    // Add assembly to the drop down select of dropeed assemblies
+                    $('.wgst-dropped-assembly-list').append(
+                        '<option value="' + assemblyFileId + '">' + assemblyFileId + '</option>'
+                    );
+
+
+
+
+
+
+
+                    //
+                    // Prepare data structure
+                    //
+                    window.WGST.exports.initFastaAndMetadata(assemblyFileId);
+
+                	console.debug('assemblyFileId: ' + assemblyFileId);
+                	console.dir(window.WGST.upload.fastaAndMetadata[assemblyFileId]);
+
+                	//
+                	// Validate mandatory metadata: date, location
+                	//
+
+                	//
+                	// Validate date
+                	//
+                	if (typeof assemblyMetadata.date !== 'undefined') {
+                		//
+                		// Update model
+                		//
+                		window.WGST.exports.setAssemblyMetadata({
+                			assemblyFileId: assemblyFileId,
+                			assemblyMetadataKey: 'date',
+                			assemblyMetadataValue: assemblyMetadata.date
+                		});
+
+                		return;
+
+                		//
+                		// Render date form
+                		//
+                		window.WGST.exports.renderAssemblyMetadataDateForm(assemblyFileId);
+                	}
+
+                	//
+                	// Validate location
+                	//
+                	if (typeof assemblyMetadata.location !== 'undefined') {
+                		
+                	}
+
+
+
+                	//
+                	// Create view
+                	//
+	        		window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
+
+	        		//
+	        		// Set metadata value on UI element
+	        		//
+
+
+
+                	//
+                	// Parse date
+                	//
+                	// if (typeof assemblyMetadata.date !== 'undefined') {
+                	// 	assemblyMetadata.date
+                	// }
+
+                	console.log('assemblyMetadata:');
+                	console.dir(assemblyMetadata);
+
+                });
+		};
+
+		var __handleCsvDrop = function(file) {
 	        console.log('[WGST] Dropped CSV file: ' + file.name);
 	        console.dir(file);
 
@@ -187,7 +315,7 @@ $(function(){
             fileReader.readAsText(file);
 		};
 
-		var sortLoadedFilesByName = function() {
+		var __sortLoadedFilesByName = function() {
 	        //
 	        // Sort loaded files by name
 	        //
@@ -202,7 +330,68 @@ $(function(){
 	        });
 		};
 
-		var handleFastaDrop = function(file) {
+		var sortLoadedDroppedFilesByName = function(loadedDroppedFiles) {
+	        //
+	        // Sort loaded dropped files by name
+	        //
+	        loadedDroppedFiles.sort(function(a, b){
+	            if (a.name > b.name) {
+	                return 1;
+	            } else if (a.name < b.name) {
+	                return -1;
+	            } else {
+	                return 0;
+	            }
+	        });
+
+	        return loadedDroppedFiles;
+		};
+
+		var parseFastaFile = function(file) {
+	        console.log('[WGST] Parsing FASTA file: ' + file.name);
+	        console.dir(file);
+
+        	var assemblyFileId = file.name,
+        		fastaFileString = file.content;
+
+        	//
+        	// Prepare data structure
+        	//
+        	window.WGST.exports.initFastaAndMetadata(assemblyFileId);
+
+            //
+            // Set fasta string
+            //
+        	window.WGST.upload.fastaAndMetadata[assemblyFileId].fasta.assembly = fastaFileString;
+
+            //
+            // Analytics
+            //
+            var fastaAnalysis = analyseFasta(assemblyFileId, fastaFileString);
+	        window.WGST.exports.renderAssemblyAnalytics(assemblyFileId, fastaAnalysis);
+	        //
+	        // Draw N50 chart
+	        //
+	        window.WGST.exports.drawN50Chart(fastaAnalysis.sumsOfNucleotidesInDnaStrings, fastaAnalysis.assemblyN50Data, '.sequence-length-distribution-chart[data-assembly-file-id="' + assemblyFileId + '"]');
+
+	        //
+	        // Metadata
+	        //
+	        window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
+			window.WGST.exports.initAssemblyMetadataLocation(assemblyFileId);
+
+			//
+			// Navigation
+			//
+
+            // Add assembly to the drop down select of dropeed assemblies
+            $('.wgst-dropped-assembly-list').append(
+                '<option value="' + assemblyFileId + '">' + assemblyFileId + '</option>'
+            );
+
+		};
+
+		var __handleFastaDrop = function(file) {
 	        console.log('[WGST] Dropped FASTA file: ' + file.name);
 	        //console.dir(file);
 
@@ -382,7 +571,7 @@ $(function(){
 		};
 
 		var isCsvFile = function(file) {
-			return file.type.match(window.WGST.dragAndDrop.csvFileTypeRegex)
+			return file.name.match(window.WGST.dragAndDrop.csvFileTypeRegex);
 		};
 
 		var isValidFile = function(file) {
@@ -417,6 +606,211 @@ $(function(){
             }
 
             return results;
+		};
+
+		var loadDroppedFile = function(file, callback) {
+	        console.log('[WGST] Loading dropped file: ' + file.name);
+	        //console.dir(file);
+
+	        var fileReader = new FileReader();
+
+            fileReader.onload = function(event) {
+                console.log('[WGST] Loaded dropped file: ' + file.name);
+                //console.dir(fileReader.result);
+
+                callback(null, event.target.result);
+
+            };
+
+            fileReader.readAsText(file);
+		};
+
+		var loadDroppedFiles = function(droppedFiles, callback) {
+
+			var loadedDroppedFiles = [];
+
+            droppedFiles.map(function(file){
+
+            	loadDroppedFile(file, function(error, fileContent){
+            		
+            		if (error) {
+            			console.error('[WGST] Failed to load dropped file: ' + error);
+            			return;
+            		}
+
+            		//
+            		// Store loaded file's content
+            		//
+            		loadedDroppedFiles.push({
+	    				name: file.name,
+	    				content: fileContent
+            		});
+
+            		//
+            		// All files have been loaded
+            		//
+            		if (loadedDroppedFiles.length === droppedFiles.length) {
+            			callback(null, loadedDroppedFiles);
+            		}
+            	});
+
+            });
+		};
+
+        var getNameOfTheFirstFile = function(sortedLoadedDroppedFiles) {
+
+            var firstFile = sortedLoadedDroppedFiles[0],
+                firstFileName = 'Unknown';
+
+            //
+            // Csv
+            //
+            if (isCsvFile(firstFile)) {
+
+                var metadata = extractCsvFileContent(firstFile);
+
+                //
+                // Get file name from the first metadata row
+                //
+                firstFileName = metadata[0].filename;
+
+            //
+            // Fasta
+            //
+            } else if (isFastaFile(firstFile)) {
+
+                firstFileName = sortedLoadedDroppedFiles[0].name;
+
+            }
+
+            return firstFileName;
+        };
+
+		var parseLoadedDroppedFiles = function(loadedDroppedFiles) {
+
+			var sortedLoadedDroppedFiles = sortLoadedDroppedFilesByName(loadedDroppedFiles);
+
+			console.log('sortedLoadedDroppedFiles:');
+			console.dir(sortedLoadedDroppedFiles);
+
+			//
+			// Update UI
+			//
+
+            //
+            // Show sidebar
+            //
+            window.WGST.exports.showSidebar();
+
+            //
+            //
+            // Create assembly upload panels
+            //
+            //
+
+            //
+            // Create assembly upload navigation panel
+            //
+            window.WGST.exports.createPanel('assembly-upload-navigation', {
+            	panelType: 'assembly-upload-navigation',
+            	panelId: 'assembly-upload-navigation'
+            });
+            //
+            // Show panel
+            //
+            window.WGST.exports.showPanel('assembly-upload-navigation');
+
+            //
+            // Create assembly upload metadata panel
+            //
+            window.WGST.exports.createPanel('assembly-upload-metadata', {
+            	panelType: 'assembly-upload-metadata',
+            	panelId: 'assembly-upload-metadata'
+            });
+            //
+            // Show panel
+            //
+            window.WGST.exports.showPanel('assembly-upload-metadata');
+
+            //
+            // Create assembly upload analytics panel
+            //
+            window.WGST.exports.createPanel('assembly-upload-analytics', {
+            	panelType: 'assembly-upload-analytics',
+            	panelId: 'assembly-upload-analytics'
+            });
+
+            //
+            // Show panel
+            //
+            window.WGST.exports.showPanel('assembly-upload-analytics');
+
+	        //
+	        // Create map fullscreen
+	        //
+	        var fullscreenType = 'collection-map',
+	            fullscreenId = fullscreenType;
+
+	        window.WGST.exports.createFullscreen(fullscreenId, {
+	            fullscreenType: fullscreenType,
+	            fullscreenId: fullscreenId
+	        });
+
+	        //
+	        // Show fullscreen
+	        //
+	        window.WGST.exports.showFullscreen(fullscreenId);
+
+            //
+		    // Initialise map
+		    //
+	    	window.WGST.geo.map.init();
+
+			//
+			// Parse each file
+			//
+			sortedLoadedDroppedFiles.map(function(file){
+
+	        	//
+	        	// Csv
+	        	//
+	            if (isCsvFile(file)) {
+
+	                parseCsvFile(file);
+
+	            //
+	            // Fasta
+	            //
+	            } else if (isFastaFile(file)) {
+
+	            	parseFastaFile(file);
+
+	            //
+	            // Unknown file type
+	            //
+	            } else {
+
+	            	console.error('[WGST] Unsupported file type.');
+	            }
+			});
+
+            //
+            // Show first assembly
+            //
+            //window.WGST.exports.showAssemblyUpload(sortedLoadedDroppedFiles[0].name);
+            window.WGST.exports.showAssemblyUpload(getNameOfTheFirstFile(sortedLoadedDroppedFiles));
+
+            //
+            // Hide drag and drop background
+            //
+            $('[data-wgst-background-id="drag-and-drop"]').addClass('wgst--hide-this');
+
+            //
+            // Reset files
+            //
+			// window.WGST.dragAndDrop.loadedFiles = [];
+			// window.WGST.dragAndDrop.droppedValidFiles = [];
+
 		};
 
 	    var handleDrop = function(event) {
@@ -454,7 +848,7 @@ $(function(){
 	            var droppedFiles = event.dataTransfer.files;
 	            var validatedDroppedFiles = validateDroppedFiles(droppedFiles);
 
-	            window.WGST.dragAndDrop.droppedValidFiles = validatedDroppedFiles.validFiles;
+	            //window.WGST.dragAndDrop.droppedValidFiles = validatedDroppedFiles.validFiles;
 
 	            // //
 	            // // Speak
@@ -496,14 +890,26 @@ $(function(){
 	            //window.WGST.dragAndDrop.files = $.merge(previouslyDroppedFiles, newlyDroppedFiles);
 	            //window.WGST.dragAndDrop.files = $.merge([], newlyDroppedFiles);
 
+	            loadDroppedFiles(validatedDroppedFiles.validFiles, function(error, loadedDroppedFiles){
+
+	            	console.log('loadedDroppedFiles:');
+	            	console.dir(loadedDroppedFiles);
+
+	            	parseLoadedDroppedFiles(loadedDroppedFiles);
+
+	            });
+
+	            return;
+
 	            //
 	            // Handle each file based on it's type
 	            //
 	            window.WGST.dragAndDrop.droppedValidFiles.map(function(file){
 
 	            	//
-	            	// Validate file type
+	            	// Load files
 	            	//
+	            	loadFiles();
 
 	            	//
 	            	// Csv

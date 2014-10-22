@@ -35,7 +35,7 @@ $(function(){
 	    		return false;
 	    	}
 
-	    	console.log('assemblyFileId: ' + assemblyFileId);
+	    	console.log('*** assemblyFileId: ' + assemblyFileId);
 
 	    	window.WGST.exports.showAssemblyUploadAnalytics(assemblyFileId);
 	    	window.WGST.exports.showAssemblyUploadMetadata(assemblyFileId);
