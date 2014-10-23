@@ -89,6 +89,8 @@ $(function(){
 	        	showNextMetadataBlock($select);
 
 	        } // if
+
+	        window.WGST.exports.updateMetadataProgressBar();
 	    });
 
 	    window.WGST.exports.updateMetadataProgressBar = function() {
@@ -169,11 +171,11 @@ $(function(){
             //
             //
             google.maps.event.addListener(window.WGST.geo.placeSearchBox[assemblyFileId], 'places_changed', function() {
-            	handlePlacesChanged(assemblyFileId);
+            	window.WGST.exports.handlePlacesChanged(assemblyFileId);
             });
 	    };
 
-	    var handlePlacesChanged = function(assemblyFileId) {
+	    window.WGST.exports.handlePlacesChanged = function(assemblyFileId) {
 
 	    	console.debug('Debug: ' + $('.assembly-sample-location-input[data-assembly-file-id="' + assemblyFileId + '"]').length);
 
@@ -182,6 +184,7 @@ $(function(){
                 place = places[0];
 
             if (typeof place === 'undefined' || typeof place.geometry === 'undefined') {
+            	console.error('[WGST] No place or geometry');
                 console.dir(WGST.geo.placeSearchBox[assemblyFileId]);
                 return;
             }
@@ -252,18 +255,6 @@ $(function(){
             });
 
             window.WGST.exports.updateMetadataProgressBar();
-
-            //WGST.upload.assembly[fileName] = WGST.upload.assembly[fileName] || {};
-            //WGST.upload.assembly[fileName].metadata = WGST.upload.assembly[fileName].metadata || {};
-            // WGST.upload.assembly[fileName].metadata.geography = {
-            //     address: formattedAddress,
-            //     position: {
-            //         latitude: latitude,
-            //         longitude: longitude
-            //     },
-            //     // https://developers.google.com/maps/documentation/geocoding/#Types
-            //     type: place.types[0]
-            // };
 	    };
 
 	    //

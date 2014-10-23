@@ -31,7 +31,7 @@ $(function(){
 
 	    window.WGST.exports.initFastaAndMetadata = function(assemblyFileId) {
 	    	//
-	    	// Only create model if it doesn't exist
+	    	// Only create data structure if it doesn't exist
 	    	//
 	    	if (typeof window.WGST.upload.fastaAndMetadata[assemblyFileId] !== 'undefined') {
 	    		return;
@@ -95,121 +95,290 @@ $(function(){
             return results.data;
         };
 
+        var __validateAssemblyMetadata = function(assemblyMetadata) {
+
+            var validatedAssemblyMetadata = {
+                valid: {},
+                invalid: {}
+            };
+
+            for (metadata in assemblyMetadata) {
+                if (assemblyMetadata.hasOwnProperty(metadata)) {
+
+                    if (metadata === 'filename') {
+
+                    }
+
+                }
+            }
+
+            //
+            // Assembly metadata must have an assembly file id
+            //
+            if (typeof assemblyMetadata.filename === 'undefined') {
+                return;
+            }
+
+            return validatedAssemblyMetadata;
+        };
+
+        var setAssemblyMetadataFormDate = function(assemblyFileId, assemblyMetadataDate) {
+
+            var assemblyDate = moment(assemblyMetadataDate);
+
+            //
+            // Validate date
+            //
+            if (! assemblyDate.isValid()) {
+                console.error('[WGST] Invalid assembly metadata date: ' + assemblyMetadataDate);
+                return;
+            }
+
+            //
+            // Set year form value
+            //
+            var year = assemblyDate.year();
+
+            $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]')
+                .find('[data-timestamp-input="year"]')
+                .val(year)
+                .change();
+
+            //
+            // Set month form value
+            //
+            var month = assemblyDate.month();
+
+            $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]')
+                .find('[data-timestamp-input="month"]')
+                .val(month)
+                .change();
+
+            //
+            // Set date form value
+            //
+            var date = assemblyDate.date();
+
+            $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]')
+                //
+                // To do: rename "day" to "date"
+                //
+                .find('[data-timestamp-input="day"]')
+                .val(date)
+                .change();
+        };
+
+        var setAssemblyMetadataFormLocation = function(assemblyFileId, assemblyMetadataAddress) {
+
+            var address = assemblyMetadataAddress;
+
+            var geocoder = new google.maps.Geocoder();
+
+            geocoder.geocode({'address': address}, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+
+                    var result = results[0];
+
+                    console.debug('Geocoder results:');
+                    console.dir(result);
+
+                    var formattedAddress = result.formatted_address,
+                        latitude = result.geometry.location.lat(),
+                        longitude = result.geometry.location.lng();
+
+                    // console.log('Assembly metadata form:');
+                    // console.dir({
+                    //     formattedAddress: formattedAddress,
+                    //     latitude: latitude,
+                    //     longitude: longitude
+                    // });
+
+                    $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]')
+                        .find('.assembly-sample-location-input')
+                        .val(formattedAddress)
+                        .change();
+
+                    //
+                    // Set model
+                    //
+                    window.WGST.exports.setAssemblyUploadMetadataModel(assemblyFileId, 'geography', {
+                        address: formattedAddress,
+                        position: {
+                            latitude: latitude,
+                            longitude: longitude
+                        },
+                        // https://developers.google.com/maps/documentation/geocoding/#Types
+                        type: 'Unknown'
+                    });
+
+                    window.WGST.exports.updateMetadataProgressBar();
+
+                } else {
+                    console.error('[WGST] Could not geocode address: ' + assemblyMetadataAddress);
+                }
+            });
+        };
+
+        var setAssemblyMetadataFormSource = function(assemblyFileId, assemblyMetadataSource) {
+
+            var source = assemblyMetadataSource;
+
+            $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]')
+                .find('.assembly-sample-source-input')
+                .val(source)
+                .change();
+        };
+
+        var addAssemblyToNavigation = function(assemblyFileId) {
+            //
+            // Only add if it doesn't exist
+            //
+            if ($('.wgst-dropped-assembly-list').find('option[value="' + assemblyFileId + '"]').length === 0) {
+                //
+                // Add assembly to the drop down select of dropeed assemblies
+                //
+                $('.wgst-dropped-assembly-list').append(
+                    '<option value="' + assemblyFileId + '">' + assemblyFileId + '</option>'
+                );
+            }
+        };
+
+        var showAllAssemblyMetadataBlocks = function() {
+            //
+            // Show all metadata input elements
+            //
+            $('.wgst-assembly-metadata-block').removeClass('wgst--hide-this');
+        };
+
 		var parseCsvFile = function(file) {
 	        console.log('[WGST] Parsing CSV file: ' + file.name);
 	        console.dir(file);
-
-            // var csvString = file.content;
-
-            // var results = Papa.parse(csvString, {
-            // 	header: true,
-            // 	dynamicTyping: true
-            // });
-
-            // var metadata = results.data;
 
             var metadata = extractCsvFileContent(file);
 
             console.log('CSV data result:');
             console.dir(metadata);
 
+            //
+            // Iterate and parse each row of metadata
+            //
+            metadata.map(function(assemblyMetadata) {
+
                 //
-                // Iterate and parse each row of metadata
                 //
-                metadata.map(function(assemblyMetadata) {
+                //
+                // Validate assembly metadata
+                //
+                //
+                //
 
-                    console.log('>>> THIS: ' + assemblyMetadata.filename);
+                //
+                // Assembly metadata must have an assembly file id
+                //
+                if (typeof assemblyMetadata.filename === 'undefined') {
+                    console.error('[WGST] Invalid assembly filename in metadata file ' + file.name);
+                    return;
+                }
 
-                	//
-                	// Assembly metadata must have an assembly file id
-                	//
-                	if (typeof assemblyMetadata.filename === 'undefined') {
-                		return;
-                	}
+                var assemblyFileId = assemblyMetadata.filename;
 
-                    console.log('OK!');
+                //
+                // Prepare data structure
+                //
+                window.WGST.exports.initFastaAndMetadata(assemblyFileId);
 
-                    var assemblyFileId = assemblyMetadata.filename;
+                //
+                // Metadata
+                //
+                window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
+                window.WGST.exports.initAssemblyMetadataLocation(assemblyFileId);
 
-                    //
-                    // Navigation
-                    //
+                //
+                // Date
+                //
+                if (typeof assemblyMetadata.date !== 'undefined') {
+                    setAssemblyMetadataFormDate(assemblyFileId, assemblyMetadata.date);
+                }
 
-                    // Add assembly to the drop down select of dropeed assemblies
-                    $('.wgst-dropped-assembly-list').append(
-                        '<option value="' + assemblyFileId + '">' + assemblyFileId + '</option>'
-                    );
+                //
+                // Location
+                //
+                if (typeof assemblyMetadata.location !== 'undefined') {
+                    setAssemblyMetadataFormLocation(assemblyFileId, assemblyMetadata.location);
+                }
 
+                //
+                // Source
+                //
+                if (typeof assemblyMetadata.source !== 'undefined') {
+                    setAssemblyMetadataFormSource(assemblyFileId, assemblyMetadata.source);
+                }
 
+                showAllAssemblyMetadataBlocks();
 
+                //
+                // Navigation
+                //
+                addAssemblyToNavigation(assemblyFileId);
 
+           //      return;
 
+           //      	//
+           //      	// Validate mandatory metadata: date, location
+           //      	//
 
+           //      	//
+           //      	// Validate date
+           //      	//
+           //      	if (typeof assemblyMetadata.date !== 'undefined') {
+           //      		//
+           //      		// Update model
+           //      		//
+           //      		window.WGST.exports.setAssemblyMetadata({
+           //      			assemblyFileId: assemblyFileId,
+           //      			assemblyMetadataKey: 'date',
+           //      			assemblyMetadataValue: assemblyMetadata.date
+           //      		});
 
-                    //
-                    // Prepare data structure
-                    //
-                    window.WGST.exports.initFastaAndMetadata(assemblyFileId);
+           //      		return;
 
-                	console.debug('assemblyFileId: ' + assemblyFileId);
-                	console.dir(window.WGST.upload.fastaAndMetadata[assemblyFileId]);
+           //      		//
+           //      		// Render date form
+           //      		//
+           //      		window.WGST.exports.renderAssemblyMetadataDateForm(assemblyFileId);
+           //      	}
 
-                	//
-                	// Validate mandatory metadata: date, location
-                	//
-
-                	//
-                	// Validate date
-                	//
-                	if (typeof assemblyMetadata.date !== 'undefined') {
-                		//
-                		// Update model
-                		//
-                		window.WGST.exports.setAssemblyMetadata({
-                			assemblyFileId: assemblyFileId,
-                			assemblyMetadataKey: 'date',
-                			assemblyMetadataValue: assemblyMetadata.date
-                		});
-
-                		return;
-
-                		//
-                		// Render date form
-                		//
-                		window.WGST.exports.renderAssemblyMetadataDateForm(assemblyFileId);
-                	}
-
-                	//
-                	// Validate location
-                	//
-                	if (typeof assemblyMetadata.location !== 'undefined') {
+           //      	//
+           //      	// Validate location
+           //      	//
+           //      	if (typeof assemblyMetadata.location !== 'undefined') {
                 		
-                	}
+           //      	}
 
 
 
-                	//
-                	// Create view
-                	//
-	        		window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
+           //      	//
+           //      	// Create view
+           //      	//
+	        		// window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
 
-	        		//
-	        		// Set metadata value on UI element
-	        		//
+	        		// //
+	        		// // Set metadata value on UI element
+	        		// //
 
 
 
-                	//
-                	// Parse date
-                	//
-                	// if (typeof assemblyMetadata.date !== 'undefined') {
-                	// 	assemblyMetadata.date
-                	// }
+           //      	//
+           //      	// Parse date
+           //      	//
+           //      	// if (typeof assemblyMetadata.date !== 'undefined') {
+           //      	// 	assemblyMetadata.date
+           //      	// }
 
-                	console.log('assemblyMetadata:');
-                	console.dir(assemblyMetadata);
+           //      	console.log('assemblyMetadata:');
+           //      	console.dir(assemblyMetadata);
 
-                });
+            });
 		};
 
 		var __handleCsvDrop = function(file) {
@@ -380,15 +549,10 @@ $(function(){
 	        window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
 			window.WGST.exports.initAssemblyMetadataLocation(assemblyFileId);
 
-			//
-			// Navigation
-			//
-
-            // Add assembly to the drop down select of dropeed assemblies
-            $('.wgst-dropped-assembly-list').append(
-                '<option value="' + assemblyFileId + '">' + assemblyFileId + '</option>'
-            );
-
+            //
+            // Navigation
+            //
+            addAssemblyToNavigation(assemblyFileId);
 		};
 
 		var __handleFastaDrop = function(file) {
@@ -804,13 +968,6 @@ $(function(){
             // Hide drag and drop background
             //
             $('[data-wgst-background-id="drag-and-drop"]').addClass('wgst--hide-this');
-
-            //
-            // Reset files
-            //
-			// window.WGST.dragAndDrop.loadedFiles = [];
-			// window.WGST.dragAndDrop.droppedValidFiles = [];
-
 		};
 
 	    var handleDrop = function(event) {
