@@ -17,16 +17,14 @@ $(function(){
 
 	    window.WGST.exports.showPreviousAssemblyUpload = function() {
 	       	var $previousOption = $('.wgst-dropped-assembly-list option:selected').prev();
-	        if ($previousOption.length) {
+	        if ($previousOption.length > 0) {
 	        	$previousOption.prop('selected', 'selected').change();
 	        }
 	    };
 
 	    window.WGST.exports.showNextAssemblyUpload = function() {
 	        var $nextOption = $('.wgst-dropped-assembly-list option:selected').next();
-	        console.log('&&& C0');
-	        if ($nextOption.length) {
-	        	console.log('&&& C1');
+	        if ($nextOption.length > 0) {
 	        	$nextOption.prop('selected', 'selected').change();
 	        }
 	    };

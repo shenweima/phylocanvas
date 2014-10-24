@@ -33,6 +33,7 @@
 	"client": {
 		"allowUpload": true,
 		"socketAddress": "127.0.0.1",
-		"referenceCollectionId": "b8d3aab1-625f-49aa-9857-a5e97f5d6be5"
+		"referenceCollectionId": "b8d3aab1-625f-49aa-9857-a5e97f5d6be5",
+		"version": "0.1.5"
 	}
 }

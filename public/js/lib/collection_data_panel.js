@@ -411,7 +411,11 @@ $(function(){
 
             var treeCanvas = tree.canvas;
 
+            //
+            // Handle selected event
+            //
             treeCanvas.on('selected', function(event) {
+                
                 var selectedNodeIds = event.nodeIds;
 
                 /**
@@ -424,7 +428,17 @@ $(function(){
                     selectedNodeIds = [selectedNodeIds];
                 }
 
-               selectTreeNodes(collectionId, selectedNodeIds); 
+                //
+                // No tree nodes to select - return
+                //
+                if (selectedNodeIds.length === 0) {
+                    return;
+                }
+
+                //
+                // Select tree nodes
+                //
+                selectTreeNodes(collectionId, selectedNodeIds); 
             });
 
             // Set user assembly id as node label

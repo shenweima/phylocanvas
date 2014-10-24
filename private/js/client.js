@@ -1,7 +1,7 @@
 //
 // App version
 //
-window.WGST.version = '0.1.4';
+window.WGST.version = window.WGST.config.version;
 
 //
 // Setup socket
@@ -153,51 +153,6 @@ $(function(){
         selector: '[data-toggle="tooltip"]'
     });
 
-    // //
-    // // Create fullscreen
-    // //
-    // var fullscreenType = 'collection-map';
-    // var fullscreenId = fullscreenType + '__' + 'NEW';
-
-    // if (window.WGST.requestedCollectionId !== 'undefined') {
-    //     var fullscreenId = fullscreenType + '__' + window.WGST.requestedCollectionId;
-    // }
-
-    // window.WGST.exports.createFullscreen(fullscreenId, {
-    //     fullscreenType: fullscreenType,
-    //     fullscreenId: fullscreenId
-    // });
-
-    // if (typeof window.WGST.requestedCollectionId !== 'undefined') {
-
-    //     //
-    //     // Create map fullscreen
-    //     //
-    //     var fullscreenType = 'collection-map',
-    //         fullscreenId = 'collection-map'; //fullscreenType + '__' + window.WGST.requestedCollectionId;
-
-    //     window.WGST.exports.createFullscreen(fullscreenId, {
-    //         fullscreenType: fullscreenType,
-    //         fullscreenId: fullscreenId
-    //     });
-
-    //     //
-    //     // Show fullscreen
-    //     //
-    //     window.WGST.exports.showFullscreen(fullscreenId);
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Description
      * @method onerror
@@ -214,24 +169,6 @@ $(function(){
 
         showNotification(error);
     };
-
-
-
-
-
-    // WGST.events = {
-    //     renderedCollectionTreeEvent: new CustomEvent('renderedCollectionTree', {})
-    // };
-
-    // ============================================================
-    // Store application state
-    // ============================================================
-
-    //var WGST = window.WGST || {};
-
-    //var socketAddress = '//' + window.WGST.config.socketAddress;
-
-
 
     window.WGST.geo = {
         map: {
@@ -374,35 +311,35 @@ $(function(){
     // Representative Collection Tree Metadata
     // ============================================================
 
-    /**
-     * Description
-     * @method getRepresentativeCollectionTreeMetadata
-     * @param {} callback
-     * @return 
-     */
-    var getRepresentativeCollectionTreeMetadata = function(callback) {
-        console.log('[WGST] Getting representative collection tree metadata');
-        // Get representative collection metadata
-        $.ajax({
-            type: 'GET',
-            url: '/api/collection/representative/metadata',
-            datatype: 'json' // http://stackoverflow.com/a/9155217
-        })
-        .done(function(representativeCollectionMetadata, textStatus, jqXHR) {
-            console.log('[WGST] Got representative collection tree metadata');
-            console.dir(representativeCollectionMetadata);
+    // /**
+    //  * Description
+    //  * @method getRepresentativeCollectionTreeMetadata
+    //  * @param {} callback
+    //  * @return 
+    //  */
+    // var getRepresentativeCollectionTreeMetadata = function(callback) {
+    //     console.log('[WGST] Getting representative collection tree metadata');
+    //     // Get representative collection metadata
+    //     $.ajax({
+    //         type: 'GET',
+    //         url: '/api/collection/representative/metadata',
+    //         datatype: 'json' // http://stackoverflow.com/a/9155217
+    //     })
+    //     .done(function(representativeCollectionMetadata, textStatus, jqXHR) {
+    //         console.log('[WGST] Got representative collection tree metadata');
+    //         console.dir(representativeCollectionMetadata);
 
-            callback(null, representativeCollectionMetadata);
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.error('[WGST][Error] ✗ Failed to get representative collection tree metadata');
-            console.error(textStatus);
-            console.error(errorThrown);
-            console.error(jqXHR);
+    //         callback(null, representativeCollectionMetadata);
+    //     })
+    //     .fail(function(jqXHR, textStatus, errorThrown) {
+    //         console.error('[WGST][Error] ✗ Failed to get representative collection tree metadata');
+    //         console.error(textStatus);
+    //         console.error(errorThrown);
+    //         console.error(jqXHR);
 
-            callback(textStatus, null);
-        });
-    };
+    //         callback(textStatus, null);
+    //     });
+    // };
 
     /**
      * Description
@@ -611,148 +548,37 @@ $(function(){
 
     })();
 
-
-
-
-
-    // var removeCollectionTreePanel = function(collectionId, collectionTreeType) {
-    //     var collectionTreePanelId = 'collectionTree' + '__' + collectionId + '__' + collectionTreeType,
-    //         $collectionTreePanel = $('.wgst-panel[data-panel-name="' + collectionTreePanelId + '"]');
-
-    //     $collectionTreePanel.remove();
-    // };
-
-    // var removeCollectionTreePanels = function(collectionId) {
-    //     var collectionTrees = WGST.collection[collectionId].tree;
-
-    //     $.each(collectionTrees, function(collectionTreeType, collectionTreeData) {
-    //         // Render collection tree button
-    //         removeCollectionTreePanel(collectionId, collectionTreeType);
-    //     });
-    // };
-
-
-
-
-
-
-
-
-
+    //
     // If user provided collection id in url then load requested collection
+    //
     if (typeof WGST.requestedCollectionId !== 'undefined') {
+
         //
         // Get existing collection
         //
         window.WGST.exports.getCollection(WGST.requestedCollectionId);
+
     } else {
+
         //
         // Suggest to create new collection
         //
         window.WGST.exports.showBackground('drag-and-drop');
-        //$('.wgst-header-collection-name').text('New');
-        //$('.wgst-drag-and-drop').removeClass('wgst--hide-this');
     }
 
+    // /**
+    //  * Description
+    //  * @method deselectAllTreeNodes
+    //  * @param {} collectionId
+    //  * @return 
+    //  */
+    // var deselectAllTreeNodes = function(collectionId) {
+    //     var tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
 
-
-
-    // $('.collection-assembly-list').on('scroll', function(){
-    //     console.log('Scrolling...');
-
-    //     var collectionId = $(this).attr('data-collection-id');
-
-    //     WGST.collection[collectionId].displayedAssemblies = [];
-    // });
-
-
-
-
-
-
-
-
-
-    // $('body').on('mouseenter', '.glyphicon-leaf', function(){
-    //     var collectionId = $(this).closest('.wgst-panel').attr('data-collection-id'),
-    //         assemblyId = $(this).closest('.assembly-list-item').attr('data-assembly-id'),
-    //         branch = WGST.collection[collectionId].tree.canvas.branches[assemblyId],
-    //         children = branch.parent.children;
-
-    //     $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
-
-    //     $.each(children, function(childCounter, child){
-    //         $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + child.id + '"] .glyphicon-leaf').css('color', 'blue');
-    //     });
-    // });
-    // $('body').on('mouseleave', '.glyphicon-leaf', function(){
-    //     $('.collection-assembly-list .assembly-list-item .glyphicon-leaf').css('color', '#000');
-    // });
-
-    // DEPRECATED
-    // var renderCollectionFamily = function(collectionId) {
-    //     var tree = WGST.collection[collectionId].tree.canvas;
-
-
-    //     var branches = tree.branches;
-
-    //     console.debug('branches');
-    //     console.dir(branches);
-
-    //     $.each(branches, function(branchId, branch){
-
-
-
-
-
-    //         var childIds = branch.getChildIds();
-
-    //         //console.debug('childIds:');
-    //         //console.dir(childIds.split(','));
-
-    //         if (branch.leaf) {
-    //             $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-generation').append(
-    //                 //'<div>&#169; OK</div>'
-    //                 '<span class="glyphicon glyphicon-leaf"></span>'
-    //             );
-    //         } else if (branchId === 'root') {
-    //             $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + branchId + '"] .assembly-list-generation').append(
-    //                 //'<div>&#169; OK</div>'
-    //                 '<span class="glyphicon glyphicon-plus"></span>'
-    //             );
-    //         } else {
-    //             $.each(childIds.split(','), function(childIdCounter, childId){
-
-
-
-    //                 $('.collection-assembly-list .assembly-list-item[data-assembly-id="' + childId + '"] .assembly-list-generation').append(
-    //                     //'<span>{</span>'
-    //                     '<span class="glyphicon glyphicon-tree-deciduous"></span>'
-    //                     );
-    //             });
-    //         }
-
-    //     });
+    //     // Workaround
+    //     // TO DO: Refactor using official API
+    //     tree.selectNodes('');
     // };
-
-
-
-    // // Init map
-    // WGST.geo.map.init();
-
-    /**
-     * Description
-     * @method deselectAllTreeNodes
-     * @param {} collectionId
-     * @return 
-     */
-    var deselectAllTreeNodes = function(collectionId) {
-        var tree = WGST.collection[collectionId].tree['CORE_TREE_RESULT'].canvas;
-
-        // Workaround
-        // TO DO: Refactor using official API
-        tree.selectNodes('');
-    };
 
     // $('.tree-controls-select-none').on('click', function() {
 
@@ -807,80 +633,80 @@ $(function(){
     //     showCollectionMetadataOnMap(collectionId, assemblyIds);
     // });
 
-    /**
-     * Description
-     * @method showCollectionMetadataOnMap
-     * @param {} collectionId
-     * @param {} assemblyIds
-     * @return 
-     */
-    var showCollectionMetadataOnMap = function(collectionId, assemblyIds) {
+    // /**
+    //  * Description
+    //  * @method showCollectionMetadataOnMap
+    //  * @param {} collectionId
+    //  * @param {} assemblyIds
+    //  * @return 
+    //  */
+    // var showCollectionMetadataOnMap = function(collectionId, assemblyIds) {
 
-        WGST.collection[collectionId].geo = WGST.collection[collectionId].geo || {};
+    //     WGST.collection[collectionId].geo = WGST.collection[collectionId].geo || {};
 
-        var collectionTree = WGST.collection[collectionId].tree.canvas,
-            existingMarkers = WGST.collection[collectionId].geo.markers,
-            existingMarkerCounter = existingMarkers.length;
+    //     var collectionTree = WGST.collection[collectionId].tree.canvas,
+    //         existingMarkers = WGST.collection[collectionId].geo.markers,
+    //         existingMarkerCounter = existingMarkers.length;
 
-        // Remove existing markers
-        for (; existingMarkerCounter !== 0;) {
-            existingMarkerCounter = existingMarkerCounter - 1;
-            // Remove marker
-            existingMarkers[existingMarkerCounter].setMap(null);
-        }
-        WGST.collection[collectionId].geo.markers = [];
+    //     // Remove existing markers
+    //     for (; existingMarkerCounter !== 0;) {
+    //         existingMarkerCounter = existingMarkerCounter - 1;
+    //         // Remove marker
+    //         existingMarkers[existingMarkerCounter].setMap(null);
+    //     }
+    //     WGST.collection[collectionId].geo.markers = [];
 
-        // Reset marker bounds
-        WGST.geo.map.markerBounds = new google.maps.LatLngBounds();
+    //     // Reset marker bounds
+    //     WGST.geo.map.markerBounds = new google.maps.LatLngBounds();
 
-        // Create new markers
-        if (assemblyIds.length > 0) {
-            var assemblyCounter = assemblyIds.length,
-                assemblyId = '',
-                assemblyMetadata = {},
-                latitude = {},
-                longitude = {};
+    //     // Create new markers
+    //     if (assemblyIds.length > 0) {
+    //         var assemblyCounter = assemblyIds.length,
+    //             assemblyId = '',
+    //             assemblyMetadata = {},
+    //             latitude = {},
+    //             longitude = {};
 
-            // For each assembly create marker
-            for (; assemblyCounter !== 0;) {
-                assemblyCounter = assemblyCounter - 1;
+    //         // For each assembly create marker
+    //         for (; assemblyCounter !== 0;) {
+    //             assemblyCounter = assemblyCounter - 1;
 
-                assemblyId = assemblyIds[assemblyCounter];
-                assemblyMetadata = WGST.collection[collectionId].assemblies[assemblyId]['ASSEMBLY_METADATA'];
-                latitude = assemblyMetadata.geography.position.latitude;
-                longitude = assemblyMetadata.geography.position.longitude;
+    //             assemblyId = assemblyIds[assemblyCounter];
+    //             assemblyMetadata = WGST.collection[collectionId].assemblies[assemblyId]['ASSEMBLY_METADATA'];
+    //             latitude = assemblyMetadata.geography.position.latitude;
+    //             longitude = assemblyMetadata.geography.position.longitude;
 
-                //Check if both latitude and longitude provided
-                if (latitude && longitude) {
-                    console.log("[WGST] Marker's latitude: " + latitude);
-                    console.log("[WGST] Marker's longitude: " + longitude);
+    //             //Check if both latitude and longitude provided
+    //             if (latitude && longitude) {
+    //                 console.log("[WGST] Marker's latitude: " + latitude);
+    //                 console.log("[WGST] Marker's longitude: " + longitude);
 
-                    var marker = new google.maps.Marker({
-                        position: new google.maps.LatLng(latitude, longitude),
-                        map: WGST.geo.map.canvas,
-                        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                        // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
-                        // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
-                        optimized: true
-                    });
+    //                 var marker = new google.maps.Marker({
+    //                     position: new google.maps.LatLng(latitude, longitude),
+    //                     map: WGST.geo.map.canvas,
+    //                     icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+    //                     // This must be optimized, otherwise white rectangles will be displayed when map is manipulated
+    //                     // However, there is a known case when this should be false: http://www.gutensite.com/Google-Maps-Custom-Markers-Cut-Off-By-Canvas-Tiles
+    //                     optimized: true
+    //                 });
 
-                    // Set marker
-                    WGST.collection[collectionId].assemblies[assemblyId].geo = WGST.collection[collectionId].assemblies[assemblyId].geo || {};
-                    WGST.collection[collectionId].assemblies[assemblyId].geo.marker = marker;
+    //                 // Set marker
+    //                 WGST.collection[collectionId].assemblies[assemblyId].geo = WGST.collection[collectionId].assemblies[assemblyId].geo || {};
+    //                 WGST.collection[collectionId].assemblies[assemblyId].geo.marker = marker;
 
-                    // Store list of assembly ids with markers
-                    WGST.collection[collectionId].geo.markers.push(assemblyIds);
+    //                 // Store list of assembly ids with markers
+    //                 WGST.collection[collectionId].geo.markers.push(assemblyIds);
                     
-                    // Extend markerBounds with each metadata marker
-                    WGST.geo.map.markerBounds.extend(marker.getPosition());
-                } // if
-            } // for
-        } else { // No assemblies were selected
-            // Show Europe
-            WGST.geo.map.canvas.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
-            WGST.geo.map.canvas.setZoom(5);
-        }
-    };
+    //                 // Extend markerBounds with each metadata marker
+    //                 WGST.geo.map.markerBounds.extend(marker.getPosition());
+    //             } // if
+    //         } // for
+    //     } else { // No assemblies were selected
+    //         // Show Europe
+    //         WGST.geo.map.canvas.panTo(new google.maps.LatLng(48.6908333333, 9.14055555556));
+    //         WGST.geo.map.canvas.setZoom(5);
+    //     }
+    // };
 
     // // --------------------------------------------------------------------------------------
     // // WGSA Ring
@@ -969,49 +795,19 @@ $(function(){
 
 
 
-        // Array of objects that store content of FASTA file and user-provided metadata
-    var fastaFilesAndMetadata = {},
-        // Stores file name of displayed FASTA file
-        selectedFastaFileName = '',
-        // Element on which user can drag and drop files
+    //     // Array of objects that store content of FASTA file and user-provided metadata
+    // var fastaFilesAndMetadata = {},
+    //     // Stores file name of displayed FASTA file
+    //     selectedFastaFileName = '',
+    //     // Element on which user can drag and drop files
         
-        // Store individual assembly objects used for displaying data
-        assemblies = [],
-        // DNA sequence regex
-        dnaSequenceRegex = /^[CTAGNUX]+$/i,
-        // Count total number of contigs in all selected assemblies
-        totalContigsSum = 0,
-        totalNumberOfContigsDropped = 0;
-
-
-
-
-
-
-
-
-
-
-    // var handleFastaDrop = function(file) {};
-
-    // var handleCsvDrop = function(file) {};
-
-    // var openAssemblyUploadPanels = function() {
-    //     if (! isPanelActive('assemblyUploadNavigator')) {
-    //         activatePanel('assemblyUploadNavigator');
-    //         showPanel('assemblyUploadNavigator');
-    //     }
-
-    //     if (! isPanelActive('assemblyUploadAnalytics')) {
-    //         activatePanel('assemblyUploadAnalytics');
-    //         showPanel('assemblyUploadAnalytics');
-    //     }        
-
-    //     if (! isPanelActive('assemblyUploadMetadata')) {
-    //         activatePanel('assemblyUploadMetadata');
-    //         showPanel('assemblyUploadMetadata');
-    //     }
-    // };
+    //     // Store individual assembly objects used for displaying data
+    //     assemblies = [],
+    //     // DNA sequence regex
+    //     dnaSequenceRegex = /^[CTAGNUX]+$/i,
+    //     // Count total number of contigs in all selected assemblies
+    //     totalContigsSum = 0,
+    //     totalNumberOfContigsDropped = 0;
 
 
 
@@ -1076,40 +872,40 @@ $(function(){
 
 
 
-    /**
-     * Description
-     * @method updateSelectedFilesSummary
-     * @return 
-     */
-    var updateSelectedFilesSummary = function() {
-        // Calculate average number of selected contigs
-        var contigsTotalNumber = 0;
-        // Count all contigs
-        $.each($('.assembly-item'), function(key, value){
-            contigsTotalNumber = contigsTotalNumber + parseInt($(value).find('.assembly-stats-number-contigs').text(), 10);
-        });
-        $('.assembly-sequences-average').text(Math.floor(contigsTotalNumber / Object.keys(fastaFilesAndMetadata).length));
+    // /**
+    //  * Description
+    //  * @method updateSelectedFilesSummary
+    //  * @return 
+    //  */
+    // var updateSelectedFilesSummary = function() {
+    //     // Calculate average number of selected contigs
+    //     var contigsTotalNumber = 0;
+    //     // Count all contigs
+    //     $.each($('.assembly-item'), function(key, value){
+    //         contigsTotalNumber = contigsTotalNumber + parseInt($(value).find('.assembly-stats-number-contigs').text(), 10);
+    //     });
+    //     $('.assembly-sequences-average').text(Math.floor(contigsTotalNumber / Object.keys(fastaFilesAndMetadata).length));
 
-        // Set total number of selected assemblies/files
-        $('.assembly-upload-total-number').text(Object.keys(fastaFilesAndMetadata).length);
-    };
+    //     // Set total number of selected assemblies/files
+    //     $('.assembly-upload-total-number').text(Object.keys(fastaFilesAndMetadata).length);
+    // };
 
-    //
-    // Updates
-    //
-    var getIndexOfDroppedAssemblyCurrentlyDisplayed = function() {
-        var fileUidOfVisibleMetadata = $('.wgst-upload-assembly__metadata:visible').attr('data-file-uid');
+    // //
+    // // Updates
+    // //
+    // var getIndexOfDroppedAssemblyCurrentlyDisplayed = function() {
+    //     var fileUidOfVisibleMetadata = $('.wgst-upload-assembly__metadata:visible').attr('data-file-uid');
 
-        var indexOfDroppedAssemblyCurrentlyDisplayed = 0;
+    //     var indexOfDroppedAssemblyCurrentlyDisplayed = 0;
 
-        WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile, index, array) {
-            if (loadedFile.uid === fileUidOfVisibleMetadata) {
-                indexOfDroppedAssemblyCurrentlyDisplayed = index;
-            }
-        });
+    //     WGST.dragAndDrop.loadedFiles.forEach(function(loadedFile, index, array) {
+    //         if (loadedFile.uid === fileUidOfVisibleMetadata) {
+    //             indexOfDroppedAssemblyCurrentlyDisplayed = index;
+    //         }
+    //     });
 
-        return indexOfDroppedAssemblyCurrentlyDisplayed;
-    };
+    //     return indexOfDroppedAssemblyCurrentlyDisplayed;
+    // };
 
     /*
     // Show next form block when user selects species
@@ -1176,24 +972,24 @@ $(function(){
     //     $('.adding-metadata-progress-container .progress-hint').fadeOut();
     // };
 
-    // Show next form block when user fills in an input
-    // To do: Refactor
-    $('.wgst-assembly-upload__metadata').on('change', '.assembly-sample-source-input', function(){
-        var $input = $(this);
+    // // Show next form block when user fills in an input
+    // // To do: Refactor
+    // $('.wgst-assembly-upload__metadata').on('change', '.assembly-sample-source-input', function(){
+    //     var $input = $(this);
 
-        // Show next form block if user selected non default option
-        if ($input.val() !== 0) {
-            // Show next metadata form block
-            $input.closest('.form-block').next('.form-block').fadeIn();
-            // Scroll to the next form block
-            $input.closest('.assembly-metadata').animate({scrollTop: $input.closest('.assembly-metadata').height()}, 400);
-        } // if
+    //     // Show next form block if user selected non default option
+    //     if ($input.val() !== 0) {
+    //         // Show next metadata form block
+    //         $input.closest('.form-block').next('.form-block').fadeIn();
+    //         // Scroll to the next form block
+    //         $input.closest('.assembly-metadata').animate({scrollTop: $input.closest('.assembly-metadata').height()}, 400);
+    //     } // if
 
-        // Increment metadata progress bar
-        updateMetadataProgressBar();
-        // Hide progress hint
-        $('.adding-metadata-progress-container .progress-hint').fadeOut();
-    });
+    //     // Increment metadata progress bar
+    //     updateMetadataProgressBar();
+    //     // Hide progress hint
+    //     $('.adding-metadata-progress-container .progress-hint').fadeOut();
+    // });
 
 
 
@@ -1253,73 +1049,73 @@ $(function(){
 
     // };
 
-    /**
-     * $('.wgst-panel__collection-panel .assemblies-summary-table').on('click', 'tr', function(event) {
-     * if (event.target.type !== 'radio' && event.target.type !== 'checkbox') {
-     * $(':checkbox', this).trigger('click');
-     * }
-     * });
-     * @method isFullscreenActive
-     * @param {} fullscreenName
-     * @return 
-     */
-    var isFullscreenActive = function(fullscreenName) {
-        var fullscreenElement = $('[data-fullscreen-name="' + fullscreenName + '"]');
+    // *
+    //  * $('.wgst-panel__collection-panel .assemblies-summary-table').on('click', 'tr', function(event) {
+    //  * if (event.target.type !== 'radio' && event.target.type !== 'checkbox') {
+    //  * $(':checkbox', this).trigger('click');
+    //  * }
+    //  * });
+    //  * @method isFullscreenActive
+    //  * @param {} fullscreenName
+    //  * @return 
+     
+    // var isFullscreenActive = function(fullscreenName) {
+    //     var fullscreenElement = $('[data-fullscreen-name="' + fullscreenName + '"]');
 
-        if (fullscreenElement.hasClass('wgst-fullscreen--active')) {
-            return true;
-        } else {
-            return false;
-        }
-    };
+    //     if (fullscreenElement.hasClass('wgst-fullscreen--active')) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // };
 
-    /**
-     * Description
-     * @method isFullscreenVisible
-     * @param {} fullscreenName
-     * @return 
-     */
-    var isFullscreenVisible = function(fullscreenName) {
-        var fullscreenElement = $('[data-fullscreen-name="' + fullscreenName + '"]');
+    // /**
+    //  * Description
+    //  * @method isFullscreenVisible
+    //  * @param {} fullscreenName
+    //  * @return 
+    //  */
+    // var isFullscreenVisible = function(fullscreenName) {
+    //     var fullscreenElement = $('[data-fullscreen-name="' + fullscreenName + '"]');
 
-        if (fullscreenElement.hasClass('wgst-fullscreen--visible')) {
-            return true;
-        } else {
-            return false;
-        }
-    };
+    //     if (fullscreenElement.hasClass('wgst-fullscreen--visible')) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // };
 
 
 
-    /**
-     * Description
-     * @method getAssembliesWithIdenticalPosition
-     * @param {} markerPositionLatLng
-     * @return assembliesWithIdenticalPosition
-     */
-    var getAssembliesWithIdenticalPosition = function(markerPositionLatLng) {
-        //------------------------------------------------------
-        // Figure out which marker to create
-        //------------------------------------------------------
-        var newMarkerLatitude = $(this).attr('data-latitude'),
-            newMarkerLongitude = $(this).attr('data-longitude'),
-            newMarkerPosition = new google.maps.LatLng(newMarkerLatitude, newMarkerLongitude);
+    // /**
+    //  * Description
+    //  * @method getAssembliesWithIdenticalPosition
+    //  * @param {} markerPositionLatLng
+    //  * @return assembliesWithIdenticalPosition
+    //  */
+    // var getAssembliesWithIdenticalPosition = function(markerPositionLatLng) {
+    //     //------------------------------------------------------
+    //     // Figure out which marker to create
+    //     //------------------------------------------------------
+    //     var newMarkerLatitude = $(this).attr('data-latitude'),
+    //         newMarkerLongitude = $(this).attr('data-longitude'),
+    //         newMarkerPosition = new google.maps.LatLng(newMarkerLatitude, newMarkerLongitude);
 
-        // Count markers with identical position
-        var assemblyId,
-            existingMarker,
-            //numberOfMarkersWithIdenticalPosition = 1,
-            assembliesWithIdenticalPosition = [];
-        for (assemblyId in WGST.geo.map.markers.assembly) {
-            existingMarker = WGST.geo.map.markers.assembly[assemblyId];
-            if (markerPositionLatLng.equals(existingMarker.getPosition())) {
-                //numberOfMarkersWithIdenticalPosition++;
-                assembliesWithIdenticalPosition.push(assemblyId);
-            }
-        }
+    //     // Count markers with identical position
+    //     var assemblyId,
+    //         existingMarker,
+    //         //numberOfMarkersWithIdenticalPosition = 1,
+    //         assembliesWithIdenticalPosition = [];
+    //     for (assemblyId in WGST.geo.map.markers.assembly) {
+    //         existingMarker = WGST.geo.map.markers.assembly[assemblyId];
+    //         if (markerPositionLatLng.equals(existingMarker.getPosition())) {
+    //             //numberOfMarkersWithIdenticalPosition++;
+    //             assembliesWithIdenticalPosition.push(assemblyId);
+    //         }
+    //     }
 
-        return assembliesWithIdenticalPosition;
-    };
+    //     return assembliesWithIdenticalPosition;
+    // };
 
 
 
@@ -1458,48 +1254,48 @@ $(function(){
 
 
 
-    $('.cancel-assembly-upload-button').on('click', function(){
-        // Remove selected FASTA file
+    // $('.cancel-assembly-upload-button').on('click', function(){
+    //     // Remove selected FASTA file
 
-        // Remove HTML element
-        $('.assembly-item[data-name="' + selectedFastaFileName + '"]').remove();
-        // Delete data object
-        delete fastaFilesAndMetadata[selectedFastaFileName];
+    //     // Remove HTML element
+    //     $('.assembly-item[data-name="' + selectedFastaFileName + '"]').remove();
+    //     // Delete data object
+    //     delete fastaFilesAndMetadata[selectedFastaFileName];
 
-        // Update assembly list slider
-        $('.assembly-list-slider').slider("option", "max", WGST.dragAndDrop.droppedFiles.length);
-        // Recalculate total number of selected files
-        $('.total-number-of-dropped-assemblies').text(WGST.dragAndDrop.droppedFiles.length);
+    //     // Update assembly list slider
+    //     $('.assembly-list-slider').slider("option", "max", WGST.dragAndDrop.droppedFiles.length);
+    //     // Recalculate total number of selected files
+    //     $('.total-number-of-dropped-assemblies').text(WGST.dragAndDrop.droppedFiles.length);
 
-        updateSelectedFilesUI($('.assembly-list-slider').slider('value'));
+    //     updateSelectedFilesUI($('.assembly-list-slider').slider('value'));
 
-        // Check if only 1 selected file left
-        if (Object.keys(fastaFilesAndMetadata).length === 1) {
-            // Update label
-            $('.assembly-upload-total-number-label').text('assembly');
-            // Update file name of assembly
-            $('.upload-single-assembly-file-name').text(fastaFilesAndMetadata[Object.getOwnPropertyNames(fastaFilesAndMetadata)[0]].name);
-            // Hide multiple assemblies label
-            $('.upload-multiple-assemblies-label').hide();
-            // Show single assembly label
-            $('.upload-single-assembly-label').show();
-            // Only 1 selected file left - hide assembly navigator
-            $('.assembly-navigator').hide();
-        } else {
-            // More than 1 selected files left - update assembly navigator
-            updateRangeNavigationButtons($('.assembly-list-slider').slider('value')); 
-        }
+    //     // Check if only 1 selected file left
+    //     if (Object.keys(fastaFilesAndMetadata).length === 1) {
+    //         // Update label
+    //         $('.assembly-upload-total-number-label').text('assembly');
+    //         // Update file name of assembly
+    //         $('.upload-single-assembly-file-name').text(fastaFilesAndMetadata[Object.getOwnPropertyNames(fastaFilesAndMetadata)[0]].name);
+    //         // Hide multiple assemblies label
+    //         $('.upload-multiple-assemblies-label').hide();
+    //         // Show single assembly label
+    //         $('.upload-single-assembly-label').show();
+    //         // Only 1 selected file left - hide assembly navigator
+    //         $('.assembly-navigator').hide();
+    //     } else {
+    //         // More than 1 selected files left - update assembly navigator
+    //         updateRangeNavigationButtons($('.assembly-list-slider').slider('value')); 
+    //     }
 
-        updateSelectedFilesSummary();
-        updateMetadataProgressBar();
-    });
+    //     updateSelectedFilesSummary();
+    //     updateMetadataProgressBar();
+    // });
 
 
 
-    // Deselect Twitter Bootstrap button on click
-    $('.tree-panel .wgst-tree-controls button').on('click', function(){
-        $(this).blur();
-    });
+    // // Deselect Twitter Bootstrap button on click
+    // $('.tree-panel .wgst-tree-controls button').on('click', function(){
+    //     $(this).blur();
+    // });
 
 
 
@@ -1550,34 +1346,6 @@ $(function(){
 
 
 
-    // /**
-    //  * Description
-    //  * @method renderRepresentativeCollectionTree
-    //  * @return 
-    //  */
-    // var renderRepresentativeCollectionTree = function() {
-    //     console.log('[WGST] Rendering representative collection tree');
-
-    //     var collectionId = 'representative';//WGST.settings.representativeCollectionId;
-
-    //     // Remove previosly rendered collection tree
-    //     $('.wgst-panel__representative-collection-tree .wgst-tree-content').html('');
-    //     // Attach collection id
-    //     $('.wgst-panel__representative-collection-tree .wgst-tree-content').attr('id', 'phylocanvas_' + collectionId);
-
-    //     console.log('WGST.collection.representative:');
-    //     console.dir(WGST.collection.representative);
-
-    //     WGST.collection.representative.tree.canvas = new PhyloCanvas.Tree($('[data-panel-name="representativeCollectionTree"] .wgst-tree-content').get(0), { history_collapsed: true });
-    //     WGST.collection.representative.tree.canvas.load('/data/reference_tree.nwk');
-    //     WGST.collection.representative.tree.canvas.treeType = 'rectangular';
-
-    //     // // Need to resize to fit it correctly
-    //     // WGST.collection.representative.tree.canvas.resizeToContainer();
-    //     // // Need to redraw to actually see it
-    //     // WGST.collection.representative.tree.canvas.drawn = false;
-    //     // WGST.collection.representative.tree.canvas.draw();
-    // };
 
     // /**
     //  * Description
@@ -1757,38 +1525,38 @@ $(function(){
 
     // };
 
-    $('.wgst-navigation-item').on('click', function(event){
-        event.preventDefault();
-    });
+    // $('.wgst-navigation-item').on('click', function(event){
+    //     event.preventDefault();
+    // });
 
-    $('.wgst-navigation-item__map').on('click', function(){
-        var activeFullscreenElement = $('.wgst-fullscreen--active');
+    // $('.wgst-navigation-item__map').on('click', function(){
+    //     var activeFullscreenElement = $('.wgst-fullscreen--active');
 
-        if (activeFullscreenElement.attr('data-fullscreen-name') === 'map') {
-            bringFullscreenToPanel(false); 
-        }
+    //     if (activeFullscreenElement.attr('data-fullscreen-name') === 'map') {
+    //         bringFullscreenToPanel(false); 
+    //     }
 
-        window.WGST.openPanel('map');
+    //     window.WGST.openPanel('map');
 
-        google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
-    });
+    //     google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+    // });
 
-    $('.wgst-navigation-item__representative-tree').on('click', function(){
-        return false;
-        openRepresentativeCollectionTree();
-    });
+    // $('.wgst-navigation-item__representative-tree').on('click', function(){
+    //     return false;
+    //     openRepresentativeCollectionTree();
+    // });
 
-    $('.wgst-navigation-item__collection').on('click', function(){
-        if (isNavItemEnabled('collection')) {
-            var activeFullscreenElement = $('.wgst-fullscreen--active');
+    // $('.wgst-navigation-item__collection').on('click', function(){
+    //     if (isNavItemEnabled('collection')) {
+    //         var activeFullscreenElement = $('.wgst-fullscreen--active');
 
-            if (activeFullscreenElement.attr('data-fullscreen-name') === 'collection') {
-                bringFullscreenToPanel(false); 
-            }
+    //         if (activeFullscreenElement.attr('data-fullscreen-name') === 'collection') {
+    //             bringFullscreenToPanel(false); 
+    //         }
 
-            window.WGST.openPanel('collection');
-        }
-    });
+    //         window.WGST.openPanel('collection');
+    //     }
+    // });
 
     // google.maps.event.addDomListener(window, "resize", function() {
     //     var map = WGST.geo.map.canvas;
@@ -1804,38 +1572,38 @@ $(function(){
 
 
 
-    /**
-     * Description
-     * @method bringMapPanelToFullscreen
-     * @param {} panelName
-     * @param {} panelId
-     * @return 
-     */
-    var bringMapPanelToFullscreen = function(panelName, panelId) {
-        if (! isFullscreenActive(panelName)) {
-            bringFullscreenToPanel(false);
+    // /**
+    //  * Description
+    //  * @method bringMapPanelToFullscreen
+    //  * @param {} panelName
+    //  * @param {} panelId
+    //  * @return 
+    //  */
+    // var bringMapPanelToFullscreen = function(panelName, panelId) {
+    //     if (! isFullscreenActive(panelName)) {
+    //         bringFullscreenToPanel(false);
 
-            bringPanelToFullscreen(panelId, function(){
-                $('[data-fullscreen-name="' + panelName + '"]')
-                    .html('')
-                    .append(WGST.geo.map.canvas.getDiv());
+    //         bringPanelToFullscreen(panelId, function(){
+    //             $('[data-fullscreen-name="' + panelName + '"]')
+    //                 .html('')
+    //                 .append(WGST.geo.map.canvas.getDiv());
 
-                google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
-            });
-        } 
-    };
+    //             google.maps.event.trigger(WGST.geo.map.canvas, 'resize');
+    //         });
+    //     } 
+    // };
 
-    $('body').on('click', '.wgst-panel-control-button__opacity', function(){
-        if ($(this).hasClass('wgst-panel-control-button--active')) {
-            // Toggle opacity
-            var panel = $(this).closest('.wgst-panel');
-            if (panel.css('opacity') !== '1') {
-                panel.css('opacity', '1');
-            } else {
-                panel.css('opacity', '0.85');
-            }
-        } // if
-    });
+    // $('body').on('click', '.wgst-panel-control-button__opacity', function(){
+    //     if ($(this).hasClass('wgst-panel-control-button--active')) {
+    //         // Toggle opacity
+    //         var panel = $(this).closest('.wgst-panel');
+    //         if (panel.css('opacity') !== '1') {
+    //             panel.css('opacity', '1');
+    //         } else {
+    //             panel.css('opacity', '0.85');
+    //         }
+    //     } // if
+    // });
 
     /**
      * Description
