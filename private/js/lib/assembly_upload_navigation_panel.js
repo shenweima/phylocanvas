@@ -7,11 +7,11 @@ $(function(){
 	    	window.WGST.exports.showAssemblyUpload(selectedAssemblyFileId);
 	    });
 
-	    $('body').on('click', '.wgst-dropped-assembly-list-navigation-button__previous', function(){
+	    $('body').on('click', '[data-wgst-dropped-assembly-list-navigation-button="previous"]', function(){
 	    	window.WGST.exports.showPreviousAssemblyUpload();
 	    });
 
-	    $('body').on('click', '.wgst-dropped-assembly-list-navigation-button__next', function(){
+	    $('body').on('click', '[data-wgst-dropped-assembly-list-navigation-button="next"]', function(){
 	    	window.WGST.exports.showNextAssemblyUpload();
 	    });
 
@@ -24,7 +24,9 @@ $(function(){
 
 	    window.WGST.exports.showNextAssemblyUpload = function() {
 	        var $nextOption = $('.wgst-dropped-assembly-list option:selected').next();
+	        console.log('&&& C0');
 	        if ($nextOption.length) {
+	        	console.log('&&& C1');
 	        	$nextOption.prop('selected', 'selected').change();
 	        }
 	    };
