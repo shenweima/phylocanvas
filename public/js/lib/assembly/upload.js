@@ -320,64 +320,6 @@ $(function(){
                 // Navigation
                 //
                 addAssemblyToNavigation(assemblyFileId);
-
-           //      return;
-
-           //      	//
-           //      	// Validate mandatory metadata: date, location
-           //      	//
-
-           //      	//
-           //      	// Validate date
-           //      	//
-           //      	if (typeof assemblyMetadata.date !== 'undefined') {
-           //      		//
-           //      		// Update model
-           //      		//
-           //      		window.WGST.exports.setAssemblyMetadata({
-           //      			assemblyFileId: assemblyFileId,
-           //      			assemblyMetadataKey: 'date',
-           //      			assemblyMetadataValue: assemblyMetadata.date
-           //      		});
-
-           //      		return;
-
-           //      		//
-           //      		// Render date form
-           //      		//
-           //      		window.WGST.exports.renderAssemblyMetadataDateForm(assemblyFileId);
-           //      	}
-
-           //      	//
-           //      	// Validate location
-           //      	//
-           //      	if (typeof assemblyMetadata.location !== 'undefined') {
-                		
-           //      	}
-
-
-
-           //      	//
-           //      	// Create view
-           //      	//
-	        		// window.WGST.exports.renderAssemblyMetadataForm(assemblyFileId);
-
-	        		// //
-	        		// // Set metadata value on UI element
-	        		// //
-
-
-
-           //      	//
-           //      	// Parse date
-           //      	//
-           //      	// if (typeof assemblyMetadata.date !== 'undefined') {
-           //      	// 	assemblyMetadata.date
-           //      	// }
-
-           //      	console.log('assemblyMetadata:');
-           //      	console.dir(assemblyMetadata);
-
             });
 		};
 

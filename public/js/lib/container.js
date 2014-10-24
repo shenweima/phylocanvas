@@ -65,12 +65,32 @@ $(function(){
 		    var zIndexHighest = 0,
 		        zIndexCurrent;
 
+		    //
+		    // Find the highest z index
+		    //
 		    $('.wgst-panel, .wgst-fullscreen').each(function(){
-		        zIndexCurrent = parseInt($(this).css('z-index'), 10);
 
+		    	var $currentContainer = $(this);
+
+		    	//
+		    	// Get element's current z index
+		    	//
+		        zIndexCurrent = parseInt($currentContainer.css('z-index'), 10);
+
+		        //
+		        // Check if current z index is higher or equal to highest z index
+		        //
 		        if (zIndexCurrent >= zIndexHighest) {
+
+		        	//
+		        	// Set highest z index
+		        	//
 		            zIndexHighest = zIndexCurrent;
-		            $(this).css('z-index', zIndexHighest - 1);
+
+		            // //
+		            // // Decrement current element's z index by one
+		            // //
+		            // $currentContainer.css('z-index', zIndexHighest - 1);
 		        }
 		    });
 
@@ -78,14 +98,21 @@ $(function(){
 		    // Panel
 		    //
 		    if (containerType === 'panel') {
-		        $('[data-panel-id="' + containerId + '"]').css('z-index', zIndexHighest);
+
+		    	//
+		    	// Set container's z index to be the highest
+		    	//
+		        $('[data-panel-id="' + containerId + '"]').css('z-index', zIndexHighest + 1);
 
 		    //
 		    // Fullscreen
 		    //
 		    } else if (containerType === 'fullscreen') {
-		        $('[data-fullscreen-id="' + containerId + '"]').css('z-index', zIndexHighest);
 
+		    	//
+		    	// Set container's z index to be the highest
+		    	//
+		        $('[data-fullscreen-id="' + containerId + '"]').css('z-index', zIndexHighest + 1);
 		    }
 		};
 
