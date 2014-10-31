@@ -1,7 +1,13 @@
 .wgst-info-window {
-	display: inline-block;
-	overflow: visible;
-	min-height: 500;
+	// display: inline-block;
+	// overflow: visible;
+	// min-height: 500;
+
+	&.no-scrollbar {
+		line-height:1.35;
+		overflow:hidden;
+		white-space:nowrap;
+	}
 
 	h5 {
 		font-size: 12px;
