@@ -50,8 +50,7 @@ $(function(){
 			return infoWindow;
 	    };
 
-	    //var createGroupMarker = function(groupAssemblyIds, groupMarkerLat, groupMarkerLng, groupSize) {
-	    var createGroupMarker = function(groupAssemblies) {
+	    var createGroupMarker = function(collectionId, groupAssemblies) {
 
 	    	var groupAssemblyIds = groupAssemblies.map(function(assembly){
 	    		return assembly.ASSEMBLY_METADATA.assemblyId;
@@ -104,6 +103,11 @@ $(function(){
 				// Set current info window as opened
 				// 
 				openedInfoWindow = groupInfoWindow;
+
+				//
+				// Select nodes on a tree
+				//
+				window.WGST.collection[collectionId].tree['COLLECTION_TREE'].canvas.selectNodes(groupAssemblyIds);
 			});
 
 	        // //
@@ -172,7 +176,7 @@ $(function(){
 		                var assemblyIds = assemblyIdsGroupedByPosition[positionString];
 
 		                //
-		                // Get assemblies
+		                // Get group assemblies
 		                //
 		                var assembly;
 	            		var groupAssemblies = [];
@@ -185,16 +189,16 @@ $(function(){
 		                //
 		                // Create group marker
 		                //
-		                createGroupMarker(groupAssemblies);
+		                createGroupMarker(collectionId, groupAssemblies);
 
 		                //
-		                // 
+		                // Get group latitude and longitude
 		                //
 		                positionGroupLat = assembly.ASSEMBLY_METADATA.geography.position.latitude;
 		                positionGroupLng = assembly.ASSEMBLY_METADATA.geography.position.longitude;
 
 		                //
-		                // Extend map bounds
+		                // Extend map bounds to fit group position
 		                //
 		                assemblyMarkerBounds.extend(new google.maps.LatLng(positionGroupLat, positionGroupLng));
 	            	}
