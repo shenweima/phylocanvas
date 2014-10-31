@@ -44,7 +44,7 @@ $(function(){
 	                if (assemblies.hasOwnProperty(assemblyId)) {
 	                    // Set label only to leaf nodes, filtering out the root node
 	                    if (treeCanvas.branches[assemblyId] && treeCanvas.branches[assemblyId].leaf) {
-	                        treeCanvas.branches[assemblyId].label = WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore.referenceId;              
+	                        treeCanvas.branches[assemblyId].label = window.WGST.collection[collectionId].assemblies[assemblyId]['FP_COMP'].topScore.referenceId;              
 	                    }
 	                }
 	            }

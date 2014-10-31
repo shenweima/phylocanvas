@@ -389,6 +389,12 @@ $(function(){
 	        var preparedAssembliesData = sortedAssemblyIds.map(function(assemblyId) {
 	        		assembly = assemblies[assemblyId];
 	        		preparedForRenderingAssemblyData = window.WGST.exports.prepareAssemblyDataForRendering(assembly, window.WGST.antibiotics);
+		            
+	        		//
+	        		// Set assembly top score
+	        		//
+	        		window.WGST.collection[collectionId].assemblies[assemblyId].FP_COMP.topScore = preparedForRenderingAssemblyData.topScore;
+
 		            return {
 		            	assemblyId: assemblyId,
 		                assemblyUserId: preparedForRenderingAssemblyData.assemblyUserId,
