@@ -2,7 +2,8 @@ $(function(){
 
 	(function(){
 
-		var openedInfoWindow;
+		var openedInfoWindow,
+			clickedMarkerAssemblyIds = [];
 
 	    var groupAssembliesByPosition = function(collectionId, assemblyIds) {
 	        var assemblyIdsGroupedByPosition = {},
@@ -33,7 +34,7 @@ $(function(){
 	        return assemblyIdsGroupedByPosition;
 	    };
 
-	    var createGroupInfoWindow = function(groupAssemblies) {
+	    var createGroupInfoWindow = function(collectionId, groupAssemblies) {
 
             var templateContext = {
 	            	groupAssemblies: groupAssemblies,
@@ -45,6 +46,22 @@ $(function(){
 
 			var infoWindow = new google.maps.InfoWindow({
 				content: '<div class="test">' + infoWindowHtml + '</div>'
+			});
+
+			var groupAssemblyIds = groupAssemblies.map(function(assembly){
+				return assembly.ASSEMBLY_METADATA.assemblyId;
+			});
+
+			//
+			// Handle closeclick event
+			//
+			google.maps.event.addListener(infoWindow, "closeclick", function() {
+				//
+				// Reset highlighted tree nodes
+				//
+				if (typeof clickedMarkerAssemblyIds.length !== 0) {
+					window.WGST.collection[collectionId].tree['COLLECTION_TREE'].canvas.setNodeColourAndShape(groupAssemblyIds, null, 'o', null, null);
+				}
 			});
 
 			return infoWindow;
@@ -81,7 +98,7 @@ $(function(){
 	        //
 	        // Create Info Window for a group of assermbly ids
 	        //
-	        var groupInfoWindow = createGroupInfoWindow(groupAssemblies);
+	        var groupInfoWindow = createGroupInfoWindow(collectionId, groupAssemblies);
 
 	        //
 	        // Handle marker click - open info window
@@ -92,6 +109,7 @@ $(function(){
 				//
 				if (typeof openedInfoWindow !== 'undefined') {
 					openedInfoWindow.close();
+					google.maps.event.trigger(openedInfoWindow, 'closeclick');
 				}
 
 				//
@@ -107,7 +125,8 @@ $(function(){
 				//
 				// Select nodes on a tree
 				//
-				window.WGST.collection[collectionId].tree['COLLECTION_TREE'].canvas.selectNodes(groupAssemblyIds);
+				//window.WGST.collection[collectionId].tree['COLLECTION_TREE'].canvas.selectNodes(groupAssemblyIds);
+				window.WGST.collection[collectionId].tree['COLLECTION_TREE'].canvas.setNodeColourAndShape(groupAssemblyIds, null, 't', null, null); // '#00ffff'
 			});
 
 	        // //
