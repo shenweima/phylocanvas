@@ -8,7 +8,8 @@ $(function(){
                 
             var templateContext = {
                 panelId: panelId,
-                panelType: panelType
+                panelType: panelType,
+                assemblyId: assemblyId
             };
 
 		    if (typeof additionalTemplateContext !== 'undefined') {

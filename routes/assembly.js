@@ -989,3 +989,7 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 		callback(null, assemblyTableData);
 	});
 };
+
+exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
+	console.log('Getting assembly metadata for download');
+};

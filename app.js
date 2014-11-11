@@ -117,7 +117,12 @@ app.post('/assembly/add', assembly.add);
 app.post('/api/assembly/resistance-profile', assembly.apiGetResistanceProfile);
 
 // Data routes
+//
 app.get('/api/all-antibiotics', assembly.apiGetAllAntibiotics);
+
+// Download
+//
+app.get('/api/download/assembly/:id/metadata', assembly.apiGetDownloadAssemblyMetadata);
 
 // 404
 app.use(function(req, res, next){

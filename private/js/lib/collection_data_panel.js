@@ -595,6 +595,28 @@ $(function(){
             }
         });
 
+        //
+        // Download assembly metadata
+        //
+        $('body').on('click', '[data-wgst-download-metadata]', function(){
+
+            var assemblyId = $(this).attr('data-wgst-assembly-id');
+
+            console.debug('Downloading assembly metadata ' + assemblyId);
+
+            // Request download
+            //
+            $.ajax({
+                type: 'GET',
+                url: '/api/download/assembly/' + assemblyId + '/metadata',
+                datatype: 'json'
+            })
+            .done(function(assemblyMetadata, textStatus, jqXHR) {
+                console.log('[WGST] Got assembly metadata');
+                console.dir(assemblyMetadata);
+            });
+        });
+
 	})();
 
 });
