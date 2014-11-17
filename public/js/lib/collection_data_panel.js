@@ -598,7 +598,7 @@ $(function(){
         //
         // Download assembly metadata
         //
-        $('body').on('click', '[data-wgst-download-metadata]', function(){
+        $('body').on('click', '[data-wgst-download-metadata]', function() {
 
             var assemblyId = $(this).attr('data-wgst-assembly-id');
 

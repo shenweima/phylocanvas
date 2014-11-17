@@ -1,3 +1,5 @@
+var download = require('./download');
+
 exports.add = function(req, res) {
 
 	var collectionId = req.body.collectionId,
@@ -7,9 +9,18 @@ exports.add = function(req, res) {
 
 	console.log('[WGST] Adding assembly ' + assemblyId + ' to collection ' + collectionId);
 
-	// TO DO: Validate request
+	// Validate request
+	//
+	if (! collectionId ||
+		! socketRoomId ||
+		! userAssemblyId ||
+		! assemblyId) {
+
+		console.error('[WGST] Missing parameters.');
+	}
 
 	// Send response
+	//
 	res.json({
 		assemblyId: assemblyId
 	});
@@ -190,9 +201,9 @@ exports.add = function(req, res) {
 			console.log('[WGST][Couchbase] Inserting assembly metadata with key: ' + metadataKey);
 			console.dir(metadata);
 
-			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].set(metadataKey, metadata, function(err, result) {
-				if (err) {
-					console.error('[WGST][Couchbase][Error] ✗ ' + err);
+			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].set(metadataKey, metadata, function(error, result) {
+				if (error) {
+					console.error('[WGST][Couchbase][Error] ✗ Failed to insert assembly metadata: ' + error);
 					return;
 				}
 
@@ -208,6 +219,10 @@ exports.add = function(req, res) {
 					socketRoomId: socketRoomId
 				});
 			});
+
+			// Write assembly metadata to file for download
+			//
+			download.createAssemblyMetadata(assemblyId, metadata);
 
 			// -----------------------------------------------------------
 			// Upload assembly
@@ -991,5 +1006,13 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 };
 
 exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
-	console.log('Getting assembly metadata for download');
+	console.log('Getting assembly ' + req.params.id + ' metadata for download in ' + req.params.format + ' format');
+
+	
+
+	res.setHeader('Content-disposition', 'attachment; filename=theDocument.txt');
+	res.setHeader('Content-type', 'text/plain');
+	res.charset = 'UTF-8';
+	res.write("Hello, world");
+	res.end();
 };

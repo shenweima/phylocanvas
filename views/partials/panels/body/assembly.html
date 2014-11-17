@@ -7,8 +7,29 @@
     <div class="wgst-assembly-details">
 
         <div class="assembly-detail">
-          <button class="btn btn-default" data-wgst-assembly-id="{{assemblyId}}" data-wgst-download-metadata><i class="fa fa-download"></i> Download assembly metadata</button>
-        </div>    
+            <div class="btn-group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+
+                    <i class="fa fa-download"></i>
+                    Download metadata <span class="caret"></span>
+                </button>
+
+                <ul class="dropdown-menu" role="menu">
+                
+                    <li><a href="#"
+                            data-wgst-download-assembly-metadata-json
+                            data-wgst-assembly-id="{{assemblyId}}">In JSON format</a></li>
+
+                    <li><a href="#"
+                            data-wgst-download-assembly-metadata-csv
+                            data-wgst-assembly-id="{{assemblyId}}">In CSV format</a></li>
+                </ul>
+            </div>
+
+            <button type="button" class="btn btn-default">
+                <i class="fa fa-download"></i> Download FASTA
+            </button>
+        </div>
 
         <div class="assembly-detail assembly-detail__nearest-representative">
           <h4>Nearest Representative</h4>

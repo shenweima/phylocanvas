@@ -194,7 +194,7 @@ $(function(){
 	            $targetTimestampMonthHtml.find('option[value="' + sourceTimestampMonthValue + '"]').prop('selected', true);
 	        }
 	        if (sourceTimestampDayValue !== '-1') {
-	            populateDaySelect($targetTimestampDaySelect, sourceTimestampYearValue, sourceTimestampMonthValue);
+	            window.WGST.exports.populateDaySelect($targetTimestampDaySelect, sourceTimestampYearValue, sourceTimestampMonthValue);
 	            // Select day option
 	            $targetTimestampDaySelect.find('option[value="' + sourceTimestampDayValue + '"]').prop('selected', true);
 	        }
