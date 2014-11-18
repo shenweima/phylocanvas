@@ -40,6 +40,7 @@ var express = require('express'),
 	user = require('./routes/user'),
 	assembly = require('./routes/assembly'),
 	collection = require('./routes/collection');
+	downloadController = require('./routes/download');
 	http = require('http'),
 	//https = require('https'),
 	path = require('path'),
@@ -122,7 +123,7 @@ app.get('/api/all-antibiotics', assembly.apiGetAllAntibiotics);
 
 // Download
 //
-app.get('/api/download/assembly/:id/metadata/:format', download.apiGetDownloadAssemblyMetadata);
+app.get('/api/download/assembly/:id/metadata/:format', downloadController.apiGetDownloadAssemblyMetadata);
 
 // 404
 app.use(function(req, res, next){

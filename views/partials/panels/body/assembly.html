@@ -7,6 +7,8 @@
     <div class="wgst-assembly-details">
 
         <div class="assembly-detail">
+
+            <!--
             <div class="btn-group">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 
@@ -16,17 +18,30 @@
 
                 <ul class="dropdown-menu" role="menu">
                 
-                    <li><a href="#"
+                    <li><a href="/api/download/assembly/{{assemblyId}}/metadata/json"
                             data-wgst-download-assembly-metadata-json
                             data-wgst-assembly-id="{{assemblyId}}">In JSON format</a></li>
 
-                    <li><a href="#"
+                    <li><a href="/api/download/assembly/{{assemblyId}}/metadata/csv"
                             data-wgst-download-assembly-metadata-csv
                             data-wgst-assembly-id="{{assemblyId}}">In CSV format</a></li>
                 </ul>
             </div>
+            -->
 
-            <button type="button" class="btn btn-default">
+            <a href="/api/download/assembly/{{assemblyId}}/metadata/json"
+                data-wgst-download-assembly-metadata-json
+                class="btn btn-default">
+                <i class="fa fa-download"></i> Download JSON
+            </a>
+
+            <a href="/api/download/assembly/{{assemblyId}}/metadata/csv"
+                data-wgst-download-assembly-metadata-csv
+                class="btn btn-default">
+                <i class="fa fa-download"></i> Download CSV
+            </a>
+
+            <button type="button" class="btn btn-default" disabled>
                 <i class="fa fa-download"></i> Download FASTA
             </button>
         </div>

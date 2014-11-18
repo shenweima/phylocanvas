@@ -13,6 +13,26 @@ exports.createAssemblyMetadata = function(assemblyId, assemblyMetadata) {
 	});
 };
 
+var flattenAssemblyMetadata = function(assemblyMetadata) {
+	// Geography
+	//
+	assemblyMetadata.location = assemblyMetadata.geography.address;
+	assemblyMetadata.latitude = assemblyMetadata.geography.position.latitude;
+	assemblyMetadata.longitude = assemblyMetadata.geography.position.longitude;
+	delete assemblyMetadata.geography;
+
+	return assemblyMetadata;
+};
+
+var convertJsonToCsv = function(flatJson) {
+	var BabyParse = require('babyparse');
+
+	return BabyParse.unparse({
+		fields: ['assemblyId', 'userAssemblyId', 'datetime', 'location', 'latitude', 'longitude', 'source'],
+		data: [flatJson]
+	});
+};
+
 exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
 	var assemblyId = req.params.id;
 	var metadataFormat = req.params.format;
@@ -21,9 +41,9 @@ exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
 
 	var assemblyController = require('./assembly');
 
-	assemblyController.getMetadata(assemblyId, function(error, assemblyMetadata){
+	assemblyController.getAssemblyMetadata(assemblyId, function(error, assemblyMetadata) {
 		if (error) {
-			res.send(500);
+			res.sendStatus(500);
 			return;
 		}
 
@@ -34,30 +54,30 @@ exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
 		// CSV
 		//
 		if (metadataFormat === 'csv') {
-			// Convert to CSV
+			console.log('[WGST] Returning CSV file');
+
+			// Flatten assembly metadata JSON object
 			//
-			var BabyParse = require('babyparse');
-			assemblyMetadataCsv = BabyParse.unparse(assemblyMetadata);
+			var flatAssemblyMetadata = flattenAssemblyMetadata(assemblyMetadata);
+
+			// Convert JSON to CSV
+			//
+			var assemblyMetadataCsv = convertJsonToCsv(flatAssemblyMetadata);
 
 			// Send data
 			//
 			res.setHeader('Content-disposition', 'attachment; filename=assembly_metadata_' + assemblyId + '.csv');
-			res.setHeader('Content-type', 'text/csv');
-			res.charset = 'UTF-8';
-			res.write(assemblyMetadataCsv);
-			res.end();
+			res.send(assemblyMetadataCsv);
 
 		// JSON (default)
 		//
 		} else {
+			console.log('[WGST] Returning JSON file');
 
 			// Send data
 			//
 			res.setHeader('Content-disposition', 'attachment; filename=assembly_metadata_' + assemblyId + '.json');
-			res.setHeader('Content-type', 'text/json');
-			res.charset = 'UTF-8';
-			res.write(JSON.stringify(assemblyMetadata, null, 4));
-			res.end();
+			res.send(JSON.stringify(assemblyMetadata, null, 4));
 		}
 	});
 };

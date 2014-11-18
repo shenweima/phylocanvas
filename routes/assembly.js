@@ -1,5 +1,3 @@
-var download = require('./download');
-
 exports.add = function(req, res) {
 
 	var collectionId = req.body.collectionId,
@@ -220,10 +218,6 @@ exports.add = function(req, res) {
 				});
 			});
 
-			// Write assembly metadata to file for download
-			//
-			download.createAssemblyMetadata(assemblyId, metadata);
-
 			// -----------------------------------------------------------
 			// Upload assembly
 			// -----------------------------------------------------------
@@ -296,11 +290,12 @@ exports.get = function(req, res) {
 	});
 };
 
-exports.getMetadata = function(assemblyId, callback) {
+exports.getAssemblyMetadata = function(assemblyId, callback) {
 	console.log('[WGST] Getting assembly metadata ' + assemblyId);
 
-	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(assemblyId, function(err, result) {
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('ASSEMBLY_METADATA_' + assemblyId, function(error, result) {
 		if (error) {
+			console.error('[WGST][Error] Failed to get assembly metadata: ' + error);
 			callback(error, null);
 			return;
 		}
