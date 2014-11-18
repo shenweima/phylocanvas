@@ -122,7 +122,7 @@ app.get('/api/all-antibiotics', assembly.apiGetAllAntibiotics);
 
 // Download
 //
-app.get('/api/download/assembly/:id/metadata/:format', assembly.apiGetDownloadAssemblyMetadata);
+app.get('/api/download/assembly/:id/metadata/:format', download.apiGetDownloadAssemblyMetadata);
 
 // 404
 app.use(function(req, res, next){

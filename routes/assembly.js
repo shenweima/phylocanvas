@@ -296,6 +296,24 @@ exports.get = function(req, res) {
 	});
 };
 
+exports.getMetadata = function(assemblyId, callback) {
+	console.log('[WGST] Getting assembly metadata ' + assemblyId);
+
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(assemblyId, function(err, result) {
+		if (error) {
+			callback(error, null);
+			return;
+		}
+
+		var assemblyMetadata = result.value;
+
+		console.log('[WGST] Got assembly metadata ' + assemblyId);
+		console.dir(assemblyMetadata);
+
+		callback(null, assemblyMetadata);
+	});
+};
+
 var generateStQueryKey = function(alleles) {
 
 	// Prepare ST query key
@@ -1003,16 +1021,4 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 
 		callback(null, assemblyTableData);
 	});
-};
-
-exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
-	console.log('Getting assembly ' + req.params.id + ' metadata for download in ' + req.params.format + ' format');
-
-	
-
-	res.setHeader('Content-disposition', 'attachment; filename=theDocument.txt');
-	res.setHeader('Content-type', 'text/plain');
-	res.charset = 'UTF-8';
-	res.write("Hello, world");
-	res.end();
 };

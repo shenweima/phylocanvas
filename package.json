@@ -16,7 +16,8 @@
     "node-uuid": "*",
     "serve-favicon": "*",
     "socket.io": "*",
-    "swig": "^1.4.2"
+    "swig": "^1.4.2",
+    "babyparse": "^0.2.1"
   },
   "devDependencies": {
     "gulp": "^3.8.6",
