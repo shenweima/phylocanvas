@@ -7,7 +7,9 @@
   },
   "dependencies": {
     "amqp": "*",
+    "babyparse": "^0.2.1",
     "body-parser": "*",
+    "chalk": "^0.5.1",
     "couchbase": "1.2.4",
     "ejs": "*",
     "express": "*",
@@ -16,8 +18,7 @@
     "node-uuid": "*",
     "serve-favicon": "*",
     "socket.io": "*",
-    "swig": "^1.4.2",
-    "babyparse": "^0.2.1"
+    "swig": "^1.4.2"
   },
   "devDependencies": {
     "gulp": "^3.8.6",
