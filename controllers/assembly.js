@@ -1,9 +1,12 @@
+var chalk = require('chalk');
+var important = chalk.white.bgRed;
+
 exports.add = function(req, res) {
 
-	var collectionId = req.body.collectionId,
-		socketRoomId = req.body.socketRoomId,
-		userAssemblyId = req.body.userAssemblyId,
-		assemblyId = req.body.assemblyId;
+	var collectionId = req.body.collectionId;
+	var socketRoomId = req.body.socketRoomId;
+	var userAssemblyId = req.body.userAssemblyId;
+	var assemblyId = req.body.assemblyId;
 
 	console.log('[WGST] Adding assembly ' + assemblyId + ' to collection ' + collectionId);
 
@@ -14,7 +17,7 @@ exports.add = function(req, res) {
 		! userAssemblyId ||
 		! assemblyId) {
 
-		console.error('[WGST] Missing parameters.');
+		console.error(important('[WGST] Missing parameters'));
 	}
 
 	// Send response
@@ -201,7 +204,7 @@ exports.add = function(req, res) {
 
 			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].set(metadataKey, metadata, function(error, result) {
 				if (error) {
-					console.error('[WGST][Couchbase][Error] ✗ Failed to insert assembly metadata: ' + error);
+					console.error(important('[WGST][Couchbase][Error] ✗ Failed to insert assembly metadata: ' + error));
 					return;
 				}
 
@@ -224,17 +227,32 @@ exports.add = function(req, res) {
 
 			var uploadQueueId = 'ART_ASSEMBLY_UPLOAD_' + assemblyId;
 
+			//
+			// Old request object
+			//
+			// // Prepare object to publish
+			// var assembly = {
+			// 	"speciesId" : "1280",
+			// 	"sequences" : req.body.sequences, // Content of FASTA file
+			// 	"assemblyId": assemblyId,
+			// 	"userAssemblyId" : userAssemblyId,
+			// 	"taskId" : "Experiment_1",
+			// 	"collectionId": collectionId
+			// };
+
 			// Prepare object to publish
+			//
 			var assembly = {
-				"speciesId" : "1280",
-				"sequences" : req.body.sequences, // Content of FASTA file
-				"assemblyId": assemblyId,
-				"userAssemblyId" : userAssemblyId,
-				"taskId" : "Experiment_1",
-				"collectionId": collectionId
+				taskId: assemblyId,
+				inputData: req.body.sequences,
+				speciesId: '1280',
+				assemblyId: assemblyId,
+				collectionId: collectionId,
+				sequences: req.body.sequences
 			};
 
 			console.log('[WGST][RabbitMQ] Uploading assembly ' + assemblyId + ' to collection ' + collectionId);
+			console.dir(assembly);
 
 			// Publish message
 			rabbitMQExchanges[rabbitMQExchangeNames.UPLOAD].publish('upload', assembly, { 
@@ -245,7 +263,7 @@ exports.add = function(req, res) {
 				replyTo: uploadQueueId
 			}, function(err){
 				if (err) {
-					console.error('[WGST][RabbitMQ][Error] ✗ Error when trying to publish to upload exchange');
+					console.error(important('[WGST][RabbitMQ][Error] ✗ Error when trying to publish to upload exchange'));
 					return;
 				}
 
@@ -295,7 +313,7 @@ exports.getAssemblyMetadata = function(assemblyId, callback) {
 
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('ASSEMBLY_METADATA_' + assemblyId, function(error, result) {
 		if (error) {
-			console.error('[WGST][Error] Failed to get assembly metadata: ' + error);
+			console.error(important('[WGST][Error] Failed to get assembly metadata: ' + error));
 			callback(error, null);
 			return;
 		}
@@ -1006,7 +1024,7 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(assemblyTableQueryKeys, {}, function(error, assemblyTableData) {
 		if (error) {
-			console.error('[WGST][Couchbase][Error] ✗ ' + error);
+			console.error(important('[WGST][Couchbase][Error] ✗ ' + error));
 			callback(error, null);
 			return;
 		}
