@@ -1,3 +1,6 @@
+var chalk = require('chalk');
+var danger = chalk.white.bgRed;
+
 exports.add = function(req, res) {
 	var collectionId = req.body.collectionId;
 
@@ -41,7 +44,7 @@ exports.add = function(req, res) {
 		replyTo: queueId
 	}, function(err){
 		if (err) {
-			console.log('[WGST][RabbitMQ][Error] ✗ Error in trying to publish');
+			console.log(danger('[WGST][RabbitMQ][Error] ✗ Error in trying to publish'));
 			return; // return undefined?
 		}
 
@@ -360,7 +363,7 @@ exports.apiGetCollection = function(req, res) {
 	// Get list of assemblies
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
 		if (error) {
-			console.error('[WGST][Error] ✗ Failed to get list of assemblies: ' + error);
+			console.error(danger('[WGST][Error] ✗ Failed to get list of assemblies: ' + error));
 			console.dir('COLLECTION_LIST_' + collectionId);
 			// Ignore this error for now
 			//res.json({});
@@ -380,7 +383,7 @@ exports.apiGetCollection = function(req, res) {
 
 			require('./assembly').getAssembly(assemblyId, function(error, assembly){
 				if (error) {
-					console.error('[WGST][Error] ✗ Failed to get assembly: ' + error);
+					console.error(danger('[WGST][Error] ✗ Failed to get assembly: ' + error));
 					console.dir(assembly);
 					// Ignore this error for now
 					//res.json({});
@@ -425,7 +428,7 @@ exports.apiGetCollection = function(req, res) {
 					var collectionTreeQueryKeys = [];
 
 					//collectionTreeQueryKeys.push('CORE_TREE_RESULT_' + collectionId);
-					collectionTreeQueryKeys.push('COLLECTION_TREE_' + collectionId);
+					collectionTreeQueryKeys.push('CORE_TREE_RESULT_' + collectionId);
 					//collectionTreeQueryKeys.push('CORE_ALLELE_TREE_' + collectionId);
 
 					// Get collection tree data
@@ -433,7 +436,7 @@ exports.apiGetCollection = function(req, res) {
 						if (error) {
 							// Ignore this error for now
 							//res.json({});
-							console.error('[WGST][Couchbase][Error] ✗ ' + error);
+							console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
 							console.dir(collectionTreesData);
 							return;
 						}
@@ -475,7 +478,7 @@ exports.apiGetCollection = function(req, res) {
 							if (error) {
 								// Ignore this error for now
 								//res.json({});
-								console.error('[WGST][Couchbase][Error] ✗ ' + error);
+								console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
 								console.dir(antibiotics);
 								return;
 							}
@@ -691,7 +694,7 @@ exports.mergeCollectionTrees = function(req, res) {
 			// -----------------------------------------------------------
 			getMergedCollectionTree(mergedTreeId, function(error, mergedTree){
 				if (error) {
-					console.error('[WGST][Couchbase][Error] ✗ ' + error);
+					console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
 					return;
 				}
 
@@ -733,7 +736,7 @@ exports.mergeCollectionTrees = function(req, res) {
 			replyTo: 'noQueueId'
 		}, function(err){
 			if (err) {
-				console.error('[WGST][RabbitMQ][Error] ✗ Failed to publish to ' + rabbitMQExchangeNames.TASKS + ' exchange');
+				console.error(danger('[WGST][RabbitMQ][Error] ✗ Failed to publish to ' + rabbitMQExchangeNames.TASKS + ' exchange'));
 				return;
 			}
 
@@ -753,7 +756,7 @@ exports.apiGetMergeTree = function(req, res) {
 	// -----------------------------------------------------------
 	getMergedCollectionTree('MERGE_TREE_' + mergeTreeId, function(error, mergeTree){
 		if (error) {
-			console.error('[WGST][Couchbase][Error] ✗ ' + error);
+			console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
 			return;
 		}
 

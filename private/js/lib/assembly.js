@@ -65,6 +65,127 @@ $(function(){
             // Get predicted resistance profile
             //
 
+            var groupResistanceData,
+                antibioticResistanceData,
+                assemblyResistanceData = [];
+
+            var antibioticClassName,
+                antibioticClass,
+                antibioticName;
+
+            var assemblyAntibioticResistanceState;
+
+            //
+            // Parse each antibiotic group
+            //
+            for (antibioticClassName in antibiotics) {
+                if (antibiotics.hasOwnProperty(antibioticClassName)) {
+
+                    antibioticClass = antibiotics[antibioticClassName];
+                    groupResistanceData = [];
+
+                    //
+                    // Parse each antibiotic
+                    //
+                    for (antibioticName in antibioticClass) {
+                        if (antibioticClass.hasOwnProperty(antibioticName)) {
+
+                            antibioticResistanceData = '';
+
+                            //
+                            // Antibiotic group found in resistance profile for this assembly
+                            //
+                            if (typeof assemblyResistanceProfile[antibioticClassName] !== 'undefined') {
+                                
+                                //
+                                // Antibiotic found in resistance profile for this assembly
+                                //
+                                if (typeof assemblyResistanceProfile[antibioticClassName][antibioticName] !== 'undefined') {
+
+                                    //assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticClassName][antibioticName].resistanceState;
+                                    assemblyAntibioticResistanceState = assemblyResistanceProfile[antibioticClassName][antibioticName];
+
+                                    //
+                                    // Assembly is resistant to this antibiotic (aka failure)
+                                    //
+                                    if (assemblyAntibioticResistanceState === 'RESISTANT') {
+
+                                        //
+                                        // Resistance: RESISTANT
+                                        //
+                                        antibioticResistanceData = 'RESISTANT';
+                                    
+                                    //
+                                    // Assembly is sensitive to this antibiotic (aka success)
+                                    //
+                                    } else if (assemblyAntibioticResistanceState === 'SENSITIVE') {
+
+                                        //
+                                        // Resistance: SENSITIVE
+                                        //
+                                        antibioticResistanceData = 'SENSITIVE';
+                                    
+                                    //
+                                    // Resistance is unknown
+                                    //
+                                    } else {
+
+                                        //
+                                        // Resistance: UNKNOWN
+                                        //
+                                        antibioticResistanceData = 'UNKNOWN';
+
+                                    }
+
+                                //
+                                // Antibiotic was not found in resistance profile for this assembly
+                                //
+                                } else {
+
+                                    //
+                                    // Resistance: UNKNOWN
+                                    //
+                                    antibioticResistanceData = 'UNKNOWN';
+
+                                }
+
+                            //
+                            // Antibiotic group was not found in resistance profile for this assembly
+                            //
+                            } else {
+
+                                //
+                                // Resistance: UNKNOWN
+                                //
+                                antibioticResistanceData = 'UNKNOWN';
+
+                            }
+
+                            groupResistanceData.push({
+                                antibioticName: antibioticName,
+                                antibioticResistanceData: antibioticResistanceData
+                            });
+
+                        } // if
+                    } // for
+
+                    assemblyResistanceData.push({
+                        antibioticClassName: antibioticClassName,
+                        antibioticClassResistanceData: groupResistanceData
+                    });
+
+                } // if
+            } // for
+
+            return assemblyResistanceData;
+        };
+
+        var __deprecated__getAssemblyResistanceData = function(antibiotics, assemblyResistanceProfile) {
+
+            //
+            // Get predicted resistance profile
+            //
+
 			var groupResistanceData,
 				antibioticResistanceData,
 				assemblyResistanceData = [];
@@ -305,7 +426,8 @@ $(function(){
             //
             // Resistance profile
             //
-            var assemblyResistanceProfile = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+            //var assemblyResistanceProfile = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+            var assemblyResistanceProfile = assembly.PAARSNP_RESULT.resistanceProfile;
             var assemblyResistanceData = getAssemblyResistanceData(antibiotics, assemblyResistanceProfile);
 
             preparedAssemblyData.resistanceProfile = assemblyResistanceData;
@@ -389,7 +511,7 @@ $(function(){
                 }
 
                 var preparedForRenderingAssemblyData = window.WGST.exports.prepareAssemblyDataForRendering(data.assembly, data.antibiotics);
-            
+
                 //
                 // Create assembly panel
                 //

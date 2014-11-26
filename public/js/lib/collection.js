@@ -56,7 +56,7 @@ $(function(){
                 sortedAssemblies = [],
                 sortedAssemblyIds = [];
 
-            var treeName = "COLLECTION_TREE",
+            var treeName = "CORE_TREE_RESULT",
             	tree = window.WGST.collection[collectionId].tree[treeName];
 
             //

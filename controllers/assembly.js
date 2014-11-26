@@ -1,5 +1,7 @@
 var chalk = require('chalk');
-var important = chalk.white.bgRed;
+var danger = chalk.white.bgRed;
+var warning = chalk.bgYellow;
+var success = chalk.bgGreen;
 
 exports.add = function(req, res) {
 
@@ -17,7 +19,7 @@ exports.add = function(req, res) {
 		! userAssemblyId ||
 		! assemblyId) {
 
-		console.error(important('[WGST] Missing parameters'));
+		console.error(danger('[WGST] Missing parameters'));
 	}
 
 	// Send response
@@ -73,7 +75,8 @@ exports.add = function(req, res) {
 					bufferJSON = buffer.toString(),
 					parsedMessage = JSON.parse(bufferJSON),
 					messageAssemblyId = parsedMessage.assemblyId,
-					messageUserAssemblyId = parsedMessage.userAssemblyId;
+					//messageUserAssemblyId = parsedMessage.userAssemblyId;
+					messageUserAssemblyId = userAssemblyId;
 
 				console.log('[WGST][RabbitMQ] Received notification message');
 				console.dir(parsedMessage);
@@ -204,11 +207,11 @@ exports.add = function(req, res) {
 
 			couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].set(metadataKey, metadata, function(error, result) {
 				if (error) {
-					console.error(important('[WGST][Couchbase][Error] ✗ Failed to insert assembly metadata: ' + error));
+					console.error(danger('[WGST][Couchbase][Error] ✗ Failed to insert assembly metadata: ' + error));
 					return;
 				}
 
-				console.log('[WGST][Couchbase] Inserted assembly metadata');
+				console.log(success('[WGST][Couchbase] Inserted assembly metadata'));
 
 				console.log('[WGST] Emitting METADATA_OK message for socketRoomId: ' + socketRoomId);
 				io.sockets.in(socketRoomId).emit("assemblyUploadNotification", {
@@ -252,7 +255,7 @@ exports.add = function(req, res) {
 			};
 
 			console.log('[WGST][RabbitMQ] Uploading assembly ' + assemblyId + ' to collection ' + collectionId);
-			console.dir(assembly);
+			//console.dir(assembly);
 
 			// Publish message
 			rabbitMQExchanges[rabbitMQExchangeNames.UPLOAD].publish('upload', assembly, { 
@@ -263,7 +266,7 @@ exports.add = function(req, res) {
 				replyTo: uploadQueueId
 			}, function(err){
 				if (err) {
-					console.error(important('[WGST][RabbitMQ][Error] ✗ Error when trying to publish to upload exchange'));
+					console.error(danger('[WGST][RabbitMQ][Error] ✗ Error when trying to publish to upload exchange'));
 					return;
 				}
 
@@ -313,7 +316,7 @@ exports.getAssemblyMetadata = function(assemblyId, callback) {
 
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('ASSEMBLY_METADATA_' + assemblyId, function(error, result) {
 		if (error) {
-			console.error(important('[WGST][Error] Failed to get assembly metadata: ' + error));
+			console.error(danger('[WGST][Error] Failed to get assembly metadata: ' + error));
 			callback(error, null);
 			return;
 		}
@@ -392,7 +395,7 @@ exports.getST = function(alleles, callback) {
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.RESOURCES].get(stQueryKey, function(error, stData) {
 		if (error) {
 			if (error.code === 13) {
-				console.log('! [WGST][Warning] No such ST key found: ' + stQueryKey);
+				console.log(warning('[WGST][Warning] No ST key found: ' + stQueryKey));
 				callback(null, 'New');
 				return;
 			} else {
@@ -604,25 +607,7 @@ exports.getAssembly = function(assemblyId, callback) {
 			}
 
 			console.log('[WGST] Got assembly ' + assemblyId + ' MLST alleles data');
-	
-			// var mlstAlleleValue,
-			// 	mlstAllele,
-			// 	locusId;
 
-			// // Check if any MLST alleles data returned
-			// if (Object.keys(mlstAlleles).length > 0) {
-			// 	// Parse MLST alleles data
-			// 	for (mlstAllele in mlstAlleles) {
-			// 		if (mlstAlleles.hasOwnProperty(mlstAllele)) {
-			// 			// Get value object from query result object
-			// 			mlstAlleleValue = mlstAlleles[mlstAllele].value;
-			// 			// Get locus id from value object
-			// 			locusId = mlstAlleleValue.locusId;
-			// 			// Add allele value object to assembly object
-			// 			assembly.MLST_RESULT.alleles[locusId] = mlstAlleleValue;
-			// 		} // if
-			// 	} // for				
-			// } // if
 			addMlstAlleleToAssembly(assembly, mlstAlleles);
 
 			// Get ST
@@ -1024,7 +1009,7 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(assemblyTableQueryKeys, {}, function(error, assemblyTableData) {
 		if (error) {
-			console.error(important('[WGST][Couchbase][Error] ✗ ' + error));
+			console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
 			callback(error, null);
 			return;
 		}

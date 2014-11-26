@@ -1,9 +1,9 @@
 {% raw %}
 
-    <table class="antibiotic-group" data-antibiotic-group-name="{{antibioticGroupName}}">
+    <table class="antibiotic-group" data-antibiotic-group-name="{{antibioticClassName}}">
     	<thead>
         	<tr>
-            	<th>{{antibioticGroupName}}</th>
+            	<th>{{antibioticClassName}}</th>
         	</tr>
     	</thead>
     	<tbody>
@@ -12,7 +12,7 @@
                 	<table>
                     	<tbody>
                         	<tr>
-			                    {{#each antibioticGroupResistanceData}}
+			                    {{#each antibioticClassResistanceData}}
 			                    	{% endraw %}{% include "antibiotic_resistance.html" %}{% raw %}
 			                    {{/each}}
                         	</tr>
