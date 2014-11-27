@@ -662,11 +662,13 @@ exports.mergeCollectionTrees = function(req, res) {
 		assemblies: [],
 		targetCollectionId: req.body.collectionId, // Your collection id
 		inputData: [req.body.mergeWithCollectionId], // e.g.: EARSS collection, etc.
-		dataSource: collectionTreeTypeToDataSourceMap[req.body.collectionTreeType]
+		//dataSource: collectionTreeTypeToDataSourceMap[req.body.collectionTreeType]
+		dataSource: 'CORE'
 	};
 
 	// Generate queue id
 	// To do: Rename ART to WGST_CLIENT_
+	var uuid = require('node-uuid');
 	var notificationQueueId = 'ART_NOTIFICATION_MERGE_TREES_' + uuid.v4();
 
 	// Create queue
@@ -685,13 +687,16 @@ exports.mergeCollectionTrees = function(req, res) {
 			var buffer = new Buffer(message.data),
 				bufferJSON = buffer.toString(),
 				parsedMessage = JSON.parse(bufferJSON),
-				mergedTreeId = parsedMessage.documentId
+				//mergedTreeId = parsedMessage.documentId
+				mergedTreeId = parsedMessage.documentKeys[0];
 
 			queue.destroy();
 
 			// -----------------------------------------------------------
 			// Get merged tree
 			// -----------------------------------------------------------
+			console.dir(parsedMessage);
+
 			getMergedCollectionTree(mergedTreeId, function(error, mergedTree){
 				if (error) {
 					console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
@@ -711,7 +716,7 @@ exports.mergeCollectionTrees = function(req, res) {
 				if (parsedMessage.taskType === 'MERGE') {
 					console.log('[WGST][Socket.io] Emitting ' + parsedMessage.taskType + ' message for socketRoomId: ' + socketRoomId);
 					io.sockets.in(socketRoomId).emit("collectionTreeMergeNotification", {
-						mergedCollectionTreeId: parsedMessage.documentId.replace('MERGE_TREE_', ''),
+						mergedCollectionTreeId: mergedTreeId.replace('MERGE_TREE_', ''),
 						//tree: mergedTree.newickTree,
 						tree: tree,
 						assemblies: mergedTree.assemblies,
