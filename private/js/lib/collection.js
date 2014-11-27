@@ -355,7 +355,8 @@ $(function(){
 
 	        for (assemblyId in WGST.collection[collectionId].assemblies) {
 	            assembly = WGST.collection[collectionId].assemblies[assemblyId];
-	            resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+	            //resistanceProfileGroups = assembly.PAARSNP_RESULT.paarResult.resistanceProfile;
+	            resistanceProfileGroups = assembly.PAARSNP_RESULT.resistanceProfile;
 	            ungroupedResistanceProfile = {};
 
 	            // console.log('resistanceProfileGroups: ' + resistanceProfileGroups);

@@ -126,13 +126,13 @@ $(function(){
 	                    // Check assembly has resistance profile for this antibiotic
 	                    if (typeof antibioticResistance !== 'undefined') {
 	                        if (tree.branches[assemblyId] && tree.branches[assemblyId].leaf) {
-	                            if (antibioticResistance.resistanceState === 'RESISTANT') {
+	                            if (antibioticResistance === 'RESISTANT') {
 	                                // Red
 	                                tree.setNodeColourAndShape(assemblyId, '#ff0000');                 
-	                            } else if (antibioticResistance.resistanceState === 'SENSITIVE') {
+	                            } else if (antibioticResistance === 'SENSITIVE') {
 	                                // Green
 	                                tree.setNodeColourAndShape(assemblyId, '#4dbd33');                 
-	                            } else if (antibioticResistance.resistanceState === 'UNKNOWN') {
+	                            } else if (antibioticResistance === 'UNKNOWN') {
 	                                // White
 	                                tree.setNodeColourAndShape(assemblyId, '#ffffff');
 	                            }
