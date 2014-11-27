@@ -70,7 +70,7 @@ $(function(){
 	            for (assemblyId in assemblies) {
 	                if (assemblies.hasOwnProperty(assemblyId)) {
 
-	                    assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.paarResult.resistanceProfile,
+	                    assemblyResistanceProfile = assemblies[assemblyId].PAARSNP_RESULT.resistanceProfile,
 	                    resistanceProfileString = createAssemblyResistanceProfilePreviewString(assemblyResistanceProfile, WGST.antibiotics);
 
 	                    // Set label only to leaf nodes, filtering out the root node
@@ -422,6 +422,9 @@ $(function(){
 	    //     });
 	    // };
 
+	    //
+	    // To do: refactor
+	    //
 	    var createAssemblyResistanceProfilePreviewString = function(assemblyResistanceProfile, antibiotics) {
 	        var assemblyResistanceProfileHtml = '',
 	            antibioticGroup,
@@ -448,7 +451,7 @@ $(function(){
 	                        // Antibiotic found in Resistance Profile for this assembly
 	                        if (typeof assemblyResistanceProfile[antibioticGroupName] !== 'undefined') {
 	                            if (typeof assemblyResistanceProfile[antibioticGroupName][antibioticName] !== 'undefined') {
-	                                antibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName].resistanceState;
+	                                antibioticResistanceState = assemblyResistanceProfile[antibioticGroupName][antibioticName];
 	                                if (antibioticResistanceState === 'RESISTANT') {
 	                                    antibioticHtml = antibioticHtml + '⦿';
 	                                } else if (antibioticResistanceState === 'SENSITIVE') {
