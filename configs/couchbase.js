@@ -40,12 +40,13 @@ module.exports = function() {
 	//
 	// Create couchbase bucket connections
 	//
-	var bucketName,
-		bucketPassword;
+	var bucketName;
+	var bucketPassword;
+	var buckets = appConfig.server.couchbase.buckets;
 
-	Object.keys(appConfig.server.couchbase.buckets).map(function(bucketType){
-		bucketName = appConfig.server.couchbase.buckets[bucketType].name;
-		bucketPassword = appConfig.server.couchbase.buckets[bucketType].password;
+	Object.keys(buckets).map(function(bucketType){
+		bucketName = buckets[bucketType].name;
+		bucketPassword = buckets[bucketType].password;
 		couchbaseDatabaseConnections[bucketType] = createCouchbaseBucketConnection(bucketName, bucketPassword);
 	});
 };
