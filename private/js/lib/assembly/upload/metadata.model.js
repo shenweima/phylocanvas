@@ -10,13 +10,13 @@ $(function(){
 		//
 		//
 
-		window.WGST.exports.setAssemblyMetadata = function(options) {
+		window.WGST.exports.setAssemblyMetadataValue = function(options) {
 
 			var assemblyFileId = options.assemblyFileId,
 				assemblyMetadataKey = options.assemblyMetadataKey,
 				assemblyMetadataValue = options.assemblyMetadataValue;
 
-			if (assemblyMetadataKey === 'date') {
+			if (assemblyMetadataKey === 'datetime') {
 
                 //
                 // Set datetime
@@ -57,11 +57,20 @@ $(function(){
 		};
 
 		window.WGST.exports.copyAssemblyMetadata = function(sourceAssemblyFileId, targetAssemblyFileId) {
+
+			//
+			// For performance improvements and maintenance - store assembly metadata in a variable
+			//
 			var sourceAssemblyMetadata = window.WGST.upload.fastaAndMetadata[sourceAssemblyFileId].metadata;
 
+			//
+			// Copy each metadata object property
+			//
 			Object.keys(sourceAssemblyMetadata).map(function(metadataKey) {
-
-				window.WGST.exports.setAssemblyMetadata({
+				//
+				// Set assembly metadata's value
+				//
+				window.WGST.exports.setAssemblyMetadataValue({
 					assemblyFileId: targetAssemblyFileId,
 					assemblyMetadataKey: metadataKey,
 					assemblyMetadataValue: sourceAssemblyMetadata[metadataKey]
@@ -70,12 +79,15 @@ $(function(){
 		};
 
 		window.WGST.exports.copyAssemblyMetadataToAssembliesWithNoMetadata = function(sourceAssemblyFileId) {
+
+			var fastaAndMetadata = window.WGST.upload.fastaAndMetadata;
+
 			//
 			// Iterate over each assembly metadata
 			//
-			Object.keys(window.WGST.upload.fastaAndMetadata).map(function(targetAssemblyFileId) {
+			Object.keys(fastaAndMetadata).map(function(targetAssemblyFileId) {
 
-				var targetAssemblyMetadata = window.WGST.upload.fastaAndMetadata[targetAssemblyFileId].metadata;
+				var targetAssemblyMetadata = fastaAndMetadata[targetAssemblyFileId].metadata;
 
 	        	//
 	            // Only copy metadata to assemblies with no metadata

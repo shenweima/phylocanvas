@@ -278,7 +278,7 @@ $(function(){
 
         });
 
-	    $('body').on('click', '.wgst-panel__assembly-upload-metadata .copy-metadata-to-all-empty-assemblies', function() {
+	    $('body').on('click', '[data-wgst-copy-metadata-to-all-empty-assemblies]', function() {
 	        //
 	        // Copy same metadata to all assemblies with no metadata
 	        //

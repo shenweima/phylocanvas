@@ -376,7 +376,7 @@ $(function(){
                 		//
                 		// Update model
                 		//
-                		window.WGST.exports.setAssemblyMetadata({
+                		window.WGST.exports.setAssemblyMetadataValue({
                 			assemblyFileId: assemblyFileId,
                 			assemblyMetadataKey: 'date',
                 			assemblyMetadataValue: assemblyMetadata.date
