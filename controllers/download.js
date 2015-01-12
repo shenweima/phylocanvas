@@ -43,7 +43,9 @@ exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
 
 	assemblyController.getAssemblyMetadata(assemblyId, function(error, assemblyMetadata) {
 		if (error) {
-			res.sendStatus(500);
+			console.error(danger(error));
+			console.error(danger(assemblyMetadata));
+			res.status(500).send('Internal Server Error');
 			return;
 		}
 

@@ -308,8 +308,13 @@ exports.add = function(req, res) {
 exports.get = function(req, res) {
 	console.log('[WGST] Requested assembly id: ' + req.params.id);
 
-	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(req.params.id, function(err, result) {
-		if (err) throw err;
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(req.params.id, function(error, result) {
+		if (error) {
+			console.error(danger(error));
+			console.error(danger(result));
+			res.sendStatus(500);
+			return;
+		}
 
 		var assembly = result.value;
 
@@ -727,7 +732,10 @@ exports.apiGetAssemblies = function(req, res) {
 		//console.log(results);
 
 		if (error) {
-			throw error;
+			console.error(danger(error));
+			console.error(danger(results));
+			res.sendStatus(500);
+			return;
 		}
 
 		// ---------------------------------------------
@@ -805,7 +813,10 @@ exports.apiGetAssemblies = function(req, res) {
 		// Get MLST alleles data
 		exports.getMlstAllelesData(allAssembliesMlstAllelesQueryKeys, function(error, mlstAllelesData){
 			if (error) {
-				throw error;
+				console.error(danger(error));
+				console.error(danger(mlstAllelesData));
+				res.sendStatus(500);
+				return;
 			}
 
 			// Group mlst alleles data by assembly id
@@ -922,7 +933,12 @@ exports.apiGetAssemblies = function(req, res) {
 exports.apiGetResistanceProfile = function(req, res) {
 	exports.getResistanceProfile(function(error, resistanceProfile){
 
-		if (error) throw error;
+		if (error) {
+			console.error(danger(error));
+			console.error(danger(resistanceProfile));
+			res.sendStatus(500);
+			return;
+		}
 
 		res.json({
 			resistanceProfile: resistanceProfile
@@ -957,7 +973,12 @@ exports.getResistanceProfile = function(callback) {
 // Return list of all antibiotics grouped by class name
 exports.apiGetAllAntibiotics = function(req, res) {
 	exports.getAllAntibiotics(function(error, antibiotics) {
-		if (error) throw error;
+		if (error) {
+			console.error(danger(error));
+			console.error(danger(antibiotics));
+			res.sendStatus(500);
+			return;
+		}
 
 		res.json(antibiotics);
 	});
