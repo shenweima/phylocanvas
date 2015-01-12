@@ -5,10 +5,16 @@ var success = chalk.bgGreen;
 //
 // Use long stack trace everywhere except for production environment
 //
-if (process.env.NODE_ENV !== 'production'){
-    console.warn(attention('Non-production environment'));
-    console.warn(attention('Using long stack trace'));
+if (process.env.NODE_ENV === 'development'){
+    console.warn(attention('Development environment.'));
+    console.warn(attention('Using long stack trace.'));
     require('longjohn');
+
+} else if (process.env.NODE_ENV === 'production') {
+    console.warn(attention('Production environment.'));
+    
+} else {
+    console.warn(attention('Unknown environment. Please identify your environment with `export NODE_ENV=` command.'));
 }
 
 //
