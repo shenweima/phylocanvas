@@ -1,3 +1,8 @@
+var chalk = require('chalk');
+var danger = chalk.white.bgRed;
+var warning = chalk.bgYellow;
+var success = chalk.bgGreen;
+
 var flattenAssemblyMetadata = function(assemblyMetadata) {
 	// Geography
 	//
