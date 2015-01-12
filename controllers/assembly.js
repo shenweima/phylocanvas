@@ -14,12 +14,20 @@ exports.add = function(req, res) {
 
 	// Validate request
 	//
-	if (! collectionId ||
-		! socketRoomId ||
-		! userAssemblyId ||
-		! assemblyId) {
+	if (! collectionId) {
+		console.error(danger('[WGST] Missing collection id'));
+	}
+	
+	if (! socketRoomId) {
+		console.error(danger('[WGST] Missing socket room id'));
+	}
 
-		console.error(danger('[WGST] Missing parameters'));
+	if (! userAssemblyId) {
+		console.error(danger('[WGST] Missing user assembly id'));
+	}
+
+	if (! assemblyId) {
+		console.error(danger('[WGST] Missing assembly id'));
 	}
 
 	// Send response
@@ -530,7 +538,7 @@ exports.getAssembly = function(assemblyId, callback) {
 	//var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey, coreQueryKey];
 	var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey];
 
-	console.log('[WGST] Assembly ' + assemblyId + ' query keys:');
+		console.log('[WGST] Assembly ' + assemblyId + ' query keys:');
 	console.dir(assemblyQueryKeys);
 
 	// ------------------------------------------
@@ -632,13 +640,18 @@ exports.apiGetAssembly = function(req, res) {
 
 	exports.getAssembly(assemblyId, function(error, assembly){
 		if (error) {
-			throw error;
+			console.error(danger(error));
+			console.error(danger(assembly));
+			res.sendStatus(500);
+			return;
 		}
 
-		// Get list of all antibiotics
 		exports.getAllAntibiotics(function(error, antibiotics){
 			if (error) {
-				throw error;
+				console.error(danger(error));
+				console.error(danger(antibiotics));
+				res.sendStatus(500);
+				return;
 			}
 
 			res.json({

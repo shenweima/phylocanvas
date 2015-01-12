@@ -29,11 +29,11 @@ var watchPaths = {
 gulp.task('js', function() {
 	//
 	// File order is important.
-	// We want client.js to be the last one.
+	// We want client.js to be the last one because it depends on all other libraries.
 	//
     return gulp.src(['./private/js/lib/**/*.js', './private/js/client.js'])
     	//.pipe(sourcemaps.init())
-    	//.pipe(uglify())
+    	.pipe(uglify())
     	//.pipe(jshint())
     	//.pipe(jshint.reporter('jshint-stylish'))
     	.pipe(concat('wgsa.js'))

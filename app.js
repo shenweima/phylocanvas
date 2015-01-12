@@ -11,18 +11,10 @@ if (process.env.NODE_ENV !== 'production'){
     require('longjohn');
 }
 
-//======================================================
-// Read config file
-//======================================================
-console.log('[WGST] Reading app config file');
-
-var fs = require('fs');
-var file = __dirname + '/config.json';
-
-var appConfigData = fs.readFileSync(file, 'utf8');
-// Global var on purpose
-appConfig = JSON.parse(appConfigData);
-console.dir(appConfig);
+//
+// Configure app
+//
+require('./controllers/configuration.js')();
 
 //======================================================
 // Module dependencies
@@ -58,30 +50,25 @@ app.use(function(req, res, next){
 });
 
 //
-// Routing
+// Setup routing
 //
-app.use(require('./routes/landing.js'));
-app.use(require('./routes/user.js'));
-app.use(require('./routes/collection.js'));
-app.use(require('./routes/assembly.js'));
-app.use(require('./routes/download.js'));
-app.use(require('./routes/error.js'));
+require('./routes.js')(app);
+
+//
+// Configure Couchbase
+//
+require('./controllers/couchbase.js')();
+
+//
+// Configure RabbitMQ
+//
+require('./controllers/rabbit.js')();
 
 var server = http.createServer(app).listen(app.get('port'), function(){
     console.log(success('[WGST] ✔ Express server listening on port ' + app.get('port')));
 
     //
-    // Init Socket.io
+    // Configure Socket.io
     //
-    require('./configs/socket.js')(server);
+    require('./controllers/socket.js')(server);
 });
-
-//
-// Init Couchbase
-//
-require('./configs/couchbase.js')();
-
-//
-// Init RabbitMQ
-//
-require('./configs/rabbit.js')();
