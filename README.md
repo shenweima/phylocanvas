@@ -1,19 +1,31 @@
-WGSA Front End
-==========
+# WGSA Web Server
 
-Front end code for the WGSA system.
+Node.js code for WGSA. Works together with [WGSA Web Client](https://github.com/ImperialCollegeLondon/wgst-web-client).
 
-Install
-----------------
+## Development and production
+
+### Install and configure
+
+Install Node dependencies:
+
 `npm install`
 
-Run
-----------------
-`[sudo] npm start`
+Copy config file:
 
-Open `http://localhost` in your browser.
+`cp example.config.json config.json`
 
-### Supported FASTA file extensions
+Run application:
+
+`npm run start`
+
+Modify the config file as needed, then navigate to `http://localhost` in your Chrome browser.
+
+## Deprecation warning
+
+This repository stores Node.js code and the client side code that can be found in `private` directory. The client side code is soon to be deprecated and replaced with [WGSA Web Client](https://github.com/ImperialCollegeLondon/wgst-web-client). Be aware of that before commiting anything to that directory.
+
+## Supported FASTA file extensions
+
 * .fa
 * .fas
 * .fna
@@ -22,14 +34,13 @@ Open `http://localhost` in your browser.
 * .frn
 * .contig
 
-Troubleshooting
-----------------
+## Troubleshooting
+
 When the node app runs as expected, but the page doesn't look/work as expected then it's very likely that your browser serves cached (i.e. old) js/css files. To validate, open Incognito Window in Chrome or disable cache in Chrome Developer Tools (Cmd + Alt + I > Settings > Disable cache) and reload your page.
 
 If that didn't help, check if you get JS error in Chrome Developer Tools Console (Cmd + Alt + J).
 
-Development Notes
-----------------
+## Client side related development notes
 
 `.wgst--hide-this` class uses `display: none;` - can not render `canvas` when it's parent element is not displayed.
 
@@ -37,7 +48,7 @@ Development Notes
 
 ### UI Logic
 
-### 1. Containers
+#### 1. Containers
 
 There are 3 types of containers:
 1. Container - top level class of containers.
@@ -50,9 +61,8 @@ Other types (yet to be defined):
 
 Containers are controlled via hidables. Each container has its own hidable. All other container controls are aliases and internally should trigger hidable controls.
 
-### 2. Hidables
+#### 2. Hidables
 
 Hidables represent containers state. Hidables are created and destroyed with containers. Each container comes with a single hidable. When hidable is created it is displayed on the sidebar. Hidables allow to manipulate containers.
 
 Hidables must not be created/removed directly. They can be manipulated only by manipulating containers.
-

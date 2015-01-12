@@ -1,10 +1,8 @@
 {
   "name": "wgst-front",
-  "version": "0.0.2",
-  "private": true,
-  "scripts": {
-    "start": "node app.js"
-  },
+  "version": "0.1.0",
+  "description": "Node.js code for WGSA.",
+  "main": "app.js",
   "dependencies": {
     "amqp": "*",
     "babyparse": "^0.2.1",
@@ -32,5 +30,18 @@
     "gulp-sourcemaps": "^1.1.0",
     "gulp-uglify": "^0.3.1",
     "jshint-stylish": "^0.4.0"
-  }
+  },
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ImperialCollegeLondon/wgst-front.git"
+  },
+  "author": "Imperial College London",
+  "bugs": {
+    "url": "https://github.com/ImperialCollegeLondon/wgst-front/issues"
+  },
+  "homepage": "https://github.com/ImperialCollegeLondon/wgst-front"
 }
