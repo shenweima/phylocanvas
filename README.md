@@ -6,17 +6,17 @@ Node.js code for WGSA. Works together with [WGSA Web Client](https://github.com/
 
 1. Install Node dependencies:
 
-...`npm install`
+  `npm install`
 
 2. Copy config file:
 
-...`cp example.config.json config.json`
+  `cp example.config.json config.json`
 
 3. Modify the config file as needed.
 
 4. Run application:
 
-...`npm run start`
+  `npm run start`
 
 5. Navigate to `http://localhost` in your latest version of Chrome browser.
 
