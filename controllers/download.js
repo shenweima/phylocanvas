@@ -3,6 +3,8 @@ var danger = chalk.white.bgRed;
 var warning = chalk.bgYellow;
 var success = chalk.bgGreen;
 
+var errorController = require('./error.js');
+
 var flattenAssemblyMetadata = function(assemblyMetadata) {
 	// Geography
 	//
@@ -35,7 +37,8 @@ exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
 		if (error) {
 			console.error(danger(error));
 			console.error(danger(assemblyMetadata));
-			res.status(500).send('Internal Server Error');
+			//res.status(500).send('Internal Server Error');
+			next(errorController.createError(500));
 			return;
 		}
 
