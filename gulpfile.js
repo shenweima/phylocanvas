@@ -22,7 +22,7 @@ var watchPaths = {
 	less: [taskPaths.less.src]
 };
 
-gulp.task('js', function() {
+gulp.task('js-app', function() {
 	//
 	// File order is important.
 	// We want client.js to be the last one because it depends on all other libraries.
@@ -33,6 +33,20 @@ gulp.task('js', function() {
     	.pipe(concat('wgsa.js'))
         .pipe(gulp.dest(taskPaths.js.dest));
 });
+
+gulp.task('js-landing', function() {
+	//
+	// File order is important.
+	// We want client.js to be the last one because it depends on all other libraries.
+	//
+    return gulp.src(['./private/js/lib/landing.js', './private/js/lib/utils.js', './private/js/lib/subscribe.js', './private/js/lib/wgsa_mixpanel.js'])
+    	.pipe(stripDebug())
+    	.pipe(uglify())
+    	.pipe(concat('landing.js'))
+        .pipe(gulp.dest(taskPaths.js.dest));
+});
+
+gulp.task('js', ['js-app', 'js-landing']);
 
 gulp.task('less', function() {
   	return gulp.src(taskPaths.less.src)
