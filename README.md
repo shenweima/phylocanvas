@@ -6,23 +6,25 @@ Node.js code for WGSA. Works together with [WGSA Web Client](https://github.com/
 
 ### Install and configure
 
-Install Node dependencies:
+1. Install Node dependencies:
 
 `npm install`
 
-Copy config file:
+2. Copy config file:
 
 `cp example.config.json config.json`
 
-Run application:
+3. Modify the config file as needed.
+
+4. Run application:
 
 `npm run start`
 
-Modify the config file as needed, then navigate to `http://localhost` in your Chrome browser.
+5. Navigate to `http://localhost` in your latest version of Chrome browser.
 
 ## Deprecation warning
 
-This repository stores Node.js code and the client side code that can be found in `private` directory. The client side code is soon to be deprecated and replaced with [WGSA Web Client](https://github.com/ImperialCollegeLondon/wgst-web-client). Be aware of that before commiting anything to that directory.
+This repository stores Node.js code and the client side code that can be found in `private` directory. The client side code is soon to be deprecated and replaced with [WGSA Web Client](https://github.com/ImperialCollegeLondon/wgst-web-client). Be aware of that before commiting to `private` directory.
 
 ## Supported FASTA file extensions
 
