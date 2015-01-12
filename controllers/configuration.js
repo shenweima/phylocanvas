@@ -1,7 +1,4 @@
 module.exports = function() {
-	//======================================================
-	// Read config file
-	//======================================================
 	console.log('[WGST] Reading app config file');
 
 	var fs = require('fs');
