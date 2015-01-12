@@ -577,16 +577,12 @@ $(function(){
             
             if ($(this).prop('checked')) {
 
-                console.log('X1');
-
                 //
                 // Check all
                 //
                 $showOnMapCheckboxes.prop('checked', true).trigger('change');
 
             } else {
-                
-                console.log('X2');
 
                 //
                 // Uncheck all

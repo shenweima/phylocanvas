@@ -409,6 +409,9 @@ $(function(){
 
         window.WGST.exports.prepareAssemblyDataForRendering = function(assembly, antibiotics) {
 
+            console.debug('[WGST] Received assembly object:');
+            console.dir(assembly);
+
             console.log('[WGST] Parsing assembly ' + assembly.assemblyId + ' data');
 
             var preparedAssemblyData = {
@@ -509,6 +512,9 @@ $(function(){
                     console.error('[WGST][Error] Failed to get assembly data: ' + error);
                     return;
                 }
+
+                console.debug('[WGST] Got assembly ' + assemblyId + ' data:');
+                console.dir(data);
 
                 var preparedForRenderingAssemblyData = window.WGST.exports.prepareAssemblyDataForRendering(data.assembly, data.antibiotics);
 

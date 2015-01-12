@@ -1,20 +1,17 @@
-var gulp = require('gulp'),
-	react = require('gulp-react'),
-	less = require('gulp-less'),
-	changed = require('gulp-changed'),
-	uglify = require('gulp-uglify'),
-	rename = require('gulp-rename'),
-	sourcemaps = require('gulp-sourcemaps'),
-	minify = require('gulp-minify-css'),
-	jshint = require('gulp-jshint'),
-	stylish = require('jshint-stylish');
+var gulp = require('gulp');
+var react = require('gulp-react');
+var less = require('gulp-less');
+var changed = require('gulp-changed');
+var uglify = require('gulp-uglify');
+var rename = require('gulp-rename');
+var sourcemaps = require('gulp-sourcemaps');
+var minify = require('gulp-minify-css');
+var jshint = require('gulp-jshint');
+var stylish = require('jshint-stylish');
+var concat = require('gulp-concat');
 
 var taskPaths = {
-	react: {
-		src: './private/js/lib/react-components/**/*.jsx',
-		dest: './public/js/lib/react-components'
-	},
-	scripts: {
+	js: {
 		src: './private/js/**/*.js',
 		dest: './public/js'
 	},
@@ -25,26 +22,23 @@ var taskPaths = {
 };
 
 var watchPaths = {
-	reactComponents: [taskPaths.react.src],
-	scripts: [taskPaths.scripts.src],
-	less: ['./private/less/**/*.less']
+	js: [taskPaths.js.src],
+	less: [taskPaths.less.src]
 };
 
-gulp.task('react', function() {
-    return gulp.src(taskPaths.react.src)
-    	.pipe(react())
-        .pipe(gulp.dest(taskPaths.react.dest));
-});
-
-gulp.task('scripts', function() {
-    return gulp.src(taskPaths.scripts.src)
+gulp.task('js', function() {
+	//
+	// File order is important.
+	// We want client.js to be the last one.
+	//
+    return gulp.src(['./private/js/lib/**/*.js', './private/js/client.js'])
     	//.pipe(sourcemaps.init())
     	//.pipe(uglify())
     	//.pipe(jshint())
     	//.pipe(jshint.reporter('jshint-stylish'))
-    	//.pipe(rename('wgsa.min.js'))
+    	.pipe(concat('wgsa.js'))
     	//.pipe(sourcemaps.write())
-        .pipe(gulp.dest(taskPaths.scripts.dest));
+        .pipe(gulp.dest(taskPaths.js.dest));
 });
 
 gulp.task('less', function() {
@@ -57,11 +51,9 @@ gulp.task('less', function() {
     	.pipe(gulp.dest(taskPaths.less.dest));
 });
 
-// Rerun the task when a file changes
 gulp.task('watch', function() {
- 	gulp.watch(watchPaths.reactComponents, ['react']);
-	gulp.watch(watchPaths.scripts, ['scripts']);
+	gulp.watch(watchPaths.js, ['js']);
 	gulp.watch(watchPaths.less, ['less']);
 });
 
-gulp.task('default', ['watch', 'react', 'scripts', 'less']);
+gulp.task('default', ['watch', 'js', 'less']);
