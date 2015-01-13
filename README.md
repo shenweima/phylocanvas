@@ -21,10 +21,10 @@ Node.js code for WGSA. Works together with [WGSA Web Client](https://github.com/
   `NODE_ENV=development npm run start`
 
   In _production_ environment:
-  
+
   `NODE_ENV=production npm run start`
 
-5. Navigate to `http://localhost` in your latest version of Chrome browser.
+5. Navigate to `http://localhost` or `http://wgsa.net` in your latest version of Chrome browser.
 
 ## Deprecation warning
 
