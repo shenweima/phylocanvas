@@ -35,10 +35,11 @@ exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
 
 	assemblyController.getAssemblyMetadata(assemblyId, function(error, assemblyMetadata) {
 		if (error) {
-			console.error(danger(error));
-			console.error(danger(assemblyMetadata));
-			//res.status(500).send('Internal Server Error');
-			next(errorController.createError(500));
+			if (error.code === errorController.errorCodes.KEY_DOES_NOT_EXIST) {
+				next(errorController.createError(404));
+			} else {
+				next(errorController.createError(500));
+			}
 			return;
 		}
 

@@ -3,21 +3,6 @@ var attention = chalk.white.bgBlue;
 var success = chalk.bgGreen;
 
 //
-// Use long stack trace everywhere except for production environment
-//
-if (process.env.NODE_ENV === 'development'){
-    console.warn(attention('Development environment.'));
-    console.warn(attention('Using long stack trace.'));
-    require('longjohn');
-
-} else if (process.env.NODE_ENV === 'production') {
-    console.warn(attention('Production environment.'));
-    
-} else {
-    console.warn(attention('Unknown environment. Please identify your environment with `export NODE_ENV=` command.'));
-}
-
-//
 // Configure app
 //
 require('./controllers/configuration.js')();
@@ -37,13 +22,35 @@ app.set('port', process.env.PORT || appConfig.server.node.port);
 app.engine('html', swig.renderFile);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'html');
-app.use(morgan('dev', { immediate: true }));
 // http://stackoverflow.com/a/19965089
 app.use(bodyParser.json({limit: '500mb'}));
 app.use(bodyParser.urlencoded({
     extended: true,
     limit: '50mb'
 }));
+
+//
+// Use long stack trace everywhere except for production environment
+//
+if (process.env.NODE_ENV === 'development'){
+    console.warn(attention('Development environment.'));
+    console.warn(attention('Using long stack trace.'));
+    require('longjohn');
+
+    app.use(morgan('dev'));
+
+} else if (process.env.NODE_ENV === 'production') {
+    console.warn(attention('Production environment.'));
+
+    app.use(morgan(':date :method :url :status :response-time', {
+        skip: function(req, res) {
+            return res.statusCode < 400;
+        }
+    }));
+
+} else {
+    console.warn(attention('Unknown environment. Please identify your environment by running `NODE_ENV=development npm run start` command.'));
+}
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -54,11 +61,6 @@ app.use(function(req, res, next){
     res.header("X-powered-by", "Blood, sweat, and tears");
     next();
 });
-
-//
-// Setup routing
-//
-require('./routes.js')(app);
 
 //
 // Configure Couchbase
@@ -78,3 +80,13 @@ var server = http.createServer(app).listen(app.get('port'), function(){
     //
     require('./controllers/socket.js')(server);
 });
+
+//
+// Setup routing
+//
+require('./routes.js')(app);
+
+//
+// Setup error handling
+//
+require('./controllers/error').handleErrors(app);

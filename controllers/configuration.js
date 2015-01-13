@@ -3,8 +3,8 @@ module.exports = function() {
 
 	var fs = require('fs');
 	var file = __dirname + '/../config.json';
-
 	var appConfigData = fs.readFileSync(file, 'utf8');
+	
 	// Global var on purpose
 	appConfig = JSON.parse(appConfigData);
 	console.dir(appConfig);

@@ -327,6 +327,14 @@ exports.getAssemblyMetadata = function(assemblyId, callback) {
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('ASSEMBLY_METADATA_' + assemblyId, function(error, result) {
 		if (error) {
 			console.error(danger('[WGST][Error] Failed to get assembly metadata: ' + error));
+			
+			//
+			// Often additional information about what caused an error can be found in the result object
+			//
+			if (Object.keys(result).length > 0) {
+				console.dir(result);
+			}
+
 			callback(error, null);
 			return;
 		}
