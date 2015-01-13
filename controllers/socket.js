@@ -2,7 +2,7 @@ var socketio = require('socket.io');
 var uuid = require('node-uuid');
 
 //
-// Global variable on purpose - will store socket connection and will share with controllers
+// Global variable on purpose - will store socket connection and will share with allcontrollers
 //
 global.io;
 global.socket;

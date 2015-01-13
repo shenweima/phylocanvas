@@ -1,17 +1,9 @@
-exports.createAssemblyMetadata = function(assemblyId, assemblyMetadata) {
-	var fs = require('fs');
+var chalk = require('chalk');
+var danger = chalk.white.bgRed;
+var warning = chalk.bgYellow;
+var success = chalk.bgGreen;
 
-	// Write assembly metadata to file for download
-	//
-	fs.writeFile('./public/download/' + assemblyId + '.json', JSON.stringify(assemblyMetadata, null, 4), function(error) {
-		if (error) {
-			console.error('[WGST] Failed to write file: ' + error);
-			return;
-		}
-
-		console.log('[WGST] Wrote metadata file for assembly '+ assemblyId);
-	});
-};
+var errorController = require('./error.js');
 
 var flattenAssemblyMetadata = function(assemblyMetadata) {
 	// Geography
@@ -43,7 +35,11 @@ exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
 
 	assemblyController.getAssemblyMetadata(assemblyId, function(error, assemblyMetadata) {
 		if (error) {
-			res.sendStatus(500);
+			if (error.code === errorController.errorCodes.KEY_DOES_NOT_EXIST) {
+				next(errorController.createError(404));
+			} else {
+				next(errorController.createError(500));
+			}
 			return;
 		}
 

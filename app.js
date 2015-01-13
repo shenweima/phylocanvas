@@ -3,32 +3,14 @@ var attention = chalk.white.bgBlue;
 var success = chalk.bgGreen;
 
 //
-// Use long stack trace everywhere except for production environment
+// Configure app
 //
-if (process.env.NODE_ENV !== 'production'){
-    console.warn(attention('Non-production environment'));
-    console.warn(attention('Using long stack trace'));
-    require('longjohn');
-}
-
-//======================================================
-// Read config file
-//======================================================
-console.log('[WGST] Reading app config file');
-
-var fs = require('fs');
-var file = __dirname + '/config.json';
-
-var appConfigData = fs.readFileSync(file, 'utf8');
-// Global var on purpose
-appConfig = JSON.parse(appConfigData);
-console.dir(appConfig);
+require('./controllers/configuration.js')();
 
 //======================================================
 // Module dependencies
 //======================================================
 var express = require('express');
-var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var http = require('http');
 var path = require('path');
@@ -39,13 +21,17 @@ app.set('port', process.env.PORT || appConfig.server.node.port);
 app.engine('html', swig.renderFile);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'html');
-app.use(morgan('dev', { immediate: true }));
 // http://stackoverflow.com/a/19965089
 app.use(bodyParser.json({limit: '500mb'}));
 app.use(bodyParser.urlencoded({
     extended: true,
     limit: '50mb'
 }));
+
+//
+// Setup logging
+//
+require('./utils/logging').init(app);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -58,30 +44,30 @@ app.use(function(req, res, next){
 });
 
 //
-// Routing
+// Configure Couchbase
 //
-app.use(require('./routes/landing.js'));
-app.use(require('./routes/user.js'));
-app.use(require('./routes/collection.js'));
-app.use(require('./routes/assembly.js'));
-app.use(require('./routes/download.js'));
-app.use(require('./routes/error.js'));
+require('./controllers/couchbase.js')();
+
+//
+// Configure RabbitMQ
+//
+require('./controllers/rabbit.js')();
 
 var server = http.createServer(app).listen(app.get('port'), function(){
     console.log(success('[WGST] ✔ Express server listening on port ' + app.get('port')));
 
     //
-    // Init Socket.io
+    // Configure Socket.io
     //
-    require('./configs/socket.js')(server);
+    require('./controllers/socket.js')(server);
 });
 
 //
-// Init Couchbase
+// Setup routing
 //
-require('./configs/couchbase.js')();
+require('./routes.js')(app);
 
 //
-// Init RabbitMQ
+// Setup error handling
 //
-require('./configs/rabbit.js')();
+require('./controllers/error').handleErrors(app);

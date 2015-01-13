@@ -14,12 +14,20 @@ exports.add = function(req, res) {
 
 	// Validate request
 	//
-	if (! collectionId ||
-		! socketRoomId ||
-		! userAssemblyId ||
-		! assemblyId) {
+	if (! collectionId) {
+		console.error(danger('[WGST] Missing collection id'));
+	}
+	
+	if (! socketRoomId) {
+		console.error(danger('[WGST] Missing socket room id'));
+	}
 
-		console.error(danger('[WGST] Missing parameters'));
+	if (! userAssemblyId) {
+		console.error(danger('[WGST] Missing user assembly id'));
+	}
+
+	if (! assemblyId) {
+		console.error(danger('[WGST] Missing assembly id'));
 	}
 
 	// Send response
@@ -42,19 +50,17 @@ exports.add = function(req, res) {
 	// RabbitMQ Notifications
 	// -------------------------------------
 	var uploadQueue;
-
-	// Generate queue id
-	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId,
-		tasks = {
-			// Per assembly
-			FP: 'FP',
-			MLST: 'MLST',
-			PAARSNP: 'PAARSNP',
-			CORE: 'CORE',
-			// Per collection
-			CORE_MUTANT_TREE: 'CORE_MUTANT_TREE',
-			COLLECTION_TREE: 'COLLECTION_TREE'
-		};
+	var notificationQueueId = 'ART_NOTIFICATION_' + assemblyId;
+	var tasks = {
+		// Per assembly
+		FP: 'FP',
+		MLST: 'MLST',
+		PAARSNP: 'PAARSNP',
+		CORE: 'CORE',
+		// Per collection
+		CORE_MUTANT_TREE: 'CORE_MUTANT_TREE',
+		COLLECTION_TREE: 'COLLECTION_TREE'
+	};
 
 	// Create queue
 	rabbitMQConnection.queue(notificationQueueId, 
@@ -71,12 +77,11 @@ exports.add = function(req, res) {
 
 			// Subscribe to response message
 			queue.subscribe(function(message, headers, deliveryInfo){
-				var buffer = new Buffer(message.data),
-					bufferJSON = buffer.toString(),
-					parsedMessage = JSON.parse(bufferJSON),
-					messageAssemblyId = parsedMessage.assemblyId,
-					//messageUserAssemblyId = parsedMessage.userAssemblyId;
-					messageUserAssemblyId = userAssemblyId;
+				var buffer = new Buffer(message.data);
+				var bufferJSON = buffer.toString();
+				var parsedMessage = JSON.parse(bufferJSON);
+				var messageAssemblyId = parsedMessage.assemblyId;
+				var messageUserAssemblyId = userAssemblyId;
 
 				console.log('[WGST][RabbitMQ] Received notification message');
 				console.dir(parsedMessage);
@@ -192,15 +197,15 @@ exports.add = function(req, res) {
 			// Insert assembly metadata into Couchbase
 			// -----------------------------------------------------------
 
-			var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId,
-				assemblyMetadata = req.body.metadata,
-				metadata = {
-					assemblyId: assemblyId,
-					userAssemblyId: req.body.userAssemblyId,
-					datetime: assemblyMetadata.datetime,
-					geography: assemblyMetadata.geography,
-					source: assemblyMetadata.source
-				};
+			var metadataKey = 'ASSEMBLY_METADATA_' + assemblyId;
+			var assemblyMetadata = req.body.metadata;
+			var metadata = {
+				assemblyId: assemblyId,
+				userAssemblyId: req.body.userAssemblyId,
+				datetime: assemblyMetadata.datetime,
+				geography: assemblyMetadata.geography,
+				source: assemblyMetadata.source
+			};
 
 			console.log('[WGST][Couchbase] Inserting assembly metadata with key: ' + metadataKey);
 			console.dir(metadata);
@@ -287,9 +292,9 @@ exports.add = function(req, res) {
 				.subscribe(function(message, headers, deliveryInfo){
 					console.log('[WGST][RabbitMQ] Preparing metadata object');									
 
-					var buffer = new Buffer(message.data),
-						bufferJSON = buffer.toString(),
-						parsedMessage = JSON.parse(bufferJSON);
+					var buffer = new Buffer(message.data);
+					var bufferJSON = buffer.toString();
+					var parsedMessage = JSON.parse(bufferJSON);
 
 					console.log('[WGST][RabbitMQ] Received message from upload queue:');
 					console.dir(parsedMessage);
@@ -300,8 +305,13 @@ exports.add = function(req, res) {
 exports.get = function(req, res) {
 	console.log('[WGST] Requested assembly id: ' + req.params.id);
 
-	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(req.params.id, function(err, result) {
-		if (err) throw err;
+	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(req.params.id, function(error, result) {
+		if (error) {
+			console.error(danger(error));
+			console.error(danger(result));
+			res.sendStatus(500);
+			return;
+		}
 
 		var assembly = result.value;
 
@@ -317,6 +327,14 @@ exports.getAssemblyMetadata = function(assemblyId, callback) {
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('ASSEMBLY_METADATA_' + assemblyId, function(error, result) {
 		if (error) {
 			console.error(danger('[WGST][Error] Failed to get assembly metadata: ' + error));
+			
+			//
+			// Often additional information about what caused an error can be found in the result object
+			//
+			if (Object.keys(result).length > 0) {
+				console.dir(result);
+			}
+
 			callback(error, null);
 			return;
 		}
@@ -334,8 +352,8 @@ var generateStQueryKey = function(alleles) {
 
 	// Prepare ST query key
 	// 'ST_' + species id + allele ids
-	var stQueryKey = 'ST_1280',
-		alleleId;
+	var stQueryKey = 'ST_1280';
+	var alleleId;
 
 	for (allele in alleles) {
 		if (alleles.hasOwnProperty(allele)) {
@@ -436,8 +454,8 @@ exports.getSTs = function(stQueryKeys, callback) {
 
 var getMlstQueryKeys = function(alleles) {
 	// Prepare allele query keys
-	var alleleQueryKey,
-		mlstAllelesQueryKeys = [];
+	var alleleQueryKey;
+	var mlstAllelesQueryKeys = [];
 
 	for (allele in alleles) {
 		if (alleles.hasOwnProperty(allele)) {
@@ -460,9 +478,9 @@ var getStData = function(mlstAllelesQueryKeys, callback) {
 			return;
 		}
 
-		var mlstAlleleValue,
-			mlstAllele,
-			locusId;
+		var mlstAlleleValue;
+		var mlstAllele;
+		var locusId;
 
 		// console.log('>>> assemblyId: ' + assemblyId);
 
@@ -495,9 +513,9 @@ var getStData = function(mlstAllelesQueryKeys, callback) {
 };
 
 var addMlstAlleleToAssembly = function(assembly, mlstAlleles) {
-	var mlstAlleleValue,
-		mlstAllele,
-		locusId;
+	var mlstAlleleValue;
+	var mlstAllele;
+	var locusId;
 
 	// Check if any MLST alleles data returned
 	if (Object.keys(mlstAlleles).length > 0) {
@@ -521,10 +539,10 @@ exports.getAssembly = function(assemblyId, callback) {
 	// ------------------------------------------
 	// Prepare query keys
 	// ------------------------------------------
-	var scoresQueryKey = 'FP_COMP_' + assemblyId,
-		metadataQueryKey = 'ASSEMBLY_METADATA_' + assemblyId,
-		resistanceProfileQueryKey = 'PAARSNP_RESULT_' + assemblyId,
-		mlstQueryKey = 'MLST_RESULT_' + assemblyId;
+	var scoresQueryKey = 'FP_COMP_' + assemblyId;
+	var metadataQueryKey = 'ASSEMBLY_METADATA_' + assemblyId;
+	var resistanceProfileQueryKey = 'PAARSNP_RESULT_' + assemblyId;
+	var mlstQueryKey = 'MLST_RESULT_' + assemblyId;
 		//coreQueryKey = 'CORE_RESULT_' + assemblyId;	
 
 	//var assemblyQueryKeys = [scoresQueryKey, metadataQueryKey, resistanceProfileQueryKey, mlstQueryKey, coreQueryKey];
@@ -632,13 +650,18 @@ exports.apiGetAssembly = function(req, res) {
 
 	exports.getAssembly(assemblyId, function(error, assembly){
 		if (error) {
-			throw error;
+			console.error(danger(error));
+			console.error(danger(assembly));
+			res.sendStatus(500);
+			return;
 		}
 
-		// Get list of all antibiotics
 		exports.getAllAntibiotics(function(error, antibiotics){
 			if (error) {
-				throw error;
+				console.error(danger(error));
+				console.error(danger(antibiotics));
+				res.sendStatus(500);
+				return;
 			}
 
 			res.json({
@@ -714,15 +737,18 @@ exports.apiGetAssemblies = function(req, res) {
 		//console.log(results);
 
 		if (error) {
-			throw error;
+			console.error(danger(error));
+			console.error(danger(results));
+			res.sendStatus(500);
+			return;
 		}
 
 		// ---------------------------------------------
 		// Merge assembly data into one assembly object
 		// ---------------------------------------------
-		var assemblies = {},
-			assemblyId,
-			cleanAssemblyId;
+		var assemblies = {};
+		var assemblyId;
+		var cleanAssemblyId;
 
 		for (assemblyId in results) {
 			if (results.hasOwnProperty(assemblyId)) {
@@ -757,11 +783,11 @@ exports.apiGetAssemblies = function(req, res) {
 		// Get ST for all assemblies
 		// 1. Extract all alleles query keys and query them.
 		// ---------------------------------------------
-		var assemblyId,
-			assembly,
-			assemblyMlstAllelesQueryKeys = [],
-			allAssembliesMlstAllelesQueryKeys = [],
-			mlstAllelesQueryKeysToAssemblyMap = {};
+		var assemblyId;
+		var assembly;
+		var assemblyMlstAllelesQueryKeys = [];
+		var allAssembliesMlstAllelesQueryKeys = [];
+		var mlstAllelesQueryKeysToAssemblyMap = {};
 
 		for (assemblyId in assemblies) {
 			if (assemblies.hasOwnProperty(assemblyId)) {
@@ -792,7 +818,10 @@ exports.apiGetAssemblies = function(req, res) {
 		// Get MLST alleles data
 		exports.getMlstAllelesData(allAssembliesMlstAllelesQueryKeys, function(error, mlstAllelesData){
 			if (error) {
-				throw error;
+				console.error(danger(error));
+				console.error(danger(mlstAllelesData));
+				res.sendStatus(500);
+				return;
 			}
 
 			// Group mlst alleles data by assembly id
@@ -802,10 +831,10 @@ exports.apiGetAssemblies = function(req, res) {
 			// { 'a4bb3c91-2d8b-43fd-87e8-64501b3de82c' : { 'MLST_1280_ySUwgFjEbIx5XpoyomFs+W3poI0=': { cas: [Object], flags: 0, value: [Object] },
 			// 												'MLST_1280_uS1ci2t4E82d/sCVd6k2OC+3nw0=': { cas: [Object], flags: 0, value: [Object] }}
 			// ---------------------------------------------------------
-			var mlstAlleleQueryKey,
-				assemblyIdsWithMlstAlleleQueryKey,
-				assemblyIdWithMlstAlleleQueryKey,
-				assemblyIdToMlstAllelesDataMap = {};
+			var mlstAlleleQueryKey;
+			var assemblyIdsWithMlstAlleleQueryKey;
+			var assemblyIdWithMlstAlleleQueryKey;
+			var assemblyIdToMlstAllelesDataMap = {};
 
 			for (mlstAlleleQueryKey in mlstAllelesData) {
 				if (mlstAllelesData.hasOwnProperty(mlstAlleleQueryKey)) {
@@ -828,9 +857,9 @@ exports.apiGetAssemblies = function(req, res) {
 				}
 			}
 
-			var allelesData = [],
-				assemblyId,
-				assembly;
+			var allelesData = [];
+			var assemblyId;
+			var assembly;
 
 			for (assemblyId in assemblies) {
 				if (assemblies.hasOwnProperty(assemblyId)) {
@@ -847,10 +876,10 @@ exports.apiGetAssemblies = function(req, res) {
 			// Create ST query keys
 			// ---------------------------------------------------------
 
-			var stQueryKeys = [],
-				stQueryKey,
-				assemblyAllelesData,
-				stQueryKeyToAssemblyIdMap = {};
+			var stQueryKeys = [];
+			var stQueryKey;
+			var assemblyAllelesData;
+			var stQueryKeyToAssemblyIdMap = {};
 
 			for (var i = 0; i < allelesData.length; i++) {
 				// Get allele
@@ -875,12 +904,12 @@ exports.apiGetAssemblies = function(req, res) {
 				// Most likely error returns 1 when some of the keys were not found.
 				// In this case we need set ST value for missing keys as 'NEW'.
 
-				var stQuery,
-					stData,
-					st,
-					assemblyId,
-					assembly,
-					assemblyIds;
+				var stQuery;
+				var stData;
+				var st;
+				var assemblyId;
+				var assembly;
+				var assemblyIds;
 
 				for (stQuery in allStData) {
 					stData = allStData[stQuery];
@@ -909,7 +938,12 @@ exports.apiGetAssemblies = function(req, res) {
 exports.apiGetResistanceProfile = function(req, res) {
 	exports.getResistanceProfile(function(error, resistanceProfile){
 
-		if (error) throw error;
+		if (error) {
+			console.error(danger(error));
+			console.error(danger(resistanceProfile));
+			res.sendStatus(500);
+			return;
+		}
 
 		res.json({
 			resistanceProfile: resistanceProfile
@@ -944,7 +978,12 @@ exports.getResistanceProfile = function(callback) {
 // Return list of all antibiotics grouped by class name
 exports.apiGetAllAntibiotics = function(req, res) {
 	exports.getAllAntibiotics(function(error, antibiotics) {
-		if (error) throw error;
+		if (error) {
+			console.error(danger(error));
+			console.error(danger(antibiotics));
+			res.sendStatus(500);
+			return;
+		}
 
 		res.json(antibiotics);
 	});
@@ -982,8 +1021,8 @@ exports.apiGetAssemblyTableData = function(req, res) {
 };
 
 var reduceAssemblyTableData = function(assemblyDataTable) {
-	var reducedAssemblyDataTable = {},
-		assembly;
+	var reducedAssemblyDataTable = {};
+	var assembly;
 
 	for (assemblyDataTableQueryKey in assemblyDataTable) {
 		if (assemblyDataTable.hasOwnProperty(assemblyDataTableQueryKey)) {

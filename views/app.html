@@ -2,10 +2,10 @@
 
 {% block head %}
 
-  <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" rel="stylesheet" type="text/css">
-  <link href="/css/app.css" rel="stylesheet" type="text/css">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" rel="stylesheet" type="text/css">
+    <link href="/css/app.css" rel="stylesheet" type="text/css">
 
-  <style>
+    <style>
     .wgst-spinner {
       content: "";
       display: block;
@@ -16,26 +16,27 @@
       border-color: #0099ff transparent #0099ff transparent;
       -webkit-animation: spin 1s linear infinite;
     }
-  </style>
+    </style>
+    
 {% endblock %}
 
 {% block content %}
 
-  <section class="wgst-page wgst-page__app wgst--hide-this" data-wgst-drag-and-drop-zone>
+    <section class="wgst-page wgst-page__app wgst--hide-this" data-wgst-drag-and-drop-zone>
 
-    {% include "partials/init.html" %}    
-    {% include "partials/header.html" %}
-    
-    <div class="wgst-layout-container">
-      {% include "partials/backgrounds/drag_and_drop.html" %}
-      {% include "partials/sidebar.html" %}
-      {% include "partials/backgrounds/uploading.html" %}
-      {% include "partials/backgrounds/get_collection.html" %}
-      <div class="wgst-workspace">
-      </div>
-    </div>
+        {% include "partials/init.html" %}    
+        {% include "partials/header.html" %}
 
-  </section>
+        <div class="wgst-layout-container">
+            {% include "partials/backgrounds/drag_and_drop.html" %}
+            {% include "partials/sidebar.html" %}
+            {% include "partials/backgrounds/uploading.html" %}
+            {% include "partials/backgrounds/get_collection.html" %}
+            <div class="wgst-workspace">
+            </div>
+        </div>
+
+    </section>
 
   {% include "partials/fullscreens/assembly.html" %}
   {% include "partials/fullscreens/collection_map.html" %}
@@ -77,78 +78,40 @@
 {% endblock %}
 
 {% block script %}
-<script>
-  'use strict';
-  
-  //
-  // WGST namespace
-  //
-  window.WGST = window.WGST || {};
-  window.WGST.exports = {};
-  window.WGST.state = {
-    panels: {}
-  };
 
-  {% if appConfig %}
-  window.WGST.config = {{appConfig | safe}};
-  {% endif %}
+    <script>
+    'use strict';
 
-  //
-  // /collection/new
-  //
-  {% if newCollection %}
-    window.WGST.isNewCollection = true;
-  {% else %}
-    window.WGST.isNewCollection = false;
-  {% endif %}
+    //
+    // WGST namespace
+    //
+    window.WGST = window.WGST || {};
+    window.WGST.exports = {};
+    window.WGST.state = {
+      panels: {}
+    };
 
-  //
-  // If user requested collection, e.g.: /collection/<collection_id>
-  //
-  {% if requestedCollectionId %}
-    window.WGST.requestedCollectionId = '{{requestedCollectionId}}';
-  {% endif %}
-</script>
+    {% if appConfig %}
+    window.WGST.config = {{appConfig | safe}};
+    {% endif %}
 
-<script src="/js/lib/utils.js"></script>
-<script src="/js/lib/background.js"></script>
+    //
+    // /collection/new
+    //
+    {% if newCollection %}
+      window.WGST.isNewCollection = true;
+    {% else %}
+      window.WGST.isNewCollection = false;
+    {% endif %}
 
-<script src="/js/lib/assembly/upload/analytics.view.js"></script>
-<script src="/js/lib/assembly/upload/metadata.view.js"></script>
-<script src="/js/lib/assembly/upload/metadata.model.js"></script>
-<script src="/js/lib/assembly/upload/metadata/date.js"></script>
-<script src="/js/lib/assembly/upload.js"></script>
+    //
+    // If user requested collection, e.g.: /collection/<collection_id>
+    //
+    {% if requestedCollectionId %}
+      window.WGST.requestedCollectionId = '{{requestedCollectionId}}';
+    {% endif %}
+    </script>
 
-<script src="/js/lib/assembly_panel.js"></script>
+    <script src="/js/wgsa.js"></script>
 
-<script src="/js/lib/unsorted.js"></script>
-<script src="/js/lib/panel.js"></script>
-<script src="/js/lib/overlay.js"></script>
-<script src="/js/lib/container.js"></script>
-<script src="/js/lib/fullscreen.js"></script>
-<script src="/js/lib/map.js"></script>
-<script src="/js/lib/fasta.js"></script>
-<script src="/js/lib/hidable.js"></script>
-
-<script src="/js/lib/collection_data_panel.js"></script>
-<script src="/js/lib/collection_tree_panel.js"></script>
-
-<script src="/js/lib/assembly_upload_analytics_panel.js"></script>
-<script src="/js/lib/assembly_upload_metadata_panel.js"></script>
-<script src="/js/lib/assembly_upload_navigation_panel.js"></script>
-<script src="/js/lib/assembly_upload_progress_panel.js"></script>
-
-<script src="/js/lib/assembly.js"></script>
-<script src="/js/lib/collection.js"></script>
-
-<script src="/js/lib/navigation.js"></script>
-
-<script src="/js/lib/feedback.js"></script>
-<script src="/js/lib/subscribe.js"></script>
-
-<script src="/js/lib/sidebar.js"></script>
-
-<script src="/js/client.js"></script>
-
-<script src="/js/lib/wgsa_mixpanel.js"></script>
 {% endblock %}

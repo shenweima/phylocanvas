@@ -1,20 +1,13 @@
-var gulp = require('gulp'),
-	react = require('gulp-react'),
-	less = require('gulp-less'),
-	changed = require('gulp-changed'),
-	uglify = require('gulp-uglify'),
-	rename = require('gulp-rename'),
-	sourcemaps = require('gulp-sourcemaps'),
-	minify = require('gulp-minify-css'),
-	jshint = require('gulp-jshint'),
-	stylish = require('jshint-stylish');
+var gulp = require('gulp');
+var less = require('gulp-less');
+var uglify = require('gulp-uglify');
+var sourcemaps = require('gulp-sourcemaps');
+var minifyCSS = require('gulp-minify-css');
+var concat = require('gulp-concat');
+var stripDebug = require('gulp-strip-debug');
 
 var taskPaths = {
-	react: {
-		src: './private/js/lib/react-components/**/*.jsx',
-		dest: './public/js/lib/react-components'
-	},
-	scripts: {
+	js: {
 		src: './private/js/**/*.js',
 		dest: './public/js'
 	},
@@ -25,43 +18,48 @@ var taskPaths = {
 };
 
 var watchPaths = {
-	reactComponents: [taskPaths.react.src],
-	scripts: [taskPaths.scripts.src],
-	less: ['./private/less/**/*.less']
+	js: [taskPaths.js.src],
+	less: [taskPaths.less.src]
 };
 
-gulp.task('react', function() {
-    return gulp.src(taskPaths.react.src)
-    	.pipe(react())
-        .pipe(gulp.dest(taskPaths.react.dest));
+gulp.task('js-app', function() {
+	//
+	// File order is important.
+	// We want client.js to be the last one because it depends on all other libraries.
+	//
+    return gulp.src(['./private/js/lib/**/*.js', './private/js/client.js'])
+    	.pipe(stripDebug())
+    	.pipe(uglify())
+    	.pipe(concat('wgsa.js'))
+        .pipe(gulp.dest(taskPaths.js.dest));
 });
 
-gulp.task('scripts', function() {
-    return gulp.src(taskPaths.scripts.src)
-    	//.pipe(sourcemaps.init())
-    	//.pipe(uglify())
-    	//.pipe(jshint())
-    	//.pipe(jshint.reporter('jshint-stylish'))
-    	//.pipe(rename('wgsa.min.js'))
-    	//.pipe(sourcemaps.write())
-        .pipe(gulp.dest(taskPaths.scripts.dest));
+gulp.task('js-landing', function() {
+	//
+	// File order is important.
+	// We want client.js to be the last one because it depends on all other libraries.
+	//
+    return gulp.src(['./private/js/lib/landing.js', './private/js/lib/utils.js', './private/js/lib/subscribe.js', './private/js/lib/wgsa_mixpanel.js'])
+    	.pipe(stripDebug())
+    	.pipe(uglify())
+    	.pipe(concat('landing.js'))
+        .pipe(gulp.dest(taskPaths.js.dest));
 });
+
+gulp.task('js', ['js-app', 'js-landing']);
 
 gulp.task('less', function() {
   	return gulp.src(taskPaths.less.src)
 	    .pipe(less())
 	    .pipe(sourcemaps.init())
-	    .pipe(minify())
-	    //.pipe(rename('wgsa.min.css'))
+	    .pipe(minifyCSS())
 	    .pipe(sourcemaps.write())
     	.pipe(gulp.dest(taskPaths.less.dest));
 });
 
-// Rerun the task when a file changes
 gulp.task('watch', function() {
- 	gulp.watch(watchPaths.reactComponents, ['react']);
-	gulp.watch(watchPaths.scripts, ['scripts']);
+	gulp.watch(watchPaths.js, ['js']);
 	gulp.watch(watchPaths.less, ['less']);
 });
 
-gulp.task('default', ['watch', 'react', 'scripts', 'less']);
+gulp.task('default', ['watch', 'js', 'less']);
