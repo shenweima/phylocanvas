@@ -16,10 +16,12 @@ Node.js code for WGSA. Works together with [WGSA Web Client](https://github.com/
 
 4. Run application:
 
-  In development environment:
+  In _development_ environment:
+
   `NODE_ENV=development npm run start`
 
-  In production environment:
+  In _production_ environment:
+  
   `NODE_ENV=production npm run start`
 
 5. Navigate to `http://localhost` in your latest version of Chrome browser.
