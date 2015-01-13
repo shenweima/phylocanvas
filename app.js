@@ -11,7 +11,6 @@ require('./controllers/configuration.js')();
 // Module dependencies
 //======================================================
 var express = require('express');
-var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var http = require('http');
 var path = require('path');
@@ -30,27 +29,9 @@ app.use(bodyParser.urlencoded({
 }));
 
 //
-// Use long stack trace everywhere except for production environment
+// Setup logging
 //
-if (process.env.NODE_ENV === 'development'){
-    console.warn(attention('Development environment.'));
-    console.warn(attention('Using long stack trace.'));
-    require('longjohn');
-
-    app.use(morgan('dev'));
-
-} else if (process.env.NODE_ENV === 'production') {
-    console.warn(attention('Production environment.'));
-
-    app.use(morgan(':date :method :url :status :response-time', {
-        skip: function(req, res) {
-            return res.statusCode < 400;
-        }
-    }));
-
-} else {
-    console.warn(attention('Unknown environment. Please identify your environment by running `NODE_ENV=development npm run start` command.'));
-}
+require('./utils/logging').init(app);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

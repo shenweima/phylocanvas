@@ -96,7 +96,7 @@ exports.apiGetCollection = function(req, res, next) {
 	// Get list of assemblies
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
 		if (error) {
-			console.error(danger('[WGST][Error] ✗ Failed to get list of assemblies: ' + error));
+			console.error(danger('[WGST][Error] ✗ Failed to get collection ' + collectionId + ': ' + error));
 			next(errorController.createError(404));
 			return;
 		}
