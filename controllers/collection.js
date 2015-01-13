@@ -3,6 +3,8 @@ var danger = chalk.white.bgRed;
 var success = chalk.bgGreen;
 var uuid = require('node-uuid');
 
+var errorController = require('./error.js');
+
 exports.add = function(req, res) {
 	var collectionId = req.body.collectionId;
 	var userAssemblyIds = req.body.userAssemblyIds;
@@ -81,7 +83,7 @@ exports.add = function(req, res) {
 	});
 };
 
-exports.apiGetCollection = function(req, res) {
+exports.apiGetCollection = function(req, res, next) {
 
 	var collectionId = req.body.collectionId;
 	var collection = {
@@ -95,9 +97,7 @@ exports.apiGetCollection = function(req, res) {
 	couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
 		if (error) {
 			console.error(danger('[WGST][Error] ✗ Failed to get list of assemblies: ' + error));
-			console.dir(assemblyIdsData);
-			// Ignore this error for now
-			//res.json({});
+			next(errorController.createError(404));
 			return;
 		}
 
