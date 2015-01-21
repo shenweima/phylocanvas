@@ -12,14 +12,10 @@ exports.handleErrors = function(app) {
 	//
 	// Handle error
 	//
-	app.use(function(error, req, res, next) {
+	app.use(function(error, req, res) {
 	    if (error.status === 404) {
-	        res.status(404);
-	        res.render('404');
-	        return;
+        return res.status(404).render('404');
 	    }
-
-	    res.status(500);
-	    res.render('500');
+	    res.status(500).render('500');
 	});
 };

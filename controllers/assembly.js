@@ -1059,3 +1059,17 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 		callback(null, assemblyTableData);
 	});
 };
+
+exports.getCoreResult = function (id, callback) {
+  var bucket = couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN];
+  bucket.get('CORE_RESULT_' + id, {}, function(error, document) {
+    if (error) {
+      return callback(error);
+    }
+
+    callback(null, {
+      totalCompleteCoreMatches: document.totalCompleteCoreMatches
+      totalCompleteAlleleMatches: document.totalCompleteAlleleMatches
+    });
+  });
+}
