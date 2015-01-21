@@ -53,7 +53,7 @@ require('./controllers/couchbase.js')();
 //
 require('./controllers/rabbit.js')();
 
-var server = http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app).listen(app.get('port'), function() {
     console.log(success('[WGST] ✔ Express server listening on port ' + app.get('port')));
 
     //
@@ -71,3 +71,5 @@ require('./routes.js')(app);
 // Setup error handling
 //
 require('./controllers/error').handleErrors(app);
+
+module.exports = app;

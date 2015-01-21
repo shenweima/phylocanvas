@@ -24,11 +24,15 @@
     "gulp-minify-css": "^0.3.7",
     "gulp-sourcemaps": "^1.1.0",
     "gulp-strip-debug": "^1.0.2",
-    "gulp-uglify": "^0.3.1"
+    "gulp-uglify": "^0.3.1",
+    "mocha": "^2.1.0",
+    "rewire": "^2.1.4",
+    "sinon": "^1.12.2",
+    "supertest": "^0.15.0"
   },
   "scripts": {
     "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --reporter spec 'tests/**/*.test.js'"
   },
   "repository": {
     "type": "git",
