@@ -1062,14 +1062,14 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 
 exports.getCoreResult = function (id, callback) {
   var bucket = couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN];
-  bucket.get('CORE_RESULT_' + id, {}, function(error, document) {
+  bucket.get('CORE_RESULT_' + id, {}, function(error, result) {
     if (error) {
       return callback(error);
     }
 
     callback(null, {
-      totalCompleteCoreMatches: document.totalCompleteCoreMatches
-      totalCompleteAlleleMatches: document.totalCompleteAlleleMatches
+      totalCompleteCoreMatches: result.value.totalCompleteCoreMatches,
+      totalCompleteAlleleMatches: result.value.totalCompleteAlleleMatches
     });
   });
 }
