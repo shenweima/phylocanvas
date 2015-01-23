@@ -14,14 +14,6 @@ router.post('/api/assembly/table-data', controller.apiGetAssemblyTableData);
 router.post('/assembly/add', controller.add);
 router.post('/api/assembly/resistance-profile', controller.apiGetResistanceProfile);
 router.get('/api/all-antibiotics', controller.apiGetAllAntibiotics);
-
-router.get('/api/assembly/:id/core-result', function (req, res, next) {
-  controller.getCoreResult(req.params.id, function (err, result) {
-    if (err) {
-      return next(err);
-    }
-    res.send(result);
-  });
-});
+router.get('/api/assembly/:id/core-result', controller.apiGetCoreResult);
 
 module.exports = router;

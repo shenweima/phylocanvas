@@ -1060,7 +1060,16 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 	});
 };
 
-exports.getCoreResult = function (id, callback) {
+exports.apiGetCoreResult = function(req, res, next) {
+	exports.getCoreResult(req.params.id, function (err, result) {
+	  if (err) {
+	    return next(err);
+	  }
+	  res.send(result);
+	});
+}
+
+exports.getCoreResult = function(id, callback) {
   var bucket = couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN];
   bucket.get('CORE_RESULT_' + id, {}, function(error, result) {
     if (error) {
