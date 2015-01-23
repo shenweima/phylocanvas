@@ -8,8 +8,7 @@ global.io;
 global.socket;
 
 module.exports = function(server) {
-	global.io = socketio.listen(server, { origins: 'localhost:3000' });
-
+	global.io = socketio.listen(server);
 	global.io.sockets.on('connection', function(socketConnection) {
 		console.log('[WGST][Socket.io] Client connected: ' + socketConnection.handshake.headers.host);
 
