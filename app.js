@@ -15,6 +15,8 @@ var bodyParser = require('body-parser');
 var http = require('http');
 var path = require('path');
 var swig = require('swig');
+var logging = require('./utils/logging');
+var logger = logging.getRootLogger();
 var app = express();
 
 app.set('port', process.env.PORT || appConfig.server.node.port);
@@ -28,10 +30,7 @@ app.use(bodyParser.urlencoded({
     limit: '50mb'
 }));
 
-//
-// Setup logging
-//
-require('./utils/logging').init(app);
+logging.initHttpLogging(app, process.env.NODE_ENV || 'development');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -54,7 +53,7 @@ require('./controllers/couchbase.js')();
 require('./controllers/rabbit.js')();
 
 var server = http.createServer(app).listen(app.get('port'), function(){
-    console.log(success('[WGST] ✔ Express server listening on port ' + app.get('port')));
+    logger.info('✔ Express server listening on port ' + app.get('port'));
 
     //
     // Configure Socket.io
