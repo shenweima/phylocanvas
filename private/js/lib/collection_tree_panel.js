@@ -349,7 +349,7 @@ $(function(){
 	        });
 	    });
 
-	    $('body').on('click', '[data-button-merge-tree]', function () {
+	    $('body').on('click', '[data-button-merge-tree]', function (event) {
 
 	    	var mergeButton = $('[data-button-merge]');
 
@@ -378,6 +378,8 @@ $(function(){
 	        .done(function(mergeRequestSent, textStatus, jqXHR) {
 	            console.log('[WGST] Requested to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
 	        });
+
+	        event.preventDefault();
 	    });
 
 	    $('body').on('click', '.wgst-tree-control__merge-collection-trees', function(){
