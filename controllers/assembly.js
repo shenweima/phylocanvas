@@ -1061,11 +1061,11 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 };
 
 exports.apiGetCoreResult = function(req, res, next) {
-	exports.getCoreResult(req.params.id, function (err, result) {
-	  if (err) {
-	    return next(err);
-	  }
-	  res.send(result);
+	exports.getCoreResult(req.params.id, function (error, result) {
+		if (error) {
+			return next(error, null);
+		}
+		res.send(result);
 	});
 }
 
@@ -1073,12 +1073,12 @@ exports.getCoreResult = function(id, callback) {
   var bucket = couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN];
   bucket.get('CORE_RESULT_' + id, {}, function(error, result) {
     if (error) {
-      return callback(error);
+      return callback(error, result);
     }
-
+    var value = result.value;
     callback(null, {
-      totalCompleteCoreMatches: result.value.totalCompleteCoreMatches,
-      totalCompleteAlleleMatches: result.value.totalCompleteAlleleMatches
+      totalCompleteCoreMatches: value.totalCompleteCoreMatches,
+      totalCompleteAlleleMatches: value.totalCompleteAlleleMatches
     });
   });
 }
