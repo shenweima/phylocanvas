@@ -316,7 +316,7 @@ $(function(){
 	            // Enable Merge Collections button
 	            // ------------------------------------------
 	            (function() {
-	                var mergeCollectionTreesButton = $('.wgst-tree-control__merge-collection-trees');
+	                var mergeCollectionTreesButton = $('[data-button-merge]');
 	                mergeCollectionTreesButton.find('.wgst-spinner').addClass('wgst--hide-this');
 	                mergeCollectionTreesButton.find('.wgst-spinner-label').removeClass('wgst--hide-this');
 	                mergeCollectionTreesButton.attr('disabled', false);
@@ -346,6 +346,37 @@ $(function(){
 	            console.error(errorThrown);
 	            console.error(jqXHR);
 
+	        });
+	    });
+
+	    $('body').on('click', '[data-button-merge-tree]', function () {
+
+	    	var mergeButton = $('[data-button-merge]');
+
+	    	mergeButton.attr('disabled', true);
+	    	mergeButton.find('.wgst-spinner-label').addClass('wgst--hide-this');
+	    	mergeButton.find('.wgst-spinner').removeClass('wgst--hide-this');
+
+	    	var mergeWithCollectionButton = $(this);
+
+	        var requestData = {
+	            collectionId: mergeButton.closest('[data-collection-tree-content]').attr('data-collection-id'),
+	            mergeWithCollectionId: mergeWithCollectionButton.attr('data-merge-with-collection'),
+	            collectionTreeType: mergeButton.attr('data-collection-tree-type'),
+	            socketRoomId: window.WGST.socket.roomId
+	        };
+
+	        console.log('[WGST] Requesting to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
+
+	        // Merge collection trees
+	        $.ajax({
+	            type: 'POST',
+	            url: '/api/collection/tree/merge',
+	            datatype: 'json', // http://stackoverflow.com/a/9155217
+	            data: requestData
+	        })
+	        .done(function(mergeRequestSent, textStatus, jqXHR) {
+	            console.log('[WGST] Requested to merge collection trees: ' + requestData.collectionId + ', ' + requestData.mergeWithCollectionId);
 	        });
 	    });
 
