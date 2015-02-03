@@ -1067,7 +1067,7 @@ exports.apiGetCoreResult = function(req, res, next) {
 		}
 		res.send(result);
 	});
-}
+};
 
 exports.getCoreResult = function(id, callback) {
   var bucket = couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN];
@@ -1081,4 +1081,4 @@ exports.getCoreResult = function(id, callback) {
       totalCompleteAlleleMatches: assemblyCoreResult.totalCompleteAlleleMatches
     });
   });
-}
+};
