@@ -1075,10 +1075,10 @@ exports.getCoreResult = function(id, callback) {
     if (error) {
       return callback(error, result);
     }
-    var value = result.value;
+    var assemblyCoreResult = result.value;
     callback(null, {
-      totalCompleteCoreMatches: value.totalCompleteCoreMatches,
-      totalCompleteAlleleMatches: value.totalCompleteAlleleMatches
+      totalCompleteCoreMatches: assemblyCoreResult.totalCompleteCoreMatches,
+      totalCompleteAlleleMatches: assemblyCoreResult.totalCompleteAlleleMatches
     });
   });
 }
