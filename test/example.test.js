@@ -15,7 +15,7 @@ describe('Example tests', function() {
       * be used at an integration and end-to-end level.
       */
     it('should get the resistance profile', function (done) {
-      var assemblyController = require('../controllers/assembly');
+      var assemblyController = require('controllers/assembly');
       var profile = { methicillin: true };
 
       // This would usually override a private method with rewire's `__set__`,
@@ -28,7 +28,7 @@ describe('Example tests', function() {
     });
 
     it('should return an error code', function(done) {
-      var assemblyController = require('../controllers/assembly');
+      var assemblyController = require('controllers/assembly');
 
       assemblyController.getResistanceProfile =
         sinon.stub().yields(new Error());

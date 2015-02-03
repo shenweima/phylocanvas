@@ -5,7 +5,7 @@ var success = chalk.bgGreen;
 //
 // Configure app
 //
-require('./controllers/configuration.js')();
+require('./app/configuration.js')();
 
 //======================================================
 // Module dependencies
@@ -31,7 +31,7 @@ app.use(bodyParser.urlencoded({
 //
 // Setup logging
 //
-require('./utils/logging').init(app);
+require('./app/utils/logging').init(app);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -46,12 +46,12 @@ app.use(function(req, res, next){
 //
 // Configure Couchbase
 //
-require('./controllers/couchbase.js')();
+require('./app/controllers/couchbase.js')();
 
 //
 // Configure RabbitMQ
 //
-require('./controllers/rabbit.js')();
+require('./app/controllers/rabbit.js')();
 
 var server = http.createServer(app).listen(app.get('port'), function() {
     console.log(success('[WGST] ✔ Express server listening on port ' + app.get('port')));
@@ -59,17 +59,17 @@ var server = http.createServer(app).listen(app.get('port'), function() {
     //
     // Configure Socket.io
     //
-    require('./controllers/socket.js')(server);
+    require('./app/controllers/socket.js')(server);
 });
 
 //
 // Setup routing
 //
-require('./routes.js')(app);
+require('./app/routes.js')(app);
 
 //
 // Setup error handling
 //
-require('./controllers/error').handleErrors(app);
+require('./app/controllers/error').handleErrors(app);
 
 module.exports = app;
