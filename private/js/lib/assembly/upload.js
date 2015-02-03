@@ -218,16 +218,9 @@ $(function(){
 
                     console.log('[WGST] Geocodeded ' + address);
 
-                    var formattedAddress = result.formatted_address,
-                        latitude = result.geometry.location.lat(),
-                        longitude = result.geometry.location.lng();
-
-                    // console.log('Assembly metadata form:');
-                    // console.dir({
-                    //     formattedAddress: formattedAddress,
-                    //     latitude: latitude,
-                    //     longitude: longitude
-                    // });
+                    var formattedAddress = result.formatted_address;
+                    var latitude = result.geometry.location.lat();
+                    var longitude = result.geometry.location.lng();
 
                     $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]')
                         .find('.assembly-sample-location-input')
