@@ -32,7 +32,11 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "mocha --reporter spec 'tests/**/*.test.js'"
+    "test": "npm run test-unit",
+    "test-unit": "npm run test-cmd 'tests/unit/**/*.test.js'",
+    "test-e2e": "npm run test-cmd 'tests/integration/**/*.test.js'",
+    "test-example": "npm run test-cmd 'tests/example.test.js'",
+    "test-cmd": "NODE_PATH='.' NODE_ENV='testing' mocha --reporter spec"
   },
   "repository": {
     "type": "git",
