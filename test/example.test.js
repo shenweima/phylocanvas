@@ -2,8 +2,8 @@ var rewire = require('rewire');
 var supertest = require('supertest');
 var sinon = require('sinon');
 
-var app = require('../app');
-var request = supertest(app);
+var server = require('../server');
+var request = supertest(server);
 
 describe('Example tests', function() {
 

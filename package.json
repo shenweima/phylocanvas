@@ -31,12 +31,12 @@
     "supertest": "^0.15.0"
   },
   "scripts": {
-    "start": "node app.js",
+    "start": "node server.js",
     "test": "npm run test-unit",
     "test-unit": "npm run test-cmd 'test/unit/**/*.test.js'",
     "test-e2e": "npm run test-cmd 'test/integration/**/*.test.js'",
     "test-example": "npm run test-cmd 'test/example.test.js'",
-    "test-cmd": "NODE_PATH='./app' NODE_ENV='testing' mocha --reporter spec"
+    "test-cmd": "NODE_PATH='./server' NODE_ENV='testing' mocha --reporter spec"
   },
   "repository": {
     "type": "git",
