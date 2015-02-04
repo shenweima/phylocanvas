@@ -10,7 +10,7 @@ module.exports = {
     if (env === 'production') {
       app.use(morgan(':date :method :url :status :response-time', {
         skip: function(req, res) {
-          return res.statusCode < 400;
+          return (res.statusCode < 400);
         }
       }));
     } else {
