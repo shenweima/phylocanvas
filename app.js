@@ -16,7 +16,7 @@ var http = require('http');
 var path = require('path');
 var swig = require('swig');
 var logging = require('./utils/logging');
-var logger = logging.getRootLogger();
+var logger = logging.getBaseLogger();
 var app = express();
 
 app.set('port', process.env.PORT || appConfig.server.node.port);

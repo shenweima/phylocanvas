@@ -2,7 +2,7 @@ var couchbase = require('couchbase');
 var COUCHBASE_DEFAULT_ADDRESS = '127.0.0.1';
 var couchbaseAddress = appConfig.server.couchbase.ip || COUCHBASE_DEFAULT_ADDRESS;
 
-var logger = require('../utils/logging').getRootLogger().child({ module: 'Couchbase' });
+var logger = require('../utils/logging').createLogger('Couchbase');
 
 var createCouchbaseBucketConnection = function(bucketName, password) {
 	logger.info('Connecting to bucket: ' + bucketName + ' ' + password);

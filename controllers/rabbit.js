@@ -1,4 +1,4 @@
-var logger = require('../utils/logging').getRootLogger().child({ module: 'RabbitMQ'});
+var logger = require('../utils/logging').createLogger('RabbitMQ');
 
 var rabbitMQConnectionOptions = {
 		host: appConfig.server.rabbit.ip,
