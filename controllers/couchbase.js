@@ -15,7 +15,7 @@ var createCouchbaseBucketConnection = function(bucketName, password) {
 		operationTimeout: 60000
 	}, function(error) {
 		if (error) {
-			logger.error('✗ ' + error);
+			logger.error(error);
 			return;
 		}
 

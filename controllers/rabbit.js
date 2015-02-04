@@ -44,7 +44,7 @@ module.exports = function() {
 		rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
 		rabbitMQConnection.on('error', function(error) {
-		    logger.error('✗ Connection: ' + error);
+		    logger.error(error);
 		});
 
 		rabbitMQConnection.on("ready", function(){
