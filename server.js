@@ -5,7 +5,7 @@ var success = chalk.bgGreen;
 //
 // Configure app
 //
-require('./controllers/configuration.js')();
+require('./server/configuration.js')();
 
 //======================================================
 // Module dependencies
@@ -19,7 +19,7 @@ var app = express();
 
 app.set('port', process.env.PORT || appConfig.server.node.port);
 app.engine('html', swig.renderFile);
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'server', 'views'));
 app.set('view engine', 'html');
 // http://stackoverflow.com/a/19965089
 app.use(bodyParser.json({limit: '500mb'}));
@@ -31,7 +31,7 @@ app.use(bodyParser.urlencoded({
 //
 // Setup logging
 //
-require('./utils/logging').init(app);
+require('./server/utils/logging').init(app);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -46,12 +46,12 @@ app.use(function(req, res, next){
 //
 // Configure Couchbase
 //
-require('./controllers/couchbase.js')();
+require('./server/controllers/couchbase.js')();
 
 //
 // Configure RabbitMQ
 //
-require('./controllers/rabbit.js')();
+require('./server/controllers/rabbit.js')();
 
 var server = http.createServer(app).listen(app.get('port'), function() {
     console.log(success('[WGST] ✔ Express server listening on port ' + app.get('port')));
@@ -59,17 +59,17 @@ var server = http.createServer(app).listen(app.get('port'), function() {
     //
     // Configure Socket.io
     //
-    require('./controllers/socket.js')(server);
+    require('./server/controllers/socket.js')(server);
 });
 
 //
 // Setup routing
 //
-require('./routes.js')(app);
+require('./server/routes.js')(app);
 
 //
 // Setup error handling
 //
-require('./controllers/error').handleErrors(app);
+require('./server/controllers/error').handleErrors(app);
 
 module.exports = app;
