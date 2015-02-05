@@ -1,3 +1,5 @@
+var logger = require('../utils/logging').createLogger('RabbitMQ');
+
 var rabbitMQConnectionOptions = {
 		host: appConfig.server.rabbit.ip,
 		port: appConfig.server.rabbit.port
@@ -31,7 +33,7 @@ var createExchange = function(exchangeName, exchangeProperties) {
 		}, function(exchange) {
 			global.rabbitMQExchanges[exchange.name] = exchange;
 
-			console.log('[WGST][RabbitMQ] ✔ Exchange "' + exchange.name + '" is open');
+			logger.info('✔ Exchange "' + exchange.name + '" is open');
 		});
 };
 
@@ -42,11 +44,11 @@ module.exports = function() {
 		rabbitMQConnection = amqp.createConnection(rabbitMQConnectionOptions, rabbitMQConnectionImplementationOptions);
 
 		rabbitMQConnection.on('error', function(error) {
-		    console.error('[WGST][RabbitMQ][Error] ✗ Connection: ' + error);
+		    logger.error(error);
 		});
 
 		rabbitMQConnection.on("ready", function(){
-			console.log('[WGST][RabbitMQ] ✔ Connection is ready');
+			logger.info('✔ Connection is ready');
 
 			// Exchange for uploading assemblies
 			createExchange(global.rabbitMQExchangeNames.UPLOAD, {

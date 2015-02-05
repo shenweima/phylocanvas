@@ -5,7 +5,7 @@ var success = chalk.bgGreen;
 //
 // Configure app
 //
-require('./server/configuration.js')();
+require('configuration.js')();
 
 //======================================================
 // Module dependencies
@@ -15,6 +15,8 @@ var bodyParser = require('body-parser');
 var http = require('http');
 var path = require('path');
 var swig = require('swig');
+var logging = require('utils/logging');
+var logger = logging.getBaseLogger();
 var app = express();
 
 app.set('port', process.env.PORT || appConfig.server.node.port);
@@ -28,10 +30,7 @@ app.use(bodyParser.urlencoded({
     limit: '50mb'
 }));
 
-//
-// Setup logging
-//
-require('./server/utils/logging').init(app);
+logging.initHttpLogging(app, process.env.NODE_ENV || 'development');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -46,30 +45,31 @@ app.use(function(req, res, next){
 //
 // Configure Couchbase
 //
-require('./server/controllers/couchbase.js')();
+require('controllers/couchbase.js')();
 
 //
 // Configure RabbitMQ
 //
-require('./server/controllers/rabbit.js')();
+require('controllers/rabbit.js')();
 
-var server = http.createServer(app).listen(app.get('port'), function() {
-    console.log(success('[WGST] ✔ Express server listening on port ' + app.get('port')));
+var server = http.createServer(app).listen(app.get('port'), function(){
+    logger.info('✔ Express server listening on port ' + app.get('port'));
+
 
     //
     // Configure Socket.io
     //
-    require('./server/controllers/socket.js')(server);
+    require('controllers/socket.js')(server);
 });
 
 //
 // Setup routing
 //
-require('./server/routes.js')(app);
+require('routes.js')(app);
 
 //
 // Setup error handling
 //
-require('./server/controllers/error').handleErrors(app);
+require('controllers/error').handleErrors(app);
 
 module.exports = app;

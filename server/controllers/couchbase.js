@@ -2,8 +2,10 @@ var couchbase = require('couchbase');
 var COUCHBASE_DEFAULT_ADDRESS = '127.0.0.1';
 var couchbaseAddress = appConfig.server.couchbase.ip || COUCHBASE_DEFAULT_ADDRESS;
 
+var logger = require('../utils/logging').createLogger('Couchbase');
+
 var createCouchbaseBucketConnection = function(bucketName, password) {
-	console.log('[WGST][Couchbase] Connecting to bucket: ' + bucketName + ' ' + password);
+	logger.info('Connecting to bucket: ' + bucketName + ' ' + password);
 	return new couchbase.Connection({
 		host: 'http://' + couchbaseAddress + ':8091/pools',
 		bucket: bucketName,
@@ -13,11 +15,11 @@ var createCouchbaseBucketConnection = function(bucketName, password) {
 		operationTimeout: 60000
 	}, function(error) {
 		if (error) {
-			console.error('[WGST][Couchbase][Error] ✗ ' + error);
+			logger.error(error);
 			return;
 		}
 
-		console.log('[WGST][Couchbase] ✔ Connected to "' + bucketName + '" bucket');
+		logger.info('✔ Connected to "' + bucketName + '" bucket');
 	});
 };
 
