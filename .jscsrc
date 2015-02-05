@@ -21,6 +21,10 @@
     "disallowYodaConditions": true,
     "disallowKeywords": [ "with" ],
     "disallowMultipleLineBreaks": true,
+    "requireSpacesInAnonymousFunctionExpression": {
+        "beforeOpeningRoundBrace": true,
+        "beforeOpeningCurlyBrace": true
+    },
     "requireSpaceBeforeBlockStatements": true,
     "requireParenthesesAroundIIFE": true,
     "requireSpacesInConditionalExpression": true,
