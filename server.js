@@ -49,13 +49,13 @@ require('controllers/couchbase.js')();
 require('controllers/rabbit.js')();
 
 var server = http.createServer(app).listen(app.get('port'), function() {
-    logger.info('✔ Express server listening on port ' + app.get('port'));
+  logger.info('✔ Express server listening on port ' + app.get('port'));
 
-    //
-    // Configure Socket.io
-    //
-    require('controllers/socket.js')(server);
-  });
+  //
+  // Configure Socket.io
+  //
+  require('controllers/socket.js')(server);
+});
 
 //
 // Setup routing
