@@ -1059,3 +1059,26 @@ var getAssemblyTableData = function(assemblyIds, callback) {
 		callback(null, assemblyTableData);
 	});
 };
+
+exports.apiGetCoreResult = function(req, res, next) {
+	exports.getCoreResult(req.params.id, function (error, result) {
+		if (error) {
+			return next(error, null);
+		}
+		res.send(result);
+	});
+};
+
+exports.getCoreResult = function(id, callback) {
+  var bucket = couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN];
+  bucket.get('CORE_RESULT_' + id, {}, function(error, result) {
+    if (error) {
+      return callback(error, result);
+    }
+    var assemblyCoreResult = result.value;
+    callback(null, {
+      totalCompleteCoreMatches: assemblyCoreResult.totalCompleteCoreMatches,
+      totalCompleteAlleleMatches: assemblyCoreResult.totalCompleteAlleleMatches
+    });
+  });
+};

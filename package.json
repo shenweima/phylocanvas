@@ -28,7 +28,7 @@
     "gulp-uglify": "^0.3.1"
   },
   "scripts": {
-    "start": "node app.js | bunyan -o short",
+    "start": "NODE_PATH='.' node app.js | bunyan -o short",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
