@@ -25,11 +25,19 @@
     "gulp-minify-css": "^0.3.7",
     "gulp-sourcemaps": "^1.1.0",
     "gulp-strip-debug": "^1.0.2",
-    "gulp-uglify": "^0.3.1"
+    "gulp-uglify": "^0.3.1",
+    "mocha": "^2.1.0",
+    "rewire": "^2.1.4",
+    "sinon": "^1.12.2",
+    "supertest": "^0.15.0"
   },
   "scripts": {
-    "start": "NODE_PATH='.' node app.js | bunyan -o short",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_PATH='./server' node server.js | bunyan -o short",
+    "test": "npm run test-unit",
+    "test-unit": "npm run test-cmd 'test/unit/**/*.test.js'",
+    "test-e2e": "npm run test-cmd 'test/integration/**/*.test.js'",
+    "test-example": "npm run test-cmd 'test/example.test.js'",
+    "test-cmd": "NODE_PATH='./server' NODE_ENV='testing' mocha --reporter spec"
   },
   "repository": {
     "type": "git",
