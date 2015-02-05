@@ -1,3 +1,3 @@
-exports.test = function(req, res){
-	// TODO
+exports.test = function(req, res) {
+  // TODO
 };

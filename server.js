@@ -1,7 +1,3 @@
-var chalk = require('chalk');
-var attention = chalk.white.bgBlue;
-var success = chalk.bgGreen;
-
 //
 // Configure app
 //
@@ -26,8 +22,8 @@ app.set('view engine', 'html');
 // http://stackoverflow.com/a/19965089
 app.use(bodyParser.json({limit: '500mb'}));
 app.use(bodyParser.urlencoded({
-    extended: true,
-    limit: '50mb'
+  extended: true,
+  limit: '50mb'
 }));
 
 logging.initHttpLogging(app, process.env.NODE_ENV || 'development');
@@ -37,9 +33,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 //
 // Set our own x-powered-by header
 //
-app.use(function(req, res, next){
-    res.header("X-powered-by", "Blood, sweat, and tears");
-    next();
+app.use(function(req, res, next) {
+  res.header('X-powered-by', 'Blood, sweat, and tears');
+  next();
 });
 
 //
@@ -52,15 +48,14 @@ require('controllers/couchbase.js')();
 //
 require('controllers/rabbit.js')();
 
-var server = http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app).listen(app.get('port'), function() {
     logger.info('✔ Express server listening on port ' + app.get('port'));
-
 
     //
     // Configure Socket.io
     //
     require('controllers/socket.js')(server);
-});
+  });
 
 //
 // Setup routing

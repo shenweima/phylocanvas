@@ -5,22 +5,22 @@ var couchbaseAddress = appConfig.server.couchbase.ip || COUCHBASE_DEFAULT_ADDRES
 var logger = require('../utils/logging').createLogger('Couchbase');
 
 var createCouchbaseBucketConnection = function(bucketName, password) {
-	logger.info('Connecting to bucket: ' + bucketName + ' ' + password);
-	return new couchbase.Connection({
-		host: 'http://' + couchbaseAddress + ':8091/pools',
-		bucket: bucketName,
-		password: password,
-		// Set timeout to 1 minute
-		connectionTimeout: 60000,
-		operationTimeout: 60000
-	}, function(error) {
-		if (error) {
-			logger.error(error);
-			return;
-		}
+  logger.info('Connecting to bucket: ' + bucketName + ' ' + password);
+  return new couchbase.Connection({
+    host: 'http://' + couchbaseAddress + ':8091/pools',
+    bucket: bucketName,
+    password: password,
+    // Set timeout to 1 minute
+    connectionTimeout: 60000,
+    operationTimeout: 60000
+  }, function(error) {
+    if (error) {
+      logger.error(error);
+      return;
+    }
 
-		logger.info('✔ Connected to "' + bucketName + '" bucket');
-	});
+    logger.info('✔ Connected to "' + bucketName + '" bucket');
+  });
 };
 
 //
@@ -32,23 +32,23 @@ var createCouchbaseBucketConnection = function(bucketName, password) {
 //
 couchbaseDatabaseConnections = {};
 COUCHBASE_BUCKETS = {
-	'MAIN': 'main',
-	'RESOURCES': 'resources',
-	'FRONT': 'front',
-	'FEEDBACK': 'feedback'
+  'MAIN': 'main',
+  'RESOURCES': 'resources',
+  'FRONT': 'front',
+  'FEEDBACK': 'feedback'
 };
 
 module.exports = function() {
-	//
-	// Create couchbase bucket connections
-	//
-	var bucketName;
-	var bucketPassword;
-	var buckets = appConfig.server.couchbase.buckets;
+  //
+  // Create couchbase bucket connections
+  //
+  var bucketName;
+  var bucketPassword;
+  var buckets = appConfig.server.couchbase.buckets;
 
-	Object.keys(buckets).map(function(bucketType){
-		bucketName = buckets[bucketType].name;
-		bucketPassword = buckets[bucketType].password;
-		couchbaseDatabaseConnections[bucketType] = createCouchbaseBucketConnection(bucketName, bucketPassword);
-	});
+  Object.keys(buckets).map(function(bucketType){
+    bucketName = buckets[bucketType].name;
+    bucketPassword = buckets[bucketType].password;
+    couchbaseDatabaseConnections[bucketType] = createCouchbaseBucketConnection(bucketName, bucketPassword);
+  });
 };
