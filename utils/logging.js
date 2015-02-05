@@ -1,35 +1,41 @@
-var chalk = require('chalk');
-var attention = chalk.white.bgBlue;
-var success = chalk.bgGreen;
-
+var bunyan = require('bunyan');
 var morgan = require('morgan');
 
-exports.init = function(app) {
-    //
-    // Use long stack trace only in development environment
-    //
-    if (process.env.NODE_ENV === 'development'){
-        console.warn(attention('[WGST] Development environment.'));
-        require('longjohn');
+var BASE_LOGGER_NAME = 'WGSA';
 
-        app.use(morgan('dev'));
+function createLogger(appendedName) {
+  var loggerName = BASE_LOGGER_NAME;
+  if (appendedName) {
+    loggerName += ' ' + appendedName.toUpperCase();
+  }
+  return bunyan.createLogger({ name: loggerName });
+}
 
-    } else if (process.env.NODE_ENV === 'production') {
-        console.warn(attention('[WGST] Production environment.'));
+/**
+ * Caching a standard logger should be more efficient than creating multiple
+ * loggers throughout the application.
+ */
+var BASE_LOGGER = createLogger();
+function getBaseLogger() {
+  return BASE_LOGGER;
+}
 
-        app.use(morgan(':date :method :url :status :response-time', {
-            skip: function(req, res) {
-                return res.statusCode < 400;
-            }
-        }));
+function initHttpLogging(app, env) {
+  getBaseLogger().warn('Environment: ' + env);
+  if (env === 'production') {
+    app.use(morgan(':date :method :url :status :response-time', {
+      skip: function(req, res) {
+        return (res.statusCode < 400);
+      }
+    }));
+  } else {
+    app.use(morgan('dev'));
+    require('longjohn');
+  }
+}
 
-        //
-        // Ignore console.log and console.dir in production
-        //
-        console.log = function(){};
-        console.dir = function(){};
-
-    } else {
-        console.warn(attention('[WGST] Unknown environment. Please identify your environment by running `NODE_ENV=development npm run start` command.'));
-    }
+module.exports = {
+  createLogger: createLogger,
+  getBaseLogger: getBaseLogger,
+  initHttpLogging: initHttpLogging
 };
