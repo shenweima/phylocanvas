@@ -1,8 +1,10 @@
 var bunyan = require('bunyan');
 var morgan = require('morgan');
 
+var BASE_LOGGER_NAME = 'WGSA';
+
 function createLogger(appendedName) {
-  var loggerName = 'WGSA';
+  var loggerName = BASE_LOGGER_NAME;
   if (appendedName) {
     loggerName += ' ' + appendedName.toUpperCase();
   }
