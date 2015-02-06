@@ -9,11 +9,11 @@ function store(type, key, value) {
   storageConnection[type].set(key, value, function (error, result) {
     if (error) {
       logger.error('✗ Failed to store "' + key + '": ' + error);
-      deferred.reject(new Error(error));
+      return deferred.reject(error);
     }
 
     logger.info('Successfully stored ' + key);
-    deferred.resolve(result);
+    deferred.resolve(result.cas);
   });
 
   return deferred.promise;
@@ -25,11 +25,11 @@ function retrieve(type, key) {
   storageConnection[type].get(key, function (error, result) {
     if (error) {
       logger.error('✗ Failed to retrieve "' + key + '": ' + error);
-      deferred.reject(new Error(error));
+      return deferred.reject(error);
     }
 
     logger.info('Successfully retrieved ' + key);
-    deferred.resolve(result);
+    deferred.resolve(result.value);
   });
 
   return deferred.promise;

@@ -6,15 +6,15 @@ describe('Service: Storage', function () {
 
   var mockSuccessConnections = {
     main: {
-      get: sinon.stub().yields(null, 'result'),
-      set: sinon.stub().yields(null, 'result')
+      get: sinon.stub().yields(null, { value: 'result', cas: 'cas' }),
+      set: sinon.stub().yields(null, { value: 'result', cas: 'cas' })
     }
   };
 
   var mockErrorConnections = {
     main: {
-      get: sinon.stub().yields('get error'),
-      set: sinon.stub().yields('set error')
+      get: sinon.stub().yields(new Error('get error')),
+      set: sinon.stub().yields(new Error('set error'))
     }
   };
 
@@ -25,7 +25,7 @@ describe('Service: Storage', function () {
     assert(storageService('resources') !== null);
   });
 
-  it('should get single values', function (done) {
+  it('should return the value of a `get` result', function (done) {
     var storageService = rewire('services/storage');
     var reset = storageService.__set__(
       'storageConnection', mockSuccessConnections
@@ -40,7 +40,7 @@ describe('Service: Storage', function () {
       });
   });
 
-  it('should surface get errors', function (done) {
+  it('should surface `get` errors', function (done) {
     var storageService = rewire('services/storage');
     var reset = storageService.__set__(
       'storageConnection', mockErrorConnections
@@ -54,22 +54,22 @@ describe('Service: Storage', function () {
       });
   });
 
-  it('should set single values', function (done) {
+  it('should return the cas of a `set` result', function (done) {
     var storageService = rewire('services/storage');
     var reset = storageService.__set__(
       'storageConnection', mockSuccessConnections
     );
 
     storageService('main').store('key', 'value')
-      .then(function (result) {
+      .then(function (cas) {
         assert(mockSuccessConnections.main.set.calledWith('key', 'value'));
-        assert(result === 'result');
+        assert(cas === 'cas');
         reset();
         done();
       });
   });
 
-  it('should surface set errors', function (done) {
+  it('should surface `set` errors', function (done) {
     var storageService = rewire('services/storage');
     var reset = storageService.__set__(
       'storageConnection', mockErrorConnections
