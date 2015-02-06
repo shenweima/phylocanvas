@@ -4,6 +4,7 @@ var success = chalk.bgGreen;
 var uuid = require('node-uuid');
 
 var errorController = require('./error.js');
+var appConfig = require('configuration');
 
 exports.add = function(req, res) {
   var collectionId = req.body.collectionId;
