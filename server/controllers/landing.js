@@ -1,3 +1,5 @@
+var appConfig = require('configuration');
+
 exports.landing = function(req, res) {
   res.render('landing', {
     appConfig: JSON.stringify(appConfig.client)
