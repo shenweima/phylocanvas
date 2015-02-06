@@ -3,12 +3,19 @@ var morgan = require('morgan');
 
 var BASE_LOGGER_NAME = 'WGSA';
 
+function getDefaultLevel() {
+  if (process.env.NODE_ENV === 'testing') {
+    return bunyan.FATAL;
+  }
+  return bunyan.TRACE;
+}
+
 function createLogger(appendedName) {
   var loggerName = BASE_LOGGER_NAME;
   if (appendedName) {
     loggerName += ' ' + appendedName.toUpperCase();
   }
-  return bunyan.createLogger({ name: loggerName });
+  return bunyan.createLogger({ name: loggerName, level: getDefaultLevel() });
 }
 
 /**
@@ -24,7 +31,7 @@ function initHttpLogging(app, env) {
   getBaseLogger().warn('Environment: ' + env);
   if (env === 'production') {
     app.use(morgan(':date :method :url :status :response-time', {
-      skip: function(req, res) {
+      skip: function (req, res) {
         return (res.statusCode < 400);
       }
     }));
