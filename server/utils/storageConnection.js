@@ -1,8 +1,8 @@
 var _ = require('lodash');
-var appConfig = require('config');
 var couchbase = require('couchbase');
 
-var logger = require('utils/logging').createLogger('Couchbase Connection');
+var appConfig = require('configuration');
+var logger = require('utils/logging').createLogger('Storage Conn.');
 
 var DEFAULT_ADDRESS = '127.0.0.1';
 var address = appConfig.server.couchbase.ip || DEFAULT_ADDRESS;
