@@ -48,7 +48,7 @@ function add(ids, callback) {
   }, function (error) {
     if (error) {
       LOGGER.error('Error in trying to publish');
-      callback(error, null);
+      return callback(error, null);
     }
 
     LOGGER.info('Message was published');
@@ -82,22 +82,20 @@ function add(ids, callback) {
   });
 }
 
-exports.apiGetCollection = function (req, res, next) {
+function get(collectionId, callback) {
 
-  var collectionId = req.body.collectionId;
   var collection = {
     assemblies: {},
     tree: {}
   };
 
-  console.log('[WGST] Getting list of assemblies for collection ' + collectionId);
+  LOGGER.info('Getting list of assemblies for collection ' + collectionId);
 
   // Get list of assemblies
-  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
+  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function (error, assemblyIdsData) {
     if (error) {
-      console.error(danger('[WGST][Error] ✗ Failed to get collection ' + collectionId + ': ' + error));
-      next(errorController.createError(404));
-      return;
+      LOGGER.error('Failed to get collection ' + collectionId + ': ' + error);
+      return callback(error);
     }
 
     var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
@@ -106,21 +104,18 @@ exports.apiGetCollection = function (req, res, next) {
     console.dir(assemblyIds);
 
     var assemblyCounter = assemblyIds.length;
-    for (;assemblyCounter !== 0;) {
+    while (assemblyCounter !== 0) {
       assemblyCounter = assemblyCounter - 1;
 
       var assemblyId = assemblyIds[assemblyCounter];
 
-      assemblyModel.getComplete(assemblyId, function(error, assembly) {
+      assemblyModel.getComplete(assemblyId, function (error, assembly) {
         if (error) {
-          console.error(danger('[WGST][Error] ✗ Failed to get assembly: ' + error));
-          console.dir(assembly);
-          // Ignore this error for now
-          //res.json({});
-          return;
+          LOGGER.error('Failed to get assembly: ' + error);
+          return callback(error);
         }
 
-        console.log('[WGST] Got assembly ' + assembly.ASSEMBLY_METADATA.assemblyId);
+        LOGGER.info('Got assembly ' + assembly.ASSEMBLY_METADATA.assemblyId);
 
         var assemblyId = assembly.ASSEMBLY_METADATA.assemblyId;
 
@@ -131,17 +126,17 @@ exports.apiGetCollection = function (req, res, next) {
         //
         if (parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) > 0) {
           // Log how many assemblies left to receive
-          console.log('[WGST] ' + parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) + ' assemblies left:');
+          LOGGER.info(parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) + ' assemblies left:');
           // Log which assemblies left to receive
-          console.dir(
-            assemblyIds.filter(function(assemblyId, index, array) {
+          LOGGER.info(
+            assemblyIds.filter(function (assemblyId, index, array) {
               if (typeof collection.assemblies[assemblyId] === 'undefined') {
                 return assemblyId;
               }
             })
-            );
+          );
         } else {
-          console.log('[WGST] 0 assemblies left');
+          LOGGER.info('0 assemblies left');
         }
 
         // If got all assemblies
@@ -156,11 +151,8 @@ exports.apiGetCollection = function (req, res, next) {
           // Get collection tree data
           couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(collectionTreeQueryKeys, {}, function(error, collectionTreesData) {
             if (error) {
-              // Ignore this error for now
-              //res.json({});
-              console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
-              console.dir(collectionTreesData);
-              return;
+              LOGGER.error(error);
+              return callback(error);
             }
 
             collection.tree = {};
@@ -196,18 +188,15 @@ exports.apiGetCollection = function (req, res, next) {
             } // for
 
             // Get antibiotics
-            antibioticModel.getAll(function(error, antibiotics){
+            antibioticModel.getAll(function (error, antibiotics) {
               if (error) {
-                // Ignore this error for now
-                //res.json({});
-                console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
-                console.dir(antibiotics);
-                return;
+                LOGGER.error(error);
+                return callback(error);
               }
 
-              console.log(success('[WGST] Finished getting collection ' + collectionId));
+              LOGGER.info('Finished getting collection ' + collectionId);
 
-              res.json({
+              callback(null, {
                 collection: collection,
                 antibiotics: antibiotics
               });
@@ -217,7 +206,7 @@ exports.apiGetCollection = function (req, res, next) {
       });
     } // for
   });
-};
+}
 
 exports.apiGetRepresentativeCollection = function(req, res) {
   console.log('[WGST] Getting representative collection');
@@ -423,3 +412,4 @@ var getMergedCollectionTree = function(mergedTreeId, callback) {
 };
 
 module.exports.add = add;
+module.exports.get = get;

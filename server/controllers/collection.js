@@ -1,11 +1,9 @@
-var errorController = require('controllers/error');
 var collectionModel = require('models/collection');
 
 var LOGGER = require('utils/logging').createLogger('Collection ctrl');
 
 function add(req, res, next) {
   var collectionId = req.body.collectionId;
-  var userAssemblyIds = req.body.userAssemblyIds;
 
   var message = collectionId.length > 0 ?
     'Received request for collection id: ' + collectionId :
@@ -14,148 +12,22 @@ function add(req, res, next) {
 
   collectionModel.add(req.body, function (error, result) {
     if (error) {
-      return next();
+      return next(error);
     }
     res.json(result);
   });
 }
 
-exports.apiGetCollection = function (req, res, next) {
-
+function get(req, res, next) {
   var collectionId = req.body.collectionId;
-  var collection = {
-    assemblies: {},
-    tree: {}
-  };
 
-  console.log('[WGST] Getting list of assemblies for collection ' + collectionId);
-
-  // Get list of assemblies
-  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get('COLLECTION_LIST_' + collectionId, function(error, assemblyIdsData) {
+  collectionModel.get(collectionId, function (error, result) {
     if (error) {
-      console.error(danger('[WGST][Error] ✗ Failed to get collection ' + collectionId + ': ' + error));
-      next(errorController.createError(404));
-      return;
+      return next(error);
     }
-
-    var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
-
-    console.log('[WGST] Got list of assemblies for collection ' + collectionId);
-    console.dir(assemblyIds);
-
-    var assemblyCounter = assemblyIds.length;
-    for (;assemblyCounter !== 0;) {
-      assemblyCounter = assemblyCounter - 1;
-
-      var assemblyId = assemblyIds[assemblyCounter];
-
-      assemblyModel.getComplete(assemblyId, function(error, assembly) {
-        if (error) {
-          console.error(danger('[WGST][Error] ✗ Failed to get assembly: ' + error));
-          console.dir(assembly);
-          // Ignore this error for now
-          //res.json({});
-          return;
-        }
-
-        console.log('[WGST] Got assembly ' + assembly.ASSEMBLY_METADATA.assemblyId);
-
-        var assemblyId = assembly.ASSEMBLY_METADATA.assemblyId;
-
-        collection.assemblies[assemblyId] = assembly;
-
-        //
-        // Log assemblies that you have received
-        //
-        if (parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) > 0) {
-          // Log how many assemblies left to receive
-          console.log('[WGST] ' + parseInt(assemblyIds.length - Object.keys(collection.assemblies).length, 10) + ' assemblies left:');
-          // Log which assemblies left to receive
-          console.dir(
-            assemblyIds.filter(function(assemblyId, index, array) {
-              if (typeof collection.assemblies[assemblyId] === 'undefined') {
-                return assemblyId;
-              }
-            })
-            );
-        } else {
-          console.log('[WGST] 0 assemblies left');
-        }
-
-        // If got all assemblies
-        if (Object.keys(collection.assemblies).length === assemblyIds.length) {
-
-          var collectionTreeQueryKeys = [];
-
-          //collectionTreeQueryKeys.push('CORE_TREE_RESULT_' + collectionId);
-          collectionTreeQueryKeys.push('CORE_TREE_RESULT_' + collectionId);
-          //collectionTreeQueryKeys.push('CORE_ALLELE_TREE_' + collectionId);
-
-          // Get collection tree data
-          couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].getMulti(collectionTreeQueryKeys, {}, function(error, collectionTreesData) {
-            if (error) {
-              // Ignore this error for now
-              //res.json({});
-              console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
-              console.dir(collectionTreesData);
-              return;
-            }
-
-            collection.tree = {};
-
-            for (var collectionTreeKey in collectionTreesData) {
-              if (collectionTreesData.hasOwnProperty(collectionTreeKey)) {
-                var collectionTreeData = collectionTreesData[collectionTreeKey].value;
-
-                  //console.dir(collectionTreesData);
-
-                  // Parsing COLLECTION_TREE
-                if (collectionTreeKey.indexOf('COLLECTION_TREE_') !== -1) {
-                  console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
-                  collection.tree[collectionTreeData.type] = {};
-                  collection.tree[collectionTreeData.type].name = 'FP Tree';
-                  collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
-
-                  // Parsing CORE_TREE_RESULT
-                } else if (collectionTreeKey.indexOf('CORE_TREE_RESULT_') !== -1) {
-                  console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
-                  collection.tree[collectionTreeData.type] = {};
-                  collection.tree[collectionTreeData.type].name = 'Core Mutations Tree';
-                  collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
-
-                  // Parsing CORE_ALLELE_TREE
-                } else if (collectionTreeKey.indexOf('CORE_ALLELE_TREE_') !== -1) {
-                  console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
-                  collection.tree[collectionTreeData.type] = {};
-                  collection.tree[collectionTreeData.type].name = 'Core Allele Tree';
-                  collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
-                } // if
-              } // if
-            } // for
-
-            // Get antibiotics
-            antibioticModel.getAll(function(error, antibiotics){
-              if (error) {
-                // Ignore this error for now
-                //res.json({});
-                console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
-                console.dir(antibiotics);
-                return;
-              }
-
-              console.log(success('[WGST] Finished getting collection ' + collectionId));
-
-              res.json({
-                collection: collection,
-                antibiotics: antibiotics
-              });
-            });
-          });
-        } // if
-      });
-    } // for
+    res.json(result);
   });
-};
+}
 
 exports.apiGetRepresentativeCollection = function(req, res) {
   console.log('[WGST] Getting representative collection');
@@ -278,7 +150,7 @@ exports.mergeCollectionTrees = function(req, res) {
           });
         } // if
       });
-});
+    });
 
     // -----------------------------------------------------------
     // Publish collection tree merge request
@@ -361,3 +233,4 @@ var getMergedCollectionTree = function(mergedTreeId, callback) {
 };
 
 module.exports.add = add;
+module.exports.get = get;

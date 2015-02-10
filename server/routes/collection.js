@@ -5,7 +5,7 @@ var controller = require('../controllers/collection.js');
 //
 // Collection routes
 //
-router.post('/collection/', controller.apiGetCollection);
+router.post('/collection/', controller.get);
 router.post('/collection/add', controller.add);
 router.get('/collection/new', controller.newCollection);
 //app.get('/collection/representative', routes.getRepresentativeTreeMetadata);
