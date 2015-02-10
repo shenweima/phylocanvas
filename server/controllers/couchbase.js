@@ -1,10 +1,12 @@
 var couchbase = require('couchbase');
+
+var appConfig = require('configuration');
+var logger = require('../utils/logging').createLogger('Couchbase');
+
 var COUCHBASE_DEFAULT_ADDRESS = '127.0.0.1';
 var couchbaseAddress = appConfig.server.couchbase.ip || COUCHBASE_DEFAULT_ADDRESS;
 
-var logger = require('../utils/logging').createLogger('Couchbase');
-
-var createCouchbaseBucketConnection = function(bucketName, password) {
+var createCouchbaseBucketConnection = function (bucketName, password) {
   logger.info('Connecting to bucket: ' + bucketName + ' ' + password);
   return new couchbase.Connection({
     host: 'http://' + couchbaseAddress + ':8091/pools',
@@ -13,7 +15,7 @@ var createCouchbaseBucketConnection = function(bucketName, password) {
     // Set timeout to 1 minute
     connectionTimeout: 60000,
     operationTimeout: 60000
-  }, function(error) {
+  }, function (error) {
     if (error) {
       logger.error(error);
       return;
@@ -32,13 +34,13 @@ var createCouchbaseBucketConnection = function(bucketName, password) {
 //
 couchbaseDatabaseConnections = {};
 COUCHBASE_BUCKETS = {
-  'MAIN': 'main',
-  'RESOURCES': 'resources',
-  'FRONT': 'front',
-  'FEEDBACK': 'feedback'
+  MAIN: 'main',
+  RESOURCES: 'resources',
+  FRONT: 'front',
+  FEEDBACK: 'feedback'
 };
 
-module.exports = function() {
+module.exports = function () {
   //
   // Create couchbase bucket connections
   //
@@ -46,7 +48,7 @@ module.exports = function() {
   var bucketPassword;
   var buckets = appConfig.server.couchbase.buckets;
 
-  Object.keys(buckets).map(function(bucketType){
+  Object.keys(buckets).map(function (bucketType) {
     bucketName = buckets[bucketType].name;
     bucketPassword = buckets[bucketType].password;
     couchbaseDatabaseConnections[bucketType] = createCouchbaseBucketConnection(bucketName, bucketPassword);

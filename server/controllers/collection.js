@@ -1,4 +1,5 @@
 var collectionModel = require('models/collection');
+var appConfig = require('configuration');
 
 var LOGGER = require('utils/logging').createLogger('Collection ctrl');
 
