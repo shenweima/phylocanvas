@@ -39,24 +39,23 @@ function getRepresentativeCollection(req, res, next) {
   });
 }
 
-exports.get = function(req, res) {
+function renderExisting(req, res) {
   var collectionId = req.params.id;
 
-  console.log('[WGST] Requested ' + collectionId + ' collection');
+  LOGGER.info('Requested ' + collectionId + ' collection');
 
   res.render('app', {
     appConfig: JSON.stringify(appConfig.client),
     requestedCollectionId: collectionId
   });
-};
+}
 
-exports.newCollection = function(req, res) {
-
+function renderNew(req, res) {
   res.render('app', {
     appConfig: JSON.stringify(appConfig.client),
     newCollection: true
   });
-};
+}
 
 exports.mergeCollectionTrees = function(req, res) {
   console.log('[WGST] Merging trees');
@@ -229,3 +228,5 @@ var getMergedCollectionTree = function(mergedTreeId, callback) {
 module.exports.add = add;
 module.exports.get = get;
 module.exports.getRepresentativeCollection = getRepresentativeCollection;
+module.exports.renderExisting = renderExisting;
+module.exports.renderNew = renderNew;

@@ -7,10 +7,10 @@ var controller = require('../controllers/collection.js');
 //
 router.post('/collection/', controller.get);
 router.post('/collection/add', controller.add);
-router.get('/collection/new', controller.newCollection);
+router.get('/collection/new', controller.renderNew);
 //app.get('/collection/representative', routes.getRepresentativeTreeMetadata);
 router.get('/api/collection/representative/metadata', controller.getRepresentativeCollection);
-router.get('/collection/:id', controller.get);
+router.get('/collection/:id', controller.renderExisting);
 router.post('/api/collection/tree/merge', controller.mergeCollectionTrees);
 router.post('/api/collection/merged', controller.apiGetMergeTree);
 

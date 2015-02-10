@@ -222,25 +222,6 @@ function getRepresentativeCollection(callback) {
   });
 }
 
-exports.get = function(req, res) {
-  var collectionId = req.params.id;
-
-  console.log('[WGST] Requested ' + collectionId + ' collection');
-
-  res.render('app', {
-    appConfig: JSON.stringify(appConfig.client),
-    requestedCollectionId: collectionId
-  });
-};
-
-exports.newCollection = function(req, res) {
-
-  res.render('app', {
-    appConfig: JSON.stringify(appConfig.client),
-    newCollection: true
-  });
-};
-
 exports.mergeCollectionTrees = function(req, res) {
   console.log('[WGST] Merging trees');
   console.dir(req.body);
