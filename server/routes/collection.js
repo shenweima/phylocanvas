@@ -12,6 +12,6 @@ router.get('/collection/new', controller.renderNew);
 router.get('/api/collection/representative/metadata', controller.getRepresentativeCollection);
 router.get('/collection/:id', controller.renderExisting);
 router.post('/api/collection/tree/merge', controller.mergeCollectionTrees);
-router.post('/api/collection/merged', controller.apiGetMergeTree);
+router.post('/api/collection/merged', controller.getMergeTree);
 
 module.exports = router;

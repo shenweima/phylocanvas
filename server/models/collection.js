@@ -100,7 +100,7 @@ function get(collectionId, callback) {
 
     var assemblyIds = assemblyIdsData.value.assemblyIdentifiers;
 
-    console.log('[WGST] Got list of assemblies for collection ' + collectionId);
+    LOGGER.info('Got list of assemblies for collection ' + collectionId);
     console.dir(assemblyIds);
 
     var assemblyCounter = assemblyIds.length;
@@ -165,21 +165,21 @@ function get(collectionId, callback) {
 
                   // Parsing COLLECTION_TREE
                 if (collectionTreeKey.indexOf('COLLECTION_TREE_') !== -1) {
-                  console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
+                  LOGGER.info('Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
                   collection.tree[collectionTreeData.type] = {};
                   collection.tree[collectionTreeData.type].name = 'FP Tree';
                   collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
 
                   // Parsing CORE_TREE_RESULT
                 } else if (collectionTreeKey.indexOf('CORE_TREE_RESULT_') !== -1) {
-                  console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
+                  LOGGER.info('Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
                   collection.tree[collectionTreeData.type] = {};
                   collection.tree[collectionTreeData.type].name = 'Core Mutations Tree';
                   collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
 
                   // Parsing CORE_ALLELE_TREE
                 } else if (collectionTreeKey.indexOf('CORE_ALLELE_TREE_') !== -1) {
-                  console.log('[WGST] Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
+                  LOGGER.info('Got ' + collectionTreeData.type + ' data for ' + collectionId + ' collection');
                   collection.tree[collectionTreeData.type] = {};
                   collection.tree[collectionTreeData.type].name = 'Core Allele Tree';
                   collection.tree[collectionTreeData.type].data = collectionTreeData.newickTree;
@@ -222,28 +222,42 @@ function getRepresentativeCollection(callback) {
   });
 }
 
-exports.mergeCollectionTrees = function(req, res) {
-  console.log('[WGST] Merging trees');
-  console.dir(req.body);
+function getMergedCollectionTree(mergedTreeId, callback) {
+  LOGGER.info('Getting merged tree ' + mergedTreeId);
 
-  res.json({});
+  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(mergedTreeId, function (error, result) {
+    if (error) {
+      callback(error, null);
+      return;
+    }
 
-  var socketRoomId = req.body.socketRoomId;
+    LOGGER.info('Got merged tree ' + mergedTreeId);
+
+    var treeData = result.value;
+
+    callback(null, treeData);
+  });
+}
+
+function mergeCollectionTrees(ids) {
+  LOGGER.info('Merging trees');
+
+  var socketRoomId = ids.socketRoomId;
 
   /**
   * Each collection tree type needs
   * it's own data source flag for merge request.
   */
   var collectionTreeTypeToDataSourceMap = {
-    'COLLECTION_TREE': 'CORE',
-    'CORE_TREE_RESULT': 'CORE',
-    'CORE_ALLELE_TREE': ''
+    COLLECTION_TREE: 'CORE',
+    CORE_TREE_RESULT: 'CORE',
+    CORE_ALLELE_TREE: ''
   };
 
   var mergeRequest = {
     assemblies: [],
-    targetCollectionId: req.body.collectionId, // Your collection id
-    inputData: [req.body.mergeWithCollectionId], // e.g.: EARSS collection, etc.
+    targetCollectionId: ids.collectionId, // Your collection id
+    inputData: [ids.mergeWithCollectionId], // e.g.: EARSS collection, etc.
     //dataSource: collectionTreeTypeToDataSourceMap[req.body.collectionTreeType]
     dataSource: 'CORE'
   };
@@ -256,14 +270,14 @@ exports.mergeCollectionTrees = function(req, res) {
   rabbitMQConnection.queue(notificationQueueId,
   {
     exclusive: true
-  }, function(queue){
-    console.log('[WGST][RabbitMQ] Notification queue "' + queue.name + '" is open');
+  }, function (queue) {
+    LOGGER.info('RabbitMQ] Notification queue "' + queue.name + '" is open');
 
-    queue.bind(rabbitMQExchangeNames.NOTIFICATION, "MERGE_TREE.COLLECTION." + mergeRequest.targetCollectionId); // binding routing key
+    queue.bind(rabbitMQExchangeNames.NOTIFICATION, 'MERGE_TREE.COLLECTION.' + mergeRequest.targetCollectionId); // binding routing key
 
     // Subscribe to response message
-    queue.subscribe(function(message, headers, deliveryInfo){
-      console.log('[WGST][RabbitMQ] Received notification message');
+    queue.subscribe(function (message, headers, deliveryInfo) {
+      LOGGER.info('RabbitMQ] Received notification message');
 
       var buffer = new Buffer(message.data);
       var bufferJSON = buffer.toString();
@@ -277,14 +291,14 @@ exports.mergeCollectionTrees = function(req, res) {
       // -----------------------------------------------------------
       console.dir(parsedMessage);
 
-      getMergedCollectionTree(mergedTreeId, function(error, mergedTree){
+      getMergedCollectionTree(mergedTreeId, function (error, mergedTree) {
         if (error) {
-          console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
+          LOGGER.error(error);
           return;
         }
 
         var tree = {
-          'MERGED': {
+          MERGED: {
             name: 'Merged tree',
             data: mergedTree.newickTree
           }
@@ -294,21 +308,21 @@ exports.mergeCollectionTrees = function(req, res) {
         // Emit socket message
         // -----------------------------------------------------------
         if (parsedMessage.taskType === 'MERGE') {
-          console.log('[WGST][Socket.io] Emitting ' + parsedMessage.taskType + ' message for socketRoomId: ' + socketRoomId);
-          io.sockets.in(socketRoomId).emit("collectionTreeMergeNotification", {
+          LOGGER.info('Emitting ' + parsedMessage.taskType + ' message for socketRoomId: ' + socketRoomId);
+          io.sockets.in(socketRoomId).emit('collectionTreeMergeNotification', {
             mergedCollectionTreeId: mergedTreeId.replace('MERGE_TREE_', ''),
             //tree: mergedTree.newickTree,
             tree: tree,
             assemblies: mergedTree.assemblies,
             targetCollectionId: mergeRequest.targetCollectionId,
             inputData: mergeRequest.inputData,
-            status: "MERGE ready",
-            result: "MERGE",
+            status: 'MERGE ready',
+            result: 'MERGE',
             socketRoomId: socketRoomId
           });
         } // if
       });
-});
+    });
 
     // -----------------------------------------------------------
     // Publish collection tree merge request
@@ -320,29 +334,27 @@ exports.mergeCollectionTrees = function(req, res) {
       // Generate UUID?
       correlationId: 'Art',
       replyTo: 'noQueueId'
-    }, function(err) {
+    }, function (err) {
       if (err) {
-        console.error(danger('[WGST][RabbitMQ][Error] ✗ Failed to publish to ' + rabbitMQExchangeNames.TASKS + ' exchange'));
+        LOGGER.error('Failed to publish to ' + rabbitMQExchangeNames.TASKS + ' exchange');
         return;
       }
 
-      console.log('[WGST][RabbitMQ] Message was published to ' + rabbitMQExchangeNames.TASKS + ' exchange');
+      LOGGER.info('Message was published to ' + rabbitMQExchangeNames.TASKS + ' exchange');
     });
   });
-};
+}
 
-exports.apiGetMergeTree = function(req, res) {
-  var mergeTreeId = req.body.mergeTreeId;
-  var socketRoomId = req.body.socketRoomId;
-
-  res.json({});
+function getMergeTree(ids) {
+  var mergeTreeId = ids.mergeTreeId;
+  var socketRoomId = ids.socketRoomId;
 
   // -----------------------------------------------------------
   // Get merged tree
   // -----------------------------------------------------------
-  getMergedCollectionTree('MERGE_TREE_' + mergeTreeId, function(error, mergeTree) {
+  getMergedCollectionTree('MERGE_TREE_' + mergeTreeId, function (error, mergeTree) {
     if (error) {
-      console.error(danger('[WGST][Couchbase][Error] ✗ ' + error));
+      LOGGER.error(error);
       return;
     }
 
@@ -357,39 +369,24 @@ exports.apiGetMergeTree = function(req, res) {
     // Emit socket message
     // -----------------------------------------------------------
     //if (parsedMessage.taskType === 'MERGE') {
-    console.log('[WGST][Socket.io] Emitting MERGE_TREE message for socketRoomId: ' + socketRoomId);
-    io.sockets.in(socketRoomId).emit("collectionTreeMergeNotification", {
+    LOGGER.info('Socket.io] Emitting MERGE_TREE message for socketRoomId: ' + socketRoomId);
+    io.sockets.in(socketRoomId).emit('collectionTreeMergeNotification', {
       mergedCollectionTreeId: mergeTreeId,
       //tree: mergedTree.newickTree,
       tree: tree,
       assemblies: mergeTree.assemblies,
       //targetCollectionId: mergeRequest.targetCollectionId,
       //inputData: mergeRequest.inputData,
-      status: "MERGE ready",
-      result: "MERGE",
+      status: 'MERGE ready',
+      result: 'MERGE',
       socketRoomId: socketRoomId
     });
     //} // if
   });
-};
-
-var getMergedCollectionTree = function(mergedTreeId, callback) {
-  console.log('[WGST] Getting merged tree ' + mergedTreeId);
-
-  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(mergedTreeId, function(error, result) {
-    if (error) {
-      callback(error, null);
-      return;
-    }
-
-    console.log('[WGST] Got merged tree ' + mergedTreeId);
-
-    var treeData = result.value;
-
-    callback(null, treeData);
-  });
-};
+}
 
 module.exports.add = add;
 module.exports.get = get;
 module.exports.getRepresentativeCollection = getRepresentativeCollection;
+module.exports.mergeCollectionTrees = mergeCollectionTrees;
+module.exports.getMergeTree = getMergeTree;
