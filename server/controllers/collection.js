@@ -4,6 +4,8 @@ var success = chalk.bgGreen;
 var uuid = require('node-uuid');
 
 var errorController = require('./error.js');
+var assemblyModel = require('models/assembly');
+var antibioticModel = require('models/antibiotic');
 
 exports.add = function(req, res) {
   var collectionId = req.body.collectionId;
@@ -112,7 +114,7 @@ exports.apiGetCollection = function(req, res, next) {
 
       var assemblyId = assemblyIds[assemblyCounter];
 
-      require('./assembly').getAssembly(assemblyId, function(error, assembly) {
+      assemblyModel.getComplete(assemblyId, function(error, assembly) {
         if (error) {
           console.error(danger('[WGST][Error] ✗ Failed to get assembly: ' + error));
           console.dir(assembly);
@@ -166,7 +168,7 @@ exports.apiGetCollection = function(req, res, next) {
 
             collection.tree = {};
 
-            for (collectionTreeKey in collectionTreesData) {
+            for (var collectionTreeKey in collectionTreesData) {
               if (collectionTreesData.hasOwnProperty(collectionTreeKey)) {
                 var collectionTreeData = collectionTreesData[collectionTreeKey].value;
 
@@ -197,7 +199,7 @@ exports.apiGetCollection = function(req, res, next) {
             } // for
 
             // Get antibiotics
-            require('./assembly').getAllAntibiotics(function(error, antibiotics){
+            antibioticModel.getAll(function(error, antibiotics){
               if (error) {
                 // Ignore this error for now
                 //res.json({});

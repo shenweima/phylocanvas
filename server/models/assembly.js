@@ -273,7 +273,7 @@ exports.beginUpload = function (req, res) {
 
 exports.get = function (assemblyId, callback) {
   console.log('[WGST] Requested assembly id: ' + assemblyId);
-  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(assemblyId, callback};
+  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.MAIN].get(assemblyId, callback);
 };
 
 exports.getAssemblyMetadata = function (assemblyId, callback) {

@@ -1,30 +1,31 @@
 var _ = require('lodash');
 
 var assemblyModel = require('models/assembly');
+var antibioticModel = require('models/antibiotic');
 
-var logger = require('utils/logging').createLogger('Assembly ctrl');
+var LOGGER = require('utils/logging').createLogger('Assembly ctrl');
 
 function add(req, res) {
 
   var ids = _.pick(req.body,
     ['collectionId', 'socketRoomId', 'userAssemblyId', 'assemblyId']);
 
-  logger.info(
+  LOGGER.info(
     'Adding assembly ' + ids.assemblyId + ' to collection ' + ids.collectionId
   );
 
   // Validate request
   if (!ids.collectionId) {
-    logger.error('Missing collection id');
+    LOGGER.error('Missing collection id');
   }
   if (!ids.socketRoomId) {
-    logger.error('Missing socket room id');
+    LOGGER.error('Missing socket room id');
   }
   if (!ids.userAssemblyId) {
-    logger.error('Missing user assembly id');
+    LOGGER.error('Missing user assembly id');
   }
   if (!ids.assemblyId) {
-    logger.error('Missing assembly id');
+    LOGGER.error('Missing assembly id');
   }
 
   res.json({
@@ -37,29 +38,38 @@ function add(req, res) {
 function get(req, res) {
   assemblyModel.get(req.params.id, function (error, result) {
     if (error) {
-      logger.error(error, result);
+      LOGGER.error(error, result);
       return res.sendStatus(500);
     }
     var assembly = result.value;
-    logger.info(assembly);
+    LOGGER.info(assembly);
     res.render('app', { requestedAssemblyObject: JSON.stringify(assembly) });
   });
 }
 
 function getComplete(req, res) {
-  assemblyModel.getComplete(req.body.assemblyId, function (error, result) {
+  assemblyModel.getComplete(req.body.assemblyId, function (error, assembly) {
     if (error) {
-      logger.error(error, result);
+      LOGGER.error(error, assembly);
       return res.sendStatus(500);
     }
-    res.json(result);
+    antibioticModel.getAll(function (antibiotics) {
+      if (error) {
+        LOGGER.error(error, antibiotics);
+        return res.sendStatus(500);
+      }
+      res.json({
+        assembly: assembly,
+        antibiotics: antibiotics
+      });
+    });
   });
 }
 
 function getMany(req, res) {
   assemblyModel.getMany(req.body.assemblyIds, function (error, assemblies) {
     if (error) {
-      logger.error(error);
+      LOGGER.error(error);
       return res.sendStatus(500);
     }
     res.json(assemblies);
@@ -70,7 +80,7 @@ function getResistanceProfile(req, res) {
   assemblyModel.getResistanceProfile(req.body.assemblyIds,
     function (error, resistanceProfile) {
       if (error) {
-        logger.error(error, resistanceProfile);
+        LOGGER.error(error, resistanceProfile);
         return res.sendStatus(500);
       }
       res.json({
