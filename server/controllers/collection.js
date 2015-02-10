@@ -20,7 +20,6 @@ function add(req, res, next) {
 
 function get(req, res, next) {
   var collectionId = req.body.collectionId;
-
   collectionModel.get(collectionId, function (error, result) {
     if (error) {
       return next(error);
@@ -29,21 +28,15 @@ function get(req, res, next) {
   });
 }
 
-exports.apiGetRepresentativeCollection = function(req, res) {
-  console.log('[WGST] Getting representative collection');
-
-  // Get list of assemblies
-  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.RESOURCES].get('REP_METADATA_1280', function(err, representativeCollectionMetadata) {
-    if (err) throw err;
-
-    representativeCollectionMetadata = representativeCollectionMetadata.value;
-
-    console.log('[WGST] Got representative collection');
-    //console.dir(representativeCollectionMetadata);
-
-    res.json(representativeCollectionMetadata);
+function getRepresentativeCollection(req, res, next) {
+  LOGGER.info('Getting representative collection');
+  collectionModel.getRepresentativeCollection(function (error, result) {
+    if (error) {
+      return next(error);
+    }
+    res.json(result);
   });
-};
+}
 
 exports.get = function(req, res) {
   var collectionId = req.params.id;
@@ -234,3 +227,4 @@ var getMergedCollectionTree = function(mergedTreeId, callback) {
 
 module.exports.add = add;
 module.exports.get = get;
+module.exports.getRepresentativeCollection = getRepresentativeCollection;

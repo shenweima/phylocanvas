@@ -208,21 +208,19 @@ function get(collectionId, callback) {
   });
 }
 
-exports.apiGetRepresentativeCollection = function(req, res) {
-  console.log('[WGST] Getting representative collection');
+function getRepresentativeCollection(callback) {
+  LOGGER.info('[WGST] Getting representative collection');
 
   // Get list of assemblies
-  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.RESOURCES].get('REP_METADATA_1280', function(err, representativeCollectionMetadata) {
-    if (err) throw err;
-
+  couchbaseDatabaseConnections[COUCHBASE_BUCKETS.RESOURCES].get('REP_METADATA_1280', function (err, representativeCollectionMetadata) {
+    if (err) {
+      return callback(err);
+    }
     representativeCollectionMetadata = representativeCollectionMetadata.value;
-
-    console.log('[WGST] Got representative collection');
-    //console.dir(representativeCollectionMetadata);
-
-    res.json(representativeCollectionMetadata);
+    LOGGER.info('Got representative collection');
+    callback(null, representativeCollectionMetadata);
   });
-};
+}
 
 exports.get = function(req, res) {
   var collectionId = req.params.id;
@@ -413,3 +411,4 @@ var getMergedCollectionTree = function(mergedTreeId, callback) {
 
 module.exports.add = add;
 module.exports.get = get;
+module.exports.getRepresentativeCollection = getRepresentativeCollection;
