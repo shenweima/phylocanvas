@@ -1,84 +1,22 @@
-var uuid = require('node-uuid');
+var errorController = require('controllers/error');
+var collectionModel = require('models/collection');
 
-var errorController = require('./error');
-var assemblyModel = require('models/assembly');
-var antibioticModel = require('models/antibiotic');
+var LOGGER = require('utils/logging').createLogger('Collection ctrl');
 
-var LOGGER = require('utils/logging').createLogger('Collection model');
+function add(req, res, next) {
+  var collectionId = req.body.collectionId;
+  var userAssemblyIds = req.body.userAssemblyIds;
 
-function add(ids, callback) {
-  var collectionId = ids.collectionId;
-  var userAssemblyIds = ids.userAssemblyIds;
-  var isNewCollection = true;
-  var collectionRequest;
+  var message = collectionId.length > 0 ?
+    'Received request for collection id: ' + collectionId :
+    'Received request for new collection id';
+  LOGGER.info(message);
 
-  // Create new collection id
-  if (collectionId.length === 0) {
-
-    // Prepare object to publish
-    collectionRequest = {
-      taskId: 'new',
-      inputData: userAssemblyIds
-    };
-
-  // Reuse existing collection id and just get new user assembly id to assembly id mapping
-  }  else {
-
-    // Prepare object to publish
-    collectionRequest = {
-      taskId: collectionId,
-      inputData: userAssemblyIds
-    };
-
-    isNewCollection = false;
-  }
-
-  // TODO: Validate request
-
-  var queueId = 'ART_CREATE_COLLECTION_' + uuid.v4();
-
-  // Publish message
-  rabbitMQExchanges[rabbitMQExchangeNames.COLLECTION_ID].publish('id-request', collectionRequest, {
-    mandatory: true,
-    contentType: 'application/json',
-    deliveryMode: 1,
-    // Generate UUID?
-    correlationId: 'Art',
-    replyTo: queueId
-  }, function (error) {
+  collectionModel.add(req.body, function (error, result) {
     if (error) {
-      LOGGER.error('Error in trying to publish');
-      callback(error, null);
+      return next();
     }
-
-    LOGGER.info('Message was published');
-  });
-
-  rabbitMQConnection
-  .queue(queueId, {
-    passive: false,
-    durable: false,
-    exclusive: true,
-    autoDelete: true,
-    noDeclare: false,
-    closeChannelOnUnsubscribe: false
-  }, function (queue) {
-    LOGGER.info('Queue "' + queue.name + '" is open');
-
-  })
-  .subscribe(function (message, headers, deliveryInfo) {
-    LOGGER.info('Received response');
-
-    var buffer = new Buffer(message.data);
-    var data = JSON.parse(buffer.toString());
-    var collectionId = data.uuid;
-    var userAssemblyIdToAssemblyIdMap = data.idMap;
-
-    callback(null, {
-      collectionId: collectionId,
-      userAssemblyIdToAssemblyIdMap: userAssemblyIdToAssemblyIdMap
-    });
-
+    res.json(result);
   });
 }
 
