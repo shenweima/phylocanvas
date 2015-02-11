@@ -1,3 +1,4 @@
+var appConfig = require('configuration');
 var logger = require('../utils/logging').createLogger('RabbitMQ');
 
 var rabbitMQConnectionOptions = {
