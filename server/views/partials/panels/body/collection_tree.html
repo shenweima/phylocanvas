@@ -81,10 +81,6 @@
 
           <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
 
-            <div class="btn-group wgst-tree-control">
-              <button type="button" class="btn btn-sm btn-default wgst-tree-control__show-newick">Show Newick</button>
-            </div>
-
             {{!--
             {{#unless matchAssemblyListButton}}
             <div class="btn-group wgst-tree-control">
@@ -94,14 +90,46 @@
             --}}
 
             {{#unless mergeWithButton}}
-            <button type="button" 
-                    class="btn btn-sm btn-default wgst-tree-control wgst-tree-control__merge-collection-trees"
-                    data-collection-tree-type="{{collectionTreeType}}">
-                    
-              <div class="wgst-spinner wgst--hide-this"></div>
-              <span class="wgst-spinner-label">Reference merge</span>
-            </button>
+            <div class="btn-group">
+              <button type="button"
+                      class="btn btn-sm btn-default dropdown-toggle"
+                      data-toggle="dropdown"
+                      aria-expanded="false"
+                      data-collection-tree-type="{{collectionTreeType}}"
+                      data-button-merge>
+
+                <span class="wgst-spinner-label">
+                  Merge with... <span class="caret"></span>
+                </span>
+
+                <div class="wgst-spinner wgst--hide-this"></div>
+
+              </button>
+
+              <ul class="dropdown-menu" role="menu">
+                <li>
+                  <a href="#"
+                    data-merge-with-collection="b8d3aab1-625f-49aa-9857-a5e97f5d6be5"
+                    data-button-merge-tree>
+
+                    WGSA Reference
+                  </a>
+                </li>
+                <li>
+                  <a href="#"
+                    data-merge-with-collection="2ebc9003-9299-4254-8758-9d1680837c9d"
+                    data-button-merge-tree>
+
+                    Harris ST239
+                  </a>
+                </li>
+              </ul>
+            </div>
             {{/unless}}
+
+            <div class="btn-group wgst-tree-control">
+              <button type="button" class="btn btn-sm btn-default wgst-tree-control__show-newick">Show Newick</button>
+            </div>
 
           </div>
 
