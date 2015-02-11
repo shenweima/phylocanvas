@@ -4,18 +4,19 @@ var sinon = require('sinon');
 
 describe('Service: Storage', function () {
 
-  var mockSuccessConnections = {
-    main: {
-      get: sinon.stub().yields(null, { value: 'result', cas: 'cas' }),
-      set: sinon.stub().yields(null, { value: 'result', cas: 'cas' })
-    }
+  var CONNECTION_NAME = 'main';
+  var COUCHBASE_RESULT = { value: 'result', cas: 'cas' };
+
+  var mockSuccessConnection = {};
+  mockSuccessConnection[CONNECTION_NAME] = {
+    get: sinon.stub().yields(null, COUCHBASE_RESULT),
+    set: sinon.stub().yields(null, COUCHBASE_RESULT)
   };
 
-  var mockErrorConnections = {
-    main: {
-      get: sinon.stub().yields(new Error('get error')),
-      set: sinon.stub().yields(new Error('set error'))
-    }
+  var mockErrorConnection = {};
+  mockErrorConnection[CONNECTION_NAME] = {
+    get: sinon.stub().yields(new Error('get error'), null),
+    set: sinon.stub().yields(new Error('set error'), null)
   };
 
   it('should create connections', function () {
@@ -25,60 +26,52 @@ describe('Service: Storage', function () {
     assert(storageService('resources') !== null);
   });
 
-  it('should return the value of a `get` result', function (done) {
+  it('should return the value property of a `get` result', function (done) {
     var storageService = rewire('services/storage');
-    var reset = storageService.__set__(
-      'storageConnection', mockSuccessConnections
-    );
 
-    storageService('main').retrieve('key')
+    storageService.__set__('storageConnection', mockSuccessConnection);
+
+    storageService(CONNECTION_NAME).retrieve('key')
       .then(function (result) {
-        assert(mockSuccessConnections.main.get.calledWith('key'));
-        assert(result === 'result');
-        reset();
+        assert(mockSuccessConnection[CONNECTION_NAME].get.calledWith('key'));
+        assert.equal(result, COUCHBASE_RESULT.value);
         done();
       });
   });
 
   it('should surface `get` errors', function (done) {
     var storageService = rewire('services/storage');
-    var reset = storageService.__set__(
-      'storageConnection', mockErrorConnections
-    );
 
-    storageService('main').retrieve('key')
+    storageService.__set__('storageConnection', mockErrorConnection);
+
+    storageService(CONNECTION_NAME).retrieve('key')
       .catch(function (error) {
-        assert(error.message === 'get error');
-        reset();
+        assert.equal(error.message, 'get error');
         done();
       });
   });
 
-  it('should return the cas of a `set` result', function (done) {
+  it('should return the cas property of a `set` result', function (done) {
     var storageService = rewire('services/storage');
-    var reset = storageService.__set__(
-      'storageConnection', mockSuccessConnections
-    );
 
-    storageService('main').store('key', 'value')
-      .then(function (cas) {
-        assert(mockSuccessConnections.main.set.calledWith('key', 'value'));
-        assert(cas === 'cas');
-        reset();
+    storageService.__set__('storageConnection', mockSuccessConnection);
+
+    storageService(CONNECTION_NAME).store('key', 'value')
+      .then(function (result) {
+        assert(mockSuccessConnection[CONNECTION_NAME].set.calledWith('key', 'value'));
+        assert.equal(result, COUCHBASE_RESULT.cas);
         done();
       });
   });
 
   it('should surface `set` errors', function (done) {
     var storageService = rewire('services/storage');
-    var reset = storageService.__set__(
-      'storageConnection', mockErrorConnections
-    );
 
-    storageService('main').store('key', 'value')
+    storageService.__set__('storageConnection', mockErrorConnection);
+
+    storageService(CONNECTION_NAME).store('key', 'value')
       .catch(function (error) {
-        assert(error.message === 'set error');
-        reset();
+        assert.equal(error.message, 'set error');
         done();
       });
   });
