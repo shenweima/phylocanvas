@@ -1,6 +1,5 @@
 var uuid = require('node-uuid');
 
-var errorController = require('./error');
 var assemblyModel = require('models/assembly');
 var antibioticModel = require('models/antibiotic');
 
@@ -66,7 +65,7 @@ function add(ids, callback) {
     LOGGER.info('Queue "' + queue.name + '" is open');
 
   })
-  .subscribe(function (message, headers, deliveryInfo) {
+  .subscribe(function (message) {
     LOGGER.info('Received response');
 
     var buffer = new Buffer(message.data);
