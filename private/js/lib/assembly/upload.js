@@ -124,7 +124,11 @@ $(function(){
 
         var setAssemblyMetadataFormDate = function(assemblyFileId, assemblyMetadataDate) {
 
-            var assemblyDate = moment(assemblyMetadataDate);
+            //
+            // This describes how date parsing works: 
+            // http://momentjs.com/docs/#/parsing/string/
+            //
+            var assemblyDate = moment(assemblyMetadataDate, 'DD-MM-YYYY');
 
             //
             // Validate date
@@ -168,30 +172,55 @@ $(function(){
                 .change();
         };
 
-        var setAssemblyMetadataFormLocation = function(assemblyFileId, assemblyMetadataAddress) {
+        var geocoder = new google.maps.Geocoder();
 
-            var address = assemblyMetadataAddress;
-
-            var geocoder = new google.maps.Geocoder();
+        var geocode = function (address, callback) {
 
             geocoder.geocode({'address': address}, function(results, status) {
                 if (status == google.maps.GeocoderStatus.OK) {
 
-                    var result = results[0];
+                    callback(null, results[0]);
 
-                    console.debug('Geocoder results:');
-                    console.dir(result);
+                } else {
 
-                    var formattedAddress = result.formatted_address,
-                        latitude = result.geometry.location.lat(),
-                        longitude = result.geometry.location.lng();
+                    callback(status, null);
+                }
+            });
+        };
 
-                    // console.log('Assembly metadata form:');
-                    // console.dir({
-                    //     formattedAddress: formattedAddress,
-                    //     latitude: latitude,
-                    //     longitude: longitude
-                    // });
+        var GEOCODER_STATUSES = {
+            READY: 1,
+            BUSY: 0
+        };
+        var GEOCODER_DELAY_INCREMENT = 1000;
+        var geocoderStatus = GEOCODER_STATUSES.READY;
+        var geocoderDelay = 0;
+
+        var setAssemblyMetadataFormLocation = function(assemblyFileId, assemblyMetadataAddress) {
+
+            setTimeout(function () {
+
+                var address = assemblyMetadataAddress;
+
+                if (geocoderStatus === GEOCODER_STATUSES.BUSY) {
+                    geocoderDelay = geocoderDelay + GEOCODER_DELAY_INCREMENT;
+                    setAssemblyMetadataFormLocation(assemblyFileId, assemblyMetadataAddress);
+                    return;
+                }
+
+                geocoderStatus = GEOCODER_STATUSES.BUSY;
+
+                geocode(address, function (error, result) {
+                    if (error) {
+                        console.error('[WGST] Could not geocode ' + address + ': ' + error);
+                        return;
+                    }
+
+                    console.log('[WGST] Geocodeded ' + address);
+
+                    var formattedAddress = result.formatted_address;
+                    var latitude = result.geometry.location.lat();
+                    var longitude = result.geometry.location.lng();
 
                     $('.wgst-upload-assembly__metadata[data-assembly-file-id="' + assemblyFileId + '"]')
                         .find('.assembly-sample-location-input')
@@ -213,10 +242,10 @@ $(function(){
 
                     window.WGST.exports.updateMetadataProgressBar();
 
-                } else {
-                    console.error('[WGST] Could not geocode address: ' + assemblyMetadataAddress);
-                }
-            });
+                    geocoderStatus = GEOCODER_STATUSES.READY;
+                });
+
+            }, geocoderDelay);
         };
 
         var setAssemblyMetadataFormSource = function(assemblyFileId, assemblyMetadataSource) {
@@ -262,7 +291,7 @@ $(function(){
             //
             // Iterate and parse each row of metadata
             //
-            metadata.map(function(assemblyMetadata) {
+            metadata.forEach(function(assemblyMetadata) {
 
                 //
                 //
