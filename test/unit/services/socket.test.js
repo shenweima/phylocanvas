@@ -1,20 +1,23 @@
 var assert = require('assert');
 var rewire = require('rewire');
 var sinon = require('sinon');
-var _ = require('lodash');
 
 describe('Service: Socket', function () {
 
   it('should connect using the passed-in server and initialise connections',
     function () {
       var socketService = rewire('services/socket');
-
-      var io = { sockets: { on: sinon.spy() } };
+      var io = {
+        sockets: {
+          on: sinon.spy()
+        }
+      };
       var socketio = {
         listen: sinon.stub().returns(io)
       };
-      socketService.__set__('socketio', socketio);
       var server = {};
+
+      socketService.__set__('socketio', socketio);
 
       socketService.connect(server);
 
@@ -28,25 +31,35 @@ describe('Service: Socket', function () {
 
   it('should send a notification in the correct format', function () {
     var socketService = rewire('services/socket');
-
-    var room = { emit: sinon.spy() };
-    var io = { sockets: { in: sinon.stub().returns(room) } };
-    socketService.__set__('io', io);
-
-    var ids = {
+    var room = {
+      emit: sinon.spy()
+    };
+    var io = {
+      sockets: {
+        in: sinon.stub().returns(room)
+      }
+    };
+    var EVENT_NAME = 'event';
+    var IDs = {
       socketRoomId: 0,
       collectionId: 1,
       assemblyId: 2,
       userAssemblyId: 3
     };
+    var NOTIFICATION = 'result';
 
-    socketService.notify('event', ids, 'result');
+    socketService.__set__('io', io);
 
-    assert(io.sockets.in.calledWith(ids.socketRoomId));
-    assert(room.emit.calledWith(
-      'event',
-      _.extend(ids, { result: 'result' })
-    ));
+    socketService.notify(EVENT_NAME, IDs, NOTIFICATION);
+
+    assert(io.sockets.in.calledWith(IDs.socketRoomId));
+    assert(room.emit.calledWith(EVENT_NAME, {
+      socketRoomId: IDs.socketRoomId,
+      collectionId: IDs.collectionId,
+      assemblyId: IDs.assemblyId,
+      userAssemblyId: IDs.userAssemblyId,
+      result: NOTIFICATION
+    }));
   });
 
 });
