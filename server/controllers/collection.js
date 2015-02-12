@@ -6,9 +6,9 @@ var LOGGER = require('utils/logging').createLogger('Collection ctrl');
 function add(req, res, next) {
   var collectionId = req.body.collectionId;
 
-  var message = collectionId.length > 0 ?
+  var message = (collectionId.length > 0 ?
     'Received request for collection id: ' + collectionId :
-    'Received request for new collection id';
+    'Received request for new collection id');
   LOGGER.info(message);
 
   collectionModel.add(req.body, function (error, result) {
