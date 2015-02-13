@@ -1,14 +1,16 @@
-var _ = require('lodash');
-
 var assemblyModel = require('models/assembly');
 var antibioticModel = require('models/antibiotic');
 
 var LOGGER = require('utils/logging').createLogger('Assembly ctrl');
 
-function add(req, res) {
+function addAssembly(req, res) {
 
-  var ids = _.pick(req.body,
-    ['collectionId', 'socketRoomId', 'userAssemblyId', 'assemblyId']);
+  var ids = {
+    collectionId: req.body.collectionId,
+    socketRoomId: req.body.socketRoomId,
+    userAssemblyId: req.body.userAssemblyId,
+    assemblyId: req.body.assemblyId
+  };
 
   LOGGER.info(
     'Adding assembly ' + ids.assemblyId + ' to collection ' + ids.collectionId
@@ -35,7 +37,7 @@ function add(req, res) {
   assemblyModel.beginUpload(ids, req.body.metadata, req.body.sequences);
 }
 
-function get(req, res) {
+function getAssembly(req, res) {
   assemblyModel.get(req.params.id, function (error, result) {
     if (error) {
       LOGGER.error(error, result);
@@ -47,7 +49,7 @@ function get(req, res) {
   });
 }
 
-function getComplete(req, res) {
+function getCompleteAssembly(req, res) {
   assemblyModel.getComplete(req.body.assemblyId, function (error, assembly) {
     if (error) {
       LOGGER.error(error, assembly);
@@ -66,7 +68,7 @@ function getComplete(req, res) {
   });
 }
 
-function getMany(req, res) {
+function getMultipleAssemblies(req, res) {
   assemblyModel.getMany(req.body.assemblyIds, function (error, assemblies) {
     if (error) {
       LOGGER.error(error);
@@ -109,12 +111,10 @@ function getCoreResult(req, res, next) {
   });
 }
 
-module.exports = {
-  add: add,
-  get: get,
-  getMany: getMany,
-  getComplete: getComplete,
-  getResistanceProfile: getResistanceProfile,
-  getTableData: getTableData,
-  getCoreResult: getCoreResult
-};
+module.exports.addAssembly = addAssembly;
+module.exports.getAssembly = getAssembly;
+module.exports.getMultipleAssemblies = getMultipleAssemblies;
+module.exports.getCompleteAssembly = getCompleteAssembly;
+module.exports.getResistanceProfile = getResistanceProfile;
+module.exports.getTableData = getTableData;
+module.exports.getCoreResult = getCoreResult;
