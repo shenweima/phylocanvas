@@ -1,6 +1,7 @@
+var assemblyModel = require('models/assembly');
 var errorController = require('./error.js');
 
-var flattenAssemblyMetadata = function(assemblyMetadata) {
+var flattenAssemblyMetadata = function (assemblyMetadata) {
   // Geography
   //
   assemblyMetadata.location = assemblyMetadata.geography.address;
@@ -11,7 +12,7 @@ var flattenAssemblyMetadata = function(assemblyMetadata) {
   return assemblyMetadata;
 };
 
-var convertJsonToCsv = function(flatJson) {
+var convertJsonToCsv = function (flatJson) {
   var BabyParse = require('babyparse');
 
   return BabyParse.unparse({
@@ -20,15 +21,13 @@ var convertJsonToCsv = function(flatJson) {
   });
 };
 
-exports.apiGetDownloadAssemblyMetadata = function(req, res, next) {
+exports.apiGetDownloadAssemblyMetadata = function (req, res, next) {
   var assemblyId = req.params.id;
   var metadataFormat = req.params.format;
 
   console.log('[WGST] Getting assembly ' + assemblyId + ' metadata for download in ' + metadataFormat + ' format');
 
-  var assemblyController = require('./assembly');
-
-  assemblyController.getAssemblyMetadata(assemblyId, function(error, assemblyMetadata) {
+  assemblyModel.getAssemblyMetadata(assemblyId, function (error, assemblyMetadata) {
     if (error) {
       if (error.code === errorController.errorCodes.KEY_DOES_NOT_EXIST) {
         next(errorController.createError(404));
