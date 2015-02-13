@@ -10,23 +10,24 @@ describe('Util: Socket Connection', function () {
     function (done) {
       var socketConnectionUtil = rewire('utils/socketConnection');
 
-      var newRoomId = sinon.stub().returns('123');
+      var ROOM_ID = '123';
+      var newRoomId = sinon.stub().returns(ROOM_ID);
       socketConnectionUtil.__set__('newRoomId', newRoomId);
 
-      var connection = new EventEmitter();
-      connection.handshake = { headers: { host: 'localhost' } };
-      connection.join = sinon.spy();
+      var socket = new EventEmitter();
+      socket.handshake = { headers: { host: 'localhost' } };
+      socket.join = sinon.spy();
 
-      socketConnectionUtil.initialise(connection);
+      socketConnectionUtil.initialise(socket);
 
-      connection.on('roomId', function (roomId) {
+      socket.on('roomId', function (roomId) {
         assert(newRoomId.called);
-        assert(connection.join.calledWith(roomId));
-        assert.equal(roomId, '123');
+        assert(socket.join.calledWith(ROOM_ID));
+        assert.equal(roomId, ROOM_ID);
         done();
       });
 
-      connection.emit('getRoomId');
+      socket.emit('getRoomId');
     }
   );
 

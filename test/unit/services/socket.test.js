@@ -7,22 +7,22 @@ describe('Service: Socket', function () {
   it('should connect using the passed-in server and initialise connections',
     function () {
       var socketService = rewire('services/socket');
-      var io = {
+      var socketIOInstance = {
         sockets: {
           on: sinon.spy()
         }
       };
-      var socketio = {
-        listen: sinon.stub().returns(io)
+      var socketIOModule = {
+        listen: sinon.stub().returns(socketIOInstance)
       };
       var server = {};
 
-      socketService.__set__('socketio', socketio);
+      socketService.__set__('socketio', socketIOModule);
 
       socketService.connect(server);
 
-      assert(socketio.listen.calledWith(server));
-      assert(io.sockets.on.calledWith(
+      assert(socketIOModule.listen.calledWith(server));
+      assert(socketIOInstance.sockets.on.calledWith(
         'connection',
         require('utils/socketConnection').initialise
       ));
@@ -34,13 +34,13 @@ describe('Service: Socket', function () {
     var room = {
       emit: sinon.spy()
     };
-    var io = {
+    var socketIOInstance = {
       sockets: {
         in: sinon.stub().returns(room)
       }
     };
     var EVENT_NAME = 'event';
-    var IDs = {
+    var MESSAGE_IDS = {
       socketRoomId: 0,
       collectionId: 1,
       assemblyId: 2,
@@ -48,16 +48,16 @@ describe('Service: Socket', function () {
     };
     var NOTIFICATION = 'result';
 
-    socketService.__set__('io', io);
+    socketService.__set__('io', socketIOInstance);
 
-    socketService.notify(EVENT_NAME, IDs, NOTIFICATION);
+    socketService.notify(EVENT_NAME, MESSAGE_IDS, NOTIFICATION);
 
-    assert(io.sockets.in.calledWith(IDs.socketRoomId));
+    assert(socketIOInstance.sockets.in.calledWith(MESSAGE_IDS.socketRoomId));
     assert(room.emit.calledWith(EVENT_NAME, {
-      socketRoomId: IDs.socketRoomId,
-      collectionId: IDs.collectionId,
-      assemblyId: IDs.assemblyId,
-      userAssemblyId: IDs.userAssemblyId,
+      socketRoomId: MESSAGE_IDS.socketRoomId,
+      collectionId: MESSAGE_IDS.collectionId,
+      assemblyId: MESSAGE_IDS.assemblyId,
+      userAssemblyId: MESSAGE_IDS.userAssemblyId,
       result: NOTIFICATION
     }));
   });
