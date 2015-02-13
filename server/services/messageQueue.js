@@ -19,7 +19,7 @@ function parseMessagesAsJson(queue) {
         var parsedMessage = JSON.parse(bufferJSON);
         callback(null, parsedMessage);
       } catch (error) {
-        callback(new Error('JSON could not be parsed.'));
+        callback(error);
       }
     });
   };

@@ -14,9 +14,10 @@ describe('Service: Message Queue', function () {
     messageQueueService.__set__('rabbit', rabbit);
   }
 
+  var MESSAGE_EVENT = 'message';
   function createEventEmittingQueue(eventName) {
     var queue = new EventEmitter();
-    queue.subscribe = queue.on.bind(queue, eventName || 'message');
+    queue.subscribe = queue.on.bind(queue, eventName || MESSAGE_EVENT);
     queue.bind = function () {};
     return queue;
   }
@@ -30,22 +31,26 @@ describe('Service: Message Queue', function () {
       var queueSpy = { bind: sinon.spy() };
       mockConnectionQueue(messageQueueService, queueSpy);
 
+      var NOTIFICATION_IDS = {
+        assemblyId: 'assembly1',
+        collectionId: 'collection1'
+      };
       messageQueueService.newAssemblyNotificationQueue(
-        { assemblyId: 'assembly1', collectionId: 'collection1' },
+        NOTIFICATION_IDS,
         function (queue) {
           assert(queue.bind.calledWith(
             rabbit.EXCHANGE_NAMES.NOTIFICATION,
-            '*.ASSEMBLY.assembly1'
+            '*.ASSEMBLY.' + NOTIFICATION_IDS.assemblyId
           ));
 
           assert(queue.bind.calledWith(
             rabbit.EXCHANGE_NAMES.NOTIFICATION,
-            'CORE_TREE_RESULT.COLLECTION.collection1'
+            'CORE_TREE_RESULT.COLLECTION.' + NOTIFICATION_IDS.collectionId
           ));
 
           assert(queue.bind.calledWith(
             rabbit.EXCHANGE_NAMES.NOTIFICATION,
-            'COLLECTION_TREE.COLLECTION.collection1'
+            'COLLECTION_TREE.COLLECTION.'  + NOTIFICATION_IDS.collectionId
           ));
 
           done();
@@ -59,15 +64,17 @@ describe('Service: Message Queue', function () {
       var queue = createEventEmittingQueue();
       mockConnectionQueue(messageQueueService, queue);
 
+      var NOTIFICATION_IDS = {};
+      var MESSAGE = { hello: 'world' };
       messageQueueService.newAssemblyNotificationQueue(
-        {},
+        NOTIFICATION_IDS,
         function (queue) {
           queue.subscribe(function (error, message) {
             assert(error === null);
-            assert(message.hello === 'world');
+            assert(sinon.match(message, MESSAGE));
             done();
           });
-          queue.emit('message', { data: JSON.stringify({ hello: 'world' }) });
+          queue.emit(MESSAGE_EVENT, { data: JSON.stringify(MESSAGE) });
         }
       );
     });
@@ -78,14 +85,16 @@ describe('Service: Message Queue', function () {
       var queue = createEventEmittingQueue();
       mockConnectionQueue(messageQueueService, queue);
 
+      var NOTIFICATION_IDS = {};
       messageQueueService.newAssemblyNotificationQueue(
-        {},
+        NOTIFICATION_IDS,
         function (queue) {
-          queue.subscribe(function (error) {
-            assert(error && error.message === 'JSON could not be parsed.');
+          queue.subscribe(function (error, value) {
+            assert(error);
+            assert(!value);
             done();
           });
-          queue.emit('message', { data: '{ hello: world }' });
+          queue.emit(MESSAGE_EVENT, { data: '{ hello: world }' });
         }
       );
     });
