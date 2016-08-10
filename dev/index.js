@@ -6,26 +6,27 @@ import { undoPointTranslation } from '../src/utils/canvas';
 
 const buttonForm = document.getElementById('buttons');
 const tree = PhyloCanvas.createTree('phylocanvas', {
-  defaultCollapsed: {
-    min: 30,
-    max: 50,
-    color: 'green',
-  },
+  // defaultCollapsed: {
+  //   min: 30,
+  //   max: 50,
+  //   color: 'green',
+  // },
   padding: 0,
   branchLengthLabelPredicate: (node) => node.branchLength > 200,
+
 });
 
 const originalDraw = tree.draw;
-tree.draw = (...args) => {
-  originalDraw.apply(tree, args);
-  const bounds = tree.getBounds();
-
-  const min = undoPointTranslation({ x: bounds[0][0], y: bounds[0][1] }, tree);
-  const max = undoPointTranslation({ x: bounds[1][0], y: bounds[1][1] }, tree);
-  tree.canvas.strokeRect(
-    min.x, min.y, max.x - min.x, max.y - min.y
-  );
-};
+// tree.draw = (...args) => {
+//   originalDraw.apply(tree, args);
+//   const bounds = tree.getBounds();
+//
+//   const min = undoPointTranslation({ x: bounds[0][0], y: bounds[0][1] }, tree);
+//   const max = undoPointTranslation({ x: bounds[1][0], y: bounds[1][1] }, tree);
+//   tree.canvas.strokeRect(
+//     min.x, min.y, max.x - min.x, max.y - min.y
+//   );
+// };
 
 // create buttons
 buttonForm.addEventListener('submit', function (e) {
@@ -123,6 +124,9 @@ function () {
   tree.backColour = true;
   // tree.setNodeSize(10);
   // tree.textSize = 20;
+
+  // Object.keys(tree.branches).forEach(id => tree.branches[id].pruned = true);
+  // tree.leaves.forEach(leaf => leaf.pruned = true);
 
   tree.branches.A.setDisplay({
     leafStyle: {

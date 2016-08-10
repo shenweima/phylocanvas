@@ -571,6 +571,7 @@ class Tree {
       // shouldn't be triggered.
       if (this.dragging) {
         this.dragging = false;
+        this.draw(); // show labels again
         return;
       }
 

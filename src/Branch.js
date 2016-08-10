@@ -368,7 +368,7 @@ class Branch {
 
     this.canvas.beginPath();
     this.canvas.fillStyle = this.getTextColour();
-    this.canvas.fillText(label, tx, (fSize / 2) );
+    this.canvas.fillText(label, tx, (fSize / 2));
     this.canvas.closePath();
 
     // Rotate canvas back to original position
@@ -447,6 +447,13 @@ class Branch {
     this.canvas.restore();
   }
 
+  shouldDrawLabel() {
+    return (
+      !this.tree.dragging &&
+      (this.tree.showLabels || (this.tree.hoverLabel && this.isHighlighted))
+    );
+  }
+
   /**
    * @method
    */
@@ -463,7 +470,7 @@ class Branch {
 
     canvas.restore();
 
-    if (this.tree.showLabels || (this.tree.hoverLabel && this.isHighlighted)) {
+    if (this.shouldDrawLabel()) {
       this.drawLabel();
     }
   }
@@ -519,6 +526,15 @@ class Branch {
     this.canvas.restore();
   }
 
+  shouldDrawBranchLabels() {
+    return (
+      !this.tree.dragging &&
+      (this.tree.root !== this &&
+        this.tree.showBranchLengthLabels ||
+        this.tree.showInternalNodeLabels)
+    );
+  }
+
   /**
    * Draws the line of the branch.
    */
@@ -554,7 +570,7 @@ class Branch {
       this.tree.highlighters.push(this.drawHighlight.bind(this, centerX, centerY));
     }
 
-    if (this.tree.root !== this && this.tree.showBranchLengthLabels || this.tree.showInternalNodeLabels) {
+    if (this.shouldDrawBranchLabels()) {
       this.drawBranchLabels();
     }
   }
