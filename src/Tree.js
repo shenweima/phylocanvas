@@ -1023,7 +1023,7 @@ class Tree {
    * @param {Branch} node - starting point.
    */
   storeNode(node) {
-    if (!node.id || node.id === '') {
+    if (!node.leaf || !node.id || node.id === '') {
       node.id = Branch.generateId();
     }
 
