@@ -1,3 +1,5 @@
+# DEPRECATED - This version is no longer maintained. Phylocanvas 3 is on the horizon 🌅
+
 [![NPM](https://nodei.co/npm/phylocanvas.png?compact=true)](https://npmjs.org/package/phylocanvas)
 
 # Phylocanvas
